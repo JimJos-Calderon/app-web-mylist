@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root {
+  background-color: #050505;
+  color-scheme: dark;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  /* Efecto de nebulosa Retrowave */
+  background: radial-gradient(circle at top right, #701a75, #050505) fixed;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+}
