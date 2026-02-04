@@ -18,3 +18,20 @@ body {
   font-family: 'Inter', sans-serif;
   color: #ffffff;
 }
+/* Para un efecto Retrowave/Vaporwave */
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.background-animate {
+  background-size: 400% 400%; /* Ajusta el tamaño del gradiente para que la animación sea visible */
+  animation: gradient-animation 15s ease infinite; /* 15s de duración, suave, infinito */
+}
