@@ -15,60 +15,63 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   sortOptions,
 }) => {
   return (
-    <div className="mb-8 bg-gradient-to-r from-slate-900/30 to-slate-800/30 border border-slate-700/30 rounded-xl p-6 backdrop-blur-sm">
-      <div className="flex flex-col md:flex-row md:items-center gap-6">
+    <div className="mb-6 md:mb-8 bg-gradient-to-r from-slate-900/30 to-slate-800/30 border border-slate-700/30 rounded-xl p-4 md:p-6 backdrop-blur-sm">
+      <div className="flex flex-col gap-4 md:gap-6">
         {/* Toggle switches */}
-        <div className="flex gap-6">
-          <label className="flex items-center gap-3 cursor-pointer">
+        <div className="flex gap-4 md:gap-6">
+          <label className="flex items-center gap-2 md:gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={filters.showUnwatched}
               onChange={(e) => onFilterChange('showUnwatched', e.target.checked)}
-              className="w-5 h-5 rounded border-2 border-cyan-500 accent-cyan-400"
+              className="w-4 h-4 md:w-5 md:h-5 rounded border-2 border-cyan-500 accent-cyan-400"
             />
-            <span className="text-sm font-semibold text-slate-300">Pendientes</span>
+            <span className="text-xs md:text-sm font-semibold text-slate-300">Pendientes</span>
           </label>
 
-          <label className="flex items-center gap-3 cursor-pointer">
+          <label className="flex items-center gap-2 md:gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={filters.showWatched}
               onChange={(e) => onFilterChange('showWatched', e.target.checked)}
-              className="w-5 h-5 rounded border-2 border-cyan-500 accent-cyan-400"
+              className="w-4 h-4 md:w-5 md:h-5 rounded border-2 border-cyan-500 accent-cyan-400"
             />
-            <span className="text-sm font-semibold text-slate-300">Vistas</span>
+            <span className="text-xs md:text-sm font-semibold text-slate-300">Vistas</span>
           </label>
         </div>
 
-        {/* Sort dropdown */}
-        <select
-          value={filters.sortBy}
-          onChange={(e) => onFilterChange('sortBy', e.target.value)}
-          className="bg-slate-800 border border-slate-600 text-white px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
-        >
-          {sortOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        {/* Second row: Sort and Search */}
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+          {/* Sort dropdown */}
+          <select
+            value={filters.sortBy}
+            onChange={(e) => onFilterChange('sortBy', e.target.value)}
+            className="bg-slate-800 border border-slate-600 text-white px-3 md:px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-xs md:text-sm"
+          >
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
 
-        {/* Search within filtered */}
-        <input
-          type="text"
-          placeholder="Filtrar por título..."
-          value={filters.searchQuery}
-          onChange={(e) => onFilterChange('searchQuery', e.target.value)}
-          className="flex-1 bg-slate-800 border border-slate-600 text-white px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm"
-        />
+          {/* Search within filtered */}
+          <input
+            type="text"
+            placeholder="Filtrar por título..."
+            value={filters.searchQuery}
+            onChange={(e) => onFilterChange('searchQuery', e.target.value)}
+            className="flex-1 bg-slate-800 border border-slate-600 text-white px-3 md:px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-xs md:text-sm"
+          />
 
-        {/* Reset button */}
-        <button
-          onClick={onReset}
-          className="px-6 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white rounded-lg transition-all text-sm font-semibold"
-        >
-          Limpiar filtros
-        </button>
+          {/* Reset button */}
+          <button
+            onClick={onReset}
+            className="px-4 md:px-6 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white rounded-lg transition-all text-xs md:text-sm font-semibold whitespace-nowrap"
+          >
+            Limpiar
+          </button>
+        </div>
       </div>
     </div>
   )

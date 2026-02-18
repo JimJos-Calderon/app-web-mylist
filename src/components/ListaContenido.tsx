@@ -21,7 +21,11 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
   const { user } = useAuth()
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isMobile, setIsMobile] = useState(false)
   const sugerenciasRef = useRef<HTMLDivElement>(null)
+
+  const ITEMS_PER_PAGE = 9
 
   const { items, loading, error: itemsError, addItem, deleteItem, toggleVisto, clearError } = useItems(
     tipo,
@@ -35,6 +39,17 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
 
   const { getPosterUrl } = useOmdb()
   const { filters, updateFilter, resetFilters } = useFilters()
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Close suggestions dropdown when clicking outside
   useEffect(() => {
@@ -59,6 +74,11 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
       setShowSuggestions(false)
     }
   }, [suggestions, searchInput])
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filters.searchQuery, filters.showWatched, filters.showUnwatched, filters.sortBy])
 
   const handleAddFromSuggestion = async (suggestion: OmdbSuggestion) => {
     try {
@@ -134,6 +154,17 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
       }
     })
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const paginatedItems = filteredItems.slice(startIndex, endIndex)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   if (!user) return null
 
   return (
@@ -152,15 +183,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-12">
-        <header className="mb-12">
-          <div className="flex items-center gap-5 mb-3">
-            <span className="text-6xl drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]">{icono}</span>
-            <h2 className="text-5xl md:text-7xl font-black italic uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 tracking-tighter">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+        <header className="mb-8 md:mb-12">
+          <div className="flex items-center gap-3 md:gap-5 mb-2 md:mb-3">
+            <span className="text-4xl md:text-6xl drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]">{icono}</span>
+            <h2 className="text-4xl md:text-5xl lg:text-7xl font-black italic uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 tracking-tighter">
               {tipo}s
             </h2>
           </div>
-          <p className="text-cyan-400 font-black text-[10px] uppercase tracking-[0.5em] border-l-4 border-pink-500 pl-4 opacity-90">
+          <p className="text-cyan-400 font-black text-[8px] md:text-[10px] uppercase tracking-[0.3em] md:tracking-[0.5em] border-l-2 md:border-l-4 border-pink-500 pl-2 md:pl-4 opacity-90">
             STATION_SYNC // {user?.email?.split('@')[0] || 'user'}
           </p>
         </header>
@@ -225,43 +256,146 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
 
         {/* Grid of items */}
         {!loading && filteredItems.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredItems.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                isOwn={item.user_id === user.id}
-                onDelete={deleteItem}
-                onToggleVisto={toggleVisto}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {paginatedItems.map((item) => (
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  isOwn={item.user_id === user.id}
+                  onDelete={deleteItem}
+                  onToggleVisto={toggleVisto}
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-8 md:mt-10 flex items-center justify-center gap-1 md:gap-2">
+                {/* Previous Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`
+                    px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase tracking-wide md:tracking-wider
+                    border-2 transition-all duration-300 flex-shrink-0
+                    ${currentPage === 1
+                      ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-slate-900/20'
+                      : 'border-cyan-500/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]'
+                    }
+                  `}
+                >
+                  <span className="hidden sm:inline">‹ Anterior</span>
+                  <span className="sm:hidden">‹</span>
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex gap-1 md:gap-2 overflow-x-auto max-w-[60vw] md:max-w-none scrollbar-none">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // On mobile: show only current page, first, and last
+                    // On desktop: show first, last, current, and pages around current
+                    const showPageMobile = 
+                      page === currentPage ||
+                      page === 1 ||
+                      page === totalPages
+
+                    const showPageDesktop =
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+
+                    const showPage = isMobile ? showPageMobile : showPageDesktop
+
+                    if (!showPage) {
+                      // Show ellipsis on desktop only
+                      if (!isMobile && (page === currentPage - 2 || page === currentPage + 2)) {
+                        return (
+                          <span
+                            key={page}
+                            className="px-1 md:px-2 py-2 text-slate-500 font-black text-xs md:text-sm"
+                          >
+                            ...
+                          </span>
+                        )
+                      }
+                      return null
+                    }
+
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`
+                          px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase
+                          border-2 transition-all duration-300 flex-shrink-0 min-w-[36px] md:min-w-[40px]
+                          ${currentPage === page
+                            ? 'border-pink-500 bg-gradient-to-br from-pink-500/20 to-purple-500/20 text-pink-400 shadow-[0_0_20px_rgba(236,72,153,0.6)]'
+                            : 'border-purple-500/50 text-purple-400 hover:border-purple-400 hover:bg-purple-500/10 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+                          }
+                        `}
+                      >
+                        {page}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`
+                    px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase tracking-wide md:tracking-wider
+                    border-2 transition-all duration-300 flex-shrink-0
+                    ${currentPage === totalPages
+                      ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-slate-900/20'
+                      : 'border-cyan-500/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]'
+                    }
+                  `}
+                >
+                  <span className="hidden sm:inline">Siguiente ›</span>
+                  <span className="sm:hidden">›</span>
+                </button>
+              </div>
+            )}
+
+            {/* Page Info */}
+            {totalPages > 1 && (
+              <div className="mt-3 md:mt-4 text-center px-4">
+                <p className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider md:tracking-widest font-bold">
+                  <span className="hidden sm:inline">Página {currentPage} de {totalPages} • </span>
+                  {filteredItems.length} {tipo}s
+                  <span className="hidden sm:inline"> en total</span>
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Stats */}
         {!loading && items.length > 0 && (
-          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-lg p-4">
-              <div className="text-2xl font-black text-cyan-400">{items.length}</div>
-              <div className="text-xs text-slate-400 uppercase font-bold">Total</div>
+          <div className="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
+            <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-lg p-3 md:p-4">
+              <div className="text-xl md:text-2xl font-black text-cyan-400">{items.length}</div>
+              <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Total</div>
             </div>
-            <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg p-4">
-              <div className="text-2xl font-black text-green-400">
+            <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg p-3 md:p-4">
+              <div className="text-xl md:text-2xl font-black text-green-400">
                 {items.filter((i) => i.visto).length}
               </div>
-              <div className="text-xs text-slate-400 uppercase font-bold">Vistas</div>
+              <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Vistas</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg p-4">
-              <div className="text-2xl font-black text-purple-400">
+            <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg p-3 md:p-4">
+              <div className="text-xl md:text-2xl font-black text-purple-400">
                 {items.filter((i) => !i.visto).length}
               </div>
-              <div className="text-xs text-slate-400 uppercase font-bold">Pendientes</div>
+              <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Pendientes</div>
             </div>
-            <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-lg p-4">
-              <div className="text-2xl font-black text-pink-400">
+            <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-lg p-3 md:p-4">
+              <div className="text-xl md:text-2xl font-black text-pink-400">
                 {items.filter((i) => i.user_id === user.id).length}
               </div>
-              <div className="text-xs text-slate-400 uppercase font-bold">Propias</div>
+              <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Propias</div>
             </div>
           </div>
         )}

@@ -30,20 +30,20 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     ref
   ) => {
     return (
-      <div className="relative mb-16 max-w-xl" ref={ref}>
-        <form onSubmit={onSubmit} className="flex gap-3">
+      <div className="relative mb-8 md:mb-16 max-w-xl" ref={ref}>
+        <form onSubmit={onSubmit} className="flex gap-2 md:gap-3">
           <div className="relative flex-1">
             <input
               type="text"
               placeholder={placeholder}
-              className="w-full bg-black/70 border-2 border-cyan-500/30 rounded-2xl px-6 py-4 text-white outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all font-bold uppercase tracking-tight"
+              className="w-full bg-black/70 border-2 border-cyan-500/30 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-sm md:text-base text-white outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all font-bold uppercase tracking-tight"
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onFocus={onFocus}
             />
             {loading && (
-              <div className="absolute right-4 top-4 text-cyan-400">
-                <svg className="animate-spin h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <div className="absolute right-3 md:right-4 top-3 md:top-4 text-cyan-400">
+                <svg className="animate-spin h-4 w-4 md:h-5 md:w-5" fill="currentColor" viewBox="0 0 24 24">
                   <circle
                     className="opacity-25"
                     cx="12"
@@ -66,7 +66,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
           <button
             type="submit"
             disabled={loading}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 px-8 py-4 rounded-2xl font-black text-white shadow-[0_0_20px_rgba(255,0,255,0.4)] transition-all italic uppercase text-xs disabled:cursor-not-allowed"
+            className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 px-4 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-white shadow-[0_0_20px_rgba(255,0,255,0.4)] transition-all italic uppercase text-[10px] md:text-xs disabled:cursor-not-allowed"
           >
             {loading ? '...' : 'OK'}
           </button>

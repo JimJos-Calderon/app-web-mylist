@@ -60,3 +60,13 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(236, 72, 153, 0.5) rgba(0, 0, 0, 0.3);
 }
+
+/* Hide scrollbar for pagination on mobile */
+.scrollbar-none {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-none::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
