@@ -223,7 +223,7 @@ Edita `src/index.css` para modificar los colores del tema.
 Ajusta `DEBOUNCE_DELAY` en `src/constants/index.ts` (default: 300ms)
 
 ### Cambiar límite de sugerencias
-Modifica `MAX_SUGGESTIONS` en `src/constants/index.ts` (default: 5)
+Modifica `MAX_SUGGESTIONS` en `src/constants/index.ts` (default: 10)
 
 ## 📝 Variables de Entorno
 

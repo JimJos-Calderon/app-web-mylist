@@ -51,6 +51,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Show suggestions when they arrive and input has 3+ chars
+  useEffect(() => {
+    if (searchInput.length >= 3 && suggestions.length > 0) {
+      setShowSuggestions(true)
+    } else if (searchInput.length < 3) {
+      setShowSuggestions(false)
+    }
+  }, [suggestions, searchInput])
+
   const handleAddFromSuggestion = async (suggestion: OmdbSuggestion) => {
     try {
       // Use poster directly from suggestion, avoiding extra API call
@@ -175,11 +184,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
           suggestions={suggestions}
           onSuggestionSelect={handleAddFromSuggestion}
           ref={sugerenciasRef}
-          onFocus={() => {
-            if (searchInput.length >= 3 && suggestions.length > 0) {
-              setShowSuggestions(true)
-            }
-          }}
         />
 
         {/* Filter Panel */}

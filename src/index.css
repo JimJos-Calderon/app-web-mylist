@@ -35,3 +35,28 @@ body {
   background-size: 400% 400%; /* Ajusta el tamaño del gradiente para que la animación sea visible */
   animation: gradient-animation 15s ease infinite; /* 15s de duración, suave, infinito */
 }
+
+/* Custom Scrollbar Styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.scrollbar-thumb-pink-500\/50::-webkit-scrollbar-thumb {
+  background: rgba(236, 72, 153, 0.5);
+  border-radius: 10px;
+}
+
+.scrollbar-thumb-pink-500\/50::-webkit-scrollbar-thumb:hover {
+  background: rgba(236, 72, 153, 0.7);
+}
+
+/* Firefox scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(236, 72, 153, 0.5) rgba(0, 0, 0, 0.3);
+}

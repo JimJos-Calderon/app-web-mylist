@@ -74,7 +74,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
 
         {/* Suggestions Dropdown */}
         {showDropdown && suggestions.length > 0 && (
-          <div className="absolute w-full mt-2 bg-black/95 border-2 border-pink-500/50 rounded-2xl overflow-hidden z-50 backdrop-blur-xl shadow-lg">
+          <div className="absolute w-full mt-2 bg-black/95 border-2 border-pink-500/50 rounded-2xl overflow-hidden z-50 backdrop-blur-xl shadow-lg max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-pink-500/50 scrollbar-track-black/30">
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion.imdbID}
