@@ -264,7 +264,7 @@ Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 
 **JimJos**
 
-- GitHub: [@tuusuario](https://github.com/tuusuario)
+- GitHub: [@tuusuario](https://github.com/JimJos-Calderon)
 
 ## 🙏 Agradecimientos
 
