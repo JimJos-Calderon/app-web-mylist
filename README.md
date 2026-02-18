@@ -4,7 +4,7 @@
 
 ![React](https://img.shields.io/badge/React-19.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.3.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-4.1.18-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-2.93.3-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
@@ -43,6 +43,7 @@ Una aplicación web moderna y elegante para gestionar tu lista personalizada de 
 ### Herramientas de Desarrollo
 - **ESLint** - Linter para mantener código limpio
 - **TypeScript ESLint** - Reglas específicas para TS
+- **Terser** - Minificación de código para producción
 
 ## 📦 Instalación
 
@@ -242,9 +243,39 @@ Modifica `MAX_SUGGESTIONS` en `src/constants/index.ts` (default: 5)
 - Verifica tus credenciales de Supabase
 - Asegúrate de haber configurado las políticas RLS correctamente
 
+### Build falla con "terser not found"
+- Asegúrate de tener `terser` instalado: `npm install`
+- Si el error persiste: `npm install terser --save-dev`
+- Vite v3+ requiere terser como dependencia opcional para minificación
+
 ### Build falla
 - Ejecuta `npm install` nuevamente
-- Limpia la caché con `rm -rf node_modules .vite dist`
+- Limpia la caché: `rm -rf node_modules .vite dist`
+- Verifica que todas las variables de entorno estén configuradas
+
+## 🚀 Deployment
+
+### Render / Vercel / Netlify
+
+1. **Configura las variables de entorno** en tu plataforma:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_OMDB_KEY`
+
+2. **Build Command**: `npm install && npm run build`
+
+3. **Output Directory**: `dist`
+
+4. **Node Version**: 18 o superior
+
+### Build Local para Producción
+
+```bash
+npm run build    # Genera la carpeta dist/
+npm run preview  # Previsualiza la build localmente
+```
+
+> **Nota**: El proyecto incluye `terser` para minificación en producción. Si encuentras errores de build, asegúrate de ejecutar `npm install` antes de buildear.
 
 ## 🤝 Contribuir
 
