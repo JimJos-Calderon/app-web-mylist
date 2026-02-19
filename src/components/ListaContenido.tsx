@@ -4,7 +4,7 @@ import { useItems } from '@hooks/useItems'
 import { useSuggestions } from '@hooks/useSuggestions'
 import { useFilters } from '@hooks/useFilters'
 import { useOmdb } from '@hooks/useOmdb'
-import { OmdbSuggestion } from '@/types'
+import { OmdbSuggestion, ListItem } from '@/types'
 import { validateTitle, sanitizeInput } from '@utils/validation'
 import { SORT_OPTIONS } from '@constants/index'
 import ItemCard from '@components/ItemCard'
@@ -23,7 +23,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [isMobile, setIsMobile] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<ListItem | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalAnimating, setIsModalAnimating] = useState(false)
+  const [synopsis, setSynopsis] = useState<string | null>(null)
+  const [synopsisLoading, setSynopsisLoading] = useState(false)
+  const [synopsisError, setSynopsisError] = useState<string | null>(null)
+  const [synopsisCache, setSynopsisCache] = useState<Record<string, string>>({})
   const sugerenciasRef = useRef<HTMLDivElement>(null)
+  const closeTimeoutRef = useRef<number | null>(null)
 
   const ITEMS_PER_PAGE = 9
 
@@ -37,7 +45,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
     tipo
   )
 
-  const { getPosterUrl } = useOmdb()
+  const { getPosterUrl, getSynopsis } = useOmdb()
   const { filters, updateFilter, resetFilters } = useFilters()
 
   // Detect mobile screen size
@@ -130,6 +138,88 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
       console.error('Error adding item manually:', err)
     }
   }
+
+  const handleOpenDetails = async (item: ListItem) => {
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current)
+      closeTimeoutRef.current = null
+    }
+
+    setSelectedItem(item)
+    setIsModalOpen(true)
+    setIsModalAnimating(false)
+    requestAnimationFrame(() => setIsModalAnimating(true))
+    setSynopsisError(null)
+
+    if (synopsisCache[item.id]) {
+      setSynopsis(synopsisCache[item.id])
+      return
+    }
+
+    setSynopsis(null)
+    setSynopsisLoading(true)
+
+    try {
+      const plot = await getSynopsis(item.titulo)
+      if (plot) {
+        setSynopsis(plot)
+        setSynopsisCache((prev) => ({
+          ...prev,
+          [item.id]: plot,
+        }))
+      } else {
+        setSynopsis(null)
+      }
+    } catch (err) {
+      setSynopsisError('No se pudo cargar la sinopsis')
+      console.error('Synopsis error:', err)
+    } finally {
+      setSynopsisLoading(false)
+    }
+  }
+
+  const handleCloseDetails = () => {
+    setIsModalAnimating(false)
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setIsModalOpen(false)
+      setSelectedItem(null)
+      setSynopsis(null)
+      setSynopsisError(null)
+      closeTimeoutRef.current = null
+    }, 180)
+  }
+
+  useEffect(() => {
+    if (!isModalOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isModalOpen])
+
+  useEffect(() => {
+    if (!selectedItem) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleCloseDetails()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedItem])
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current !== null) {
+        window.clearTimeout(closeTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Filter and sort items
   const filteredItems = items
@@ -272,6 +362,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
                   isOwn={item.user_id === user.id}
                   onDelete={deleteItem}
                   onToggleVisto={toggleVisto}
+                  onOpenDetails={handleOpenDetails}
                 />
               ))}
             </div>
@@ -407,6 +498,70 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
           </div>
         )}
       </div>
+
+      {isModalOpen && selectedItem && (
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity duration-200 ${
+            isModalAnimating ? 'bg-black/70 opacity-100' : 'bg-black/0 opacity-0'
+          }`}
+          role="dialog"
+          aria-modal="true"
+          onClick={handleCloseDetails}
+        >
+          <div
+            className={`w-full max-w-2xl rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl overflow-hidden transition-all duration-200 ${
+              isModalAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 p-5 border-b border-slate-800/60">
+              <div>
+                <h3 className="text-lg md:text-xl font-black uppercase text-white tracking-tight">
+                  {selectedItem.titulo}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {selectedItem.tipo === 'pelicula' ? 'Pelicula' : 'Serie'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCloseDetails}
+                className="text-slate-400 hover:text-white transition"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 p-5">
+              <div className="w-full">
+                {selectedItem.poster_url ? (
+                  <div className="w-full max-h-80 rounded-xl bg-slate-900/60 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={selectedItem.poster_url}
+                      alt={selectedItem.titulo}
+                      className="h-80 w-auto max-w-full object-contain"
+                      loading="lazy"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-48 w-full rounded-xl bg-slate-900 flex items-center justify-center text-slate-500">
+                    Sin imagen
+                  </div>
+                )}
+              </div>
+
+              <div className="text-sm text-slate-200 leading-relaxed">
+                {synopsisLoading && <p className="text-slate-400">Cargando sinopsis...</p>}
+                {synopsisError && <p className="text-red-400">{synopsisError}</p>}
+                {!synopsisLoading && !synopsisError && (
+                  <p>{synopsis || 'No hay sinopsis disponible.'}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

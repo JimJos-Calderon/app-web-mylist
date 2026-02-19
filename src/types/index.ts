@@ -35,6 +35,7 @@ export interface OmdbResponse {
   Title?: string
   Year?: string
   Poster?: string
+  Plot?: string
   Response: 'True' | 'False'
   Error?: string
   Search?: OmdbSuggestion[]

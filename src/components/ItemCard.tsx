@@ -6,6 +6,7 @@ interface ItemCardProps {
   isOwn: boolean
   onDelete: (id: string) => Promise<void>
   onToggleVisto: (id: string, currentState: boolean) => Promise<void>
+  onOpenDetails: (item: ListItem) => void
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({
@@ -13,6 +14,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
   isOwn,
   onDelete,
   onToggleVisto,
+  onOpenDetails,
 }) => {
   const [deleting, setDeleting] = React.useState(false)
 
@@ -39,6 +41,15 @@ const ItemCard: React.FC<ItemCardProps> = ({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenDetails(item)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpenDetails(item)
+        }
+      }}
       className={`group relative flex flex-col rounded-[2rem] border-2 transition-all duration-500 overflow-hidden bg-black/60 backdrop-blur-md ${
         item.visto
           ? 'border-purple-900/20 opacity-30 scale-95'
@@ -81,6 +92,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
             <input
               type="checkbox"
               checked={item.visto}
+              onClick={(event) => event.stopPropagation()}
               onChange={handleToggle}
               className="w-6 h-6 appearance-none border-2 border-white bg-black/60 rounded-full checked:bg-cyan-400 checked:border-cyan-400 cursor-pointer transition-all"
             />
@@ -125,7 +137,10 @@ const ItemCard: React.FC<ItemCardProps> = ({
         {/* Delete button */}
         <div className="flex justify-end mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={handleDelete}
+            onClick={(event) => {
+              event.stopPropagation()
+              handleDelete()
+            }}
             disabled={deleting}
             className="text-zinc-600 hover:text-red-500 transition-all p-2 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Eliminar"

@@ -57,7 +57,7 @@ Una aplicación web moderna y elegante para gestionar tu lista personalizada de 
 
 1. **Clona el repositorio**
 ```bash
-git clone https://github.com/tuusuario/app-web-mylist.git
+git clone https://github.com/JimJos-Calderon/app-web-mylist.git
 cd app-web-mylist
 ```
 
