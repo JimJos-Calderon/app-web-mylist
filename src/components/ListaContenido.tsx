@@ -11,7 +11,7 @@ import ItemCard from '@components/ItemCard'
 import SearchBar from '@components/SearchBar'
 import FilterPanel from '@components/FilterPanel'
 import ErrorAlert from '@components/ErrorAlert'
-import HeroSlider from '@components/HeroSlider'
+import RingSlider from '@components/RingSlider'
 
 interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
@@ -24,7 +24,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [isMobile, setIsMobile] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'slider'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'ring'>('grid' as 'grid' | 'ring')
+  const handleSetViewMode = (mode: 'grid' | 'ring') => setViewMode(mode)
   const [selectedItem, setSelectedItem] = useState<ListItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalAnimating, setIsModalAnimating] = useState(false)
@@ -282,6 +283,22 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60"></div>
       </div>
 
+      {/* Ring view - Full Screen */}
+      {!loading && filteredItems.length > 0 && viewMode === 'ring' && (
+        <div className="relative z-10 w-full">
+          <RingSlider
+            items={filteredItems}
+            allItems={items}
+            onOpenDetails={handleOpenDetails}
+            userOwnerId={user?.id}
+            onViewModeChange={handleSetViewMode}
+          />
+        </div>
+      )}
+
+      {/* Grid/Slider/Normal views */}
+      {viewMode !== 'ring' && (
+        <>
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
         <header className="mb-8 md:mb-12">
           <div className="flex items-center gap-3 md:gap-5 mb-2 md:mb-3">
@@ -324,15 +341,28 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
           sortOptions={SORT_OPTIONS}
         />
 
-        <div className="mb-6 flex justify-end">
+        <div className="mb-6 flex justify-end gap-2 flex-wrap">
           <button
             type="button"
-            onClick={() =>
-              setViewMode((prev) => (prev === 'grid' ? 'slider' : 'grid'))
-            }
-            className="px-4 py-2 rounded-lg border border-purple-500/40 text-purple-300 text-xs md:text-sm font-semibold uppercase tracking-wide hover:border-purple-400 hover:text-purple-200 transition"
+            onClick={() => setViewMode('grid')}
+            className={`px-3 py-2 rounded-lg border text-xs md:text-sm font-semibold uppercase tracking-wide transition ${
+              viewMode === 'grid'
+                ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
+                : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
+            }`}
           >
-            {viewMode === 'grid' ? 'Ver slider' : 'Ver grilla'}
+            📋 Grilla
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('ring')}
+            className={`px-3 py-2 rounded-lg border text-xs md:text-sm font-semibold uppercase tracking-wide transition ${
+              (viewMode as 'grid' | 'ring') === 'ring'
+                ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
+                : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
+            }`}
+          >
+            💎 Ring
           </button>
         </div>
 
@@ -363,11 +393,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
                 : `Agrega tu primer ${tipo} a la lista`}
             </p>
           </div>
-        )}
-
-        {/* Slider view */}
-        {!loading && filteredItems.length > 0 && viewMode === 'slider' && (
-          <HeroSlider items={filteredItems} />
         )}
 
         {/* Grid of items */}
@@ -490,7 +515,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
         )}
 
         {/* Stats */}
-        {!loading && items.length > 0 && (
+        {!loading && items.length > 0 && viewMode === 'grid' && (
           <div className="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
             <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-lg p-3 md:p-4">
               <div className="text-xl md:text-2xl font-black text-cyan-400">{items.length}</div>
@@ -517,6 +542,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
           </div>
         )}
       </div>
+        </>
+      )}
 
       {isModalOpen && selectedItem && (
         <div
@@ -575,6 +602,42 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
                 {synopsisError && <p className="text-red-400">{synopsisError}</p>}
                 {!synopsisLoading && !synopsisError && (
                   <p>{synopsis || 'No hay sinopsis disponible.'}</p>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-slate-800/60">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await toggleVisto(selectedItem.id, selectedItem.visto)
+                      handleCloseDetails()
+                    } catch (err) {
+                      console.error('Toggle error:', err)
+                    }
+                  }}
+                  className="flex-1 px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 hover:border-cyan-400 text-cyan-300 hover:text-cyan-200 rounded-lg transition-all text-sm font-semibold uppercase tracking-wide"
+                >
+                  {selectedItem.visto ? '✓ Visto' : '○ No visto'}
+                </button>
+
+                {selectedItem.user_id === user?.id && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!confirm(`¿Eliminar "${selectedItem.titulo}"?`)) return
+                      try {
+                        await deleteItem(selectedItem.id)
+                        handleCloseDetails()
+                      } catch (err) {
+                        console.error('Delete error:', err)
+                      }
+                    }}
+                    className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-400 text-red-300 hover:text-red-200 rounded-lg transition-all text-sm font-semibold uppercase tracking-wide"
+                  >
+                    🗑️ Borrar
+                  </button>
                 )}
               </div>
             </div>
