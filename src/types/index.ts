@@ -50,5 +50,6 @@ export interface FilterState {
   showWatched: boolean
   showUnwatched: boolean
   sortBy: 'date' | 'title' | 'rating'
+  sortOrder: 'asc' | 'desc'
   searchQuery: string
 }

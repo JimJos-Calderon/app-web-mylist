@@ -78,7 +78,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [filters.searchQuery, filters.showWatched, filters.showUnwatched, filters.sortBy])
+  }, [filters.searchQuery, filters.showWatched, filters.showUnwatched, filters.sortBy, filters.sortOrder])
 
   const handleAddFromSuggestion = async (suggestion: OmdbSuggestion) => {
     try {
@@ -143,15 +143,22 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
       return item.titulo.toLowerCase().includes(filters.searchQuery.toLowerCase())
     })
     .sort((a, b) => {
+      let compareResult = 0
+
       switch (filters.sortBy) {
         case 'title':
-          return a.titulo.localeCompare(b.titulo)
+          compareResult = a.titulo.localeCompare(b.titulo)
+          break
         case 'rating':
-          return (b.rating || 0) - (a.rating || 0)
+          compareResult = (a.rating || 0) - (b.rating || 0)
+          break
         case 'date':
         default:
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          compareResult = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          break
       }
+
+      return filters.sortOrder === 'desc' ? -compareResult : compareResult
     })
 
   // Pagination logic

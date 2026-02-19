@@ -11,6 +11,7 @@ const initialFilters: FilterState = {
   showWatched: false,
   showUnwatched: true,
   sortBy: 'date',
+  sortOrder: 'desc',
   searchQuery: '',
 }
 
