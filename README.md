@@ -1,14 +1,14 @@
-# 🎬 MyList - Gestor de Películas y Series
+# 🎬 Nuestra Lista - Gestor de Películas y Series
 
 <div align="center">
 
 ![React](https://img.shields.io/badge/React-19.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-7.3.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-4.1.18-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-2.93.3-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-Una aplicación web moderna y elegante para gestionar tu lista personalizada de películas y series. Con diseño retro-futurista inspirado en los años 80, búsqueda inteligente con OMDB API, y autenticación segura con Supabase.
+Una aplicación web moderna y elegante para gestionar una lista compartida de películas y series. Con diseño retro-futurista inspirado en los años 80, búsqueda inteligente con OMDB API y autenticación segura con Supabase.
 
 [✨ Demo](#) • [📖 Documentación](#características) • [🐛 Reportar Bug](../../issues)
 
@@ -34,7 +34,8 @@ Una aplicación web moderna y elegante para gestionar tu lista personalizada de 
 - **TypeScript** - Tipado estático para código robusto
 - **Vite** - Build tool ultra-rápido
 - **TailwindCSS 4** - Framework CSS utility-first
-- **React Router DOM 7** - Navegación entre páginas
+- **React Router DOM 7.13** - Navegación entre páginas
+- **Swiper 12** - Carrusel 3D para destacados
 
 ### Backend & Servicios
 - **Supabase** - Backend as a Service (Auth + PostgreSQL)

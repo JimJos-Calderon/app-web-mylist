@@ -4,11 +4,15 @@ import { useAuth } from '@hooks/useAuth'
 import Login from '@pages/Login'
 import Peliculas from '@pages/Peliculas'
 import Series from '@pages/Series'
+import SpotifyGlassCard from '@components/SpotifyGlassCard'
 
 const App: React.FC = () => {
   const { session, loading, signOut, error: authError } = useAuth()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showError, setShowError] = useState(authError)
+  const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth - 400, y: window.innerHeight - 400 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
   React.useEffect(() => {
     if (authError) {
@@ -17,6 +21,38 @@ const App: React.FC = () => {
       return () => clearTimeout(timer)
     }
   }, [authError])
+
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        setPlayerPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y
+        })
+      }
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
+  }, [isDragging, dragOffset])
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true)
+    setDragOffset({
+      x: e.clientX - playerPosition.x,
+      y: e.clientY - playerPosition.y
+    })
+  }
 
   if (loading) {
     return (
@@ -129,14 +165,16 @@ const App: React.FC = () => {
           <Route
             path="/"
             element={
-              <div className="text-center mt-20 animate-in fade-in zoom-in duration-700">
-                <h2 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-violet-500">
-                  ¡Hola de nuevo!
-                </h2>
-                <p className="text-zinc-400 text-lg">
-                  ¿Qué vamos a ver hoy,{' '}
-                  <span className="text-zinc-200 font-bold">{userEmail}</span>?
-                </p>
+              <div className="text-center mt-20 animate-in fade-in zoom-in duration-700 space-y-8">
+                <div>
+                  <h2 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-violet-500">
+                    ¡Hola de nuevo!
+                  </h2>
+                  <p className="text-zinc-400 text-lg">
+                    ¿Qué vamos a ver hoy,{' '}
+                    <span className="text-zinc-200 font-bold">{userEmail}</span>?
+                  </p>
+                </div>
               </div>
             }
           />
@@ -144,6 +182,22 @@ const App: React.FC = () => {
           <Route path="/series" element={<Series />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
+
+        <div
+          onMouseDown={handleMouseDown}
+          style={{
+            position: 'fixed',
+            left: `${playerPosition.x}px`,
+            top: `${playerPosition.y}px`,
+            zIndex: 30
+          }}
+        >
+          <SpotifyGlassCard
+            spotifyUrl="https://open.spotify.com/embed/playlist/3WyehWydbIc9FCDVDHbTbZ?utm_source=generator&theme=0"
+            accentColor="rgb(168, 85, 247)"
+            isDragging={isDragging}
+          />
+        </div>
       </main>
     </div>
   )
