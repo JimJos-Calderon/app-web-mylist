@@ -11,6 +11,7 @@ import ItemCard from '@components/ItemCard'
 import SearchBar from '@components/SearchBar'
 import FilterPanel from '@components/FilterPanel'
 import ErrorAlert from '@components/ErrorAlert'
+import HeroSlider from '@components/HeroSlider'
 
 interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
@@ -23,6 +24,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [isMobile, setIsMobile] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'slider'>('grid')
   const [selectedItem, setSelectedItem] = useState<ListItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalAnimating, setIsModalAnimating] = useState(false)
@@ -322,6 +324,18 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
           sortOptions={SORT_OPTIONS}
         />
 
+        <div className="mb-6 flex justify-end">
+          <button
+            type="button"
+            onClick={() =>
+              setViewMode((prev) => (prev === 'grid' ? 'slider' : 'grid'))
+            }
+            className="px-4 py-2 rounded-lg border border-purple-500/40 text-purple-300 text-xs md:text-sm font-semibold uppercase tracking-wide hover:border-purple-400 hover:text-purple-200 transition"
+          >
+            {viewMode === 'grid' ? 'Ver slider' : 'Ver grilla'}
+          </button>
+        </div>
+
         {/* Loading state */}
         {loading && (
           <div className="text-center py-12">
@@ -351,8 +365,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
           </div>
         )}
 
+        {/* Slider view */}
+        {!loading && filteredItems.length > 0 && viewMode === 'slider' && (
+          <HeroSlider items={filteredItems} />
+        )}
+
         {/* Grid of items */}
-        {!loading && filteredItems.length > 0 && (
+        {!loading && filteredItems.length > 0 && viewMode === 'grid' && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {paginatedItems.map((item) => (
