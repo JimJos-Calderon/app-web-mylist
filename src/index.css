@@ -18,8 +18,13 @@ html, body, #root {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Pramukh Rounded', sans-serif;
   color: #ffffff;
+}
+
+/* Navbar with Nippo font */
+nav {
+  font-family: 'Nippo', sans-serif;
 }
 /* Para un efecto Retrowave/Vaporwave */
 @keyframes gradient-animation {
