@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth - 400, y: window.innerHeight - 400 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [playlistPosition, setPlaylistPosition] = useState({ x: window.innerWidth - 450, y: 100 })
+  const [playlistPosition, setPlaylistPosition] = useState({ x: 50, y: window.innerHeight - 400 })
   const [isPlaylistDragging, setIsPlaylistDragging] = useState(false)
   const [playlistDragOffset, setPlaylistDragOffset] = useState({ x: 0, y: 0 })
 
@@ -137,6 +137,12 @@ const App: React.FC = () => {
             className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm"
           >
             Series
+          </Link>
+          <Link
+            to="/perfil"
+            className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm"
+          >
+            Mi Perfil
           </Link>
         </div>
 

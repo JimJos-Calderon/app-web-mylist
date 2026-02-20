@@ -2,6 +2,7 @@ import React from 'react'
 import { ListItem } from '@/types'
 import { useUsername } from '@hooks/useUsername'
 import RatingWidget from './RatingWidget'
+import ConfirmDialog from './ConfirmDialog'
 
 interface ItemCardProps {
   item: ListItem
@@ -19,12 +20,12 @@ const ItemCard: React.FC<ItemCardProps> = ({
   onOpenDetails,
 }) => {
   const [deleting, setDeleting] = React.useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false)
   const { username } = useUsername(item.user_id)
 
   const handleDelete = async () => {
-    if (!confirm(`¿Eliminar "${item.titulo}"?`)) return
-
     setDeleting(true)
+    setShowConfirmDialog(false)
     try {
       await onDelete(item.id)
     } catch (err) {
@@ -84,36 +85,6 @@ const ItemCard: React.FC<ItemCardProps> = ({
             </div>
           </div>
         )}
-
-        {/* Checkbox overlay */}
-        <div
-          className={`absolute top-4 right-4 transition-all duration-300 ${
-            item.visto ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}
-        >
-          <label className="relative flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={item.visto}
-              onClick={(event) => event.stopPropagation()}
-              onChange={handleToggle}
-              className="w-6 h-6 appearance-none border-2 border-white bg-black/60 rounded-full checked:bg-cyan-400 checked:border-cyan-400 cursor-pointer transition-all"
-            />
-            {item.visto && (
-              <svg
-                className="absolute w-4 h-4 text-black pointer-events-none left-1 top-1"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            )}
-          </label>
-        </div>
       </div>
 
       {/* Info */}
@@ -133,7 +104,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 : 'border-pink-500/30 text-pink-500 bg-pink-500/5'
             }`}
           >
-            {isOwn ? 'TUYO' : username || 'Cargando...'}
+            {isOwn ? 'TUYO' : (username || item.user_email?.split('@')[0] || 'Usuario')}
             {item.genero && (
               <>
                 <span className="mx-1.5">•</span>
@@ -148,12 +119,40 @@ const ItemCard: React.FC<ItemCardProps> = ({
           </div>
         </div>
 
-        {/* Delete button */}
-        <div className="flex justify-end mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Action buttons */}
+        <div className="flex justify-end gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={(event) => {
               event.stopPropagation()
-              handleDelete()
+              handleToggle()
+            }}
+            className={`p-2 transition-all ${
+              item.visto
+                ? 'text-cyan-400 hover:text-cyan-300'
+                : 'text-zinc-600 hover:text-cyan-400'
+            }`}
+            title={item.visto ? 'Marcar como no visto' : 'Marcar como visto'}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill={item.visto ? 'currentColor' : 'none'}
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </button>
+
+          <button
+            onClick={(event) => {
+              event.stopPropagation()
+              setShowConfirmDialog(true)
             }}
             disabled={deleting}
             className="text-zinc-600 hover:text-red-500 transition-all p-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -187,14 +186,25 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={3}
-                  d="M6 18L18 6M6 6l12 12"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                 />
               </svg>
             )}
           </button>
         </div>
       </div>
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="¿Eliminar?"
+        message={`¿Estás seguro de que deseas eliminar "${item.titulo}"? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={handleDelete}
+        onCancel={() => setShowConfirmDialog(false)}
+      />
     </div>
   )
 }

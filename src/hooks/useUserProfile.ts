@@ -62,13 +62,11 @@ export const useUserProfile = () => {
         setError(null)
 
         if (profile) {
-          // Update existing
+          // Update existing (only username)
           const { data, error } = await supabase
             .from('user_profiles')
             .update({
               username,
-              avatar_url: profile.avatar_url,
-              bio: profile.bio,
               updated_at: new Date().toISOString(),
             })
             .eq('user_id', user.id)
@@ -118,6 +116,7 @@ export const useUserProfile = () => {
         setError(null)
 
         if (profile) {
+          // Update existing profile
           const { data, error } = await supabase
             .from('user_profiles')
             .update({
@@ -125,6 +124,23 @@ export const useUserProfile = () => {
               updated_at: new Date().toISOString(),
             })
             .eq('user_id', user.id)
+            .select()
+            .maybeSingle()
+
+          if (error) throw error
+          setProfile(data)
+        } else {
+          // Create new profile with avatar
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .insert([{
+              user_id: user.id,
+              username: user.email?.split('@')[0] || 'Usuario',
+              avatar_url: avatarUrl,
+              bio: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }])
             .select()
             .maybeSingle()
 
@@ -138,7 +154,63 @@ export const useUserProfile = () => {
         throw err
       }
     },
-    [user?.id, profile]
+    [user?.id, user?.email, profile]
+  )
+
+  const uploadAvatar = useCallback(
+    async (file: File) => {
+      if (!user?.id) {
+        setError('Debes iniciar sesión')
+        throw new Error('Debes iniciar sesión')
+      }
+
+      try {
+        setError(null)
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          throw new Error('El archivo debe ser una imagen')
+        }
+
+        // Validate file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          throw new Error('La imagen no puede superar 2MB')
+        }
+
+        // Create unique filename
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`
+        const filePath = `${user.id}/${fileName}`
+
+        // Upload to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+          })
+
+        if (uploadError) throw uploadError
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath)
+
+        const publicUrl = urlData.publicUrl
+
+        // Update profile with new avatar URL
+        await updateAvatar(publicUrl)
+
+        return publicUrl
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error al subir imagen'
+        setError(message)
+        console.error('Upload avatar error:', err)
+        throw err
+      }
+    },
+    [user?.id, updateAvatar]
   )
 
   const updateBio = useCallback(
@@ -152,6 +224,7 @@ export const useUserProfile = () => {
         setError(null)
 
         if (profile) {
+          // Update existing profile
           const { data, error } = await supabase
             .from('user_profiles')
             .update({
@@ -159,6 +232,23 @@ export const useUserProfile = () => {
               updated_at: new Date().toISOString(),
             })
             .eq('user_id', user.id)
+            .select()
+            .maybeSingle()
+
+          if (error) throw error
+          setProfile(data)
+        } else {
+          // Create new profile with bio
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .insert([{
+              user_id: user.id,
+              username: user.email?.split('@')[0] || 'Usuario',
+              avatar_url: null,
+              bio: bio || null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }])
             .select()
             .maybeSingle()
 
@@ -172,7 +262,7 @@ export const useUserProfile = () => {
         throw err
       }
     },
-    [user?.id, profile]
+    [user?.id, user?.email, profile]
   )
 
   return {
@@ -181,6 +271,7 @@ export const useUserProfile = () => {
     error,
     saveProfile,
     updateAvatar,
+    uploadAvatar,
     updateBio,
   }
 }
