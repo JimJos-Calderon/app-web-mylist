@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@hooks/useAuth'
+import { useUserProfile } from '@hooks/useUserProfile'
 import Login from '@pages/Login'
 import Peliculas from '@pages/Peliculas'
 import Series from '@pages/Series'
+import Perfil from '@pages/Perfil'
 import SpotifyGlassCard from '@components/SpotifyGlassCard'
 
 const App: React.FC = () => {
   const { session, loading, signOut, error: authError } = useAuth()
+  const { profile } = useUserProfile()
   const location = useLocation()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showError, setShowError] = useState(authError)
@@ -93,7 +96,8 @@ const App: React.FC = () => {
   }
 
   const userEmail = session.user.email || 'Usuario'
-  const userInitials = userEmail.split('@')[0].substring(0, 2).toUpperCase()
+  const displayName = profile?.username || userEmail.split('@')[0]
+  const userInitials = displayName.substring(0, 2).toUpperCase()
 
   return (
     <div className="min-h-screen text-white font-sans selection:bg-orange-500/30 bg-black">
@@ -141,10 +145,21 @@ const App: React.FC = () => {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-700/30 transition-all"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">
-              {userInitials}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs overflow-hidden bg-gradient-to-br from-cyan-500 to-pink-500">
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none'
+                  }}
+                />
+              ) : (
+                userInitials
+              )}
             </div>
-            <span className="text-sm font-semibold hidden sm:inline text-slate-300">{userEmail}</span>
+            <span className="text-sm font-semibold hidden sm:inline text-slate-300">{displayName}</span>
             <svg
               className={`w-4 h-4 text-slate-400 transition-transform ${
                 showUserMenu ? 'rotate-180' : ''
@@ -161,16 +176,27 @@ const App: React.FC = () => {
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden z-50">
+            <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden z-50">
               <div className="px-4 py-3 border-b border-slate-700 bg-slate-900/50">
-                <p className="text-sm font-semibold text-white">{userEmail}</p>
+                <p className="text-sm font-semibold text-white">{displayName}</p>
+                <p className="text-xs text-slate-400">{userEmail}</p>
+                {profile?.bio && (
+                  <p className="text-xs text-slate-300 mt-2 italic line-clamp-2">{profile.bio}</p>
+                )}
               </div>
+              <Link
+                to="/perfil"
+                onClick={() => setShowUserMenu(false)}
+                className="block w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 transition-colors font-medium"
+              >
+                Mi Perfil
+              </Link>
               <button
                 onClick={() => {
                   signOut()
                   setShowUserMenu(false)
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors font-medium"
+                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors font-medium border-t border-slate-700"
               >
                 Cerrar sesión
               </button>
@@ -191,7 +217,7 @@ const App: React.FC = () => {
                   </h2>
                   <p className="text-zinc-400 text-lg">
                     ¿Qué vamos a ver hoy,{' '}
-                    <span className="text-zinc-200 font-bold">{userEmail}</span>?
+                    <span className="text-zinc-200 font-bold">{displayName}</span>?
                   </p>
                 </div>
               </div>
@@ -199,6 +225,7 @@ const App: React.FC = () => {
           />
           <Route path="/peliculas" element={<Peliculas />} />
           <Route path="/series" element={<Series />} />
+          <Route path="/perfil" element={<Perfil />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
 

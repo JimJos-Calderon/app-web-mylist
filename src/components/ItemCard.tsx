@@ -1,5 +1,6 @@
 import React from 'react'
 import { ListItem } from '@/types'
+import { useUsername } from '@hooks/useUsername'
 import RatingWidget from './RatingWidget'
 
 interface ItemCardProps {
@@ -18,6 +19,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
   onOpenDetails,
 }) => {
   const [deleting, setDeleting] = React.useState(false)
+  const { username } = useUsername(item.user_id)
 
   const handleDelete = async () => {
     if (!confirm(`¿Eliminar "${item.titulo}"?`)) return
@@ -131,7 +133,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 : 'border-pink-500/30 text-pink-500 bg-pink-500/5'
             }`}
           >
-            {isOwn ? 'TUYO' : item.user_email?.split('@')[0]}
+            {isOwn ? 'TUYO' : username || 'Cargando...'}
             {item.genero && (
               <>
                 <span className="mx-1.5">•</span>
