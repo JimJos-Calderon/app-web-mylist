@@ -1,5 +1,6 @@
 import React from 'react'
 import { ListItem } from '@/types'
+import RatingWidget from './RatingWidget'
 
 interface ItemCardProps {
   item: ListItem
@@ -131,6 +132,17 @@ const ItemCard: React.FC<ItemCardProps> = ({
             }`}
           >
             {isOwn ? 'TUYO' : item.user_email?.split('@')[0]}
+            {item.genero && (
+              <>
+                <span className="mx-1.5">•</span>
+                <span className="font-semibold">{item.genero}</span>
+              </>
+            )}
+          </div>
+
+          {/* Rating Widget */}
+          <div className="mt-4 border-t border-zinc-700 pt-3">
+            <RatingWidget itemId={item.id} onlyOwn={true} />
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import { OMDB_BASE_URL, OMDB_API_KEY, ERROR_MESSAGES } from '@constants/index'
 interface UseOmdbReturn {
   getPosterUrl: (title: string) => Promise<string | null>
   getSynopsis: (title: string) => Promise<string | null>
+  getGenre: (title: string) => Promise<string | null>
   loading: boolean
   error: string | null
   clearError: () => void
@@ -95,9 +96,48 @@ export const useOmdb = (): UseOmdbReturn => {
     }
   }, [])
 
+  const getGenre = useCallback(async (title: string): Promise<string | null> => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      if (!OMDB_API_KEY) {
+        throw new Error('OMDB API key not configured')
+      }
+
+      const params = new URLSearchParams({
+        t: title,
+        apikey: OMDB_API_KEY,
+      })
+
+      const response = await fetch(`${OMDB_BASE_URL}?${params}`)
+
+      if (!response.ok) {
+        throw new Error(ERROR_MESSAGES.SEARCH_SUGGESTIONS)
+      }
+
+      const data: OmdbResponse = await response.json()
+
+      if (data.Response === 'False' || !data.Genre || data.Genre === 'N/A') {
+        return null
+      }
+
+      return data.Genre
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : ERROR_MESSAGES.SEARCH_SUGGESTIONS
+      setError(message)
+      console.error('OMDB error:', err)
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   return {
     getPosterUrl,
     getSynopsis,
+    getGenre,
     loading,
     error,
     clearError,

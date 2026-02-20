@@ -21,6 +21,17 @@ export interface ListItem {
   created_at: string
   rating?: number
   comentario?: string
+  genero?: string
+}
+
+export interface ItemRating {
+  id: string
+  item_id: string
+  user_id: string
+  rating: number | null
+  liked: boolean | null
+  created_at: string
+  updated_at: string
 }
 
 export interface OmdbSuggestion {
@@ -36,6 +47,7 @@ export interface OmdbResponse {
   Year?: string
   Poster?: string
   Plot?: string
+  Genre?: string
   Response: 'True' | 'False'
   Error?: string
   Search?: OmdbSuggestion[]

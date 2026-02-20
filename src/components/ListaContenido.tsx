@@ -48,7 +48,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
     tipo
   )
 
-  const { getPosterUrl, getSynopsis } = useOmdb()
+  const { getPosterUrl, getSynopsis, getGenre } = useOmdb()
   const { filters, updateFilter, resetFilters } = useFilters()
 
   // Detect mobile screen size
@@ -95,6 +95,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
     try {
       // Use poster directly from suggestion, avoiding extra API call
       const poster = suggestion.Poster !== 'N/A' ? suggestion.Poster : null
+      const genre = await getGenre(suggestion.Title)
 
       await addItem({
         titulo: suggestion.Title,
@@ -103,13 +104,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
         user_id: user?.id || '',
         user_email: user?.email || '',
         poster_url: poster,
+        genero: genre || undefined,
       })
 
       setSearchInput('')
       setSuggestions([])
       setShowSuggestions(false)
     } catch (err) {
-      console.error('Error adding item:', err)
+      const details = err && typeof err === 'object' ? JSON.stringify(err) : String(err)
+      console.error('Error adding item:', details, err)
     }
   }
 
@@ -124,6 +127,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
 
     try {
       const poster = await getPosterUrl(searchInput)
+      const genre = await getGenre(searchInput)
 
       await addItem({
         titulo: sanitizeInput(searchInput),
@@ -132,13 +136,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
         user_id: user?.id || '',
         user_email: user?.email || '',
         poster_url: poster,
+        genero: genre || undefined,
       })
 
       setSearchInput('')
       setSuggestions([])
       setShowSuggestions(false)
     } catch (err) {
-      console.error('Error adding item manually:', err)
+      const details = err && typeof err === 'object' ? JSON.stringify(err) : String(err)
+      console.error('Error adding item manually:', details, err)
     }
   }
 
