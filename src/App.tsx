@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Routes, Route, Link, Navigate } from 'react-router-dom'
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@hooks/useAuth'
 import Login from '@pages/Login'
 import Peliculas from '@pages/Peliculas'
@@ -8,11 +8,15 @@ import SpotifyGlassCard from '@components/SpotifyGlassCard'
 
 const App: React.FC = () => {
   const { session, loading, signOut, error: authError } = useAuth()
+  const location = useLocation()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showError, setShowError] = useState(authError)
   const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth - 400, y: window.innerHeight - 400 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [playlistPosition, setPlaylistPosition] = useState({ x: window.innerWidth - 450, y: 100 })
+  const [isPlaylistDragging, setIsPlaylistDragging] = useState(false)
+  const [playlistDragOffset, setPlaylistDragOffset] = useState({ x: 0, y: 0 })
 
   React.useEffect(() => {
     if (authError) {
@@ -30,13 +34,20 @@ const App: React.FC = () => {
           y: e.clientY - dragOffset.y
         })
       }
+      if (isPlaylistDragging) {
+        setPlaylistPosition({
+          x: e.clientX - playlistDragOffset.x,
+          y: e.clientY - playlistDragOffset.y
+        })
+      }
     }
 
     const handleMouseUp = () => {
       setIsDragging(false)
+      setIsPlaylistDragging(false)
     }
 
-    if (isDragging) {
+    if (isDragging || isPlaylistDragging) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
       return () => {
@@ -44,13 +55,21 @@ const App: React.FC = () => {
         document.removeEventListener('mouseup', handleMouseUp)
       }
     }
-  }, [isDragging, dragOffset])
+  }, [isDragging, dragOffset, isPlaylistDragging, playlistDragOffset])
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsDragging(true)
     setDragOffset({
       x: e.clientX - playerPosition.x,
       y: e.clientY - playerPosition.y
+    })
+  }
+
+  const handlePlaylistMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsPlaylistDragging(true)
+    setPlaylistDragOffset({
+      x: e.clientX - playlistPosition.x,
+      y: e.clientY - playlistPosition.y
     })
   }
 
@@ -183,21 +202,42 @@ const App: React.FC = () => {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
 
-        <div
-          onMouseDown={handleMouseDown}
-          style={{
-            position: 'fixed',
-            left: `${playerPosition.x}px`,
-            top: `${playerPosition.y}px`,
-            zIndex: 30
-          }}
-        >
-          <SpotifyGlassCard
-            spotifyUrl="https://open.spotify.com/embed/playlist/3WyehWydbIc9FCDVDHbTbZ?utm_source=generator&theme=0"
-            accentColor="rgb(168, 85, 247)"
-            isDragging={isDragging}
-          />
-        </div>
+        {location.pathname === '/' && (
+          <div
+            onMouseDown={handleMouseDown}
+            style={{
+              position: 'fixed',
+              left: `${playerPosition.x}px`,
+              top: `${playerPosition.y}px`,
+              zIndex: 30
+            }}
+          >
+            <SpotifyGlassCard
+              spotifyUrl="https://open.spotify.com/embed/playlist/3WyehWydbIc9FCDVDHbTbZ?utm_source=generator&theme=0"
+              accentColor="rgb(168, 85, 247)"
+              isDragging={isDragging}
+            />
+          </div>
+        )}
+
+        {location.pathname === '/' && (
+          <div
+            onMouseDown={handlePlaylistMouseDown}
+            style={{
+              position: 'fixed',
+              left: `${playlistPosition.x}px`,
+              top: `${playlistPosition.y}px`,
+              zIndex: 30,
+              pointerEvents: 'auto'
+            }}
+          >
+            <SpotifyGlassCard
+              spotifyUrl="https://open.spotify.com/embed/playlist/6y6uFhkd4QSgiZ4XBZekNb?utm_source=generator"
+              accentColor="rgb(168, 85, 247)"
+              isDragging={isPlaylistDragging}
+            />
+          </div>
+        )}
       </main>
     </div>
   )
