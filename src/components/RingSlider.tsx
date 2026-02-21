@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { EffectCoverflow } from 'swiper/modules'
 import { ListItem } from '@/types'
+import { Grid3x3, ChevronLeft, ChevronRight, Film, Tv } from 'lucide-react'
 
 interface RingSliderProps {
   items: ListItem[]
@@ -173,13 +174,17 @@ const RingSlider: React.FC<RingSliderProps> = ({
 
                       <div className="flex gap-2 justify-center flex-wrap">
                         <span
-                          className={`text-[9px] font-black uppercase tracking-[0.15em] px-2 py-1 rounded-full border transition-all duration-700 ${
+                          className={`text-[9px] font-black uppercase tracking-[0.15em] px-2 py-1 rounded-full border transition-all duration-700 flex items-center gap-1 ${
                             isActive
                               ? 'border-cyan-400 text-cyan-300 bg-cyan-500/15 shadow-[0_0_15px_rgba(0,255,255,0.4)]'
                               : 'border-purple-500/30 text-purple-300/60'
                           }`}
                         >
-                          {item.tipo === 'pelicula' ? '🎬 Film' : '📺 Series'}
+                          {item.tipo === 'pelicula' ? (
+                            <><Film className="w-3 h-3" /> Film</>
+                          ) : (
+                            <><Tv className="w-3 h-3" /> Series</>
+                          )}
                         </span>
                       </div>
                     </div>
@@ -198,9 +203,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
         className="absolute bottom-32 right-6 z-20 bg-gradient-to-r from-pink-500/30 to-pink-500/10 hover:from-pink-500/50 hover:to-pink-500/30 border border-pink-400/40 hover:border-pink-400/80 text-pink-300 hover:text-pink-200 rounded-full p-2.5 sm:p-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]"
         aria-label="Volver a rejilla"
       >
-        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 6h12M6 12h12M6 18h12" />
-        </svg>
+        <Grid3x3 className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
 
       {/* Navigation Buttons */}
@@ -210,9 +213,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
         className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-cyan-500/30 to-cyan-500/10 hover:from-cyan-500/50 hover:to-cyan-500/30 border border-cyan-400/40 hover:border-cyan-400/80 text-cyan-300 hover:text-cyan-200 rounded-full p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)]"
         aria-label="Anterior"
       >
-        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
 
       <button
@@ -221,9 +222,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
         className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-cyan-500/10 to-cyan-500/30 hover:from-cyan-500/30 hover:to-cyan-500/50 border border-cyan-400/40 hover:border-cyan-400/80 text-cyan-300 hover:text-cyan-200 rounded-full p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)]"
         aria-label="Siguiente"
       >
-        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
 
       {/* Bottom Info - Active Item */}

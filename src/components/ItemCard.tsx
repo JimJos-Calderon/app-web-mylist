@@ -1,5 +1,5 @@
 import React from 'react'
-import { Eye, EyeOff, Trash2, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Trash2, Loader2, Film } from 'lucide-react'
 import { ListItem } from '@/types'
 import { useUsername } from '@hooks/useUsername'
 import RatingWidget from './RatingWidget'
@@ -81,7 +81,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-center px-4">
             <div>
-              <div className="text-4xl mb-2">🎬</div>
+              <Film className="w-12 h-12 mx-auto mb-2 text-zinc-600" />
               <div className="text-[10px] text-zinc-500 font-black uppercase">
                 {item.tipo === 'pelicula' ? 'Película' : 'Serie'}
               </div>

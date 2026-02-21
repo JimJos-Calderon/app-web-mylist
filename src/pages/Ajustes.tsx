@@ -3,7 +3,7 @@ import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/supabaseClient'
-import { Eye, EyeOff, User, LockKeyhole } from 'lucide-react'
+import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key } from 'lucide-react'
 
 type Section = 'perfil' | 'seguridad'
 
@@ -288,7 +288,7 @@ const Ajustes: React.FC = () => {
                           }}
                         />
                       ) : (
-                        <div className="text-5xl">👤</div>
+                        <UserCircle className="w-16 h-16 text-white" />
                       )}
                     </div>
                   </div>
@@ -408,7 +408,7 @@ const Ajustes: React.FC = () => {
                 {/* Change Email */}
                 <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-3xl p-8">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                    <span>📧</span>
+                    <Mail className="w-5 h-5" />
                     Cambiar Correo Electrónico
                   </h2>
                   
@@ -452,7 +452,7 @@ const Ajustes: React.FC = () => {
                 {/* Change Password */}
                 <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-3xl p-8">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                    <span>🔑</span>
+                    <Key className="w-5 h-5" />
                     Cambiar Contraseña
                   </h2>
                   

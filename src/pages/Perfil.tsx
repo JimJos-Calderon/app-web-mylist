@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Cog } from 'lucide-react'
+import { Cog, UserCircle, Film } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
 import { useNavigate } from 'react-router-dom'
@@ -86,11 +86,11 @@ const Perfil: React.FC = () => {
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (_id: string) => {
     // No eliminar desde perfil - solo ver
   }
 
-  const handleToggleVisto = async (id: string, currentState: boolean) => {
+  const handleToggleVisto = async (_id: string, _currentState: boolean) => {
     // No cambiar estado desde perfil - solo ver
   }
 
@@ -126,7 +126,7 @@ const Perfil: React.FC = () => {
                     }}
                   />
                 ) : (
-                  <div className="text-5xl">👤</div>
+                  <UserCircle className="w-20 h-20 text-white" />
                 )}
               </div>
               
@@ -189,7 +189,7 @@ const Perfil: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-20">
-            <div className="text-6xl mb-4">🎬</div>
+            <Film className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
             <h2 className="text-2xl font-bold mb-2">Aún sin calificaciones</h2>
             <p className="text-zinc-400 mb-6">
               Comienza a calificar películas y series para verlas aquí

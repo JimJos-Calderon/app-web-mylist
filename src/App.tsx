@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
-import { Menu } from 'lucide-react'
+import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
 import Login from '@pages/Login'
@@ -15,6 +15,7 @@ const App: React.FC = () => {
   const { profile } = useUserProfile()
   const location = useLocation()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showError, setShowError] = useState(authError)
   const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth - 400, y: window.innerHeight - 400 })
   const [isDragging, setIsDragging] = useState(false)
@@ -106,28 +107,24 @@ const App: React.FC = () => {
       {/* Error notification */}
       {showError && (
         <div className="fixed top-4 right-4 z-50 bg-red-500/20 border border-red-500/50 rounded-lg p-4 flex items-start gap-3 max-w-md animate-in slide-in-from-top duration-300">
-          <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
           <span className="text-red-200 text-sm">{showError}</span>
         </div>
       )}
 
-      <nav className="sticky top-0 z-40 backdrop-blur-md bg-black/60 border-b border-pink-500/20 px-8 py-4 flex items-center justify-between">
-        <Link to="/" className="group flex items-center gap-3">
-          <div className="w-10 h-10 bg-pink-600 rounded-lg flex items-center justify-center font-black text-white shadow-[0_0_15px_rgba(219,39,119,0.5)] group-hover:scale-110 transition-all">
+      <nav className="sticky top-0 z-40 backdrop-blur-md bg-black/60 border-b border-pink-500/20 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
+        <Link to="/" className="group flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-pink-600 rounded-lg flex items-center justify-center font-black text-white text-xs sm:text-base shadow-[0_0_15px_rgba(219,39,119,0.5)] group-hover:scale-110 transition-all">
             J&N
           </div>
-          <span className="text-2xl font-black tracking-tighter text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
-            Nuestra Lista ❤️❤️
+          <span className="text-base sm:text-2xl font-black tracking-tighter text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+            <span className="hidden sm:inline">Nuestra Lista <Heart className="inline w-5 h-5 text-red-500 fill-red-500" /></span>
+            <span className="sm:hidden">Mi Lista <Heart className="inline w-4 h-4 text-red-500 fill-red-500" /></span>
           </span>
         </Link>
 
-        <div className="flex bg-purple-900/20 p-1 rounded-xl border border-pink-500/10">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex bg-purple-900/20 p-1 rounded-xl border border-pink-500/10">
           <Link
             to="/peliculas"
             className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm"
@@ -148,7 +145,15 @@ const App: React.FC = () => {
           </Link>
         </div>
 
-        <div className="relative">
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          className="md:hidden p-2 text-white hover:text-pink-400 transition-colors"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
+        <div className="relative hidden md:block">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-700/30 transition-all"
@@ -207,6 +212,69 @@ const App: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {showMobileMenu && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-pink-500/20 shadow-[0_0_30px_rgba(219,39,119,0.2)] z-50">
+            <div className="px-4 py-3 border-b border-pink-500/20 bg-black/60 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm overflow-hidden bg-gradient-to-br from-cyan-500 to-pink-500">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                ) : (
+                  userInitials
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">{displayName}</p>
+                <p className="text-xs text-zinc-400">{userEmail}</p>
+              </div>
+            </div>
+            <Link
+              to="/peliculas"
+              onClick={() => setShowMobileMenu(false)}
+              className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
+            >
+              <Film className="w-4 h-4" /> Películas
+            </Link>
+            <Link
+              to="/series"
+              onClick={() => setShowMobileMenu(false)}
+              className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
+            >
+              <Tv className="w-4 h-4" /> Series
+            </Link>
+            <Link
+              to="/perfil"
+              onClick={() => setShowMobileMenu(false)}
+              className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
+            >
+              <User className="w-4 h-4" /> Mi Perfil
+            </Link>
+            <Link
+              to="/ajustes"
+              onClick={() => setShowMobileMenu(false)}
+              className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" /> Ajustes
+            </Link>
+            <button
+              onClick={() => {
+                signOut()
+                setShowMobileMenu(false)
+              }}
+              className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors font-bold flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" /> Cerrar sesión
+            </button>
+          </div>
+        )}
       </nav>
 
       <main className="max-w-7xl mx-auto p-4">
@@ -234,41 +302,44 @@ const App: React.FC = () => {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
 
+        {/* Spotify Players - Only on desktop */}
         {location.pathname === '/' && (
-          <div
-            onMouseDown={handleMouseDown}
-            style={{
-              position: 'fixed',
-              left: `${playerPosition.x}px`,
-              top: `${playerPosition.y}px`,
-              zIndex: 30
-            }}
-          >
-            <SpotifyGlassCard
-              spotifyUrl="https://open.spotify.com/embed/playlist/3WyehWydbIc9FCDVDHbTbZ?utm_source=generator&theme=0"
-              accentColor="rgb(168, 85, 247)"
-              isDragging={isDragging}
-            />
-          </div>
-        )}
+          <>
+            <div
+              className="hidden lg:block"
+              onMouseDown={handleMouseDown}
+              style={{
+                position: 'fixed',
+                left: `${playerPosition.x}px`,
+                top: `${playerPosition.y}px`,
+                zIndex: 30
+              }}
+            >
+              <SpotifyGlassCard
+                spotifyUrl="https://open.spotify.com/embed/playlist/3WyehWydbIc9FCDVDHbTbZ?utm_source=generator&theme=0"
+                accentColor="rgb(168, 85, 247)"
+                isDragging={isDragging}
+              />
+            </div>
 
-        {location.pathname === '/' && (
-          <div
-            onMouseDown={handlePlaylistMouseDown}
-            style={{
-              position: 'fixed',
-              left: `${playlistPosition.x}px`,
-              top: `${playlistPosition.y}px`,
-              zIndex: 30,
-              pointerEvents: 'auto'
-            }}
-          >
-            <SpotifyGlassCard
-              spotifyUrl="https://open.spotify.com/embed/playlist/6y6uFhkd4QSgiZ4XBZekNb?utm_source=generator"
-              accentColor="rgb(168, 85, 247)"
-              isDragging={isPlaylistDragging}
-            />
-          </div>
+            <div
+              className="hidden lg:block"
+              onMouseDown={handlePlaylistMouseDown}
+              style={{
+                position: 'fixed',
+                left: `${playlistPosition.x}px`,
+                top: `${playlistPosition.y}px`,
+                zIndex: 30,
+                pointerEvents: 'auto'
+              }}
+            >
+              <SpotifyGlassCard
+                spotifyUrl="https://open.spotify.com/embed/playlist/6y6uFhkd4QSgiZ4XBZekNb?utm_source=generator"
+                accentColor="rgb(168, 85, 247)"
+                isDragging={isPlaylistDragging}
+              />
+            </div>
+          </>
         )}
       </main>
     </div>
