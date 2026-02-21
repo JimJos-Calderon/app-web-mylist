@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Heart, HeartOff, Star } from 'lucide-react'
 import { useItemRating } from '@/hooks/useItemRating'
 
 interface RatingWidgetProps {
@@ -56,8 +57,8 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
           className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title={currentRating ? `Calificación: ${currentRating}/5` : 'Calificar'}
         >
-          <span className="text-lg">⭐</span>
-          {currentRating && <span className="text-xs font-semibold text-yellow-400">{currentRating}</span>}
+          <Star className="w-4 h-4 text-cyan-400" fill={currentRating ? 'currentColor' : 'none'} />
+          {currentRating && <span className="text-xs font-semibold text-cyan-400">{currentRating}</span>}
         </button>
 
         {/* Rating Menu */}
@@ -72,10 +73,10 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
                     handleStarClick(star)
                   }}
                   disabled={isUpdating}
-                  className="text-2xl hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-cyan-400 hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                   title={`${star} estrella${star > 1 ? 's' : ''}`}
                 >
-                  {star <= (currentRating || 0) ? '⭐' : '☆'}
+                  <Star className="w-6 h-6" fill={star <= (currentRating || 0) ? 'currentColor' : 'none'} />
                 </button>
               ))}
             </div>
@@ -103,12 +104,12 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
           disabled={isUpdating}
           className={`px-2 py-1 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
             currentLike === true
-              ? 'bg-green-500/30 text-green-400 border border-green-500/50'
+              ? 'bg-pink-500/30 text-pink-400 border border-pink-500/50'
               : 'hover:bg-zinc-800 text-zinc-400'
           }`}
           title="Me gusta"
         >
-          <span className="text-lg">👍</span>
+          <Heart className="w-5 h-5" fill={currentLike === true ? 'currentColor' : 'none'} />
         </button>
 
         <button
@@ -119,12 +120,12 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
           disabled={isUpdating}
           className={`px-2 py-1 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
             currentLike === false
-              ? 'bg-red-500/30 text-red-400 border border-red-500/50'
+              ? 'bg-purple-500/30 text-purple-400 border border-purple-500/50'
               : 'hover:bg-zinc-800 text-zinc-400'
           }`}
           title="No me gusta"
         >
-          <span className="text-lg">👎</span>
+          <HeartOff className="w-5 h-5" />
         </button>
       </div>
 

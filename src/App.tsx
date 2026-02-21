@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
+import { Menu } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
 import Login from '@pages/Login'
@@ -167,41 +168,30 @@ const App: React.FC = () => {
               )}
             </div>
             <span className="text-sm font-semibold hidden sm:inline text-slate-300">{displayName}</span>
-            <svg
+            <Menu
               className={`w-4 h-4 text-slate-400 transition-transform ${
                 showUserMenu ? 'rotate-180' : ''
               }`}
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
+            />
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden z-50">
-              <div className="px-4 py-3 border-b border-slate-700 bg-slate-900/50">
+            <div className="absolute right-0 mt-2 w-56 bg-black/95 backdrop-blur-lg border border-cyan-500/20 rounded-lg shadow-[0_0_30px_rgba(0,255,255,0.2)] overflow-hidden z-50">
+              <div className="px-4 py-3 border-b border-cyan-500/20 bg-black/60">
                 <p className="text-sm font-semibold text-white">{displayName}</p>
-                <p className="text-xs text-slate-400">{userEmail}</p>
-                {profile?.bio && (
-                  <p className="text-xs text-slate-300 mt-2 italic line-clamp-2">{profile.bio}</p>
-                )}
+                <p className="text-xs text-zinc-400">{userEmail}</p>
               </div>
               <Link
                 to="/perfil"
                 onClick={() => setShowUserMenu(false)}
-                className="block w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 transition-colors font-medium"
+                className="block w-full text-left px-4 py-2 text-sm text-zinc-200 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors font-medium"
               >
                 Mi Perfil
               </Link>
               <Link
                 to="/ajustes"
                 onClick={() => setShowUserMenu(false)}
-                className="block w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 transition-colors font-medium"
+                className="block w-full text-left px-4 py-2 text-sm text-zinc-200 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors font-medium"
               >
                 Ajustes
               </Link>
@@ -210,7 +200,7 @@ const App: React.FC = () => {
                   signOut()
                   setShowUserMenu(false)
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors font-medium border-t border-slate-700"
+                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors font-medium border-t border-cyan-500/20"
               >
                 Cerrar sesión
               </button>

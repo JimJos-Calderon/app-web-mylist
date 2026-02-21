@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { supabase } from '@/supabaseClient'
 import { validateEmail, validatePassword } from '@utils/validation'
 import { ERROR_MESSAGES } from '@constants/index'
+import { Eye, EyeOff } from 'lucide-react'
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -62,7 +63,7 @@ const Login: React.FC = () => {
             <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
               Nuestra Lista
             </h1>
-            <p className="text-slate-400 text-sm">Gestiona tu lista compartida de películas y series</p>
+            <p className="text-slate-400 text-xl">Gestiona tu lista compartida de películas y series</p>
           </div>
 
           {error && (
@@ -84,7 +85,7 @@ const Login: React.FC = () => {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-300 mb-2">
+              <label htmlFor="email" className="block text-xl font-semibold text-slate-300 mb-2">
                 Email
               </label>
               <input
@@ -94,13 +95,13 @@ const Login: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
-                className="w-full bg-slate-900/50 border border-slate-600 text-white px-4 py-3 rounded-lg outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-slate-900/50 border border-slate-600 text-white text-xl px-5 py-4 rounded-lg outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-500 placeholder:text-lg"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-slate-300 mb-2">
+              <label htmlFor="password" className="block text-xl font-semibold text-slate-300 mb-2">
                 Contraseña
               </label>
               <div className="relative">
@@ -111,33 +112,16 @@ const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="w-full bg-slate-900/50 border border-slate-600 text-white px-4 py-3 rounded-lg outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-slate-900/50 border border-slate-600 text-white text-xl px-5 py-4 pr-12 rounded-lg outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-slate-500 placeholder:text-lg"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-300 disabled:opacity-50"
+                  className="absolute right-4 top-4 text-slate-400 hover:text-slate-300 disabled:opacity-50"
                 >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path
-                        fillRule="evenodd"
-                        d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-14-14zM10 4.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zm0 1a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
+                  {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -145,7 +129,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 disabled:from-slate-600 disabled:to-slate-600 text-white font-bold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 disabled:from-slate-600 disabled:to-slate-600 text-white text-xl font-bold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading && (
                 <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -168,8 +152,8 @@ const Login: React.FC = () => {
             </button>
           </form>
 
-          <p className="text-center text-slate-400 text-xs">
-            by J&N ❤️❤️
+          <p className="text-center text-slate-400 text-xl">
+            by JimJos 
           </p>
         </div>
       </div>
