@@ -6,6 +6,7 @@ import Login from '@pages/Login'
 import Peliculas from '@pages/Peliculas'
 import Series from '@pages/Series'
 import Perfil from '@pages/Perfil'
+import Ajustes from '@pages/Ajustes'
 import SpotifyGlassCard from '@components/SpotifyGlassCard'
 
 const App: React.FC = () => {
@@ -197,6 +198,13 @@ const App: React.FC = () => {
               >
                 Mi Perfil
               </Link>
+              <Link
+                to="/ajustes"
+                onClick={() => setShowUserMenu(false)}
+                className="block w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-slate-700 transition-colors font-medium"
+              >
+                Ajustes
+              </Link>
               <button
                 onClick={() => {
                   signOut()
@@ -232,6 +240,7 @@ const App: React.FC = () => {
           <Route path="/peliculas" element={<Peliculas />} />
           <Route path="/series" element={<Series />} />
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/ajustes" element={<Ajustes />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
 

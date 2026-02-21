@@ -10,6 +10,7 @@ interface ItemCardProps {
   onDelete: (id: string) => Promise<void>
   onToggleVisto: (id: string, currentState: boolean) => Promise<void>
   onOpenDetails: (item: ListItem) => void
+  disableVistoEffect?: boolean
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({
@@ -18,6 +19,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
   onDelete,
   onToggleVisto,
   onOpenDetails,
+  disableVistoEffect = false,
 }) => {
   const [deleting, setDeleting] = React.useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false)
@@ -55,7 +57,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
         }
       }}
       className={`group relative flex flex-col rounded-[2rem] border-2 transition-all duration-500 overflow-hidden bg-black/60 backdrop-blur-md ${
-        item.visto
+        item.visto && !disableVistoEffect
           ? 'border-purple-900/20 opacity-30 scale-95'
           : isOwn
             ? 'border-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(0,255,255,0.4)] hover:-translate-y-2'
