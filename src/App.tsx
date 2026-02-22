@@ -9,6 +9,7 @@ import Series from '@pages/Series'
 import Perfil from '@pages/Perfil'
 import Ajustes from '@pages/Ajustes'
 import SpotifyGlassCard from '@components/SpotifyGlassCard'
+// import InvitationPage from './pages/InvitationPage';
 
 const App: React.FC = () => {
   const { session, loading, signOut, error: authError } = useAuth()
@@ -143,6 +144,7 @@ const App: React.FC = () => {
           >
             Mi Perfil
           </Link>
+            {/* Invitación link removed */}
         </div>
 
         {/* Mobile Menu Button */}
@@ -264,6 +266,7 @@ const App: React.FC = () => {
             >
               <Settings className="w-4 h-4" /> Ajustes
             </Link>
+            {/* Invitación link removed from mobile menu */}
             <button
               onClick={() => {
                 signOut()
@@ -299,6 +302,7 @@ const App: React.FC = () => {
           <Route path="/series" element={<Series />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/ajustes" element={<Ajustes />} />
+          {/* InvitationPage route removed */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
 

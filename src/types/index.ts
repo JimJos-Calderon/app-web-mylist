@@ -22,6 +22,7 @@ export interface ListItem {
   rating?: number
   comentario?: string
   genero?: string
+  list_id: string
 }
 
 export interface ItemRating {
@@ -65,4 +66,23 @@ export interface FilterState {
   sortBy: 'date' | 'title' | 'rating'
   sortOrder: 'asc' | 'desc'
   searchQuery: string
+}
+
+export interface List {
+  id: string
+  name: string
+  description: string | null
+  owner_id: string
+  created_at: string
+  updated_at: string
+  is_private: boolean
+  invite_code: string
+}
+
+export interface ListMember {
+  id: string
+  list_id: string
+  user_id: string
+  role: 'owner' | 'admin' | 'member'
+  joined_at: string
 }

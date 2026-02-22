@@ -13,13 +13,24 @@ import FilterPanel from '@components/FilterPanel'
 import ErrorAlert from '@components/ErrorAlert'
 import RingSlider from '@components/RingSlider'
 
+import { CreateListDialog, InviteDialog } from '@components/ListDialogs'
+import ListSelector from '@components/ListSelector'
+
 interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
   icono: string
+  listId?: string
+  lists?: any[]
+  currentList?: any
+  setCurrentList?: (list: any) => void
+  loadingLists?: boolean
 }
 
-const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
+// Removed duplicate definition below
+const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, lists, currentList, setCurrentList, loadingLists }) => {
   const { user } = useAuth()
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -40,7 +51,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
 
   const { items, loading, error: itemsError, addItem, deleteItem, toggleVisto, clearError } = useItems(
     tipo,
-    user?.id || ''
+    user?.id || '',
+    listId
   )
 
   const { suggestions, loading: suggestionsLoading, error: suggestionsError, setSuggestions } = useSuggestions(
@@ -49,7 +61,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
   )
 
   const { getPosterUrl, getSynopsis, getGenre } = useOmdb()
+
   const { filters, updateFilter, resetFilters } = useFilters()
+
+  // Handler para cambios en los filtros
+  const handleFilterChange = (filterKey: string, value: any) => {
+    updateFilter(filterKey, value)
+  }
 
   // Detect mobile screen size
   useEffect(() => {
@@ -105,6 +123,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
         user_email: user?.email || '',
         poster_url: poster,
         genero: genre || undefined,
+        list_id: listId || '',
       })
 
       setSearchInput('')
@@ -137,6 +156,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
         user_email: user?.email || '',
         poster_url: poster,
         genero: genre || undefined,
+        list_id: listId || '',
       })
 
       setSearchInput('')
@@ -275,6 +295,44 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-black">
+      {/* Selector y botones arriba del filtro de búsqueda */}
+      <div className="mb-4 flex items-center gap-2">
+        {lists && currentList && setCurrentList && (
+          <ListSelector
+            lists={lists}
+            currentList={currentList}
+            onChange={setCurrentList}
+            loading={loadingLists}
+          />
+        )}
+        <button
+          className="px-3 py-2 bg-pink-500 text-white rounded font-bold text-sm"
+          onClick={() => setShowCreateDialog(true)}
+        >
+          Crear lista
+        </button>
+        {currentList && (
+          <button
+            className="px-3 py-2 bg-cyan-500 text-white rounded font-bold text-sm"
+            onClick={() => setShowInviteDialog(true)}
+          >
+            Invitar
+          </button>
+        )}
+      </div>
+      {/* Diálogos modales */}
+      <CreateListDialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onCreated={() => setShowCreateDialog(false)}
+      />
+      {currentList && (
+        <InviteDialog
+          open={showInviteDialog}
+          onClose={() => setShowInviteDialog(false)}
+          listId={currentList.id}
+        />
+      )}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black"></div>
         <div
@@ -342,7 +400,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono }) => {
         {/* Filter Panel */}
         <FilterPanel
           filters={filters}
-          onFilterChange={updateFilter}
+          onFilterChange={handleFilterChange}
           onReset={resetFilters}
           sortOptions={SORT_OPTIONS}
         />

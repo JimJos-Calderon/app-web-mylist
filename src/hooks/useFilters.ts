@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { FilterState } from '@types/index'
+import { FilterState } from '@typings/index'
 
 interface UseFiltersReturn {
   filters: FilterState

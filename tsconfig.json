@@ -29,6 +29,7 @@
       "@pages/*": ["src/pages/*"],
       "@hooks/*": ["src/hooks/*"],
       "@context/*": ["src/context/*"],
+      "@typings/*": ["src/types/*"],
       "@utils/*": ["src/utils/*"],
       "@constants/*": ["src/constants/*"]
     }

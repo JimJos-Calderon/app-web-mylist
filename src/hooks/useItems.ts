@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/supabaseClient'
-import { ListItem, ApiError } from '@types/index'
 import { ERROR_MESSAGES } from '@constants/index'
+import { ListItem } from '@typings/index'
+import { useCallback, useEffect, useState } from 'react'
 
 interface UseItemsReturn {
   items: ListItem[]
@@ -15,13 +15,21 @@ interface UseItemsReturn {
   clearError: () => void
 }
 
-export const useItems = (tipo: 'pelicula' | 'serie', userId: string): UseItemsReturn => {
+export const useItems = (
+  tipo: 'pelicula' | 'serie',
+  userId: string,
+  listId?: string
+): UseItemsReturn => {
   const [items, setItems] = useState<ListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchItems = useCallback(async () => {
-    if (!userId) return
+    if (!userId || !listId) {
+      setItems([])
+      setLoading(false)
+      return
+    }
 
     setLoading(true)
     try {
@@ -29,6 +37,7 @@ export const useItems = (tipo: 'pelicula' | 'serie', userId: string): UseItemsRe
         .from('items')
         .select('*')
         .eq('tipo', tipo)
+        .eq('list_id', listId)
         .order('created_at', { ascending: false })
 
       if (fetchError) throw fetchError
@@ -43,22 +52,23 @@ export const useItems = (tipo: 'pelicula' | 'serie', userId: string): UseItemsRe
     } finally {
       setLoading(false)
     }
-  }, [tipo, userId])
+  }, [tipo, userId, listId])
 
   // Subscribe to realtime changes
   useEffect(() => {
     fetchItems()
 
     // Setup realtime listener
+    const channelName = listId ? `items:${tipo}:${listId}` : `items:${tipo}`
     const channel = supabase
-      .channel(`items:${tipo}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'items',
-          filter: `tipo=eq.${tipo}`,
+          filter: listId ? `tipo=eq.${tipo},list_id=eq.${listId}` : `tipo=eq.${tipo}`,
         },
         (_payload) => {
           // Refetch when changes occur
@@ -70,7 +80,7 @@ export const useItems = (tipo: 'pelicula' | 'serie', userId: string): UseItemsRe
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [tipo, fetchItems])
+  }, [tipo, listId, fetchItems])
 
   const addItem = useCallback(
     async (item: Omit<ListItem, 'id' | 'created_at'>) => {
