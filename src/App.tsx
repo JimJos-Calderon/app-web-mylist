@@ -3,6 +3,7 @@ import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle, Users, ArrowRight, Loader2 } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
+import { supabase } from '@/supabaseClient'
 import Login from '@pages/Login'
 import Peliculas from '@pages/Peliculas'
 import Series from '@pages/Series'
@@ -28,6 +29,7 @@ const App: React.FC = () => {
   // Pending invite
   const [pendingInvite, setPendingInvite] = useState<{ list_id: string; list_name: string; list_description: string | null } | null>(null)
   const [inviteJoining, setInviteJoining] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
 
   // Refs para cerrar menús al hacer click fuera
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -62,12 +64,14 @@ const App: React.FC = () => {
 
     const resolvePendingInvite = async () => {
       try {
-        const { supabase } = await import('./supabaseClient')
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('lists')
           .select('id, name, description')
           .eq('invite_code', code)
           .maybeSingle()
+        if (error) {
+          console.error('Invite resolve error:', error)
+        }
         if (data) {
           // Check not already a member
           const { data: membership } = await supabase
@@ -181,6 +185,12 @@ const App: React.FC = () => {
                   <p className="text-zinc-400 text-sm">{pendingInvite.list_description}</p>
                 )}
               </div>
+              {inviteError && (
+                <div className="w-full px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-2">
+                  <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span className="text-red-400 text-sm">{inviteError}</span>
+                </div>
+              )}
               <div className="flex gap-3 w-full">
                 <button
                   onClick={() => setPendingInvite(null)}
@@ -194,17 +204,19 @@ const App: React.FC = () => {
                   onClick={async () => {
                     if (!session?.user?.id) return
                     setInviteJoining(true)
+                    setInviteError(null)
                     try {
-                      const { supabase } = await import('./supabaseClient')
-                      await supabase.from('list_members').insert({
+                      const { error } = await supabase.from('list_members').insert({
                         list_id: pendingInvite.list_id,
                         user_id: session.user.id,
                         role: 'member',
                       })
+                      if (error) throw error
                       setPendingInvite(null)
                       window.location.href = '/peliculas'
-                    } catch (err) {
+                    } catch (err: any) {
                       console.error(err)
+                      setInviteError(err?.message || 'Error al unirse a la lista')
                     } finally {
                       setInviteJoining(false)
                     }
