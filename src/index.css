@@ -78,3 +78,9 @@ nav {
 .scrollbar-none::-webkit-scrollbar { 
   display: none;  /* Safari and Chrome */
 }
+
+/* Progress bar animation for JoinList success screen */
+@keyframes grow {
+  from { width: 0%; }
+  to   { width: 100%; }
+}

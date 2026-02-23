@@ -8,8 +8,8 @@ import Peliculas from '@pages/Peliculas'
 import Series from '@pages/Series'
 import Perfil from '@pages/Perfil'
 import Ajustes from '@pages/Ajustes'
+import JoinList from '@pages/JoinList'
 import SpotifyGlassCard from '@components/SpotifyGlassCard'
-// import InvitationPage from './pages/InvitationPage';
 
 const App: React.FC = () => {
   const { session, loading, signOut, error: authError } = useAuth()
@@ -318,7 +318,7 @@ const App: React.FC = () => {
           <Route path="/series" element={<Series />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/ajustes" element={<Ajustes />} />
-          {/* InvitationPage route removed */}
+          <Route path="/join/:code" element={<JoinList />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
 

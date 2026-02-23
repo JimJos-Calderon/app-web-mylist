@@ -205,8 +205,10 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
   useEscapeKey(open, onClose);
 
+  const inviteUrl = `${window.location.origin}/join/${list.invite_code}`;
+
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(list.invite_code);
+    navigator.clipboard.writeText(inviteUrl);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };
@@ -259,18 +261,23 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-cyan-400 mb-2">
-              Código de invitación
+              Link de invitación
             </label>
             <p className="text-zinc-400 text-sm mb-3">
-              Comparte este código. La otra persona puede unirse desde{' '}
-              <span className="text-cyan-400 font-semibold">Ajustes</span>.
+              Comparte este enlace. Cualquier persona con el link puede unirse a la lista.
             </p>
             <div className="flex gap-2">
-              <div className="flex-1 px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl flex items-center">
-                <span className="text-2xl font-black tracking-[0.3em] text-white font-mono">
-                  {list.invite_code}
+              <a
+                href={inviteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl flex items-center min-w-0
+                           hover:border-cyan-500/50 transition-all group"
+              >
+                <span className="text-sm font-mono text-cyan-400 group-hover:text-cyan-300 truncate transition-colors">
+                  {inviteUrl}
                 </span>
-              </div>
+              </a>
               <button
                 onClick={handleCopyCode}
                 className={`px-4 py-3 rounded-xl font-bold border transition-all flex items-center gap-2 whitespace-nowrap ${copiedCode
