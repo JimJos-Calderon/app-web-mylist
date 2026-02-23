@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
@@ -24,6 +24,23 @@ const App: React.FC = () => {
   const [playlistPosition, setPlaylistPosition] = useState({ x: 50, y: window.innerHeight - 400 })
   const [isPlaylistDragging, setIsPlaylistDragging] = useState(false)
   const [playlistDragOffset, setPlaylistDragOffset] = useState({ x: 0, y: 0 })
+
+  // Refs para cerrar menús al hacer click fuera
+  const userMenuRef = useRef<HTMLDivElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false)
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setShowMobileMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   React.useEffect(() => {
     if (authError) {
@@ -144,7 +161,7 @@ const App: React.FC = () => {
           >
             Mi Perfil
           </Link>
-            {/* Invitación link removed */}
+          {/* Invitación link removed */}
         </div>
 
         {/* Mobile Menu Button */}
@@ -155,7 +172,7 @@ const App: React.FC = () => {
           <Menu className="w-6 h-6" />
         </button>
 
-        <div className="relative hidden md:block">
+        <div className="relative hidden md:block" ref={userMenuRef}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-700/30 transition-all"
@@ -176,9 +193,8 @@ const App: React.FC = () => {
             </div>
             <span className="text-sm font-semibold hidden sm:inline text-slate-300">{displayName}</span>
             <Menu
-              className={`w-4 h-4 text-slate-400 transition-transform ${
-                showUserMenu ? 'rotate-180' : ''
-              }`}
+              className={`w-4 h-4 text-slate-400 transition-transform ${showUserMenu ? 'rotate-180' : ''
+                }`}
             />
           </button>
 
@@ -217,7 +233,7 @@ const App: React.FC = () => {
 
         {/* Mobile Navigation Menu */}
         {showMobileMenu && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-pink-500/20 shadow-[0_0_30px_rgba(219,39,119,0.2)] z-50">
+          <div ref={mobileMenuRef} className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-pink-500/20 shadow-[0_0_30px_rgba(219,39,119,0.2)] z-50">
             <div className="px-4 py-3 border-b border-pink-500/20 bg-black/60 flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm overflow-hidden bg-gradient-to-br from-cyan-500 to-pink-500">
                 {profile?.avatar_url ? (

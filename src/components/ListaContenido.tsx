@@ -4,7 +4,7 @@ import { useItems } from '@hooks/useItems'
 import { useSuggestions } from '@hooks/useSuggestions'
 import { useFilters } from '@hooks/useFilters'
 import { useOmdb } from '@hooks/useOmdb'
-import { OmdbSuggestion, ListItem } from '@/types'
+import { OmdbSuggestion, ListItem, List, FilterState } from '@/types'
 import { validateTitle, sanitizeInput } from '@utils/validation'
 import { SORT_OPTIONS } from '@constants/index'
 import ItemCard from '@components/ItemCard'
@@ -20,9 +20,9 @@ interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
   icono: string
   listId?: string
-  lists?: any[]
-  currentList?: any
-  setCurrentList?: (list: any) => void
+  lists?: List[]
+  currentList?: List
+  setCurrentList?: (list: List) => void
   loadingLists?: boolean
 }
 
@@ -65,7 +65,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   const { filters, updateFilter, resetFilters } = useFilters()
 
   // Handler para cambios en los filtros
-  const handleFilterChange = (filterKey: string, value: any) => {
+  const handleFilterChange = (filterKey: keyof FilterState, value: any) => {
     updateFilter(filterKey, value)
   }
 
@@ -74,7 +74,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -296,7 +296,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-black">
       {/* Selector y botones arriba del filtro de búsqueda */}
-      <div className="mb-4 flex items-center gap-2">
+      <div className="relative z-10 mb-4 flex items-center gap-2">
         {lists && currentList && setCurrentList && (
           <ListSelector
             lists={lists}
@@ -324,16 +324,19 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
       <CreateListDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
-        onCreated={() => setShowCreateDialog(false)}
+        onCreated={(newList: List) => {
+          setShowCreateDialog(false)
+          if (setCurrentList) setCurrentList(newList)
+        }}
       />
       {currentList && (
         <InviteDialog
           open={showInviteDialog}
           onClose={() => setShowInviteDialog(false)}
-          listId={currentList.id}
+          list={currentList}
         />
       )}
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black"></div>
         <div
           className="absolute bottom-0 left-0 right-0 h-[40%] opacity-10"
@@ -363,265 +366,261 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
       {/* Grid/Slider/Normal views */}
       {viewMode !== 'ring' && (
         <>
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
-        <header className="mb-8 md:mb-12">
-          <div className="flex items-center gap-3 md:gap-5 mb-2 md:mb-3">
-            <span className="text-4xl md:text-6xl drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]">{icono}</span>
-            <h2 className="text-4xl md:text-5xl lg:text-7xl font-black italic uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 tracking-tighter">
-              {tipo}s
-            </h2>
-          </div>
-          <p className="text-cyan-400 font-black text-[8px] md:text-[10px] uppercase tracking-[0.3em] md:tracking-[0.5em] border-l-2 md:border-l-4 border-pink-500 pl-2 md:pl-4 opacity-90">
-            STATION_SYNC // {user?.email?.split('@')[0] || 'user'}
-          </p>
-        </header>
-
-        {/* Error alerts */}
-        {itemsError && (
-          <ErrorAlert message={itemsError} onClose={clearError} />
-        )}
-        {suggestionsError && (
-          <ErrorAlert message={suggestionsError} onClose={() => {}} />
-        )}
-
-        {/* Search Bar */}
-        <SearchBar
-          value={searchInput}
-          onChange={setSearchInput}
-          onSubmit={handleAddManual}
-          placeholder={`BUSCAR ${tipo.toUpperCase()}...`}
-          loading={suggestionsLoading}
-          showDropdown={showSuggestions && suggestions.length > 0}
-          suggestions={suggestions}
-          onSuggestionSelect={handleAddFromSuggestion}
-          ref={sugerenciasRef}
-        />
-
-        {/* Filter Panel */}
-        <FilterPanel
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onReset={resetFilters}
-          sortOptions={SORT_OPTIONS}
-        />
-
-        <div className="mb-6 flex justify-end gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setViewMode('grid')}
-            className={`px-3 py-2 rounded-lg border text-xs md:text-sm font-semibold uppercase tracking-wide transition ${
-              viewMode === 'grid'
-                ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
-                : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
-            }`}
-          >
-            📋 Grilla
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('ring')}
-            className={`px-3 py-2 rounded-lg border text-xs md:text-sm font-semibold uppercase tracking-wide transition ${
-              (viewMode as 'grid' | 'ring') === 'ring'
-                ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
-                : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
-            }`}
-          >
-            💎 Ring
-          </button>
-        </div>
-
-        {/* Loading state */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-flex flex-col items-center gap-4">
-              <div className="w-12 h-12 rounded-full border-4 border-pink-500/20 border-t-pink-500 animate-spin"></div>
-              <p className="text-cyan-400 font-black text-sm uppercase tracking-widest">
-                Cargando {tipo}s...
+          <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+            <header className="mb-8 md:mb-12">
+              <div className="flex items-center gap-3 md:gap-5 mb-2 md:mb-3">
+                <span className="text-4xl md:text-6xl drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]">{icono}</span>
+                <h2 className="text-4xl md:text-5xl lg:text-7xl font-black italic uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 tracking-tighter">
+                  {tipo}s
+                </h2>
+              </div>
+              <p className="text-cyan-400 font-black text-[8px] md:text-[10px] uppercase tracking-[0.3em] md:tracking-[0.5em] border-l-2 md:border-l-4 border-pink-500 pl-2 md:pl-4 opacity-90">
+                STATION_SYNC // {user?.email?.split('@')[0] || 'user'}
               </p>
+            </header>
+
+            {/* Error alerts */}
+            {itemsError && (
+              <ErrorAlert message={itemsError} onClose={clearError} />
+            )}
+            {suggestionsError && (
+              <ErrorAlert message={suggestionsError} onClose={() => { }} />
+            )}
+
+            {/* Search Bar */}
+            <SearchBar
+              value={searchInput}
+              onChange={setSearchInput}
+              onSubmit={handleAddManual}
+              placeholder={`BUSCAR ${tipo.toUpperCase()}...`}
+              loading={suggestionsLoading}
+              showDropdown={showSuggestions && suggestions.length > 0}
+              suggestions={suggestions}
+              onSuggestionSelect={handleAddFromSuggestion}
+              ref={sugerenciasRef}
+            />
+
+            {/* Filter Panel */}
+            <FilterPanel
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onReset={resetFilters}
+              sortOptions={SORT_OPTIONS}
+            />
+
+            <div className="mb-6 flex justify-end gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-2 rounded-lg border text-xs md:text-sm font-semibold uppercase tracking-wide transition ${viewMode === 'grid'
+                  ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
+                  : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
+                  }`}
+              >
+                📋 Grilla
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('ring')}
+                className={`px-3 py-2 rounded-lg border text-xs md:text-sm font-semibold uppercase tracking-wide transition ${(viewMode as 'grid' | 'ring') === 'ring'
+                  ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
+                  : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
+                  }`}
+              >
+                💎 Ring
+              </button>
             </div>
-          </div>
-        )}
 
-        {/* Empty state */}
-        {!loading && filteredItems.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🍿</div>
-            <h3 className="text-xl font-black text-white mb-2">
-              {filters.searchQuery
-                ? 'No hay resultados'
-                : 'Sin elementos aún'}
-            </h3>
-            <p className="text-slate-400">
-              {filters.searchQuery
-                ? `No se encontraron ${tipo}s con "${filters.searchQuery}"`
-                : `Agrega tu primer ${tipo} a la lista`}
-            </p>
-          </div>
-        )}
-
-        {/* Grid of items */}
-        {!loading && filteredItems.length > 0 && viewMode === 'grid' && (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {paginatedItems.map((item) => (
-                <ItemCard
-                  key={item.id}
-                  item={item}
-                  isOwn={item.user_id === user.id}
-                  onDelete={deleteItem}
-                  onToggleVisto={toggleVisto}
-                  onOpenDetails={handleOpenDetails}
-                />
-              ))}
-            </div>
-
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="mt-8 md:mt-10 flex items-center justify-center gap-1 md:gap-2">
-                {/* Previous Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`
-                    px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase tracking-wide md:tracking-wider
-                    border-2 transition-all duration-300 flex-shrink-0
-                    ${currentPage === 1
-                      ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-slate-900/20'
-                      : 'border-cyan-500/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]'
-                    }
-                  `}
-                >
-                  <span className="hidden sm:inline">‹ Anterior</span>
-                  <span className="sm:hidden">‹</span>
-                </button>
-
-                {/* Page Numbers */}
-                <div className="flex gap-1 md:gap-2 overflow-x-auto max-w-[60vw] md:max-w-none scrollbar-none">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    // On mobile: show only current page, first, and last
-                    // On desktop: show first, last, current, and pages around current
-                    const showPageMobile = 
-                      page === currentPage ||
-                      page === 1 ||
-                      page === totalPages
-
-                    const showPageDesktop =
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-
-                    const showPage = isMobile ? showPageMobile : showPageDesktop
-
-                    if (!showPage) {
-                      // Show ellipsis on desktop only
-                      if (!isMobile && (page === currentPage - 2 || page === currentPage + 2)) {
-                        return (
-                          <span
-                            key={page}
-                            className="px-1 md:px-2 py-2 text-slate-500 font-black text-xs md:text-sm"
-                          >
-                            ...
-                          </span>
-                        )
-                      }
-                      return null
-                    }
-
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`
-                          px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase
-                          border-2 transition-all duration-300 flex-shrink-0 min-w-[36px] md:min-w-[40px]
-                          ${currentPage === page
-                            ? 'border-pink-500 bg-gradient-to-br from-pink-500/20 to-purple-500/20 text-pink-400 shadow-[0_0_20px_rgba(236,72,153,0.6)]'
-                            : 'border-purple-500/50 text-purple-400 hover:border-purple-400 hover:bg-purple-500/10 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]'
-                          }
-                        `}
-                      >
-                        {page}
-                      </button>
-                    )
-                  })}
+            {/* Loading state */}
+            {loading && (
+              <div className="text-center py-12">
+                <div className="inline-flex flex-col items-center gap-4">
+                  <div className="w-12 h-12 rounded-full border-4 border-pink-500/20 border-t-pink-500 animate-spin"></div>
+                  <p className="text-cyan-400 font-black text-sm uppercase tracking-widest">
+                    Cargando {tipo}s...
+                  </p>
                 </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`
-                    px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase tracking-wide md:tracking-wider
-                    border-2 transition-all duration-300 flex-shrink-0
-                    ${currentPage === totalPages
-                      ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-slate-900/20'
-                      : 'border-cyan-500/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]'
-                    }
-                  `}
-                >
-                  <span className="hidden sm:inline">Siguiente ›</span>
-                  <span className="sm:hidden">›</span>
-                </button>
               </div>
             )}
 
-            {/* Page Info */}
-            {totalPages > 1 && (
-              <div className="mt-3 md:mt-4 text-center px-4">
-                <p className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider md:tracking-widest font-bold">
-                  <span className="hidden sm:inline">Página {currentPage} de {totalPages} • </span>
-                  {filteredItems.length} {tipo}s
-                  <span className="hidden sm:inline"> en total</span>
+            {/* Empty state */}
+            {!loading && filteredItems.length === 0 && (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">🍿</div>
+                <h3 className="text-xl font-black text-white mb-2">
+                  {filters.searchQuery
+                    ? 'No hay resultados'
+                    : 'Sin elementos aún'}
+                </h3>
+                <p className="text-slate-400">
+                  {filters.searchQuery
+                    ? `No se encontraron ${tipo}s con "${filters.searchQuery}"`
+                    : `Agrega tu primer ${tipo} a la lista`}
                 </p>
               </div>
             )}
-          </>
-        )}
 
-        {/* Stats */}
-        {!loading && items.length > 0 && viewMode === 'grid' && (
-          <div className="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
-            <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-lg p-3 md:p-4">
-              <div className="text-xl md:text-2xl font-black text-cyan-400">{items.length}</div>
-              <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Total</div>
-            </div>
-            <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg p-3 md:p-4">
-              <div className="text-xl md:text-2xl font-black text-green-400">
-                {items.filter((i) => i.visto).length}
+            {/* Grid of items */}
+            {!loading && filteredItems.length > 0 && viewMode === 'grid' && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {paginatedItems.map((item) => (
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      isOwn={item.user_id === user.id}
+                      onDelete={deleteItem}
+                      onToggleVisto={toggleVisto}
+                      onOpenDetails={handleOpenDetails}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="mt-8 md:mt-10 flex items-center justify-center gap-1 md:gap-2">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`
+                    px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase tracking-wide md:tracking-wider
+                    border-2 transition-all duration-300 flex-shrink-0
+                    ${currentPage === 1
+                          ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-slate-900/20'
+                          : 'border-cyan-500/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]'
+                        }
+                  `}
+                    >
+                      <span className="hidden sm:inline">‹ Anterior</span>
+                      <span className="sm:hidden">‹</span>
+                    </button>
+
+                    {/* Page Numbers */}
+                    <div className="flex gap-1 md:gap-2 overflow-x-auto max-w-[60vw] md:max-w-none scrollbar-none">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                        // On mobile: show only current page, first, and last
+                        // On desktop: show first, last, current, and pages around current
+                        const showPageMobile =
+                          page === currentPage ||
+                          page === 1 ||
+                          page === totalPages
+
+                        const showPageDesktop =
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+
+                        const showPage = isMobile ? showPageMobile : showPageDesktop
+
+                        if (!showPage) {
+                          // Show ellipsis on desktop only
+                          if (!isMobile && (page === currentPage - 2 || page === currentPage + 2)) {
+                            return (
+                              <span
+                                key={page}
+                                className="px-1 md:px-2 py-2 text-slate-500 font-black text-xs md:text-sm"
+                              >
+                                ...
+                              </span>
+                            )
+                          }
+                          return null
+                        }
+
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`
+                          px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase
+                          border-2 transition-all duration-300 flex-shrink-0 min-w-[36px] md:min-w-[40px]
+                          ${currentPage === page
+                                ? 'border-pink-500 bg-gradient-to-br from-pink-500/20 to-purple-500/20 text-pink-400 shadow-[0_0_20px_rgba(236,72,153,0.6)]'
+                                : 'border-purple-500/50 text-purple-400 hover:border-purple-400 hover:bg-purple-500/10 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+                              }
+                        `}
+                          >
+                            {page}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`
+                    px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase tracking-wide md:tracking-wider
+                    border-2 transition-all duration-300 flex-shrink-0
+                    ${currentPage === totalPages
+                          ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-slate-900/20'
+                          : 'border-cyan-500/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]'
+                        }
+                  `}
+                    >
+                      <span className="hidden sm:inline">Siguiente ›</span>
+                      <span className="sm:hidden">›</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Page Info */}
+                {totalPages > 1 && (
+                  <div className="mt-3 md:mt-4 text-center px-4">
+                    <p className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider md:tracking-widest font-bold">
+                      <span className="hidden sm:inline">Página {currentPage} de {totalPages} • </span>
+                      {filteredItems.length} {tipo}s
+                      <span className="hidden sm:inline"> en total</span>
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Stats */}
+            {!loading && items.length > 0 && viewMode === 'grid' && (
+              <div className="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
+                <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-lg p-3 md:p-4">
+                  <div className="text-xl md:text-2xl font-black text-cyan-400">{items.length}</div>
+                  <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Total</div>
+                </div>
+                <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg p-3 md:p-4">
+                  <div className="text-xl md:text-2xl font-black text-green-400">
+                    {items.filter((i) => i.visto).length}
+                  </div>
+                  <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Vistas</div>
+                </div>
+                <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg p-3 md:p-4">
+                  <div className="text-xl md:text-2xl font-black text-purple-400">
+                    {items.filter((i) => !i.visto).length}
+                  </div>
+                  <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Pendientes</div>
+                </div>
+                <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-lg p-3 md:p-4">
+                  <div className="text-xl md:text-2xl font-black text-pink-400">
+                    {items.filter((i) => i.user_id === user.id).length}
+                  </div>
+                  <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Propias</div>
+                </div>
               </div>
-              <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Vistas</div>
-            </div>
-            <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg p-3 md:p-4">
-              <div className="text-xl md:text-2xl font-black text-purple-400">
-                {items.filter((i) => !i.visto).length}
-              </div>
-              <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Pendientes</div>
-            </div>
-            <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-lg p-3 md:p-4">
-              <div className="text-xl md:text-2xl font-black text-pink-400">
-                {items.filter((i) => i.user_id === user.id).length}
-              </div>
-              <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Propias</div>
-            </div>
+            )}
           </div>
-        )}
-      </div>
         </>
       )}
 
       {isModalOpen && selectedItem && (
         <div
-          className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity duration-200 ${
-            isModalAnimating ? 'bg-black/70 opacity-100' : 'bg-black/0 opacity-0'
-          }`}
+          className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity duration-200 ${isModalAnimating ? 'bg-black/70 opacity-100' : 'bg-black/0 opacity-0'
+            }`}
           role="dialog"
           aria-modal="true"
           onClick={handleCloseDetails}
         >
           <div
-            className={`w-full max-w-2xl rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl overflow-hidden transition-all duration-200 ${
-              isModalAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-            }`}
+            className={`w-full max-w-2xl rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl overflow-hidden transition-all duration-200 ${isModalAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+              }`}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4 p-5 border-b border-slate-800/60">

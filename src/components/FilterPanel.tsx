@@ -1,9 +1,10 @@
 import React from 'react'
 import { SORT_OPTIONS } from '@constants/index'
+import { FilterState } from '@/types'
 
 interface FilterPanelProps {
   filters: any
-  onFilterChange: (key: string, value: any) => void
+  onFilterChange: (key: keyof FilterState, value: any) => void
   onReset: () => void
   sortOptions: readonly typeof SORT_OPTIONS[number][]
 }
