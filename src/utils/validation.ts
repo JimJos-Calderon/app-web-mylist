@@ -38,3 +38,12 @@ export const validateFormInput = (
   }
   return { valid: true }
 }
+
+export const validateUsername = (username: string): { valid: boolean; message?: string } => {
+  const trimmed = username.trim()
+  if (trimmed.length < 3) return { valid: false, message: 'Mínimo 3 caracteres' }
+  if (trimmed.length > 20) return { valid: false, message: 'Máximo 20 caracteres' }
+  if (!/^[a-zA-Z0-9_]+$/.test(trimmed))
+    return { valid: false, message: 'Solo letras, números y guión bajo (_)' }
+  return { valid: true }
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
-import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle } from 'lucide-react'
+import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle, Users, ArrowRight, Loader2 } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
 import Login from '@pages/Login'
@@ -24,6 +24,10 @@ const App: React.FC = () => {
   const [playlistPosition, setPlaylistPosition] = useState({ x: 50, y: window.innerHeight - 400 })
   const [isPlaylistDragging, setIsPlaylistDragging] = useState(false)
   const [playlistDragOffset, setPlaylistDragOffset] = useState({ x: 0, y: 0 })
+
+  // Pending invite
+  const [pendingInvite, setPendingInvite] = useState<{ list_id: string; list_name: string; list_description: string | null } | null>(null)
+  const [inviteJoining, setInviteJoining] = useState(false)
 
   // Refs para cerrar menús al hacer click fuera
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -49,6 +53,42 @@ const App: React.FC = () => {
       return () => clearTimeout(timer)
     }
   }, [authError])
+
+  // Detect pending invite code on session start
+  React.useEffect(() => {
+    if (!session?.user?.id) return
+    const code = localStorage.getItem('pendingInviteCode')
+    if (!code) return
+
+    const resolvePendingInvite = async () => {
+      try {
+        const { supabase } = await import('./supabaseClient')
+        const { data } = await supabase
+          .from('lists')
+          .select('id, name, description')
+          .eq('invite_code', code)
+          .maybeSingle()
+        if (data) {
+          // Check not already a member
+          const { data: membership } = await supabase
+            .from('list_members')
+            .select('id')
+            .eq('list_id', data.id)
+            .eq('user_id', session.user.id)
+            .maybeSingle()
+          if (!membership) {
+            setPendingInvite({ list_id: data.id, list_name: data.name, list_description: data.description })
+          }
+        }
+      } catch (err) {
+        console.error('Error resolving pending invite:', err)
+      } finally {
+        localStorage.removeItem('pendingInviteCode')
+      }
+    }
+
+    resolvePendingInvite()
+  }, [session?.user?.id])
 
   React.useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -122,6 +162,70 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen text-white font-sans selection:bg-orange-500/30 bg-black">
+      {/* ── Pending Invite Modal ── */}
+      {pendingInvite && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center px-4">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+          {/* Card */}
+          <div className="relative w-full max-w-md rounded-2xl border border-cyan-500/40 bg-black/95 backdrop-blur-xl shadow-[0_0_80px_rgba(6,182,212,0.25)] overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+            <div className="px-8 py-10 flex flex-col items-center gap-6 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center">
+                <Users className="w-8 h-8 text-cyan-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold uppercase tracking-widest text-cyan-500/70 mb-2">¡Tienes una invitación!</p>
+                <h2 className="text-2xl font-black text-white mb-2">{pendingInvite.list_name}</h2>
+                {pendingInvite.list_description && (
+                  <p className="text-zinc-400 text-sm">{pendingInvite.list_description}</p>
+                )}
+              </div>
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setPendingInvite(null)}
+                  disabled={inviteJoining}
+                  className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
+                >
+                  Rechazar
+                </button>
+                <button
+                  disabled={inviteJoining}
+                  onClick={async () => {
+                    if (!session?.user?.id) return
+                    setInviteJoining(true)
+                    try {
+                      const { supabase } = await import('./supabaseClient')
+                      await supabase.from('list_members').insert({
+                        list_id: pendingInvite.list_id,
+                        user_id: session.user.id,
+                        role: 'member',
+                      })
+                      setPendingInvite(null)
+                      window.location.href = '/peliculas'
+                    } catch (err) {
+                      console.error(err)
+                    } finally {
+                      setInviteJoining(false)
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black rounded-xl
+                             hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all
+                             disabled:opacity-50 disabled:cursor-not-allowed
+                             flex items-center justify-center gap-2"
+                >
+                  {inviteJoining ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Uniéndome…</>
+                  ) : (
+                    <>Unirme <ArrowRight className="w-4 h-4" /></>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+          </div>
+        </div>
+      )}
       {/* Error notification */}
       {showError && (
         <div className="fixed top-4 right-4 z-50 bg-red-500/20 border border-red-500/50 rounded-lg p-4 flex items-start gap-3 max-w-md animate-in slide-in-from-top duration-300">

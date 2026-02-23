@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { supabase } from '@/supabaseClient'
-import { validateEmail, validatePassword } from '@utils/validation'
+import { validateEmail, validatePassword, validateUsername } from '@utils/validation'
 import { ERROR_MESSAGES } from '@constants/index'
-import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, Heart } from 'lucide-react'
+import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, Heart, AtSign, Check, AlertCircle } from 'lucide-react'
 
 // ─── Register Modal ─────────────────────────────────────────────────────────────
 
@@ -14,6 +14,7 @@ interface RegisterModalProps {
 
 const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
   const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -21,6 +22,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
+  const [usernameMessage, setUsernameMessage] = useState<string>('')
 
   // Close on Escape
   useEffect(() => {
@@ -34,14 +37,60 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
   useEffect(() => {
     if (!open) {
       setEmail(''); setPassword(''); setConfirmPassword('')
+      setUsername(''); setUsernameStatus('idle'); setUsernameMessage('')
       setError(null); setSuccess(false)
       setShowPassword(false); setShowConfirm(false)
     }
   }, [open])
 
+  // Debounced username availability check
+  useEffect(() => {
+    if (!username) { setUsernameStatus('idle'); setUsernameMessage(''); return }
+    const formatCheck = validateUsername(username)
+    if (!formatCheck.valid) {
+      setUsernameStatus('invalid')
+      setUsernameMessage(formatCheck.message || '')
+      return
+    }
+    setUsernameStatus('checking')
+    setUsernameMessage('')
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .ilike('username', username.trim())
+          .maybeSingle()
+        if (data) {
+          setUsernameStatus('taken')
+          setUsernameMessage('Este usuario ya está en uso')
+        } else {
+          setUsernameStatus('available')
+          setUsernameMessage('¡Usuario disponible!')
+        }
+      } catch {
+        setUsernameStatus('idle')
+      }
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [username])
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    // Validate username format
+    const usernameCheck = validateUsername(username)
+    if (!usernameCheck.valid) {
+      setError(usernameCheck.message || 'Usuario inválido')
+      return
+    }
+
+    // Block if username is taken
+    if (usernameStatus === 'taken') {
+      setError('Ese usuario ya está en uso. Elige otro.')
+      return
+    }
 
     if (!validateEmail(email)) {
       setError('Por favor ingresa un email válido')
@@ -61,7 +110,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
     setLoading(true)
     try {
-      const { error: signUpError } = await supabase.auth.signUp({ email, password })
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password })
       if (signUpError) {
         if (signUpError.message.includes('already registered')) {
           setError('Este email ya está registrado. Intenta iniciar sesión.')
@@ -70,6 +119,35 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
         }
         return
       }
+
+      // With confirm email OFF, we get an immediate session + user
+      const newUser = signUpData?.user
+      if (newUser) {
+        // Double-check username availability (race condition guard)
+        const { data: existing } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .ilike('username', username.trim())
+          .maybeSingle()
+
+        if (existing) {
+          setError('Ese usuario ya fue tomado justo ahora. Elige otro.')
+          // Roll back: sign out the newly created user
+          await supabase.auth.signOut()
+          return
+        }
+
+        // Insert user profile
+        await supabase.from('user_profiles').insert([{
+          user_id: newUser.id,
+          username: username.trim().toLowerCase(),
+          avatar_url: null,
+          bio: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }])
+      }
+
       setSuccess(true)
     } catch (err) {
       console.error(err)
@@ -104,7 +182,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
             <div className="w-8 h-8 rounded-lg bg-pink-500/20 border border-pink-500/40 flex items-center justify-center">
               <UserPlus className="w-4 h-4 text-pink-400" />
             </div>
-            <h2 className="text-lg font-black uppercase tracking-wider text-white">
+            <h2 className="text-xl font-black uppercase tracking-wider text-white">
               Crear cuenta
             </h2>
           </div>
@@ -126,7 +204,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               </div>
               <div>
                 <h3 className="text-xl font-black text-white mb-2">¡Cuenta creada!</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">
+                <p className="text-zinc-400 text-xl leading-relaxed">
                   Hemos enviado un correo de confirmación a{' '}
                   <span className="text-pink-400 font-semibold">{email}</span>.
                   <br />
@@ -135,7 +213,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               </div>
               <button
                 onClick={onClose}
-                className="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black
+                className="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black text-xl
                            hover:shadow-[0_0_25px_rgba(219,39,119,0.5)] transition-all"
               >
                 Entendido
@@ -144,9 +222,49 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
           ) : (
             /* ── Form ── */
             <form onSubmit={handleRegister} className="space-y-4">
+              {/* Username */}
+              <div>
+                <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
+                  Usuario
+                </label>
+                <div className="relative">
+                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <input
+                    type="text"
+                    placeholder="tu_usuario"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    disabled={loading}
+                    autoFocus
+                    maxLength={20}
+                    className={`w-full pl-9 pr-10 py-3 bg-zinc-900/80 border rounded-xl text-white text-xl placeholder-zinc-500
+                               focus:outline-none focus:ring-2 transition-all font-medium disabled:opacity-50
+                               ${usernameStatus === 'available' ? 'border-green-500 focus:border-green-500 focus:ring-green-500/20' :
+                        usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' :
+                          'border-zinc-700 focus:border-pink-500 focus:ring-pink-500/20'
+                      }`}
+                    required
+                  />
+                  {/* Status icon */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />}
+                    {usernameStatus === 'available' && <Check className="w-4 h-4 text-green-400" />}
+                    {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle className="w-4 h-4 text-red-400" />}
+                  </div>
+                </div>
+                {/* Status message */}
+                {usernameMessage && (
+                  <p className={`text-xl mt-1.5 font-medium ${usernameStatus === 'available' ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                    {usernameMessage}
+                  </p>
+                )}
+                <p className="text-xl text-zinc-600 mt-1">Solo letras, números y _ (3-20 caracteres)</p>
+              </div>
+
               {/* Email */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">
+                <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
                   Email
                 </label>
                 <input
@@ -155,8 +273,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   disabled={loading}
-                  autoFocus
-                  className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
+                  className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
                              focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
                              transition-all font-medium disabled:opacity-50"
                   required
@@ -165,7 +282,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">
+                <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
                   Contraseña
                 </label>
                 <div className="relative">
@@ -175,7 +292,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
+                    className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
                                focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
                                transition-all font-medium disabled:opacity-50"
                     required
@@ -192,7 +309,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
               {/* Confirm password */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">
+                <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
                   Confirmar contraseña
                 </label>
                 <div className="relative">
@@ -202,7 +319,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
+                    className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
                                focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
                                transition-all font-medium disabled:opacity-50"
                     required
@@ -221,7 +338,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               {error && (
                 <div className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
                   <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <span className="text-red-400 text-sm">{error}</span>
+                  <span className="text-red-400 text-xl">{error}</span>
                 </div>
               )}
 
@@ -232,12 +349,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     <div
                       key={i}
                       className={`flex-1 h-1 rounded-full transition-all ${password.length >= i * 3
-                          ? i <= 1 ? 'bg-red-500' : i === 2 ? 'bg-yellow-500' : i === 3 ? 'bg-blue-400' : 'bg-green-400'
-                          : 'bg-zinc-800'
+                        ? i <= 1 ? 'bg-red-500' : i === 2 ? 'bg-yellow-500' : i === 3 ? 'bg-blue-400' : 'bg-green-400'
+                        : 'bg-zinc-800'
                         }`}
                     />
                   ))}
-                  <span className="text-xs text-zinc-500 whitespace-nowrap">
+                  <span className="text-xl text-zinc-500 whitespace-nowrap">
                     {password.length < 4 ? 'Muy débil' : password.length < 7 ? 'Débil' : password.length < 10 ? 'Buena' : 'Fuerte'}
                   </span>
                 </div>
@@ -249,15 +366,15 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   type="button"
                   onClick={onClose}
                   disabled={loading}
-                  className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold
+                  className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold text-xl
                              hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !email || !password || !confirmPassword}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black
+                  disabled={loading || !email || !password || !confirmPassword || !username || usernameStatus === 'taken' || usernameStatus === 'invalid' || usernameStatus === 'checking'}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black text-xl
                              hover:shadow-[0_0_25px_rgba(219,39,119,0.5)] transition-all
                              disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
                              flex items-center justify-center gap-2"
@@ -360,7 +477,7 @@ const Login: React.FC = () => {
                 <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
                   Nuestra Lista <Heart className="inline w-6 h-6 text-red-500 fill-red-500 -mt-1" />
                 </h1>
-                <p className="text-zinc-400 text-sm">
+                <p className="text-zinc-400 text-xl">
                   Tu lista compartida de películas y series
                 </p>
               </div>
@@ -369,14 +486,14 @@ const Login: React.FC = () => {
               {error && (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-3">
                   <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                  <span className="text-red-400 text-sm font-medium">{error}</span>
+                  <span className="text-red-400 text-xl font-medium">{error}</span>
                 </div>
               )}
 
               {/* Login Form */}
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
-                  <label htmlFor="login-email" className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">
+                  <label htmlFor="login-email" className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
                     Email
                   </label>
                   <input
@@ -386,7 +503,7 @@ const Login: React.FC = () => {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
+                    className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
                                focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
                                transition-all font-medium disabled:opacity-50"
                     required
@@ -394,7 +511,7 @@ const Login: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="login-password" className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">
+                  <label htmlFor="login-password" className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
                     Contraseña
                   </label>
                   <div className="relative">
@@ -405,7 +522,7 @@ const Login: React.FC = () => {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       disabled={loading}
-                      className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
+                      className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
                                  focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
                                  transition-all font-medium disabled:opacity-50"
                       required
@@ -424,7 +541,7 @@ const Login: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-black rounded-xl text-base
+                  className="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-black rounded-xl text-xl
                              hover:shadow-[0_0_30px_rgba(219,39,119,0.5)] transition-all
                              disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
                              flex items-center justify-center gap-2"
@@ -443,16 +560,16 @@ const Login: React.FC = () => {
               {/* Divider */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-zinc-600 text-xs uppercase tracking-widest">o</span>
+                <span className="text-zinc-600 text-xl uppercase tracking-widest">o</span>
                 <div className="flex-1 h-px bg-zinc-800" />
               </div>
 
               {/* Register CTA */}
               <div className="text-center space-y-3">
-                <p className="text-zinc-400 text-sm">¿No tienes cuenta todavía?</p>
+                <p className="text-zinc-400 text-xl">¿No tienes cuenta todavía?</p>
                 <button
                   onClick={() => setShowRegister(true)}
-                  className="w-full py-3 border border-pink-500/40 text-pink-400 font-black rounded-xl
+                  className="w-full py-3 border border-pink-500/40 text-pink-400 font-black rounded-xl text-xl
                              hover:bg-pink-500/10 hover:border-pink-500/70 hover:shadow-[0_0_20px_rgba(219,39,119,0.2)]
                              transition-all flex items-center justify-center gap-2"
                 >
@@ -466,7 +583,7 @@ const Login: React.FC = () => {
             <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/30 to-transparent" />
           </div>
 
-          <p className="text-center mt-5 text-zinc-700 text-xs">by JimJos</p>
+          <p className="text-center mt-5 text-zinc-700 text-xl">by JimJos</p>
         </div>
       </div>
     </>
