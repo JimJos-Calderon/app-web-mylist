@@ -23,38 +23,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession()
-
-        if (error) throw error
-
-        setSession(session as any)
-        if (session?.user) {
-          const mappedUser: User = {
-            id: session.user.id,
-            email: session.user.email || '',
-            user_metadata: session.user.user_metadata,
-          }
-          setUser(mappedUser)
-        }
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Error al cargar sesión'
-        setError(message)
-        console.error('Session error:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    getInitialSession()
-
-    // Listen for auth changes
+    // Use only onAuthStateChange (fires INITIAL_SESSION on first call in Supabase v2)
+    // This avoids the race condition where getInitialSession sets loading=false
+    // before onAuthStateChange has fired with the actual session.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -70,6 +41,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null)
       }
       setError(null)
+      // Always mark loading as done once we get any auth event
+      setLoading(false)
     })
 
     return () => {
