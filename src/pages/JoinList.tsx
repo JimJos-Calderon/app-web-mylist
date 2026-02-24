@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '@/supabaseClient'
 import { useAuth } from '@hooks/useAuth'
 import { List } from '@typings/index'
@@ -8,7 +8,10 @@ import { CheckCircle, XCircle, Users, ArrowRight, Loader2 } from 'lucide-react'
 type Status = 'loading' | 'found' | 'joining' | 'success' | 'already_member' | 'not_found' | 'error' | 'login_required'
 
 const JoinList: React.FC = () => {
-    const { code } = useParams<{ code: string }>()
+    const { code: routeCode } = useParams<{ code: string }>()
+    const { pathname } = useLocation()
+    // When rendered outside a <Route>, useParams() is empty — fall back to parsing the URL
+    const code = routeCode ?? pathname.match(/\/join\/([^/]+)/)?.[1]
     const navigate = useNavigate()
     const { session, loading } = useAuth()
 
