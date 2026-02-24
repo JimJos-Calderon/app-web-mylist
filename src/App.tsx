@@ -157,6 +157,12 @@ const App: React.FC = () => {
   }
 
   if (!session) {
+    // If the user landed on /join/:code while unauthenticated, save the
+    // invite code now so the pending-invite modal fires after login.
+    const joinMatch = location.pathname.match(/^\/join\/([^/]+)$/)
+    if (joinMatch) {
+      localStorage.setItem('pendingInviteCode', joinMatch[1].toUpperCase())
+    }
     return <Login />
   }
 

@@ -10,7 +10,7 @@ type Status = 'loading' | 'found' | 'joining' | 'success' | 'already_member' | '
 const JoinList: React.FC = () => {
     const { code } = useParams<{ code: string }>()
     const navigate = useNavigate()
-    const { session } = useAuth()
+    const { session, loading } = useAuth()
 
     const [status, setStatus] = useState<Status>('loading')
     const [list, setList] = useState<List | null>(null)
@@ -21,6 +21,9 @@ const JoinList: React.FC = () => {
             setStatus('not_found')
             return
         }
+
+        // Wait until auth is resolved to avoid redirecting while session is briefly null
+        if (loading) return
 
         // If not logged in: save code and redirect to login
         if (!session) {
@@ -59,7 +62,7 @@ const JoinList: React.FC = () => {
         }
 
         resolveCode()
-    }, [code, session, navigate])
+    }, [code, session, loading, navigate])
 
     const handleJoin = async () => {
         if (!list || !session?.user?.id) return
