@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
-import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle, Users, ArrowRight, Loader2 } from 'lucide-react'
+import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle, Users, ArrowRight, Loader2, AtSign, Check, AlertCircle } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
 import { supabase } from '@/supabaseClient'
+import { validateUsername } from '@utils/validation'
 import Login from '@pages/Login'
 import Peliculas from '@pages/Peliculas'
 import Series from '@pages/Series'
@@ -12,8 +13,138 @@ import Ajustes from '@pages/Ajustes'
 import JoinList from '@pages/JoinList'
 import SpotifyGlassCard from '@components/SpotifyGlassCard'
 
+// ─── Username Setup Modal (for new Google users) ─────────────────────────────
+const UsernameSetupModal: React.FC = () => {
+  const { completeGoogleProfile } = useAuth()
+  const [username, setUsername] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
+  const [usernameMessage, setUsernameMessage] = useState('')
+
+  useEffect(() => {
+    if (!username) { setUsernameStatus('idle'); setUsernameMessage(''); return }
+    const formatCheck = validateUsername(username)
+    if (!formatCheck.valid) {
+      setUsernameStatus('invalid')
+      setUsernameMessage(formatCheck.message || '')
+      return
+    }
+    setUsernameStatus('checking')
+    setUsernameMessage('')
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .ilike('username', username.trim())
+          .maybeSingle()
+        if (data) {
+          setUsernameStatus('taken')
+          setUsernameMessage('Este usuario ya está en uso')
+        } else {
+          setUsernameStatus('available')
+          setUsernameMessage('¡Usuario disponible!')
+        }
+      } catch {
+        setUsernameStatus('idle')
+      }
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [username])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (usernameStatus !== 'available') return
+    setError(null)
+    setLoading(true)
+    try {
+      await completeGoogleProfile(username)
+    } catch (err: any) {
+      setError(err?.message || 'Error al guardar el usuario')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const canSubmit = usernameStatus === 'available' && !loading
+
+  return (
+    <div className="fixed inset-0 z-[500] flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" />
+      <div className="relative w-full max-w-md rounded-2xl border border-pink-500/30 bg-black/95 backdrop-blur-xl shadow-[0_0_80px_rgba(219,39,119,0.2)] overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
+        <div className="px-8 py-10 space-y-6">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-pink-600/20 border border-pink-500/40 mb-2">
+              <AtSign className="w-7 h-7 text-pink-400" />
+            </div>
+            <h2 className="text-2xl font-black text-white">Elige tu usuario</h2>
+            <p className="text-zinc-400 text-sm">Es la primera vez que entras con Google.<br />Elige un nombre de usuario único.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">Usuario</label>
+              <div className="relative">
+                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input
+                  type="text"
+                  placeholder="tu_usuario"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  disabled={loading}
+                  autoFocus
+                  maxLength={20}
+                  className={`w-full pl-9 pr-10 py-3 bg-zinc-900/80 border rounded-xl text-white placeholder-zinc-500
+                             focus:outline-none focus:ring-2 transition-all font-medium disabled:opacity-50
+                             ${usernameStatus === 'available' ? 'border-green-500 focus:border-green-500 focus:ring-green-500/20' :
+                      usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' :
+                        'border-zinc-700 focus:border-pink-500 focus:ring-pink-500/20'
+                    }`}
+                  required
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />}
+                  {usernameStatus === 'available' && <Check className="w-4 h-4 text-green-400" />}
+                  {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle className="w-4 h-4 text-red-400" />}
+                </div>
+              </div>
+              {usernameMessage && (
+                <p className={`text-xs mt-1.5 font-medium ${usernameStatus === 'available' ? 'text-green-400' : 'text-red-400'}`}>
+                  {usernameMessage}
+                </p>
+              )}
+              <p className="text-xs text-zinc-600 mt-1">Solo letras, números y _ (3-20 caracteres)</p>
+            </div>
+
+            {error && (
+              <div className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
+                <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <span className="text-red-400 text-sm">{error}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-black rounded-xl
+                         hover:shadow-[0_0_30px_rgba(219,39,119,0.5)] transition-all
+                         disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
+                         flex items-center justify-center gap-2"
+            >
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando…</> : 'Confirmar usuario'}
+            </button>
+          </form>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/30 to-transparent" />
+      </div>
+    </div>
+  )
+}
+
 const App: React.FC = () => {
-  const { session, loading, signOut, error: authError } = useAuth()
+  const { session, loading, signOut, error: authError, needsUsername } = useAuth()
   const { profile } = useUserProfile()
   const location = useLocation()
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -171,6 +302,9 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen text-white font-sans selection:bg-orange-500/30 bg-black">
+      {/* ── Username Setup Modal (new Google users) ── */}
+      {needsUsername && <UsernameSetupModal />}
+
       {/* ── Pending Invite Modal ── */}
       {pendingInvite && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center px-4">

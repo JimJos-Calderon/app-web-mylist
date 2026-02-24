@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { Session, User } from '@/types'
 import { supabase } from '@/supabaseClient'
 
@@ -8,6 +8,8 @@ interface AuthContextType {
   loading: boolean
   signOut: () => Promise<void>
   error: string | null
+  needsUsername: boolean
+  completeGoogleProfile: (username: string) => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,11 +23,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [needsUsername, setNeedsUsername] = useState(false)
+
+  const checkNeedsUsername = useCallback(async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle()
+      setNeedsUsername(!data)
+    } catch {
+      setNeedsUsername(false)
+    }
+  }, [])
 
   useEffect(() => {
-    // Use only onAuthStateChange (fires INITIAL_SESSION on first call in Supabase v2)
-    // This avoids the race condition where getInitialSession sets loading=false
-    // before onAuthStateChange has fired with the actual session.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -37,18 +50,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           user_metadata: session.user.user_metadata,
         }
         setUser(mappedUser)
+        checkNeedsUsername(session.user.id)
       } else {
         setUser(null)
+        setNeedsUsername(false)
       }
       setError(null)
-      // Always mark loading as done once we get any auth event
       setLoading(false)
     })
 
     return () => {
       subscription?.unsubscribe()
     }
-  }, [])
+  }, [checkNeedsUsername])
 
   const signOut = async () => {
     try {
@@ -57,6 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setSession(null)
       setUser(null)
       setError(null)
+      setNeedsUsername(false)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cerrar sesión'
       setError(message)
@@ -64,9 +79,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const completeGoogleProfile = async (username: string) => {
+    if (!user) throw new Error('No user')
+    await supabase.from('user_profiles').insert([{
+      user_id: user.id,
+      username: username.trim().toLowerCase(),
+      avatar_url: user.user_metadata?.avatar_url || null,
+      bio: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }])
+    setNeedsUsername(false)
+  }
+
   return (
     <AuthContext.Provider
-      value={{ session, user, loading, signOut, error }}
+      value={{ session, user, loading, signOut, error, needsUsername, completeGoogleProfile }}
     >
       {children}
     </AuthContext.Provider>
