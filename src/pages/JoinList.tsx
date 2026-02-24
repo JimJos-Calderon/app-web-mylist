@@ -5,7 +5,7 @@ import { useAuth } from '@hooks/useAuth'
 import { List } from '@typings/index'
 import { CheckCircle, XCircle, Users, ArrowRight, Loader2 } from 'lucide-react'
 
-type Status = 'loading' | 'found' | 'joining' | 'success' | 'already_member' | 'not_found' | 'error'
+type Status = 'loading' | 'found' | 'joining' | 'success' | 'already_member' | 'not_found' | 'error' | 'login_required'
 
 const JoinList: React.FC = () => {
     const { code } = useParams<{ code: string }>()
@@ -25,10 +25,10 @@ const JoinList: React.FC = () => {
         // Wait until auth is resolved to avoid redirecting while session is briefly null
         if (loading) return
 
-        // If not logged in: save code and redirect to login
+        // If not logged in: save code and show login prompt
         if (!session) {
             localStorage.setItem('pendingInviteCode', code.toUpperCase())
-            navigate('/', { replace: true })
+            setStatus('login_required')
             return
         }
 
@@ -182,6 +182,28 @@ const JoinList: React.FC = () => {
                                        flex items-center justify-center gap-2"
                                 >
                                     Ir a la lista <ArrowRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                        )}
+
+                        {status === 'login_required' && (
+                            <div className="flex flex-col items-center gap-5 text-center">
+                                <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center">
+                                    <Users className="w-8 h-8 text-cyan-400" />
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl font-black text-white mb-1">Invitación recibida</h1>
+                                    <p className="text-zinc-400 text-sm">
+                                        Inicia sesión para unirte a esta lista.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => navigate('/', { replace: true })}
+                                    className="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black rounded-xl
+                                       hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all
+                                       flex items-center justify-center gap-2"
+                                >
+                                    Iniciar sesión <ArrowRight className="w-5 h-5" />
                                 </button>
                             </div>
                         )}

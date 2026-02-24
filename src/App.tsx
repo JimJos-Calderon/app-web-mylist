@@ -156,13 +156,12 @@ const App: React.FC = () => {
     )
   }
 
+  // Render join route BEFORE auth guards — JoinList manages its own auth state
+  if (location.pathname.match(/^\/join\/[^/]+$/)) {
+    return <JoinList />
+  }
+
   if (!session) {
-    // If the user landed on /join/:code while unauthenticated, save the
-    // invite code now so the pending-invite modal fires after login.
-    const joinMatch = location.pathname.match(/^\/join\/([^/]+)$/)
-    if (joinMatch) {
-      localStorage.setItem('pendingInviteCode', joinMatch[1].toUpperCase())
-    }
     return <Login />
   }
 
@@ -440,7 +439,6 @@ const App: React.FC = () => {
           <Route path="/series" element={<Series />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/ajustes" element={<Ajustes />} />
-          <Route path="/join/:code" element={<JoinList />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
 
