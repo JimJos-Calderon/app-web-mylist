@@ -10,7 +10,7 @@
 
 Una aplicación web moderna y elegante para gestionar **listas compartidas** de películas y series. Con diseño retro-futurista inspirado en los años 80, búsqueda inteligente con OMDB API, sistema de calificaciones, y autenticación segura con Supabase.
 
-[✨ Demo](#) • [📖 Documentación](#características) • [🐛 Reportar Bug](../../issues)
+[✨ WebSite](https://jandn.onrender.com/) • [📖 Documentación](#características) • [🐛 Reportar Bug](../../issues)
 
 </div>
 
@@ -32,6 +32,8 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 - 🔒 **Ajustes de seguridad** — Cambio de email y contraseña con verificación
 - 🎵 **Spotify integrado** — Cards de Spotify embebidas y arrastrables en el home (solo desktop)
 - 📱 **Responsive** — Diseño adaptable a todos los dispositivos
+- 🛡️ **Seguridad a nivel empresarial** — RLS en BD, Edge Functions con rate limiting, validaciones en cliente y servidor
+- ✅ **Testing completo** — Unit tests (18 tests) + E2E tests con Playwright + CI/CD con GitHub Actions
 
 ---
 
@@ -44,17 +46,59 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 - **TailwindCSS 4** — Framework CSS utility-first (via plugin de Vite)
 - **React Router DOM 7.13** — Navegación SPA
 - **Framer Motion 12** — Animaciones fluidas
+- **TanStack Query 5.90** — Gestión de estado asincrónico y caché
 - **Swiper 12** — Biblioteca de carruseles (usada en la vista Ring)
 - **Lucide React** — Iconos SVG modernos
 
 ### Backend & Servicios
-- **Supabase** — Auth + PostgreSQL + Realtime + Storage
-- **OMDB API** — Base de datos de películas y series
+- **Supabase** — Auth + PostgreSQL + Realtime + Storage + Edge Functions
+- **OMDB API** — Base de datos de películas y series (acceso seguro vía Edge Function)
+- **Supabase Edge Functions** — API segura con rate limiting (30 búsquedas/hora por usuario)
+
+### Testing & CI/CD
+- **Vitest 4.0** — Framework de testing rápido
+- **@testing-library/react 16.3** — Testing de componentes React
+- **Playwright** — Testing E2E en navegadores reales
+- **GitHub Actions** — CI/CD automation (Node.js 18 & 20)
 
 ### Herramientas de Desarrollo
 - **ESLint** — Linter para mantener código limpio
 - **TypeScript ESLint** — Reglas específicas para TS
 - **Terser** — Minificación de código para producción
+
+---
+
+## 🔐 Seguridad Implementada
+
+### Edge Functions (Servidor)
+- **search-omdb**: API segura que actúa como proxy para OMDB
+  - ✅ Inyecta `OMDB_API_KEY` en el servidor (nunca expuesto al cliente)
+  - ✅ Valida entrada: 2-100 caracteres, sin caracteres peligrosos (< > " ' % ; ( ) & +)
+  - ✅ **Rate limiting**: 30 búsquedas por usuario/hora
+  - ✅ Headers informativos: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+  - ✅ Responde 429 cuando se excede límite
+
+### Row Level Security (RLS) en Base de Datos
+Todos los accesos se filtran automáticamente por usuario:
+
+- **items**: Solo ves items de listas donde eres miembro
+- **lists**: Solo ves listas que posees o te invitaron
+- **list_members**: Solo ves tus registros de membresía
+- **item_ratings**: Solo ves/modificas tus propias calificaciones
+
+### Check Constraints (Validación en BD)
+Previene datos inválidos incluso sin validación frontend:
+
+- `tipo` ∈ {'pelicula', 'serie'}
+- `visto`, `liked`, `is_private` ∈ {true, false}
+- `rating` ∈ [0, 5]
+- `titulo`, `name` cumplen con longitudes mínimas y máximas
+- `role` ∈ {'owner', 'admin', 'member'}
+
+### Testing de Seguridad
+- ✅ 18 unit tests de hooks con aislamiento de contexto
+- ✅ 4 E2E tests de flujos críticos
+- ✅ CI/CD en GitHub Actions (Node.js 18 & 20)
 
 ---
 
@@ -86,8 +130,9 @@ Crea un archivo `.env` en la raíz del proyecto:
 ```env
 VITE_SUPABASE_URL=tu_supabase_url
 VITE_SUPABASE_ANON_KEY=tu_supabase_anon_key
-VITE_OMDB_KEY=tu_omdb_api_key
 ```
+
+⚠️ **Importante**: `OMDB_API_KEY` se configura como Secret en Supabase (ver paso 5)
 
 4. **Configura Supabase**
 
@@ -277,16 +322,42 @@ USING (user_id = auth.uid())
 WITH CHECK (user_id = auth.uid());
 ```
 
-5. **Configura Supabase Storage**
+**O mejor aún**: Usa el archivo de migración incluido:
+- Archivo: `supabase/migrations/04_security_rls_and_constraints.sql`
+- Contiene: RLS completo + Check Constraints + Índices optimizados
+- Ejecución en Supabase: SQL Editor → Copiar contenido → Run
+
+5. **Configura Supabase Edge Functions & Secrets**
+
+En tu proyecto [Supabase](https://app.supabase.com):
+
+1. Ve a **Edge Functions** → **Secrets**
+2. Crea un nuevo secret:
+   - **Nombre**: `OMDB_API_KEY`
+   - **Valor**: Tu API key de OMDB
+3. Guarda
+
+La Edge Function `search-omdb` usará este secret automáticamente.
+
+6. **Configura Supabase Storage**
 
 Crea un bucket público llamado `avatars` en Supabase Storage para las fotos de perfil.
 
-6. **Inicia el servidor de desarrollo**
+7. **Verifica la instalación**
+
+Inicia el servidor:
 ```bash
 npm run dev
 ```
 
-La aplicación estará disponible en `http://localhost:5173`
+La aplicación debería estar en `http://localhost:5173`
+
+**Checklist**:
+- ✅ Puedes registrarte/iniciar sesión
+- ✅ Las listas se cargan sin errores de RLS
+- ✅ La búsqueda de películas funciona (a través de Edge Function)
+- ✅ Los tests pasan: `npm run test`
+- ✅ El build es exitoso: `npm run build`
 
 ---
 
@@ -299,10 +370,17 @@ Si tienes datos en la tabla `lista_items` (versión antigua), usa el archivo `mi
 ## 🚀 Scripts Disponibles
 
 ```bash
-npm run dev      # Inicia el servidor de desarrollo
-npm run build    # Construye la aplicación para producción
-npm run preview  # Previsualiza la build de producción
-npm run lint     # Ejecuta el linter
+npm run dev              # Inicia el servidor de desarrollo
+npm run build            # Construye la aplicación para producción
+npm run preview          # Previsualiza la build de producción
+npm run lint             # Ejecuta el linter
+
+# Testing
+npm run test             # Ejecuta tests unitarios (Vitest)
+npm run test:ui          # Interfaz visual de Vitest
+npm run test:coverage    # Reporte de cobertura de tests
+npm run test:e2e         # Ejecuta tests E2E (Playwright)
+npm run test:e2e:ui      # UI de Playwright (modo debug)
 ```
 
 ---
@@ -455,50 +533,71 @@ La gestión de caché se realiza automáticamente con React Query. Modifica `sta
 
 ## 📝 Variables de Entorno
 
+### Frontend (.env)
+
 | Variable | Descripción | Requerida |
-|----------|-------------|-----------|
+|----------|-------------|----------|
 | `VITE_SUPABASE_URL` | URL de tu proyecto Supabase | ✅ Sí |
 | `VITE_SUPABASE_ANON_KEY` | Clave anónima de Supabase | ✅ Sí |
-| `VITE_OMDB_KEY` | API Key de OMDB | ✅ Sí |
+
+### Supabase Edge Functions Secrets
+
+| Variable | Descripción | Configuración |
+|----------|-------------|----------|
+| `OMDB_API_KEY` | API Key de OMDB (protegida en servidor) | Supabase → Edge Functions → Secrets |
+
+**Nota importante**: `OMDB_API_KEY` se mantiene **seguro en el servidor** y **NUNCA se expone en el frontend**. Las llamadas a OMDB se hacen a través de la Edge Function `search-omdb` que inyecta la clave automáticamente.
 
 ---
 
 ## 🐛 Solución de Problemas
 
-### Las imágenes no cargan
-- Verifica que tu `VITE_OMDB_KEY` sea válida
-- Algunas imágenes de OMDB pueden estar rotas; se mostrará un placeholder automáticamente
+### Seguridad y RLS
+- **Error 500 con RLS**: Verifica que has ejecutado el archivo `04_security_rls_and_constraints.sql`
+- **No veo mis listas/items**: Confirma que ejecutaste las políticas RLS correctamente
+- **Rate limit excedido (429)**: Esperaré 1 hora o contacta al admin para reset manual
 
-### Error de autenticación / RLS
-- Verifica tus credenciales de Supabase en el `.env`
-- Asegúrate de haber ejecutado todo el SQL de configuración, incluyendo las políticas RLS
-- Si el error es solo en INSERT, revisa el archivo `fix-rls-insert-policy.sql`
+### Edge Functions
+- **Error en búsqueda**: Verifica que `OMDB_API_KEY` está configurado en Supabase Secrets
+- **Búsqueda muy lenta**: Puede ser el límite de rate limiting (30/hora), espera o usa otra cuenta
+- **Error de validación en búsqueda**: Asegúrate de escribir 2-100 caracteres, sin caracteres especiales
 
-### Build falla con "terser not found"
-- Asegúrate de tener `terser` instalado: `npm install`
-- Si el error persiste: `npm install terser --save-dev`
+### API y Datos
+- **Las imágenes no cargan**: Verifica que `OMDB_API_KEY` sea válida. Algunas películas no tienen póster (placeholder automático)
+- **Error de autenticación / RLS**: Verifica tus credenciales de Supabase en el `.env`
+- **Datos inconsistentes**: Asegúrate de haber ejecutado ALL los archivos SQL de migración
 
-### Build falla
-- Ejecuta `npm install` nuevamente
-- Limpia la caché: `rm -rf node_modules .vite dist`
-- Verifica que todas las variables de entorno estén configuradas
+### Build
+- **Build falla con "terser not found"**: Ejecuta `npm install && npm run build`
+- **Build falla por TypeScript**: Ejecuta `npm run lint` para ver errores de tipo
+- **Errores de módulos**: Limpia y reinstala: `rm -rf node_modules && npm install`
+
+### Testing
+- **Tests fallan en CI/CD**: GitHub Actions usa Ubuntu. Si los tests pasan localmente pero fallan en CI, puede ser un tema de timeouts. Aumenta el timeout en `.github/workflows/ci.yml`
+- **E2E tests lentos**: Los tests E2E pueden tardar según tu conexión a internet. Defaults: 2 minutos por suite
 
 ---
 
 ## 🚀 Deployment
 
-### Render / Vercel / Netlify
+### Vercel / Netlify / Render
 
 1. **Configura las variables de entorno** en tu plataforma:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_OMDB_KEY`
+
+   **Nota**: `OMDB_API_KEY` NO va en el frontend. Se configura como Secret en Supabase.
 
 2. **Build Command**: `npm install && npm run build`
 
 3. **Output Directory**: `dist`
 
 4. **Node Version**: 18 o superior
+
+5. **Configura en Supabase** (este paso es crucial):
+   - Ve a tu proyecto Supabase
+   - Edge Functions → Secrets
+   - Agrega `OMDB_API_KEY` con tu API key
 
 ### Build Local para Producción
 
@@ -508,6 +607,106 @@ npm run preview  # Previsualiza la build localmente
 ```
 
 > **Nota**: El proyecto incluye `terser` para minificación en producción. Si encuentras errores de build, asegúrate de ejecutar `npm install` antes de buildear.
+
+### Verificación Pre-Deployment
+
+```bash
+npm run lint              # Verifica código
+npm run test              # Ejecuta tests unitarios
+npm run test:e2e          # Ejecuta tests E2E
+npm run build             # Compila para producción
+npm run preview           # Prueba la build
+```
+
+## 🔧 Arquitectura de Edge Functions
+
+### search-omdb Function
+
+**Ubicación**: `supabase/functions/search-omdb/index.ts`
+
+**Propósito**: Proxy seguro para OMDB API que:
+1. Inyecta `OMDB_API_KEY` desde Supabase Secrets (no expuesto en cliente)
+2. Valida input del usuario
+3. Aplica rate limiting (30 búsquedas/hora por usuario)
+4. Retorna resultados formatados con headers de rate limit
+
+**Cómo se invoca desde el frontend**:
+```typescript
+const { data, error } = await supabase.functions.invoke('search-omdb', {
+  body: {
+    query: 'Inception',
+    type: 'movie',  // 'movie' | 'series' | 'episode'
+    page: 1,         // 1-10
+  },
+})
+```
+
+**Headers de respuesta**:
+- `X-RateLimit-Limit`: 30 (límite máximo)
+- `X-RateLimit-Remaining`: Búsquedas restantes
+- `X-RateLimit-Reset`: Segundos hasta reset
+
+**Códigos de error**:
+- `200`: OK
+- `400`: Validación de entrada fallida
+- `429`: Rate limit excedido
+- `500`: Error interno
+
+---
+
+## ✅ Testing
+
+### Estructura de Tests
+
+```
+src/
+├── hooks/
+│   ├── useItems.test.tsx        # 5 tests
+│   ├── useLists.test.tsx        # 6 tests
+│   └── useItemRating.test.tsx   # 7 tests
+└── test-utils.tsx              # Wrapper de React Query
+
+tests/
+└── home.spec.ts                 # 4 E2E tests
+```
+
+### Ejecutar Tests
+
+```bash
+# Unit tests con Vitest
+npm run test                # Modo watch
+npm run test:ui             # Interfaz visual
+npm run test:coverage       # Reporte de cobertura
+
+# E2E tests con Playwright
+npm run test:e2e            # Headless
+npm run test:e2e:ui         # Con navegador visible
+```
+
+### CI/CD Workflow
+
+**Archivo**: `.github/workflows/ci.yml`
+
+**Triggers**: Push o PR a `main` / `develop`
+
+**Jobs**:
+1. **lint-and-test** (Matrix: Node 18, 20)
+   - ESLint
+   - Vitest (unit tests)
+   - Build verification
+
+2. **e2e-tests** (Chromium)
+   - Playwright tests
+   - Retries automáticos
+   - Timeout: 2 minutos
+
+3. **build-success** 
+   - Status final
+
+**Badge**: Puedes agregar a tu README:
+```markdown
+[![CI/CD Pipeline](https://github.com/JimJos-Calderon/app-web-mylist/actions/workflows/ci.yml/badge.svg)](https://github.com/JimJos-Calderon/app-web-mylist/actions/workflows/ci.yml)
+```
 
 ---
 
