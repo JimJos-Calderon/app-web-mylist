@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { OmdbSuggestion, OmdbResponse } from '@/types'
-import { OMDB_BASE_URL, OMDB_API_KEY, DEBOUNCE_DELAY, MAX_SUGGESTIONS, ERROR_MESSAGES } from '@constants/index'
+import { DEBOUNCE_DELAY, MAX_SUGGESTIONS, ERROR_MESSAGES } from '@constants/index'
 import { queryKeys } from '@config/queryKeys'
+import { supabase } from '@/supabaseClient'
 
 interface UseSuggestionsReturn {
   suggestions: OmdbSuggestion[]
@@ -14,6 +15,7 @@ interface UseSuggestionsReturn {
 /**
  * Hook para obtener sugerencias de búsqueda desde OMDB
  * Con debounce automático y caché gestionado por React Query
+ * Ahora usa la Edge Function segura en lugar de llamadas directas a OMDB
  */
 export const useSuggestions = (
   searchQuery: string,
@@ -38,25 +40,20 @@ export const useSuggestions = (
         return []
       }
 
-      if (!OMDB_API_KEY) {
-        throw new Error('OMDB API key not configured')
-      }
-
-      const params = new URLSearchParams({
-        s: debouncedQuery,
-        type: tipo === 'pelicula' ? 'movie' : 'series',
-        apikey: OMDB_API_KEY,
+      // Llamar a la Edge Function de Supabase en lugar de OMDB directamente
+      const { data, error } = await supabase.functions.invoke('search-omdb', {
+        body: {
+          query: debouncedQuery,
+          type: tipo === 'pelicula' ? 'movie' : 'series',
+          page: 1,
+        },
       })
 
-      const response = await fetch(`${OMDB_BASE_URL}?${params}`)
-
-      if (!response.ok) {
-        throw new Error(ERROR_MESSAGES.SEARCH_SUGGESTIONS)
+      if (error) {
+        throw new Error(error.message || ERROR_MESSAGES.SEARCH_SUGGESTIONS)
       }
 
-      const data: OmdbResponse = await response.json()
-
-      if (data.Response === 'False') {
+      if (data.Response === 'False' || data.Error) {
         return []
       }
 

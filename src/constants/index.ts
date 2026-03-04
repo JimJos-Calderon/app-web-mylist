@@ -1,6 +1,3 @@
-export const OMDB_BASE_URL = 'https://www.omdbapi.com/'
-export const OMDB_API_KEY = import.meta.env.VITE_OMDB_KEY
-
 export const DEBOUNCE_DELAY = 300
 export const ITEMS_PER_PAGE = 50
 export const MAX_SUGGESTIONS = 10
