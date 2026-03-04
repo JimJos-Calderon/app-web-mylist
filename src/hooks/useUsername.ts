@@ -1,40 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 
+/**
+ * Hook para obtener el nombre de usuario
+ * Usa useQuery para cachear el resultado
+ */
 export const useUsername = (userId: string) => {
-  const [username, setUsername] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchUsername = async () => {
+  const { data: username = null, isLoading: loading } = useQuery({
+    queryKey: ['username', userId],
+    queryFn: async () => {
       if (!userId) {
-        setLoading(false)
-        return
+        return null
       }
 
-      try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('username')
-          .eq('user_id', userId)
-          .maybeSingle()
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('username')
+        .eq('user_id', userId)
+        .maybeSingle()
 
-        if (error) {
-          console.error('Error fetching username:', error)
-          setUsername(null)
-        } else {
-          setUsername(data?.username || null)
-        }
-      } catch (err) {
-        console.error('Error:', err)
-        setUsername(null)
-      } finally {
-        setLoading(false)
+      if (error) {
+        console.error('Error fetching username:', error)
+        return null
       }
-    }
 
-    fetchUsername()
-  }, [userId])
+      return data?.username || null
+    },
+    enabled: !!userId,
+  })
 
   return { username, loading }
 }

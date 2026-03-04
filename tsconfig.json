@@ -48,6 +48,9 @@
       ],
       "@constants/*": [
         "src/constants/*"
+      ],
+      "@config/*": [
+        "src/config/*"
       ]
     }
   },

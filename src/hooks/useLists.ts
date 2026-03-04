@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { List, ListMember } from '@typings/index'
+import { queryKeys } from '@config/queryKeys'
 
 interface UseListsReturn {
   lists: List[]
@@ -9,84 +11,88 @@ interface UseListsReturn {
   loading: boolean
   error: string | null
   refreshLists: () => Promise<void>
-  createList: (name: string, description?: string) => Promise<{ list: List | null; error: string | null }>
-  joinListByCode: (inviteCode: string) => Promise<{ error: string | null }>
+  createList: (name: string, description?: string) => Promise<List | null>
+  joinListByCode: (inviteCode: string) => Promise<void>
   getListMembers: (listId: string) => Promise<{ members: ListMember[]; error: string | null }>
+  isCreatingList: boolean
+  isJoiningList: boolean
 }
 
+/**
+ * Hook para gestionar listas de usuario
+ * Lectura con useQuery + Mutaciones con useMutation
+ */
 export const useLists = (userId: string | undefined): UseListsReturn => {
-  const [lists, setLists] = useState<List[]>([])
   const [currentList, setCurrentList] = useState<List | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const fetchLists = useCallback(async () => {
-    if (!userId) {
-      setLoading(false)
-      return
-    }
-
-    try {
-      setError(null)
-      
-      // Obtener todas las listas donde el usuario es miembro
-      const { data: memberData, error: memberError } = await supabase
-        .from('list_members')
-        .select('list_id')
-        .eq('user_id', userId)
-
-      if (memberError) throw memberError
-
-      const listIds = memberData?.map((m) => m.list_id) || []
-
-      if (listIds.length === 0) {
-        setLists([])
-        setCurrentList(null)
-        setLoading(false)
-        return
+  // Query para obtener listas del usuario
+  const {
+    data: lists = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: queryKeys.lists.byUser(userId || ''),
+    queryFn: async () => {
+      if (!userId) {
+        return []
       }
 
-      // Obtener los detalles de las listas
-      const { data: listsData, error: listsError } = await supabase
-        .from('lists')
-        .select('*')
-        .in('id', listIds)
-        .order('created_at', { ascending: false })
+      try {
+        // Obtener todas las listas donde el usuario es miembro
+        const { data: memberData, error: memberError } = await supabase
+          .from('list_members')
+          .select('list_id')
+          .eq('user_id', userId)
 
-      if (listsError) throw listsError
+        if (memberError) throw memberError
 
-      setLists(listsData || [])
-      
-      // Si no hay lista seleccionada, seleccionar la primera
-      if (!currentList && listsData && listsData.length > 0) {
-        setCurrentList(listsData[0])
+        const listIds = memberData?.map((m) => m.list_id) || []
+
+        if (listIds.length === 0) {
+          return []
+        }
+
+        // Obtener los detalles de las listas
+        const { data: listsData, error: listsError } = await supabase
+          .from('lists')
+          .select('*')
+          .in('id', listIds)
+          .order('created_at', { ascending: false })
+
+        if (listsError) throw listsError
+
+        return (listsData || []) as List[]
+      } catch (err) {
+        console.error('Error fetching lists:', err)
+        throw err
       }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cargar listas'
-      setError(message)
-      console.error('Error fetching lists:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [userId, currentList])
+    },
+    enabled: !!userId,
+  })
 
+  // Auto-select first list if none is selected
   useEffect(() => {
-    fetchLists()
-  }, [fetchLists])
+    if (!currentList && lists && lists.length > 0) {
+      setCurrentList(lists[0])
+    }
+  }, [lists, currentList])
 
   const refreshLists = useCallback(async () => {
-    await fetchLists()
-  }, [fetchLists])
+    await refetch()
+  }, [refetch])
 
-  const createList = useCallback(async (name: string, description?: string) => {
-    if (!userId) {
-      return { list: null, error: 'Usuario no autenticado' }
-    }
+  // ─── MUTACIÓN: Crear Lista ────────────────────────────────────
+  const createListMutation = useMutation({
+    mutationFn: async ({ name, description }: { name: string; description?: string }) => {
+      if (!userId) {
+        throw new Error('Usuario no autenticado')
+      }
 
-    try {
       // Generar código de invitación
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase()
-      
+
       // Crear la lista
       const { data: list, error: listError } = await supabase
         .from('lists')
@@ -95,7 +101,7 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
           description: description || null,
           owner_id: userId,
           invite_code: inviteCode,
-          is_private: false
+          is_private: false,
         })
         .select()
         .single()
@@ -108,28 +114,31 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
         .insert({
           list_id: list.id,
           user_id: userId,
-          role: 'owner'
+          role: 'owner',
         })
 
       if (memberError) throw memberError
 
-      // Refrescar listas
-      await refreshLists()
+      return list as List
+    },
+    onSuccess: () => {
+      // Invalidar y re-fetchear listas
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.lists.byUser(userId || ''),
+      })
+    },
+    onError: (error) => {
+      console.error('Error creating list:', error)
+    },
+  })
 
-      return { list, error: null }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al crear lista'
-      console.error('Error creating list:', err)
-      return { list: null, error: message }
-    }
-  }, [userId, refreshLists])
+  // ─── MUTACIÓN: Unirse a Lista ─────────────────────────────────
+  const joinListMutation = useMutation({
+    mutationFn: async (inviteCode: string) => {
+      if (!userId) {
+        throw new Error('Usuario no autenticado')
+      }
 
-  const joinListByCode = useCallback(async (inviteCode: string) => {
-    if (!userId) {
-      return { error: 'Usuario no autenticado' }
-    }
-
-    try {
       // Buscar la lista por código
       const { data: list, error: listError } = await supabase
         .from('lists')
@@ -138,7 +147,7 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
         .single()
 
       if (listError || !list) {
-        return { error: 'Código de invitación inválido' }
+        throw new Error('Código de invitación inválido')
       }
 
       // Verificar si ya es miembro
@@ -150,7 +159,7 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
         .single()
 
       if (existingMember) {
-        return { error: 'Ya eres miembro de esta lista' }
+        throw new Error('Ya eres miembro de esta lista')
       }
 
       // Agregar al usuario como miembro
@@ -159,21 +168,21 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
         .insert({
           list_id: list.id,
           user_id: userId,
-          role: 'member'
+          role: 'member',
         })
 
       if (memberError) throw memberError
-
-      // Refrescar listas
-      await refreshLists()
-
-      return { error: null }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al unirse a la lista'
-      console.error('Error joining list:', err)
-      return { error: message }
-    }
-  }, [userId, refreshLists])
+    },
+    onSuccess: () => {
+      // Invalidar y re-fetchear listas
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.lists.byUser(userId || ''),
+      })
+    },
+    onError: (error) => {
+      console.error('Error joining list:', error)
+    },
+  })
 
   const getListMembers = useCallback(async (listId: string) => {
     try {
@@ -203,10 +212,15 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
     currentList,
     setCurrentList,
     loading,
-    error,
+    error: error?.message || null,
     refreshLists,
-    createList,
-    joinListByCode,
-    getListMembers
+    createList: async (name, description) => {
+      const list = await createListMutation.mutateAsync({ name, description })
+      return list || null
+    },
+    joinListByCode: (code) => joinListMutation.mutateAsync(code),
+    getListMembers,
+    isCreatingList: createListMutation.isPending,
+    isJoiningList: joinListMutation.isPending,
   }
 }
