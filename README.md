@@ -359,7 +359,6 @@ app-web-mylist/
 │   │   └── ErrorAlert.tsx      # Componente de alerta de error
 │   │
 │   └── utils/
-│       ├── cache.ts            # Caché en memoria con TTL configurable (30min por defecto)
 │       └── validation.ts       # Validación y sanitización de títulos
 │
 ├── public/                     # Assets estáticos
@@ -449,8 +448,8 @@ Ajusta `DEBOUNCE_DELAY` en `src/constants/index.ts` (por defecto: 300ms)
 ### Cambiar límite de sugerencias OMDB
 Modifica `MAX_SUGGESTIONS` en `src/constants/index.ts` (por defecto: 10)
 
-### TTL del caché de OMDB
-Edita `src/utils/cache.ts`. El parámetro `ttlMinutes` controla cuánto tiempo se cachean las respuestas (por defecto: 30 minutos).
+### Configurar TTL del caché
+La gestión de caché se realiza automáticamente con React Query. Modifica `staleTime` y `gcTime` en [src/config/queryClient.ts](src/config/queryClient.ts) para ajustar el comportamiento de caché global (por defecto: staleTime 5 min, gcTime 10 min).
 
 ---
 

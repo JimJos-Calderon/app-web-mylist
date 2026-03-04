@@ -1,52 +1,49 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { OmdbSuggestion, OmdbResponse } from '@/types'
 import { OMDB_BASE_URL, OMDB_API_KEY, DEBOUNCE_DELAY, MAX_SUGGESTIONS, ERROR_MESSAGES } from '@constants/index'
-import { searchCache } from '@utils/cache'
+import { queryKeys } from '@config/queryKeys'
 
 interface UseSuggestionsReturn {
   suggestions: OmdbSuggestion[]
   loading: boolean
   error: string | null
   setSuggestions: (suggestions: OmdbSuggestion[]) => void
-  clearError: () => void
 }
 
+/**
+ * Hook para obtener sugerencias de búsqueda desde OMDB
+ * Con debounce automático y caché gestionado por React Query
+ */
 export const useSuggestions = (
   searchQuery: string,
   tipo: 'pelicula' | 'serie'
 ): UseSuggestionsReturn => {
-  const [suggestions, setSuggestions] = useState<OmdbSuggestion[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [localSuggestions, setLocalSuggestions] = useState<OmdbSuggestion[]>([])
 
-  const fetchSuggestions = useCallback(async (query: string) => {
-    if (query.length < 3) {
-      setSuggestions([])
-      setError(null)
-      setLoading(false)
-      return
-    }
+  // Debounce logic
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedQuery(searchQuery)
+    }, DEBOUNCE_DELAY)
 
-    // Check cache first
-    const cacheKey = `${query}-${tipo}`
-    const cachedData = searchCache.get<OmdbSuggestion[]>(cacheKey)
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
 
-    if (cachedData) {
-      setSuggestions(cachedData)
-      setLoading(false)
-      return
-    }
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.suggestions.byType(tipo),
+    queryFn: async () => {
+      if (!debouncedQuery || debouncedQuery.length < 3) {
+        return []
+      }
 
-    setLoading(true)
-    setError(null)
-
-    try {
       if (!OMDB_API_KEY) {
         throw new Error('OMDB API key not configured')
       }
 
       const params = new URLSearchParams({
-        s: query,
+        s: debouncedQuery,
         type: tipo === 'pelicula' ? 'movie' : 'series',
         apikey: OMDB_API_KEY,
       })
@@ -60,46 +57,28 @@ export const useSuggestions = (
       const data: OmdbResponse = await response.json()
 
       if (data.Response === 'False') {
-        setSuggestions([])
-        setError(null)
-        return
+        return []
       }
 
-      const results = (data.Search || []).slice(0, MAX_SUGGESTIONS)
-      setSuggestions(results)
+      return (data.Search || []).slice(0, MAX_SUGGESTIONS)
+    },
+    enabled: debouncedQuery.length >= 3,
+    staleTime: 60 * 60 * 1000, // 60 minutos (mismo TTL que antes)
+  })
 
-      // Cache the results
-      searchCache.set(cacheKey, results, 60) // 60 minutes cache
-
-      setError(null)
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : ERROR_MESSAGES.SEARCH_SUGGESTIONS
-      setError(message)
-      setSuggestions([])
-      console.error('Suggestions error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [tipo])
-
+  // Actualizar sugerencias cuando sea necesario
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchSuggestions(searchQuery)
-    }, DEBOUNCE_DELAY)
-
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery, fetchSuggestions])
-
-  const clearError = useCallback(() => {
-    setError(null)
-  }, [])
+    if (data) {
+      setLocalSuggestions(data)
+    } else if (!debouncedQuery || debouncedQuery.length < 3) {
+      setLocalSuggestions([])
+    }
+  }, [data, debouncedQuery])
 
   return {
-    suggestions,
-    loading,
-    error,
-    setSuggestions,
-    clearError,
+    suggestions: localSuggestions,
+    loading: isLoading,
+    error: error?.message || null,
+    setSuggestions: setLocalSuggestions,
   }
 }

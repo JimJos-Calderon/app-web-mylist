@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
+import { queryKeys } from '@config/queryKeys'
 import { useAuth } from './useAuth'
 
 export interface UserProfile {
@@ -12,266 +13,257 @@ export interface UserProfile {
   updated_at: string
 }
 
-export const useUserProfile = () => {
-  const { user } = useAuth()
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+interface UseUserProfileReturn {
+  profile: UserProfile | null
+  loading: boolean
+  error: string | null
+  saveProfile: (username: string) => Promise<UserProfile>
+  updateAvatar: (avatarUrl: string) => Promise<UserProfile>
+  uploadAvatar: (file: File) => Promise<string>
+  updateBio: (bio: string) => Promise<UserProfile>
+  isSavingProfile: boolean
+  isUpdatingAvatar: boolean
+  isUploadingAvatar: boolean
+  isUpdatingBio: boolean
+}
 
-  // Fetch profile on mount
-  useEffect(() => {
-    const fetchProfile = async () => {
+/**
+ * Hook para gestionar el perfil del usuario
+ * Lectura con useQuery + Mutaciones con useMutation
+ */
+export const useUserProfile = (): UseUserProfileReturn => {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  // Query para obtener el perfil del usuario
+  const {
+    data: profile = null,
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: queryKeys.userProfile.byUser(user?.id || ''),
+    queryFn: async () => {
       if (!user?.id) {
-        setLoading(false)
-        return
+        return null
       }
 
-      setLoading(true)
-      try {
-        const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (fetchError) throw fetchError
+
+      return (data as UserProfile) || null
+    },
+    enabled: !!user?.id,
+  })
+
+  // ─── MUTACIÓN: Guardar Perfil ─────────────────────────────────
+  const saveProfileMutation = useMutation({
+    mutationFn: async (username: string) => {
+      if (!user?.id) {
+        throw new Error('Debes iniciar sesión')
+      }
+
+      if (profile) {
+        // Update existing
+        const { data, error: updateError } = await supabase
           .from('user_profiles')
-          .select('*')
+          .update({
+            username,
+            updated_at: new Date().toISOString(),
+          })
           .eq('user_id', user.id)
+          .select()
           .maybeSingle()
 
-        if (error) throw error
-
-        setProfile(data)
-        setError(null)
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al cargar perfil'
-        setError(message)
-        console.error('Fetch profile error:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProfile()
-  }, [user?.id])
-
-  // Create or update profile
-  const saveProfile = useCallback(
-    async (username: string) => {
-      if (!user?.id) {
-        setError('Debes iniciar sesión')
-        return
-      }
-
-      try {
-        setError(null)
-
-        if (profile) {
-          // Update existing (only username)
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .update({
+        if (updateError) throw updateError
+        return data as UserProfile
+      } else {
+        // Create new
+        const { data, error: insertError } = await supabase
+          .from('user_profiles')
+          .insert([
+            {
+              user_id: user.id,
               username,
+              avatar_url: null,
+              bio: null,
+              created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
-            })
-            .eq('user_id', user.id)
-            .select()
-            .maybeSingle()
+            },
+          ])
+          .select()
+          .maybeSingle()
 
-          if (error) throw error
-          setProfile(data)
-        } else {
-          // Insert new
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .insert([
-              {
-                user_id: user.id,
-                username,
-                avatar_url: null,
-                bio: null,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            ])
-            .select()
-            .maybeSingle()
-
-          if (error) throw error
-          setProfile(data)
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al guardar perfil'
-        setError(message)
-        console.error('Save profile error:', err)
-        throw err
+        if (insertError) throw insertError
+        return data as UserProfile
       }
     },
-    [user?.id, profile]
-  )
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.userProfile.byUser(user?.id || ''),
+      })
+    },
+  })
 
-  const updateAvatar = useCallback(
-    async (avatarUrl: string) => {
+  // ─── MUTACIÓN: Actualizar Avatar ──────────────────────────────
+  const updateAvatarMutation = useMutation({
+    mutationFn: async (avatarUrl: string) => {
       if (!user?.id) {
-        setError('Debes iniciar sesión')
-        return
+        throw new Error('Debes iniciar sesión')
       }
 
-      try {
-        setError(null)
+      if (profile) {
+        // Update existing profile
+        const { data, error: updateError } = await supabase
+          .from('user_profiles')
+          .update({
+            avatar_url: avatarUrl,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id)
+          .select()
+          .maybeSingle()
 
-        if (profile) {
-          // Update existing profile
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .update({
-              avatar_url: avatarUrl,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('user_id', user.id)
-            .select()
-            .maybeSingle()
-
-          if (error) throw error
-          setProfile(data)
-        } else {
-          // Create new profile with avatar
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .insert([{
+        if (updateError) throw updateError
+        return data as UserProfile
+      } else {
+        // Create new profile with avatar
+        const { data, error: insertError } = await supabase
+          .from('user_profiles')
+          .insert([
+            {
               user_id: user.id,
               username: user.email?.split('@')[0] || 'Usuario',
               avatar_url: avatarUrl,
               bio: null,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
-            }])
-            .select()
-            .maybeSingle()
+            },
+          ])
+          .select()
+          .maybeSingle()
 
-          if (error) throw error
-          setProfile(data)
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al guardar avatar'
-        setError(message)
-        console.error('Update avatar error:', err)
-        throw err
+        if (insertError) throw insertError
+        return data as UserProfile
       }
     },
-    [user?.id, user?.email, profile]
-  )
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.userProfile.byUser(user?.id || ''),
+      })
+    },
+  })
 
-  const uploadAvatar = useCallback(
-    async (file: File) => {
+  // ─── MUTACIÓN: Subir Avatar ───────────────────────────────────
+  const uploadAvatarMutation = useMutation({
+    mutationFn: async (file: File) => {
       if (!user?.id) {
-        setError('Debes iniciar sesión')
         throw new Error('Debes iniciar sesión')
       }
 
-      try {
-        setError(null)
-
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          throw new Error('El archivo debe ser una imagen')
-        }
-
-        // Validate file size (max 2MB)
-        if (file.size > 2 * 1024 * 1024) {
-          throw new Error('La imagen no puede superar 2MB')
-        }
-
-        // Create unique filename
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`
-        const filePath = `${user.id}/${fileName}`
-
-        // Upload to Supabase Storage
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false,
-          })
-
-        if (uploadError) throw uploadError
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath)
-
-        const publicUrl = urlData.publicUrl
-
-        // Update profile with new avatar URL
-        await updateAvatar(publicUrl)
-
-        return publicUrl
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al subir imagen'
-        setError(message)
-        console.error('Upload avatar error:', err)
-        throw err
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('El archivo debe ser una imagen')
       }
+
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error('La imagen no puede superar 2MB')
+      }
+
+      // Create unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`
+      const filePath = `${user.id}/${fileName}`
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      const publicUrl = urlData.publicUrl
+
+      // Update profile with new avatar URL
+      await updateAvatarMutation.mutateAsync(publicUrl)
+
+      return publicUrl
     },
-    [user?.id, updateAvatar]
-  )
+  })
 
-  const updateBio = useCallback(
-    async (bio: string) => {
+  // ─── MUTACIÓN: Actualizar Bio ─────────────────────────────────
+  const updateBioMutation = useMutation({
+    mutationFn: async (bio: string) => {
       if (!user?.id) {
-        setError('Debes iniciar sesión')
-        return
+        throw new Error('Debes iniciar sesión')
       }
 
-      try {
-        setError(null)
+      if (profile) {
+        // Update existing profile
+        const { data, error: updateError } = await supabase
+          .from('user_profiles')
+          .update({
+            bio: bio || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id)
+          .select()
+          .maybeSingle()
 
-        if (profile) {
-          // Update existing profile
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .update({
-              bio: bio || null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('user_id', user.id)
-            .select()
-            .maybeSingle()
-
-          if (error) throw error
-          setProfile(data)
-        } else {
-          // Create new profile with bio
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .insert([{
+        if (updateError) throw updateError
+        return data as UserProfile
+      } else {
+        // Create new profile with bio
+        const { data, error: insertError } = await supabase
+          .from('user_profiles')
+          .insert([
+            {
               user_id: user.id,
               username: user.email?.split('@')[0] || 'Usuario',
               avatar_url: null,
               bio: bio || null,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
-            }])
-            .select()
-            .maybeSingle()
+            },
+          ])
+          .select()
+          .maybeSingle()
 
-          if (error) throw error
-          setProfile(data)
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Error al guardar bio'
-        setError(message)
-        console.error('Update bio error:', err)
-        throw err
+        if (insertError) throw insertError
+        return data as UserProfile
       }
     },
-    [user?.id, user?.email, profile]
-  )
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.userProfile.byUser(user?.id || ''),
+      })
+    },
+  })
 
   return {
     profile,
     loading,
-    error,
-    saveProfile,
-    updateAvatar,
-    uploadAvatar,
-    updateBio,
+    error: error?.message || null,
+    saveProfile: (username) => saveProfileMutation.mutateAsync(username),
+    updateAvatar: (url) => updateAvatarMutation.mutateAsync(url),
+    uploadAvatar: (file) => uploadAvatarMutation.mutateAsync(file),
+    updateBio: (bio) => updateBioMutation.mutateAsync(bio),
+    isSavingProfile: saveProfileMutation.isPending,
+    isUpdatingAvatar: updateAvatarMutation.isPending,
+    isUploadingAvatar: uploadAvatarMutation.isPending,
+    isUpdatingBio: updateBioMutation.isPending,
   }
 }

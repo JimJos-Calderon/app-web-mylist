@@ -1,38 +1,49 @@
+import { useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { ERROR_MESSAGES } from '@constants/index'
 import { ListItem } from '@typings/index'
-import { useCallback, useEffect, useState } from 'react'
+import { queryKeys } from '@config/queryKeys'
 
 interface UseItemsReturn {
   items: ListItem[]
   loading: boolean
   error: string | null
+  refetch: () => Promise<void>
   addItem: (item: Omit<ListItem, 'id' | 'created_at'>) => Promise<void>
   deleteItem: (id: string) => Promise<void>
   toggleVisto: (id: string, currentState: boolean) => Promise<void>
   updateItem: (id: string, updates: Partial<ListItem>) => Promise<void>
-  refetch: () => Promise<void>
-  clearError: () => void
+  isAddingItem: boolean
+  isDeletingItem: boolean
+  isUpdatingItem: boolean
 }
 
+/**
+ * Hook para gestionar items de una lista específica
+ * Lectura con useQuery + Mutaciones con useMutation
+ * Soporta realtime updates desde Supabase
+ */
 export const useItems = (
   tipo: 'pelicula' | 'serie',
   userId: string,
   listId?: string
 ): UseItemsReturn => {
-  const [items, setItems] = useState<ListItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const fetchItems = useCallback(async () => {
-    if (!userId || !listId) {
-      setItems([])
-      setLoading(false)
-      return
-    }
+  // Query para obtener los items
+  const {
+    data: items = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: queryKeys.items.byList(tipo, listId || ''),
+    queryFn: async () => {
+      if (!userId || !listId) {
+        return []
+      }
 
-    setLoading(true)
-    try {
       const { data, error: fetchError } = await supabase
         .from('items')
         .select('*')
@@ -42,24 +53,16 @@ export const useItems = (
 
       if (fetchError) throw fetchError
 
-      setItems((data || []) as ListItem[])
-      setError(null)
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : ERROR_MESSAGES.FETCH_ITEMS
-      setError(message)
-      console.error('Fetch items error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [tipo, userId, listId])
+      return (data || []) as ListItem[]
+    },
+    enabled: !!userId && !!listId,
+  })
 
-  // Subscribe to realtime changes
+  // Setup realtime listener para actualizaciones automáticas
   useEffect(() => {
-    fetchItems()
+    if (!userId || !listId) return
 
-    // Setup realtime listener
-    const channelName = listId ? `items:${tipo}:${listId}` : `items:${tipo}`
+    const channelName = `items:${tipo}:${listId}`
     const channel = supabase
       .channel(channelName)
       .on(
@@ -68,11 +71,13 @@ export const useItems = (
           event: '*',
           schema: 'public',
           table: 'items',
-          filter: listId ? `tipo=eq.${tipo},list_id=eq.${listId}` : `tipo=eq.${tipo}`,
+          filter: `tipo=eq.${tipo},list_id=eq.${listId}`,
         },
         (_payload) => {
-          // Refetch when changes occur
-          fetchItems()
+          // Invalidar la query para re-fetchear
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.items.byList(tipo, listId),
+          })
         }
       )
       .subscribe()
@@ -80,104 +85,109 @@ export const useItems = (
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [tipo, listId, fetchItems])
+  }, [tipo, listId, userId, queryClient])
 
-  const addItem = useCallback(
-    async (item: Omit<ListItem, 'id' | 'created_at'>) => {
-      try {
-        const { error: insertError } = await supabase
-          .from('items')
-          .insert([item])
+  // ─── MUTACIÓN: Agregar Item ───────────────────────────────────
+  const addItemMutation = useMutation({
+    mutationFn: async (item: Omit<ListItem, 'id' | 'created_at'>) => {
+      const { error: insertError } = await supabase
+        .from('items')
+        .insert([item])
 
-        if (insertError) throw insertError
-
-        await fetchItems()
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : ERROR_MESSAGES.ADD_ITEM
-        setError(message)
-        throw err
-      }
+      if (insertError) throw insertError
     },
-    [fetchItems]
-  )
-
-  const deleteItem = useCallback(
-    async (id: string) => {
-      try {
-        const { error: deleteError } = await supabase
-          .from('items')
-          .delete()
-          .eq('id', id)
-
-        if (deleteError) throw deleteError
-
-        await fetchItems()
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : ERROR_MESSAGES.DELETE_ITEM
-        setError(message)
-        throw err
-      }
+    onSuccess: () => {
+      // Invalidar y re-fetchear items
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.byList(tipo, listId || ''),
+      })
     },
-    [fetchItems]
-  )
-
-  const toggleVisto = useCallback(
-    async (id: string, currentState: boolean) => {
-      try {
-        const { error: updateError } = await supabase
-          .from('items')
-          .update({ visto: !currentState })
-          .eq('id', id)
-
-        if (updateError) throw updateError
-
-        await fetchItems()
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : ERROR_MESSAGES.UPDATE_ITEM
-        setError(message)
-        throw err
-      }
+    onError: (error) => {
+      console.error('Error adding item:', error)
     },
-    [fetchItems]
-  )
+  })
 
-  const updateItem = useCallback(
-    async (id: string, updates: Partial<ListItem>) => {
-      try {
-        const { error: updateError } = await supabase
-          .from('items')
-          .update(updates)
-          .eq('id', id)
+  // ─── MUTACIÓN: Eliminar Item ──────────────────────────────────
+  const deleteItemMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error: deleteError } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', id)
 
-        if (updateError) throw updateError
-
-        await fetchItems()
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : ERROR_MESSAGES.UPDATE_ITEM
-        setError(message)
-        throw err
-      }
+      if (deleteError) throw deleteError
     },
-    [fetchItems]
-  )
+    onSuccess: () => {
+      // Invalidar y re-fetchear items
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.byList(tipo, listId || ''),
+      })
+    },
+    onError: (error) => {
+      console.error('Error deleting item:', error)
+    },
+  })
 
-  const clearError = useCallback(() => {
-    setError(null)
-  }, [])
+  // ─── MUTACIÓN: Toggle Visto ────────────────────────────────────
+  const toggleVistoMutation = useMutation({
+    mutationFn: async ({ id, currentState }: { id: string; currentState: boolean }) => {
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({ visto: !currentState })
+        .eq('id', id)
+
+      if (updateError) throw updateError
+    },
+    onSuccess: () => {
+      // Invalidar y re-fetchear items
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.byList(tipo, listId || ''),
+      })
+    },
+    onError: (error) => {
+      console.error('Error toggling visto:', error)
+    },
+  })
+
+  // ─── MUTACIÓN: Actualizar Item ────────────────────────────────
+  const updateItemMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<ListItem> }) => {
+      const { error: updateError } = await supabase
+        .from('items')
+        .update(updates)
+        .eq('id', id)
+
+      if (updateError) throw updateError
+    },
+    onSuccess: () => {
+      // Invalidar y re-fetchear items
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.byList(tipo, listId || ''),
+      })
+    },
+    onError: (error) => {
+      console.error('Error updating item:', error)
+    },
+  })
+
+  const refetchItems = async () => {
+    await refetch()
+  }
 
   return {
     items,
     loading,
-    error,
-    addItem,
-    deleteItem,
-    toggleVisto,
-    updateItem,
-    refetch: fetchItems,
-    clearError,
+    error: error?.message || null,
+    refetch: refetchItems,
+    addItem: (item) => addItemMutation.mutateAsync(item),
+    deleteItem: (id) => deleteItemMutation.mutateAsync(id),
+    toggleVisto: (id, currentState) =>
+      toggleVistoMutation.mutateAsync({ id, currentState }),
+    updateItem: (id, updates) =>
+      updateItemMutation.mutateAsync({ id, updates }),
+    isAddingItem: addItemMutation.isPending,
+    isDeletingItem: deleteItemMutation.isPending,
+    isUpdatingItem:
+      updateItemMutation.isPending || toggleVistoMutation.isPending,
   }
 }
