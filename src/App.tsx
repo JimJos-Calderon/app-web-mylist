@@ -1,11 +1,20 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
+import { ErrorBoundary } from 'react-error-boundary'
+import * as Sentry from '@sentry/react'
 import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle, Users, ArrowRight, Loader2, AtSign, Check, AlertCircle } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
 import { supabase } from '@/supabaseClient'
 import { validateUsername } from '@utils/validation'
+import { SectionErrorFallback } from '@components/SectionErrorFallback'
 import Login from '@pages/Login'
+
+const handleSectionError = (error: Error, info: { componentStack?: string | null }) => {
+  Sentry.captureException(error, {
+    extra: { componentStack: info.componentStack },
+  })
+}
 
 // ─── Code Splitting: Lazy load heavy pages ─────────────────────────────────
 const Peliculas = lazy(() => import('@pages/Peliculas'))
@@ -599,10 +608,26 @@ const App: React.FC = () => {
                 </div>
               }
             />
-            <Route path="/peliculas" element={<Peliculas />} />
-            <Route path="/series" element={<Series />} />
-            <Route path="/perfil" element={<Perfil />} />
-            <Route path="/ajustes" element={<Ajustes />} />
+            <Route path="/peliculas" element={
+              <ErrorBoundary FallbackComponent={SectionErrorFallback} onError={handleSectionError} onReset={() => window.location.reload()}>
+                <Peliculas />
+              </ErrorBoundary>
+            } />
+            <Route path="/series" element={
+              <ErrorBoundary FallbackComponent={SectionErrorFallback} onError={handleSectionError} onReset={() => window.location.reload()}>
+                <Series />
+              </ErrorBoundary>
+            } />
+            <Route path="/perfil" element={
+              <ErrorBoundary FallbackComponent={SectionErrorFallback} onError={handleSectionError} onReset={() => window.location.reload()}>
+                <Perfil />
+              </ErrorBoundary>
+            } />
+            <Route path="/ajustes" element={
+              <ErrorBoundary FallbackComponent={SectionErrorFallback} onError={handleSectionError} onReset={() => window.location.reload()}>
+                <Ajustes />
+              </ErrorBoundary>
+            } />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Suspense>
