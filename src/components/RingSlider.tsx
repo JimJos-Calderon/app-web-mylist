@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { EffectCoverflow } from 'swiper/modules'
 import { ListItem } from '@/types'
 import { Grid3x3, ChevronLeft, ChevronRight, Film, Tv } from 'lucide-react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface RingSliderProps {
   items: ListItem[]
@@ -22,6 +23,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
   const itemsWithPoster = items.filter((item) => Boolean(item.poster_url))
   const swiperRef = useRef<any>(null)
   const [activeItemId, setActiveItemId] = useState<string>(itemsWithPoster[0]?.id || '')
+  const prefersReducedMotion = useReducedMotion()
 
   if (itemsWithPoster.length === 0) {
     return (
@@ -55,9 +57,35 @@ const RingSlider: React.FC<RingSliderProps> = ({
 
   const activeItem = itemsWithPoster.find((item) => item.id === activeItemId)
   const isOwn = activeItem?.user_id === userOwnerId
+  const [liveText, setLiveText] = useState('')
+
+  const handleCarouselKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      swiperRef.current?.swiper.slidePrev()
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      swiperRef.current?.swiper.slideNext()
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      swiperRef.current?.swiper.slideToLoop(0)
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      swiperRef.current?.swiper.slideToLoop(itemsWithPoster.length - 1)
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      const active = itemsWithPoster.find((i) => i.id === activeItemId)
+      if (active) onOpenDetails(active)
+    }
+  }, [itemsWithPoster.length, activeItemId, itemsWithPoster, onOpenDetails])
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-black via-purple-950/20 to-black flex flex-col items-center justify-center relative overflow-hidden">
+    <div
+      className="w-full min-h-screen bg-gradient-to-b from-black via-purple-950/20 to-black flex flex-col items-center justify-center relative overflow-hidden"
+      role="region"
+      aria-roledescription="carrusel"
+      aria-label={`Carrusel de ${itemsWithPoster.length} títulos`}
+    >
       {/* Background Grid Effect */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div
@@ -71,6 +99,19 @@ const RingSlider: React.FC<RingSliderProps> = ({
       {/* Radial Glow */}
       <div className="absolute inset-0 bg-radial-gradient from-purple-500/10 via-transparent to-transparent pointer-events-none" />
 
+      {/* Screen reader live announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {liveText}
+      </div>
+
+      {/* Keyboard-navigable wrapper — Swiper ignores tabIndex/onKeyDown props */}
+      <div
+        tabIndex={0}
+        role="group"
+        aria-label="Usa las flechas izquierda y derecha para navegar"
+        onKeyDown={handleCarouselKeyDown}
+        className="w-full relative z-10 outline-none"
+      >
       <Swiper
         ref={swiperRef}
         effect={'coverflow'}
@@ -80,18 +121,20 @@ const RingSlider: React.FC<RingSliderProps> = ({
         loop={true}
         autoplay={false}
         coverflowEffect={{
-          rotate: 45,
+          rotate: prefersReducedMotion ? 0 : 45,
           stretch: 0,
-          depth: 250,
+          depth: prefersReducedMotion ? 0 : 250,
           modifier: 1,
           slideShadows: false,
         }}
+        speed={prefersReducedMotion ? 0 : 300}
         modules={[EffectCoverflow]}
-        className="w-full h-auto relative z-10"
+        className="w-full h-auto"
         onSlideChange={(swiper) => {
           const currentSlide = itemsWithPoster[swiper.realIndex]
           if (currentSlide) {
             setActiveItemId(currentSlide.id)
+            setLiveText(`${currentSlide.titulo} — ${swiper.realIndex + 1} de ${itemsWithPoster.length}`)
           }
         }}
       >
@@ -100,7 +143,8 @@ const RingSlider: React.FC<RingSliderProps> = ({
             {({ isActive }) => (
               <div
                 role="button"
-                tabIndex={0}
+                tabIndex={-1}
+                aria-label={`${item.titulo}${isActive ? ' — activo' : ''}. Presiona Enter para ver detalles`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
@@ -195,6 +239,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
           </SwiperSlide>
         ))}
       </Swiper>
+      </div>
 
       {/* Back to Grid Button */}
       <button

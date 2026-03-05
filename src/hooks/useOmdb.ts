@@ -8,6 +8,7 @@ interface UseOmdbReturn {
   getPosterUrl: (title: string) => { data: string | null; isLoading: boolean; error: Error | null }
   getSynopsis: (title: string) => { data: string | null; isLoading: boolean; error: Error | null }
   getGenre: (title: string) => { data: string | null; isLoading: boolean; error: Error | null }
+  fetchPlot: (title: string) => Promise<string | null>
 }
 
 /**
@@ -90,9 +91,28 @@ export const useOmdb = (): UseOmdbReturn => {
     return { data: data || null, isLoading, error }
   }
 
+  /** Plain async function — safe to call from event handlers (no hooks). */
+  const fetchPlot = async (title: string): Promise<string | null> => {
+    const response = await fetch(
+      'https://lpaysuasdjgajiftyush.supabase.co/functions/v1/search-omdb',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwYXlzdWFzZGpnYWppZnR5dXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDgyNzUxNDIsImV4cCI6MTk5Mzg1MTE0Mn0.I6I8scpqFLX0xc7OgPRQvQ5zBBBEO1_4rCjQhljW6lI',
+        },
+        body: JSON.stringify({ query: title, type: 'movie', mode: 'detail' }),
+      }
+    )
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data: OmdbResponse = await response.json()
+    return data.Plot && data.Plot !== 'N/A' ? data.Plot : null
+  }
+
   return {
     getPosterUrl,
     getSynopsis,
     getGenre,
+    fetchPlot,
   }
 }

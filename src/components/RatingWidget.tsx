@@ -56,8 +56,10 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
           disabled={isUpdating}
           className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title={currentRating ? `Calificación: ${currentRating}/5` : 'Calificar'}
+          aria-label={currentRating ? `Calificación: ${currentRating} de 5. Cambiar` : 'Calificar'}
+          aria-expanded={showRatingMenu}
         >
-          <Star className="w-4 h-4 text-cyan-400" fill={currentRating ? 'currentColor' : 'none'} />
+          <Star className="w-4 h-4 text-cyan-400" fill={currentRating ? 'currentColor' : 'none'} aria-hidden="true" />
           {currentRating && <span className="text-xs font-semibold text-cyan-400">{currentRating}</span>}
         </button>
 
@@ -75,8 +77,9 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
                   disabled={isUpdating}
                   className="text-cyan-400 hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                   title={`${star} estrella${star > 1 ? 's' : ''}`}
+                  aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
                 >
-                  <Star className="w-6 h-6" fill={star <= (currentRating || 0) ? 'currentColor' : 'none'} />
+                  <Star className="w-6 h-6" fill={star <= (currentRating || 0) ? 'currentColor' : 'none'} aria-hidden="true" />
                 </button>
               ))}
             </div>
@@ -108,8 +111,10 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
               : 'hover:bg-zinc-800 text-zinc-400'
           }`}
           title="Me gusta"
+          aria-label="Me gusta"
+          aria-pressed={currentLike === true}
         >
-          <Heart className="w-5 h-5" fill={currentLike === true ? 'currentColor' : 'none'} />
+          <Heart className="w-5 h-5" fill={currentLike === true ? 'currentColor' : 'none'} aria-hidden="true" />
         </button>
 
         <button
@@ -124,8 +129,10 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
               : 'hover:bg-zinc-800 text-zinc-400'
           }`}
           title="No me gusta"
+          aria-label="No me gusta"
+          aria-pressed={currentLike === false}
         >
-          <HeartOff className="w-5 h-5" />
+          <HeartOff className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 

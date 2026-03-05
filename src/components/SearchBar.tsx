@@ -38,6 +38,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
             <input
               type="text"
               placeholder={placeholder}
+              aria-label="Buscar título"
               className="w-full bg-black/70 border-2 border-cyan-500/30 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-sm md:text-base text-white outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all font-bold uppercase tracking-tight"
               value={value}
               onChange={(e) => onChange(e.target.value)}

@@ -59,6 +59,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   const [synopsisCache, setSynopsisCache] = useState<Record<string, string>>({})
   const sugerenciasRef = useRef<HTMLDivElement>(null)
   const closeTimeoutRef = useRef<number | null>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
 
   const ITEMS_PER_PAGE = 9
 
@@ -73,7 +75,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     tipo
   )
 
-  const { getPosterUrl, getSynopsis, getGenre } = useOmdb()
+  const { getPosterUrl, getSynopsis, getGenre, fetchPlot } = useOmdb()
 
   const { filters, updateFilter, resetFilters } = useFilters()
 
@@ -236,10 +238,14 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
       closeTimeoutRef.current = null
     }
 
+    previousFocusRef.current = document.activeElement as HTMLElement | null
     setSelectedItem(item)
     setIsModalOpen(true)
     setIsModalAnimating(false)
-    requestAnimationFrame(() => setIsModalAnimating(true))
+    requestAnimationFrame(() => {
+      setIsModalAnimating(true)
+      closeButtonRef.current?.focus()
+    })
     setSynopsisError(null)
 
     if (synopsisCache[item.id]) {
@@ -251,15 +257,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     setSynopsisLoading(true)
 
     try {
-      const plot = await getSynopsis(item.titulo)
+      const plot = await fetchPlot(item.titulo)
+      setSynopsis(plot)
       if (plot) {
-        setSynopsis(plot)
         setSynopsisCache((prev) => ({
           ...prev,
           [item.id]: plot,
         }))
-      } else {
-        setSynopsis(null)
       }
     } catch (err) {
       setSynopsisError('No se pudo cargar la sinopsis')
@@ -277,6 +281,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
       setSynopsis(null)
       setSynopsisError(null)
       closeTimeoutRef.current = null
+      previousFocusRef.current?.focus()
     }, 180)
   }
 
@@ -680,7 +685,14 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
             }`}
           role="dialog"
           aria-modal="true"
+          aria-label={`Detalles de ${selectedItem.titulo}`}
           onClick={handleCloseDetails}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.stopPropagation()
+              handleCloseDetails()
+            }
+          }}
         >
           <div
             className={`w-full max-w-2xl rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl overflow-hidden transition-all duration-200 ${isModalAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
@@ -697,6 +709,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                 </p>
               </div>
               <button
+                ref={closeButtonRef}
                 type="button"
                 onClick={handleCloseDetails}
                 className="text-slate-400 hover:text-white transition"

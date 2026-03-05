@@ -100,3 +100,115 @@ nav {
 .spotify-card-enter {
   animation: spotify-card-enter 0.5s cubic-bezier(0.23, 1, 0.320, 1) forwards;
 }
+
+/* ══════════════════════════════════════════════════════
+   ACCESSIBILITY: Cyberpunk Focus Rings (WCAG 2.1)
+   ══════════════════════════════════════════════════════ */
+
+/*
+ * Global focus-visible ring: visible ONLY on keyboard navigation.
+ * Mouse/touch clicks don't trigger :focus-visible, so the glow
+ * appears exclusively for keyboard users.
+ */
+:focus-visible {
+  outline: 2px solid #22d3ee;                          /* cyan-400 */
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 4px rgba(34, 211, 238, 0.25),                /* soft halo */
+    0 0 15px rgba(34, 211, 238, 0.4);                   /* neon glow */
+  border-radius: 4px;
+}
+
+/* Inputs/textareas: inner glow instead of outline to match existing styles */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: #22d3ee;                               /* cyan-400 */
+  box-shadow:
+    0 0 0 3px rgba(34, 211, 238, 0.2),                 /* ring */
+    inset 0 0 12px rgba(34, 211, 238, 0.08);           /* inner glow */
+}
+
+/* Buttons: pulsing glow ring */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 4px rgba(34, 211, 238, 0.3),
+    0 0 20px rgba(34, 211, 238, 0.35);
+}
+
+/* Links */
+a:focus-visible {
+  outline: 2px solid #f472b6;                          /* pink-400 */
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 4px rgba(244, 114, 182, 0.25),
+    0 0 15px rgba(244, 114, 182, 0.35);
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+/* ══════════════════════════════════════════════════════
+   ACCESSIBILITY: Contrast-safe utility classes
+   ══════════════════════════════════════════════════════ */
+
+/* 
+ * Use .text-muted instead of text-zinc-600.
+ * zinc-400 (#a1a1aa) gives 8.0:1 on #050505 — passes AAA.
+ */
+.text-muted {
+  color: #a1a1aa;
+}
+
+/* ══════════════════════════════════════════════════════
+   ACCESSIBILITY: Reduced Motion (WCAG 2.3.3)
+   ══════════════════════════════════════════════════════
+   Users who enable "Reduce motion" in their OS get:
+   - No continuous/looping animations (gradient, spin, pulse)
+   - Entrance animations collapse to instant opacity fade
+   - Transitions shortened to ≤100ms (still feel responsive)
+   ══════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* ── Kill looping background animation ── */
+  .background-animate {
+    animation: none;
+  }
+
+  /* ── Entrance card: instant fade, no scale transform ── */
+  @keyframes spotify-card-enter-reduced {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .spotify-card-enter {
+    animation: spotify-card-enter-reduced 0.15s ease forwards;
+  }
+
+  /* ── Progress bar: appear immediately ── */
+  @keyframes grow-reduced {
+    from { width: 100%; }
+    to   { width: 100%; }
+  }
+
+  /* ── Cap all transitions to near-instant ── */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.1s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* ── Decorative entrance/exit animations: single short play ──
+       Excludes .animate-spin which indicates loading state (essential). */
+  .animate-in,
+  .animate-pulse,
+  [class*="fade-in"],
+  [class*="zoom-in"],
+  [class*="slide-in"] {
+    animation-duration: 0.15s !important;
+    animation-iteration-count: 1 !important;
+  }
+}

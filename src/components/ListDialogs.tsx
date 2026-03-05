@@ -105,9 +105,10 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
           </div>
           <button
             onClick={onClose}
+            aria-label="Cerrar diálogo"
             className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -126,7 +127,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
               autoFocus
               maxLength={60}
               className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
-                         focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
+                         focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
                          transition-all font-medium"
             />
           </div>
@@ -134,7 +135,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
               Descripción{' '}
-              <span className="text-zinc-600 normal-case tracking-normal font-normal">(opcional)</span>
+              <span className="text-zinc-400 normal-case tracking-normal font-normal">(opcional)</span>
             </label>
             <textarea
               placeholder="Una lista de películas y series para ver juntos..."
@@ -143,7 +144,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
               maxLength={200}
               rows={3}
               className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
-                         focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
+                         focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
                          transition-all font-medium resize-none"
             />
           </div>
@@ -243,9 +244,10 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
           </div>
           <button
             onClick={onClose}
+            aria-label="Cerrar diálogo"
             className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 

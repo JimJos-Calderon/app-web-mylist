@@ -60,6 +60,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             <select
               value={filters.sortBy}
               onChange={(e) => onFilterChange('sortBy', e.target.value)}
+              aria-label="Ordenar por"
               className="bg-slate-800 border border-slate-600 text-white px-3 md:px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-xs md:text-sm"
             >
               {sortOptions.map((option) => (
@@ -88,6 +89,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <input
             type="text"
             placeholder="Filtrar por título..."
+            aria-label="Filtrar por título"
             value={filters.searchQuery}
             onChange={(e) => onFilterChange('searchQuery', e.target.value)}
             className="flex-1 bg-slate-800 border border-slate-600 text-white px-3 md:px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-xs md:text-sm"

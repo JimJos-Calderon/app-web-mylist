@@ -50,7 +50,7 @@ const ListSelector = ({
             onChange(selectedList)
           }
         }}
-        className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+        className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-white"
       >
         {lists.map((list) => (
           <option key={list.id} value={list.id}>

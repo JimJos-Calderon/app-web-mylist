@@ -198,9 +198,10 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
           </div>
           <button
             onClick={onClose}
+            aria-label="Cerrar ventana de registro"
             className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -248,10 +249,10 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     autoFocus
                     maxLength={20}
                     className={`w-full pl-9 pr-10 py-3 bg-zinc-900/80 border rounded-xl text-white text-xl placeholder-zinc-500
-                               focus:outline-none focus:ring-2 transition-all font-medium disabled:opacity-50
-                               ${usernameStatus === 'available' ? 'border-green-500 focus:border-green-500 focus:ring-green-500/20' :
-                        usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' :
-                          'border-zinc-700 focus:border-pink-500 focus:ring-pink-500/20'
+                               focus-visible:ring-2 transition-all font-medium disabled:opacity-50
+                               ${usernameStatus === 'available' ? 'border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/20' :
+                        usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/20' :
+                          'border-zinc-700 focus-visible:border-pink-500 focus-visible:ring-pink-500/20'
                       }`}
                     required
                   />
@@ -269,7 +270,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     {usernameMessage}
                   </p>
                 )}
-                <p className="text-xl text-zinc-600 mt-1">Solo letras, números y _ (3-20 caracteres)</p>
+                <p className="text-xl text-zinc-400 mt-1">Solo letras, números y _ (3-20 caracteres)</p>
               </div>
 
               {/* Email */}
@@ -284,7 +285,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   onChange={e => setEmail(e.target.value)}
                   disabled={loading}
                   className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                             focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
+                             focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
                              transition-all font-medium disabled:opacity-50"
                   required
                 />
@@ -303,16 +304,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     onChange={e => setPassword(e.target.value)}
                     disabled={loading}
                     className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                               focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
+                               focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
                                transition-all font-medium disabled:opacity-50"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                   >
-                    {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                    {showPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
@@ -330,16 +332,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     onChange={e => setConfirmPassword(e.target.value)}
                     disabled={loading}
                     className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                               focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
+                               focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
                                transition-all font-medium disabled:opacity-50"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(v => !v)}
+                    aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                   >
-                    {showConfirm ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                    {showConfirm ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
@@ -534,7 +537,7 @@ const Login: React.FC = () => {
                     onChange={e => setEmail(e.target.value)}
                     disabled={loading}
                     className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                               focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
+                               focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
                                transition-all font-medium disabled:opacity-50"
                     required
                   />
@@ -553,7 +556,7 @@ const Login: React.FC = () => {
                       onChange={e => setPassword(e.target.value)}
                       disabled={loading}
                       className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                                 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20
+                                 focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
                                  transition-all font-medium disabled:opacity-50"
                       required
                     />
@@ -561,9 +564,10 @@ const Login: React.FC = () => {
                       type="button"
                       onClick={() => setShowPassword(v => !v)}
                       disabled={loading}
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors disabled:opacity-50"
                     >
-                      {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                      {showPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>
@@ -590,7 +594,7 @@ const Login: React.FC = () => {
               {/* Divider */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-zinc-600 text-xl uppercase tracking-widest">o</span>
+                <span className="text-zinc-400 text-xl uppercase tracking-widest">o</span>
                 <div className="flex-1 h-px bg-zinc-800" />
               </div>
 

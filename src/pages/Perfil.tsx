@@ -189,7 +189,7 @@ const Perfil: React.FC = () => {
           </div>
         ) : (
           <div className="text-center py-20">
-            <Film className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
+            <Film className="w-16 h-16 mx-auto mb-4 text-zinc-500" />
             <h2 className="text-2xl font-bold mb-2">Aún sin calificaciones</h2>
             <p className="text-zinc-400 mb-6">
               Comienza a calificar películas y series para verlas aquí

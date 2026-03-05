@@ -252,7 +252,7 @@ const JoinList: React.FC = () => {
                 </div>
 
                 {code && (
-                    <p className="text-center mt-4 text-xs text-zinc-600 font-mono">
+                    <p className="text-center mt-4 text-xs text-zinc-400 font-mono">
                         código: {code.toUpperCase()}
                     </p>
                 )}

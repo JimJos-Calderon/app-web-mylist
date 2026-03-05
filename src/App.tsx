@@ -135,10 +135,10 @@ const UsernameSetupModal: React.FC = () => {
                   autoFocus
                   maxLength={20}
                   className={`w-full pl-9 pr-10 py-3 bg-zinc-900/80 border rounded-xl text-white placeholder-zinc-500
-                             focus:outline-none focus:ring-2 transition-all font-medium disabled:opacity-50
-                             ${usernameStatus === 'available' ? 'border-green-500 focus:border-green-500 focus:ring-green-500/20' :
-                      usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' :
-                        'border-zinc-700 focus:border-pink-500 focus:ring-pink-500/20'
+                             focus-visible:ring-2 transition-all font-medium disabled:opacity-50
+                             ${usernameStatus === 'available' ? 'border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/20' :
+                      usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/20' :
+                        'border-zinc-700 focus-visible:border-pink-500 focus-visible:ring-pink-500/20'
                     }`}
                   required
                 />
@@ -153,7 +153,7 @@ const UsernameSetupModal: React.FC = () => {
                   {usernameMessage}
                 </p>
               )}
-              <p className="text-xs text-zinc-600 mt-1">Solo letras, números y _ (3-20 caracteres)</p>
+              <p className="text-xs text-zinc-400 mt-1">Solo letras, números y _ (3-20 caracteres)</p>
             </div>
 
             {error && (

@@ -78,7 +78,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-center px-4">
             <div>
-              <Film className="w-12 h-12 mx-auto mb-2 text-zinc-600" />
+              <Film className="w-12 h-12 mx-auto mb-2 text-zinc-500" />
               <div className="text-[10px] text-zinc-500 font-black uppercase">
                 {item.tipo === 'pelicula' ? 'Película' : 'Serie'}
               </div>
@@ -129,14 +129,15 @@ const ItemCard: React.FC<ItemCardProps> = ({
             className={`p-2 transition-all ${
               item.visto
                 ? 'text-cyan-400 hover:text-cyan-300'
-                : 'text-zinc-600 hover:text-cyan-400'
+                : 'text-zinc-500 hover:text-cyan-400'
             }`}
             title={item.visto ? 'Marcar como no visto' : 'Marcar como visto'}
+            aria-label={item.visto ? 'Marcar como no visto' : 'Marcar como visto'}
           >
             {item.visto ? (
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <EyeOff className="h-4 w-4" />
+              <EyeOff className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
 
@@ -146,13 +147,14 @@ const ItemCard: React.FC<ItemCardProps> = ({
               setShowConfirmDialog(true)
             }}
             disabled={deleting}
-            className="text-zinc-600 hover:text-red-500 transition-all p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-zinc-500 hover:text-red-500 transition-all p-2 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Eliminar"
+            aria-label="Eliminar elemento"
           >
             {deleting ? (
-              <Loader2 className="animate-spin h-4 w-4" />
+              <Loader2 className="animate-spin h-4 w-4" aria-hidden="true" />
             ) : (
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
         </div>

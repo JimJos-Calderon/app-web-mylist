@@ -21,8 +21,9 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({ message, onClose }) => {
       <button
         onClick={onClose}
         className="text-red-400 hover:text-red-300 transition-colors"
+        aria-label="Cerrar alerta"
       >
-        <X className="w-4 h-4" />
+        <X className="w-4 h-4" aria-hidden="true" />
       </button>
     </div>
   )

@@ -305,7 +305,7 @@ const Ajustes: React.FC = () => {
                       placeholder="Tu nombre de usuario"
                       disabled={isSaving}
                       maxLength={20}
-                      className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2"
+                      className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2"
                     />
                     <div className="text-xs text-zinc-500">
                       {username.length}/20 caracteres
@@ -350,7 +350,7 @@ const Ajustes: React.FC = () => {
                       disabled={isSaving}
                       maxLength={150}
                       rows={3}
-                      className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2 resize-none"
+                      className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2 resize-none"
                     />
                     <div className="text-xs text-zinc-500">
                       {bio.length}/150 caracteres
@@ -435,7 +435,7 @@ const Ajustes: React.FC = () => {
                         onChange={(e) => setNewEmail(e.target.value)}
                         placeholder="nuevo@ejemplo.com"
                         disabled={isSaving}
-                        className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all disabled:opacity-50"
+                        className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                       />
                     </div>
 
@@ -468,15 +468,16 @@ const Ajustes: React.FC = () => {
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="Ingresa tu contraseña actual"
                           disabled={isSaving}
-                          className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all disabled:opacity-50"
+                          className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                         />
                         <button
                           type="button"
                           onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                           disabled={isSaving}
+                          aria-label={showCurrentPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                         >
-                          {showCurrentPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                          {showCurrentPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
                       </div>
                     </div>
@@ -492,15 +493,16 @@ const Ajustes: React.FC = () => {
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="Mínimo 6 caracteres"
                           disabled={isSaving}
-                          className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all disabled:opacity-50"
+                          className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                         />
                         <button
                           type="button"
                           onClick={() => setShowNewPassword(!showNewPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                           disabled={isSaving}
+                          aria-label={showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                         >
-                          {showNewPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                          {showNewPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
                       </div>
                     </div>
@@ -516,15 +518,16 @@ const Ajustes: React.FC = () => {
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Repite tu contraseña"
                           disabled={isSaving}
-                          className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all disabled:opacity-50"
+                          className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                           disabled={isSaving}
+                          aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                         >
-                          {showConfirmPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                          {showConfirmPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
                       </div>
                     </div>
@@ -575,15 +578,16 @@ const Ajustes: React.FC = () => {
                       onChange={(e) => setVerifyEmailPassword(e.target.value)}
                       placeholder="Ingresa tu contraseña"
                       disabled={isSaving}
-                      className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all disabled:opacity-50"
+                      className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                     />
                     <button
                       type="button"
                       onClick={() => setShowVerifyEmailPassword(!showVerifyEmailPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                       disabled={isSaving}
+                      aria-label={showVerifyEmailPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
-                      {showVerifyEmailPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                      {showVerifyEmailPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>

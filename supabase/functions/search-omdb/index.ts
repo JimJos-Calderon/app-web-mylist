@@ -5,6 +5,7 @@ interface SearchRequest {
   query: string;
   type?: "movie" | "series" | "episode";
   page?: number;
+  mode?: "search" | "detail";
 }
 
 interface OmdbResponse {
@@ -153,7 +154,7 @@ serve(async (req: Request) => {
 
     // Parsear el body
     const body: SearchRequest = await req.json();
-    const { query, type = "movie", page = 1 } = body;
+    const { query, type = "movie", page = 1, mode = "search" } = body;
 
     // Validar entrada
     const validation = validateInput(query);
@@ -194,9 +195,18 @@ serve(async (req: Request) => {
     // Construir URL de OMDB
     const omdbUrl = new URL("https://www.omdbapi.com/");
     omdbUrl.searchParams.append("apikey", omdbApiKey);
-    omdbUrl.searchParams.append("s", query);
-    omdbUrl.searchParams.append("type", type);
-    omdbUrl.searchParams.append("page", String(page));
+
+    if (mode === "detail") {
+      // Modo detalle: usa "t=" para obtener Plot, Genre, etc.
+      omdbUrl.searchParams.append("t", query);
+      omdbUrl.searchParams.append("type", type);
+      omdbUrl.searchParams.append("plot", "short");
+    } else {
+      // Modo búsqueda: usa "s=" para lista de resultados
+      omdbUrl.searchParams.append("s", query);
+      omdbUrl.searchParams.append("type", type);
+      omdbUrl.searchParams.append("page", String(page));
+    }
 
     // Hacer la petición a OMDB
     const omdbResponse = await fetch(omdbUrl.toString(), {
