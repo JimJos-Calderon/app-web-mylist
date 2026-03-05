@@ -84,3 +84,19 @@ nav {
   from { width: 0%; }
   to   { width: 100%; }
 }
+
+/* SpotifyGlassCard entrance animation (replaces framer-motion) */
+@keyframes spotify-card-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.spotify-card-enter {
+  animation: spotify-card-enter 0.5s cubic-bezier(0.23, 1, 0.320, 1) forwards;
+}

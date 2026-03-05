@@ -4,6 +4,7 @@ import { ListItem } from '@/types'
 import { useUsername } from '@hooks/useUsername'
 import RatingWidget from './RatingWidget'
 import ConfirmDialog from './ConfirmDialog'
+import OptimizedImage from './OptimizedImage'
 
 interface ItemCardProps {
   item: ListItem
@@ -68,15 +69,11 @@ const ItemCard: React.FC<ItemCardProps> = ({
       {/* Image */}
       <div className="relative aspect-[2/3] w-full overflow-hidden">
         {item.poster_url ? (
-          <img
+          <OptimizedImage
             src={item.poster_url}
             alt={item.titulo}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            loading="lazy"
-            onError={(e) => {
-              // Fallback to placeholder if image fails to load
-              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x450?text=No+Image'
-            }}
+            placeholderUrl="https://via.placeholder.com/300x450?text=No+Image"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-center px-4">

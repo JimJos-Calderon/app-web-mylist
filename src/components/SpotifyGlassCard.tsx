@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import React from 'react'
 
 interface SpotifyGlassCardProps {
@@ -13,11 +12,8 @@ const SpotifyGlassCard: React.FC<SpotifyGlassCardProps> = ({
   isDragging = false
 }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="relative group"
+    <div
+      className="relative group spotify-card-enter"
       style={{
         cursor: isDragging ? 'grabbing' : 'grab'
       }}
@@ -59,7 +55,7 @@ const SpotifyGlassCard: React.FC<SpotifyGlassCardProps> = ({
           />
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 

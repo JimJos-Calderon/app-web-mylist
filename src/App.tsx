@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle, Users, ArrowRight, Loader2, AtSign, Check, AlertCircle } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
@@ -6,12 +6,41 @@ import { useUserProfile } from '@hooks/useUserProfile'
 import { supabase } from '@/supabaseClient'
 import { validateUsername } from '@utils/validation'
 import Login from '@pages/Login'
-import Peliculas from '@pages/Peliculas'
-import Series from '@pages/Series'
-import Perfil from '@pages/Perfil'
-import Ajustes from '@pages/Ajustes'
-import JoinList from '@pages/JoinList'
-import SpotifyGlassCard from '@components/SpotifyGlassCard'
+
+// ─── Code Splitting: Lazy load heavy pages ─────────────────────────────────
+const Peliculas = lazy(() => import('@pages/Peliculas'))
+const Series = lazy(() => import('@pages/Series'))
+const Perfil = lazy(() => import('@pages/Perfil'))
+const Ajustes = lazy(() => import('@pages/Ajustes'))
+const JoinList = lazy(() => import('@pages/JoinList'))
+
+// ─── Lazy load heavy components ────────────────────────────────────────────
+const SpotifyGlassCard = lazy(() => import('@components/SpotifyGlassCard'))
+
+// ─── Per-route Loading Fallback ─────────────────────────────────────────────
+const PageLoadingSkeleton: React.FC = () => (
+  <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="text-center space-y-6">
+      <div className="inline-flex items-center justify-center">
+        <div className="w-20 h-20 rounded-full border-4 border-pink-500/20 border-t-pink-500 border-r-purple-500 animate-spin"></div>
+      </div>
+      <div className="space-y-2">
+        <p className="text-pink-400 font-black text-xl uppercase tracking-widest">Cargando...</p>
+        <p className="text-zinc-500 text-sm">Optimizando recursos</p>
+      </div>
+    </div>
+  </div>
+)
+
+// ─── Component Loading Skeleton (for Spotify widgets) ──────────────────────
+const SpotifyWidgetSkeleton: React.FC = () => (
+  <div className="w-80 h-[480px] rounded-2xl bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/20 backdrop-blur-xl animate-pulse flex items-center justify-center">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-12 h-12 rounded-full bg-purple-500/20 animate-pulse"></div>
+      <p className="text-zinc-500 text-xs">Cargando widget...</p>
+    </div>
+  </div>
+)
 
 // ─── Username Setup Modal (for new Google users) ─────────────────────────────
 const UsernameSetupModal: React.FC = () => {
@@ -552,67 +581,73 @@ const App: React.FC = () => {
       </nav>
 
       <main className="max-w-7xl mx-auto p-4">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <div className="text-center mt-20 animate-in fade-in zoom-in duration-700 space-y-8">
-                <div>
-                  <h2 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-violet-500">
-                    ¡Hola de nuevo!
-                  </h2>
-                  <p className="text-zinc-400 text-lg">
-                    ¿Qué vamos a ver hoy,{' '}
-                    <span className="text-zinc-200 font-bold">{displayName}</span>?
-                  </p>
+        <Suspense fallback={<PageLoadingSkeleton />}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <div className="text-center mt-20 animate-in fade-in zoom-in duration-700 space-y-8">
+                  <div>
+                    <h2 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-violet-500">
+                      ¡Hola de nuevo!
+                    </h2>
+                    <p className="text-zinc-400 text-lg">
+                      ¿Qué vamos a ver hoy,{' '}
+                      <span className="text-zinc-200 font-bold">{displayName}</span>?
+                    </p>
+                  </div>
                 </div>
-              </div>
-            }
-          />
-          <Route path="/peliculas" element={<Peliculas />} />
-          <Route path="/series" element={<Series />} />
-          <Route path="/perfil" element={<Perfil />} />
-          <Route path="/ajustes" element={<Ajustes />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+              }
+            />
+            <Route path="/peliculas" element={<Peliculas />} />
+            <Route path="/series" element={<Series />} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/ajustes" element={<Ajustes />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
 
         {/* Spotify Players - Only on desktop */}
         {location.pathname === '/' && (
           <>
-            <div
-              className="hidden lg:block"
-              onMouseDown={handleMouseDown}
-              style={{
-                position: 'fixed',
-                left: `${playerPosition.x}px`,
-                top: `${playerPosition.y}px`,
-                zIndex: 30
-              }}
-            >
-              <SpotifyGlassCard
-                spotifyUrl="https://open.spotify.com/embed/playlist/3WyehWydbIc9FCDVDHbTbZ?utm_source=generator&theme=0"
-                accentColor="rgb(168, 85, 247)"
-                isDragging={isDragging}
-              />
-            </div>
+            <Suspense fallback={<SpotifyWidgetSkeleton />}>
+              <div
+                className="hidden lg:block"
+                onMouseDown={handleMouseDown}
+                style={{
+                  position: 'fixed',
+                  left: `${playerPosition.x}px`,
+                  top: `${playerPosition.y}px`,
+                  zIndex: 30
+                }}
+              >
+                <SpotifyGlassCard
+                  spotifyUrl="https://open.spotify.com/embed/playlist/3WyehWydbIc9FCDVDHbTbZ?utm_source=generator&theme=0"
+                  accentColor="rgb(168, 85, 247)"
+                  isDragging={isDragging}
+                />
+              </div>
+            </Suspense>
 
-            <div
-              className="hidden lg:block"
-              onMouseDown={handlePlaylistMouseDown}
-              style={{
-                position: 'fixed',
-                left: `${playlistPosition.x}px`,
-                top: `${playlistPosition.y}px`,
-                zIndex: 30,
-                pointerEvents: 'auto'
-              }}
-            >
-              <SpotifyGlassCard
-                spotifyUrl="https://open.spotify.com/embed/playlist/6y6uFhkd4QSgiZ4XBZekNb?utm_source=generator"
-                accentColor="rgb(168, 85, 247)"
-                isDragging={isPlaylistDragging}
-              />
-            </div>
+            <Suspense fallback={<SpotifyWidgetSkeleton />}>
+              <div
+                className="hidden lg:block"
+                onMouseDown={handlePlaylistMouseDown}
+                style={{
+                  position: 'fixed',
+                  left: `${playlistPosition.x}px`,
+                  top: `${playlistPosition.y}px`,
+                  zIndex: 30,
+                  pointerEvents: 'auto'
+                }}
+              >
+                <SpotifyGlassCard
+                  spotifyUrl="https://open.spotify.com/embed/playlist/6y6uFhkd4QSgiZ4XBZekNb?utm_source=generator"
+                  accentColor="rgb(168, 85, 247)"
+                  isDragging={isPlaylistDragging}
+                />
+              </div>
+            </Suspense>
           </>
         )}
       </main>

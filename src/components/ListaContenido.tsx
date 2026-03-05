@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, Suspense, lazy } from 'react'
 import { useAuth } from '@hooks/useAuth'
 import { useItems } from '@hooks/useItems'
 import { useSuggestions } from '@hooks/useSuggestions'
@@ -11,10 +11,11 @@ import ItemCard from '@components/ItemCard'
 import SearchBar from '@components/SearchBar'
 import FilterPanel from '@components/FilterPanel'
 import ErrorAlert from '@components/ErrorAlert'
-import RingSlider from '@components/RingSlider'
-
 import { CreateListDialog, InviteDialog } from '@components/ListDialogs'
 import ListSelector from '@components/ListSelector'
+
+// ─── Lazy load heavy component (uses Swiper) ───────────────────────────────
+const RingSlider = lazy(() => import('@components/RingSlider'))
 
 interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
@@ -25,6 +26,18 @@ interface ListaContenidoProps {
   setCurrentList?: (list: List) => void
   loadingLists?: boolean
 }
+
+// ─── RingSlider Loading Fallback ───────────────────────────────────────────
+const RingSliderSkeleton: React.FC = () => (
+  <div className="relative z-10 w-full h-screen flex items-center justify-center bg-gradient-to-b from-black via-purple-900/10 to-black">
+    <div className="text-center space-y-4">
+      <div className="inline-flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin"></div>
+      </div>
+      <p className="text-purple-400 font-bold text-sm uppercase tracking-widest">Cargando vista 3D...</p>
+    </div>
+  </div>
+)
 
 // Removed duplicate definition below
 const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, lists, currentList, setCurrentList, loadingLists }) => {
@@ -352,15 +365,17 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
       {/* Ring view - Full Screen */}
       {!loading && filteredItems.length > 0 && viewMode === 'ring' && (
-        <div className="relative z-10 w-full">
-          <RingSlider
-            items={filteredItems}
-            allItems={items}
-            onOpenDetails={handleOpenDetails}
-            userOwnerId={user?.id}
-            onViewModeChange={handleSetViewMode}
-          />
-        </div>
+        <Suspense fallback={<RingSliderSkeleton />}>
+          <div className="relative z-10 w-full">
+            <RingSlider
+              items={filteredItems}
+              allItems={items}
+              onOpenDetails={handleOpenDetails}
+              userOwnerId={user?.id}
+              onViewModeChange={handleSetViewMode}
+            />
+          </div>
+        </Suspense>
       )}
 
       {/* Grid/Slider/Normal views */}

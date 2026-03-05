@@ -1,6 +1,7 @@
 import React, { Ref } from 'react'
 import { OmdbSuggestion } from '@/types'
 import { Loader2 } from 'lucide-react'
+import OptimizedImage from './OptimizedImage'
 
 interface SearchBarProps {
   value: string
@@ -68,20 +69,14 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
                 onClick={() => onSuggestionSelect?.(suggestion)}
                 className="w-full flex items-center gap-4 p-3 hover:bg-pink-500/20 border-b border-white/5 text-left transition-all last:border-b-0"
               >
-                <img
-                  src={
-                    suggestion.Poster !== 'N/A'
-                      ? suggestion.Poster
-                      : 'https://via.placeholder.com/60x90?text=No+Image'
-                  }
-                  className="w-10 h-14 object-cover rounded border border-pink-500/30"
-                  alt={suggestion.Title}
-                  loading="lazy"
-                  onError={(e) => {
-                    // Fallback to placeholder if image fails to load
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/60x90?text=No+Image'
-                  }}
-                />
+                <div className="w-10 h-14 flex-shrink-0 rounded border border-pink-500/30 overflow-hidden">
+                  <OptimizedImage
+                    src={suggestion.Poster !== 'N/A' ? suggestion.Poster : undefined}
+                    alt={suggestion.Title}
+                    className="w-full h-full object-cover"
+                    placeholderUrl="https://via.placeholder.com/60x90?text=No+Image"
+                  />
+                </div>
                 <div>
                   <div className="text-white font-black text-sm uppercase italic">
                     {suggestion.Title}
