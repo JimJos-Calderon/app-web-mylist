@@ -18,18 +18,28 @@ interface UseOmdbReturn {
 export const useOmdb = (): UseOmdbReturn => {
 
   const fetchFromOmdb = async (title: string): Promise<OmdbResponse> => {
-    // Llamar a la Edge Function de Supabase en lugar de OMDB directamente
-    const { data, error } = await supabase.functions.invoke('search-omdb', {
-      body: {
-        query: title,
-        type: 'movie',
-        page: 1,
-      },
-    })
+    // Usar fetch directo en lugar de supabase.functions.invoke para evitar requerimientos de JWT
+    const response = await fetch(
+      'https://lpaysuasdjgajiftyush.supabase.co/functions/v1/search-omdb',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwYXlzdWFzZGpnYWppZnR5dXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDgyNzUxNDIsImV4cCI6MTk5Mzg1MTE0Mn0.I6I8scpqFLX0xc7OgPRQvQ5zBBBEO1_4rCjQhljW6lI',
+        },
+        body: JSON.stringify({
+          query: title,
+          type: 'movie',
+          page: 1,
+        }),
+      }
+    )
 
-    if (error) {
-      throw new Error(error.message || ERROR_MESSAGES.SEARCH_SUGGESTIONS)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
+
+    const data: OmdbResponse = await response.json()
 
     if (data.Response === 'False' || data.Error) {
       throw new Error('No se encontró la película o serie')

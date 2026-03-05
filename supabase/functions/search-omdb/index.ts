@@ -14,6 +14,7 @@ interface OmdbResponse {
     imdbID: string;
     Type: string;
     Poster: string;
+    Genre?: string;
   }>;
   totalResults?: string;
   Response: string;
@@ -112,8 +113,8 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Verificar que sea una solicitud POST
-    if (req.method !== "POST") {
+    // Verificar que sea una solicitud POST o GET
+    if (req.method !== "POST" && req.method !== "GET") {
       return new Response(
         JSON.stringify({ error: "Method not allowed" }),
         {
@@ -123,7 +124,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // Extraer user_id del token de autorización
+    // Extraer user_id del token de autorización (OPCIONAL - no requiere autenticación)
     const authHeader = req.headers.get("Authorization");
     const userId = extractUserIdFromAuth(authHeader);
 
@@ -217,6 +218,38 @@ serve(async (req: Request) => {
     }
 
     const data: OmdbResponse = await omdbResponse.json();
+
+    // Enriquecer resultados con Genre si es necesario
+    if (data.Search && data.Search.length > 0) {
+      // Obtener género del primer resultado usando su imdbID
+      const firstResult = data.Search[0];
+      
+      if (firstResult.imdbID) {
+        try {
+          const detailsUrl = new URL("https://www.omdbapi.com/");
+          detailsUrl.searchParams.append("apikey", omdbApiKey);
+          detailsUrl.searchParams.append("i", firstResult.imdbID);
+          detailsUrl.searchParams.append("type", type);
+
+          const detailsResponse = await fetch(detailsUrl.toString(), {
+            method: "GET",
+            headers: {
+              "User-Agent": "MyListApp/1.0",
+            },
+          });
+
+          if (detailsResponse.ok) {
+            const details: any = await detailsResponse.json();
+            if (details.Genre) {
+              firstResult.Genre = details.Genre;
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching details for Genre:", error);
+          // Continue without genre if detail fetching fails
+        }
+      }
+    }
 
     // Devolver respuesta
     return new Response(

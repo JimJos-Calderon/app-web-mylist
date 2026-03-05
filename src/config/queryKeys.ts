@@ -45,6 +45,6 @@ export const queryKeys = {
   // ─── Suggestions ─────────────────────────────────────────────────
   suggestions: {
     all: ['suggestions'] as const,
-    byType: (tipo: 'pelicula' | 'serie') => [...queryKeys.suggestions.all, tipo] as const,
+    byType: (tipo: 'pelicula' | 'serie', query: string = '') => [...queryKeys.suggestions.all, tipo, query] as const,
   },
 } as const

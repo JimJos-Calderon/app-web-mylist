@@ -122,22 +122,69 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     setCurrentPage(1)
   }, [filters.searchQuery, filters.showWatched, filters.showUnwatched, filters.sortBy, filters.sortOrder])
 
+  // Función helper para obtener datos de OMDB directamente
+  const fetchOmdbData = async (title: string) => {
+    try {
+      const response = await fetch(
+        'https://lpaysuasdjgajiftyush.supabase.co/functions/v1/search-omdb',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwYXlzdWFzZGpnYWppZnR5dXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDgyNzUxNDIsImV4cCI6MTk5Mzg1MTE0Mn0.I6I8scpqFLX0xc7OgPRQvQ5zBBBEO1_4rCjQhljW6lI',
+          },
+          body: JSON.stringify({
+            query: title,
+            type: tipo === 'pelicula' ? 'movie' : 'series',
+            page: 1,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        console.warn(`OMDB response not ok: ${response.status}`)
+        return { Genre: undefined, Poster: undefined }
+      }
+
+      const data = await response.json()
+      console.log('OMDB Response:', data)
+      const result = data.Search?.[0]
+      console.log('OMDB Search Result:', result)
+      const omdbResult = {
+        Genre:
+          result?.Genre && result.Genre !== 'N/A'
+            ? result.Genre
+            : undefined,
+        Poster: result?.Poster !== 'N/A' ? result.Poster : undefined,
+      }
+      console.log('Extracted OMDB Data:', omdbResult)
+      return omdbResult
+    } catch (err) {
+      console.error('Error fetching OMDB data:', err)
+      return { Genre: undefined, Poster: undefined }
+    }
+  }
+
   const handleAddFromSuggestion = async (suggestion: OmdbSuggestion) => {
     try {
-      // Use poster directly from suggestion, avoiding extra API call
+      // Use poster directly from suggestion
       const poster = suggestion.Poster !== 'N/A' ? suggestion.Poster : null
-      const genre = await getGenre(suggestion.Title)
+      
+      // Obtener género de OMDB usando la sugerencia
+      const omdbData = await fetchOmdbData(suggestion.Title)
 
-      await addItem({
+      const itemData = {
         titulo: suggestion.Title,
         tipo,
         visto: false,
         user_id: user?.id || '',
         user_email: user?.email || '',
         poster_url: poster,
-        genero: genre || undefined,
+        genero: omdbData.Genre || undefined,
         list_id: listId || '',
-      })
+      }
+      console.log('Adding item with data:', itemData)
+      await addItem(itemData)
 
       setSearchInput('')
       setSuggestions([])
@@ -158,19 +205,21 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     }
 
     try {
-      const poster = await getPosterUrl(searchInput)
-      const genre = await getGenre(searchInput)
+      // Obtener género y poster de OMDB
+      const omdbData = await fetchOmdbData(searchInput)
 
-      await addItem({
+      const itemData = {
         titulo: sanitizeInput(searchInput),
         tipo,
         visto: false,
         user_id: user?.id || '',
         user_email: user?.email || '',
-        poster_url: poster,
-        genero: genre || undefined,
+        poster_url: omdbData.Poster || null,
+        genero: omdbData.Genre || undefined,
         list_id: listId || '',
-      })
+      }
+      console.log('Adding item manually with data:', itemData)
+      await addItem(itemData)
 
       setSearchInput('')
       setSuggestions([])
