@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { SORT_OPTIONS } from '@constants/index'
 import { FilterState } from '@/types'
 
@@ -15,16 +16,17 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   onReset,
   sortOptions,
 }) => {
+  const { t } = useTranslation()
   const getSortOrderLabel = () => {
     if (filters.sortBy === 'date') {
-      return filters.sortOrder === 'desc' ? 'Mas recientes' : 'Mas antiguas'
+      return filters.sortOrder === 'desc' ? t('sort_order.most_recent') : t('sort_order.oldest')
     }
 
     if (filters.sortBy === 'title') {
-      return filters.sortOrder === 'desc' ? 'Titulo Z-A' : 'Titulo A-Z'
+      return filters.sortOrder === 'desc' ? t('sort_order.title_desc') : t('sort_order.title_asc')
     }
 
-    return filters.sortOrder === 'desc' ? 'Mejor calificadas' : 'Peor calificadas'
+    return filters.sortOrder === 'desc' ? t('sort_order.best_rated') : t('sort_order.worst_rated')
   }
 
   return (
@@ -39,7 +41,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               onChange={(e) => onFilterChange('showUnwatched', e.target.checked)}
               className="w-4 h-4 md:w-5 md:h-5 rounded border-2 border-cyan-500 accent-cyan-400"
             />
-            <span className="text-xs md:text-sm font-semibold text-slate-300">Pendientes</span>
+            <span className="text-xs md:text-sm font-semibold text-slate-300">{t('filter.pending')}</span>
           </label>
 
           <label className="flex items-center gap-2 md:gap-3 cursor-pointer">
@@ -49,7 +51,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               onChange={(e) => onFilterChange('showWatched', e.target.checked)}
               className="w-4 h-4 md:w-5 md:h-5 rounded border-2 border-cyan-500 accent-cyan-400"
             />
-            <span className="text-xs md:text-sm font-semibold text-slate-300">Vistas</span>
+            <span className="text-xs md:text-sm font-semibold text-slate-300">{t('filter.watched')}</span>
           </label>
         </div>
 
@@ -60,7 +62,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             <select
               value={filters.sortBy}
               onChange={(e) => onFilterChange('sortBy', e.target.value)}
-              aria-label="Ordenar por"
+              aria-label={t('filter.sort_by')}
               className="bg-slate-800 border border-slate-600 text-white px-3 md:px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-xs md:text-sm"
             >
               {sortOptions.map((option) => (
@@ -79,7 +81,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 )
               }
               className="px-3 md:px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 text-slate-200 rounded-lg transition-all text-xs md:text-sm font-semibold whitespace-nowrap"
-              aria-label="Invertir orden"
+              aria-label={t('filter.sort_order_toggle')}
             >
               {getSortOrderLabel()}
             </button>
@@ -88,8 +90,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           {/* Search within filtered */}
           <input
             type="text"
-            placeholder="Filtrar por título..."
-            aria-label="Filtrar por título"
+            placeholder={t('filter.search_placeholder')}
+            aria-label={t('filter.search_label')}
             value={filters.searchQuery}
             onChange={(e) => onFilterChange('searchQuery', e.target.value)}
             className="flex-1 bg-slate-800 border border-slate-600 text-white px-3 md:px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-xs md:text-sm"
@@ -100,7 +102,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             onClick={onReset}
             className="px-4 md:px-6 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white rounded-lg transition-all text-xs md:text-sm font-semibold whitespace-nowrap"
           >
-            Limpiar
+            {t('filter.reset')}
           </button>
         </div>
       </div>

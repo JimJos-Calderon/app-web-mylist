@@ -23,9 +23,9 @@
     "mark_unwatched": "Mark as unwatched",
     "delete_confirm": "Are you sure you want to delete this item?",
     "no_synopsis": "No synopsis available.",
-    "add_first": "Add your first {type} to the list",
+    "add_first": "Add your first {{type}} to the list",
     "no_results": "No results found",
-    "search_no_results": "No {type}s found with \"{query}\""
+    "search_no_results": "No {{type}}s found with \"{{query}}\""
   },
   "stats": {
     "total": "Total",
@@ -39,7 +39,8 @@
     "grid": "Grid",
     "slider": "Slider",
     "ring": "Ring",
-    "normal": "Normal"
+    "normal": "Normal",
+    "loading_3d": "Loading 3D view..."
   },
   "filters": {
     "all": "All",
@@ -47,7 +48,101 @@
     "unwatched": "Unwatched",
     "favorites": "Favorites"
   },
-  "own_item": "Your movie",
+  "own_item": "Yours",
   "shared_item": "Shared movie",
-  "click_for_details": "Click to view details"
+  "click_for_details": "Click to see details",
+  "loading": {
+    "items": "Loading...",
+    "synopsis": "Loading synopsis..."
+  },
+  "pagination": {
+    "previous": "‹ Previous",
+    "next": "Next ›",
+    "page": "Page {{current}} of {{total}}",
+    "showing": "Showing {{from}}-{{to}}"
+  },
+  "modal": {
+    "close": "Close",
+    "delete_title": "Delete \"{{title}}\"?"
+  },
+  "filter": {
+    "pending": "Unwatched",
+    "watched": "Watched",
+    "sort_by": "Sort by",
+    "sort_order_toggle": "Toggle sort order",
+    "search_placeholder": "Filter by title...",
+    "search_label": "Filter by title",
+    "reset": "Clear"
+  },
+  "sort_order": {
+    "most_recent": "Most recent",
+    "oldest": "Oldest",
+    "title_asc": "Title A-Z",
+    "title_desc": "Title Z-A",
+    "best_rated": "Top rated",
+    "worst_rated": "Lowest rated"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your account and preferences",
+    "loading": "Loading settings...",
+    "profile_section": "Edit Profile",
+    "security_section": "Security",
+    "logout_button": "Sign Out",
+    "logout_confirm": "Are you sure you want to sign out?",
+    "username_label": "Username",
+    "username_placeholder": "Your username",
+    "username_error_empty": "Username cannot be empty",
+    "username_error_short": "Username must be at least 3 characters",
+    "username_error_long": "Username cannot exceed 20 characters",
+    "bio_error_long": "Bio cannot exceed 150 characters",
+    "avatar_label": "Profile Picture",
+    "avatar_changing": "⏳ Uploading...",
+    "avatar_uploading": "Uploading...",
+    "avatar_button": "Change profile picture",
+    "avatar_upload_hint": "Formats: JPG, PNG, GIF (max. 2MB)",
+    "save_button": "Save Changes",
+    "saving_button": "Saving...",
+    "save_success": "✓ Changes saved successfully",
+    "bio_label": "About Me (Bio)",
+    "bio_placeholder": "Tell us about you...",
+    "email_change_title": "Change Email",
+    "email_current_label": "Current Email",
+    "email_new_label": "New Email",
+    "email_button": "Change Email",
+    "email_updating": "Updating...",
+    "email_error_empty": "Enter an email address",
+    "email_error_same": "Email is the same as current",
+    "email_success": "Confirmation email sent to your new address",
+    "email_error": "Error changing email",
+    "password_change_title": "Change Password",
+    "password_current_label": "Current Password",
+    "password_current_placeholder": "Enter your current password",
+    "password_new_label": "New Password",
+    "password_confirm_label": "Confirm Password",
+    "password_confirm_placeholder": "Repeat your password",
+    "password_button": "Change Password",
+    "password_show_label": "Show password",
+    "password_hide_label": "Hide password",
+    "password_error_empty": "Complete all fields",
+    "password_error_short": "Password must be at least 6 characters",
+    "password_error_mismatch": "Passwords do not match",
+    "password_error_same": "New password cannot be the same as current",
+    "password_error_wrong": "Current password is incorrect",
+    "password_success": "✓ Password updated successfully",
+    "password_error": "Error changing password",
+    "verify_email_title": "Confirm email change",
+    "verify_email_description": "Enter your password to confirm email change",
+    "verify_email_label": "Password",
+    "verify_email_placeholder": "Enter your password"
+  },
+  "account": {
+    "info_title": "Account Information",
+    "email": "Email",
+    "bio": "Bio",
+    "user_id": "User ID",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "verifying": "Verifying..."
+  }
 }

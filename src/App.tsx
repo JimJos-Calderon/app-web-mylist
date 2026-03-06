@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
 import * as Sentry from '@sentry/react'
 import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle, Users, ArrowRight, Loader2, AtSign, Check, AlertCircle } from 'lucide-react'
@@ -8,6 +9,7 @@ import { useUserProfile } from '@hooks/useUserProfile'
 import { supabase } from '@/supabaseClient'
 import { validateUsername } from '@utils/validation'
 import { SectionErrorFallback } from '@components/SectionErrorFallback'
+import { LanguageSwitcher } from '@components/LanguageSwitcher'
 import Login from '@pages/Login'
 
 const handleSectionError = (error: Error, info: { componentStack?: string | null }) => {
@@ -184,6 +186,7 @@ const UsernameSetupModal: React.FC = () => {
 const App: React.FC = () => {
   const { session, loading, signOut, error: authError, needsUsername } = useAuth()
   const { profile } = useUserProfile()
+  const { t } = useTranslation()
   const location = useLocation()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
@@ -440,19 +443,19 @@ const App: React.FC = () => {
             to="/peliculas"
             className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm"
           >
-            Películas
+            {t('navbar.movies')}
           </Link>
           <Link
             to="/series"
             className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm"
           >
-            Series
+            {t('navbar.series')}
           </Link>
           <Link
             to="/perfil"
             className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm"
           >
-            Mi Perfil
+            {t('navbar.profile')}
           </Link>
           {/* Invitación link removed */}
         </div>
@@ -464,6 +467,11 @@ const App: React.FC = () => {
         >
           <Menu className="w-6 h-6" />
         </button>
+
+        {/* Language Switcher - Desktop */}
+        <div className="hidden md:block">
+          <LanguageSwitcher />
+        </div>
 
         <div className="relative hidden md:block" ref={userMenuRef}>
           <button
@@ -502,14 +510,14 @@ const App: React.FC = () => {
                 onClick={() => setShowUserMenu(false)}
                 className="block w-full text-left px-4 py-2 text-sm text-zinc-200 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors font-medium"
               >
-                Mi Perfil
+                {t('navbar.profile')}
               </Link>
               <Link
                 to="/ajustes"
                 onClick={() => setShowUserMenu(false)}
                 className="block w-full text-left px-4 py-2 text-sm text-zinc-200 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors font-medium"
               >
-                Ajustes
+                {t('navbar.settings')}
               </Link>
               <button
                 onClick={() => {
@@ -518,7 +526,7 @@ const App: React.FC = () => {
                 }}
                 className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors font-medium border-t border-cyan-500/20"
               >
-                Cerrar sesión
+                {t('navbar.logout')}
               </button>
             </div>
           )}
@@ -552,29 +560,33 @@ const App: React.FC = () => {
               onClick={() => setShowMobileMenu(false)}
               className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
             >
-              <Film className="w-4 h-4" /> Películas
+              <Film className="w-4 h-4" /> {t('navbar.movies')}
             </Link>
             <Link
               to="/series"
               onClick={() => setShowMobileMenu(false)}
               className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
             >
-              <Tv className="w-4 h-4" /> Series
+              <Tv className="w-4 h-4" /> {t('navbar.series')}
             </Link>
             <Link
               to="/perfil"
               onClick={() => setShowMobileMenu(false)}
               className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
             >
-              <User className="w-4 h-4" /> Mi Perfil
+              <User className="w-4 h-4" /> {t('navbar.profile')}
             </Link>
             <Link
               to="/ajustes"
               onClick={() => setShowMobileMenu(false)}
               className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
             >
-              <Settings className="w-4 h-4" /> Ajustes
+              <Settings className="w-4 h-4" /> {t('navbar.settings')}
             </Link>
+            {/* Language Switcher - Mobile */}
+            <div className="px-4 py-3 border-b border-pink-500/10 flex justify-center">
+              <LanguageSwitcher />
+            </div>
             {/* Invitación link removed from mobile menu */}
             <button
               onClick={() => {
@@ -583,7 +595,7 @@ const App: React.FC = () => {
               }}
               className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors font-bold flex items-center gap-2"
             >
-              <LogOut className="w-4 h-4" /> Cerrar sesión
+              <LogOut className="w-4 h-4" /> {t('navbar.logout')}
             </button>
           </div>
         )}

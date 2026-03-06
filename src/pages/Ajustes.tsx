@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
 import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key } from 'lucide-react'
 
 type Section = 'perfil' | 'seguridad'
 
 const Ajustes: React.FC = () => {
+  const { t } = useTranslation()
   const { user, signOut } = useAuth()
   const { profile, loading, error, saveProfile, uploadAvatar, updateBio } = useUserProfile()
   const [activeSection, setActiveSection] = useState<Section>('perfil')
@@ -43,22 +45,22 @@ const Ajustes: React.FC = () => {
 
   const handleSaveChanges = async () => {
     if (!username.trim()) {
-      alert('El nombre de usuario no puede estar vacío')
+      alert(t('settings.username_error_empty'))
       return
     }
 
     if (username.length < 3) {
-      alert('El nombre de usuario debe tener al menos 3 caracteres')
+      alert(t('settings.username_error_short'))
       return
     }
 
     if (username.length > 20) {
-      alert('El nombre de usuario no puede exceder 20 caracteres')
+      alert(t('settings.username_error_long'))
       return
     }
 
     if (bio.length > 150) {
-      alert('La bio no puede exceder 150 caracteres')
+      alert(t('settings.bio_error_long'))
       return
     }
 
@@ -96,7 +98,7 @@ const Ajustes: React.FC = () => {
   }
 
   const handleLogout = async () => {
-    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+    if (confirm(t('settings.logout_confirm'))) {
       await signOut()
       navigate('/')
     }
@@ -106,12 +108,12 @@ const Ajustes: React.FC = () => {
     e.preventDefault()
     
     if (!newEmail.trim()) {
-      setSecurityMessage({ type: 'error', text: 'Ingresa un correo electrónico' })
+      setSecurityMessage({ type: 'error', text: t('settings.email_error_empty') })
       return
     }
 
     if (newEmail === user?.email) {
-      setSecurityMessage({ type: 'error', text: 'El correo es el mismo que el actual' })
+      setSecurityMessage({ type: 'error', text: t('settings.email_error_same') })
       return
     }
 
@@ -121,7 +123,7 @@ const Ajustes: React.FC = () => {
 
   const handleVerifyAndChangeEmail = async () => {
     if (!verifyEmailPassword.trim()) {
-      setSecurityMessage({ type: 'error', text: 'Ingresa tu contraseña' })
+      setSecurityMessage({ type: 'error', text: t('settings.verify_email_placeholder') })
       return
     }
 
@@ -134,7 +136,7 @@ const Ajustes: React.FC = () => {
         password: verifyEmailPassword
       })
       
-      if (signInError) throw new Error('La contraseña es incorrecta')
+      if (signInError) throw new Error(t('settings.password_error_wrong'))
       
       const { error } = await supabase.auth.updateUser({ email: newEmail })
       
@@ -142,13 +144,13 @@ const Ajustes: React.FC = () => {
       
       setSecurityMessage({ 
         type: 'success', 
-        text: 'Se ha enviado un correo de confirmación a tu nueva dirección' 
+        text: t('settings.email_success') 
       })
       setNewEmail('')
       setVerifyEmailPassword('')
       setShowVerifyEmailModal(false)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cambiar correo'
+      const message = err instanceof Error ? err.message : t('settings.email_error')
       setSecurityMessage({ type: 'error', text: message })
     } finally {
       setIsSaving(false)
@@ -159,22 +161,22 @@ const Ajustes: React.FC = () => {
     e.preventDefault()
     
     if (!currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
-      setSecurityMessage({ type: 'error', text: 'Completa todos los campos' })
+      setSecurityMessage({ type: 'error', text: t('settings.password_error_empty') })
       return
     }
 
     if (newPassword.length < 6) {
-      setSecurityMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres' })
+      setSecurityMessage({ type: 'error', text: t('settings.password_error_short') })
       return
     }
 
     if (newPassword !== confirmPassword) {
-      setSecurityMessage({ type: 'error', text: 'Las contraseñas no coinciden' })
+      setSecurityMessage({ type: 'error', text: t('settings.password_error_mismatch') })
       return
     }
 
     if (currentPassword === newPassword) {
-      setSecurityMessage({ type: 'error', text: 'La nueva contraseña no puede ser igual a la actual' })
+      setSecurityMessage({ type: 'error', text: t('settings.password_error_same') })
       return
     }
 
@@ -187,7 +189,7 @@ const Ajustes: React.FC = () => {
         password: currentPassword
       })
       
-      if (signInError) throw new Error('La contraseña actual es incorrecta')
+      if (signInError) throw new Error(t('settings.password_error_wrong'))
       
       const { error } = await supabase.auth.updateUser({ password: newPassword })
       
@@ -195,13 +197,13 @@ const Ajustes: React.FC = () => {
       
       setSecurityMessage({ 
         type: 'success', 
-        text: '✓ Contraseña actualizada correctamente' 
+        text: t('settings.password_success') 
       })
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cambiar contraseña'
+      const message = err instanceof Error ? err.message : t('settings.password_error')
       setSecurityMessage({ type: 'error', text: message })
     } finally {
       setIsSaving(false)
@@ -211,7 +213,7 @@ const Ajustes: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center">
-        <div className="text-white">Cargando ajustes...</div>
+        <div className="text-white">{t('settings.loading')}</div>
       </div>
     )
   }
@@ -222,9 +224,9 @@ const Ajustes: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-black mb-2 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            Ajustes
+            {t('settings.title')}
           </h1>
-          <p className="text-zinc-400">Gestiona tu cuenta y preferencias</p>
+          <p className="text-zinc-400">{t('settings.description')}</p>
         </div>
 
         <div className="flex flex-col md:flex-row gap-6">
@@ -240,7 +242,7 @@ const Ajustes: React.FC = () => {
                       : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                   }`}
                 >
-                  <User className="w-5 h-5" /> Modificar Perfil
+                  <User className="w-5 h-5" /> {t('settings.profile_section')}
                 </button>
                 <button
                   onClick={() => setActiveSection('seguridad')}
@@ -250,7 +252,7 @@ const Ajustes: React.FC = () => {
                       : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                   }`}
                 >
-                  <LockKeyhole className="w-5 h-5" /> Seguridad
+                  <LockKeyhole className="w-5 h-5" /> {t('settings.security_section')}
                 </button>
               </nav>
               
@@ -259,7 +261,7 @@ const Ajustes: React.FC = () => {
                 onClick={handleLogout}
                 className="w-full mt-6 px-4 py-3 bg-red-500/20 border border-red-500/30 text-red-400 font-bold rounded-lg hover:bg-red-500/30 transition-all text-sm"
               >
-                Cerrar Sesión
+                {t('settings.logout_button')}
               </button>
             </div>
           </div>
@@ -276,7 +278,7 @@ const Ajustes: React.FC = () => {
                       {isUploading ? (
                         <div className="text-center">
                           <div className="animate-spin w-12 h-12 border-4 border-white/30 border-t-white rounded-full mx-auto mb-2"></div>
-                          <p className="text-xs text-white">Subiendo...</p>
+                          <p className="text-xs text-white">{t('settings.avatar_uploading')}</p>
                         </div>
                       ) : avatarUrl ? (
                         <img
@@ -296,13 +298,13 @@ const Ajustes: React.FC = () => {
                   {/* Username Form */}
                   <div className="mb-6 pb-6 border-b border-zinc-700">
                     <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                      Nombre de Usuario
+                      {t('settings.username_label')}
                     </label>
                     <input
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Tu nombre de usuario"
+                      placeholder={t('settings.username_placeholder')}
                       disabled={isSaving}
                       maxLength={20}
                       className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2"
@@ -315,7 +317,7 @@ const Ajustes: React.FC = () => {
                   {/* Avatar Form */}
                   <div className="mb-6 pb-6 border-b border-zinc-700">
                     <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                      Foto de Perfil
+                      {t('settings.avatar_label')}
                     </label>
                     
                     {/* File Upload */}
@@ -329,11 +331,11 @@ const Ajustes: React.FC = () => {
                           className="hidden"
                         />
                         <div className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(147,51,234,0.4)] transition-all cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed">
-                          {isUploading ? '⏳ Subiendo...' : 'Cambiar foto de perfil'}
+                          {isUploading ? t('settings.avatar_uploading') : t('settings.avatar_button')}
                         </div>
                       </label>
                       <p className="text-xs text-zinc-500 mt-2">
-                        Formatos: JPG, PNG, GIF (máx. 2MB)
+                        {t('settings.avatar_upload_hint')}
                       </p>
                     </div>
                   </div>
@@ -341,12 +343,12 @@ const Ajustes: React.FC = () => {
                   {/* Bio Form */}
                   <div className="mb-6">
                     <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                      Sobre mí (Bio)
+                      {t('settings.bio_label')}
                     </label>
                     <textarea
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      placeholder="Cuéntanos sobre ti..."
+                      placeholder={t('settings.bio_placeholder')}
                       disabled={isSaving}
                       maxLength={150}
                       rows={3}
@@ -366,7 +368,7 @@ const Ajustes: React.FC = () => {
 
                   {saveSuccess && (
                     <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-2 rounded-lg text-sm mb-4">
-                      ✓ Perfil actualizado correctamente
+                      {t('settings.save_success')}
                     </div>
                   )}
 
@@ -376,26 +378,26 @@ const Ajustes: React.FC = () => {
                     disabled={isSaving || !username.trim()}
                     className="w-full px-4 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                    {isSaving ? t('settings.saving_button') : t('settings.save_button')}
                   </button>
                 </div>
 
                 {/* Account Info */}
                 <div className="bg-black/40 border border-zinc-700/50 rounded-2xl p-6">
-                  <h2 className="text-lg font-bold mb-4">Información de la Cuenta</h2>
+                  <h2 className="text-lg font-bold mb-4">{t('account.info_title')}</h2>
                   <div className="space-y-3 text-sm">
                     <div>
-                      <span className="text-zinc-400">Email:</span>
+                      <span className="text-zinc-400">{t('account.email')}:</span>
                       <p className="text-zinc-300 break-all mt-1">{user?.email}</p>
                     </div>
                     {bio && (
                       <div className="pt-3 border-t border-zinc-700">
-                        <span className="text-zinc-400">Bio:</span>
+                        <span className="text-zinc-400">{t('account.bio')}:</span>
                         <p className="text-zinc-300 mt-1 whitespace-pre-wrap">{bio}</p>
                       </div>
                     )}
                     <div className={bio ? 'pt-3 border-t border-zinc-700' : ''}>
-                      <span className="text-zinc-400">ID de Usuario:</span>
+                      <span className="text-zinc-400">{t('account.user_id')}:</span>
                       <p className="text-zinc-300 break-all font-mono text-xs mt-1">{user?.id}</p>
                     </div>
                   </div>
@@ -409,13 +411,13 @@ const Ajustes: React.FC = () => {
                 <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-3xl p-8">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                     <Mail className="w-5 h-5" />
-                    Cambiar Correo Electrónico
+                    {t('settings.email_change_title')}
                   </h2>
                   
                   <form onSubmit={handleChangeEmail} className="space-y-4">
                     <div>
                       <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                        Correo Actual
+                        {t('settings.email_current_label')}
                       </label>
                       <input
                         type="email"
@@ -427,7 +429,7 @@ const Ajustes: React.FC = () => {
                     
                     <div>
                       <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                        Nuevo Correo Electrónico
+                        {t('settings.email_new_label')}
                       </label>
                       <input
                         type="email"
@@ -444,7 +446,7 @@ const Ajustes: React.FC = () => {
                       disabled={isSaving || !newEmail.trim()}
                       className="w-full px-4 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isSaving ? 'Actualizando...' : 'Cambiar Correo'}
+                      {isSaving ? t('settings.email_updating') : t('settings.email_button')}
                     </button>
                   </form>
                 </div>
@@ -453,20 +455,20 @@ const Ajustes: React.FC = () => {
                 <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-3xl p-8">
                   <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                     <Key className="w-5 h-5" />
-                    Cambiar Contraseña
+                    {t('settings.password_change_title')}
                   </h2>
                   
                   <form onSubmit={handleChangePassword} className="space-y-4">
                     <div>
                       <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                        Contraseña Actual
+                        {t('settings.password_current_label')}
                       </label>
                       <div className="relative">
                         <input
                           type={showCurrentPassword ? 'text' : 'password'}
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
-                          placeholder="Ingresa tu contraseña actual"
+                          placeholder={t('settings.password_current_placeholder')}
                           disabled={isSaving}
                           className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                         />
@@ -475,7 +477,7 @@ const Ajustes: React.FC = () => {
                           onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                           disabled={isSaving}
-                          aria-label={showCurrentPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          aria-label={showCurrentPassword ? t('settings.password_hide_label') : t('settings.password_show_label')}
                         >
                           {showCurrentPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
@@ -484,7 +486,7 @@ const Ajustes: React.FC = () => {
                     
                     <div>
                       <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                        Nueva Contraseña
+                        {t('settings.password_new_label')}
                       </label>
                       <div className="relative">
                         <input
@@ -500,7 +502,7 @@ const Ajustes: React.FC = () => {
                           onClick={() => setShowNewPassword(!showNewPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                           disabled={isSaving}
-                          aria-label={showNewPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          aria-label={showNewPassword ? t('settings.password_hide_label') : t('settings.password_show_label')}
                         >
                           {showNewPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
@@ -509,14 +511,14 @@ const Ajustes: React.FC = () => {
                     
                     <div>
                       <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                        Confirmar Contraseña
+                        {t('settings.password_confirm_label')}
                       </label>
                       <div className="relative">
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Repite tu contraseña"
+                          placeholder={t('settings.password_confirm_placeholder')}
                           disabled={isSaving}
                           className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                         />
@@ -525,7 +527,7 @@ const Ajustes: React.FC = () => {
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                           disabled={isSaving}
-                          aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          aria-label={showConfirmPassword ? t('settings.password_hide_label') : t('settings.password_show_label')}
                         >
                           {showConfirmPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
@@ -537,7 +539,7 @@ const Ajustes: React.FC = () => {
                       disabled={isSaving || !currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim()}
                       className="w-full px-4 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isSaving ? 'Actualizando...' : 'Cambiar Contraseña'}
+                      {isSaving ? t('settings.email_updating') : t('settings.password_button')}
                     </button>
                   </form>
                 </div>
@@ -561,22 +563,22 @@ const Ajustes: React.FC = () => {
         {showVerifyEmailModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-black/90 border border-cyan-500/20 rounded-2xl p-8 max-w-md w-full">
-              <h3 className="text-xl font-bold mb-2">Verificar Identidad</h3>
+              <h3 className="text-xl font-bold mb-2">{t('settings.verify_email_title')}</h3>
               <p className="text-zinc-400 text-sm mb-6">
-                Ingresa tu contraseña para confirmar el cambio de correo electrónico
+                {t('settings.verify_email_description')}
               </p>
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-zinc-400 mb-3">
-                    Contraseña
+                    {t('settings.verify_email_label')}
                   </label>
                   <div className="relative">
                     <input
                       type={showVerifyEmailPassword ? 'text' : 'password'}
                       value={verifyEmailPassword}
                       onChange={(e) => setVerifyEmailPassword(e.target.value)}
-                      placeholder="Ingresa tu contraseña"
+                      placeholder={t('settings.verify_email_placeholder')}
                       disabled={isSaving}
                       className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                     />
@@ -585,7 +587,7 @@ const Ajustes: React.FC = () => {
                       onClick={() => setShowVerifyEmailPassword(!showVerifyEmailPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                       disabled={isSaving}
-                      aria-label={showVerifyEmailPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      aria-label={showVerifyEmailPassword ? t('settings.password_hide_label') : t('settings.password_show_label')}
                     >
                       {showVerifyEmailPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                     </button>
@@ -608,14 +610,14 @@ const Ajustes: React.FC = () => {
                     disabled={isSaving}
                     className="flex-1 px-4 py-3 text-white border border-zinc-700 rounded-lg hover:bg-zinc-800/50 transition-all disabled:opacity-50"
                   >
-                    Cancelar
+                    {t('account.cancel')}
                   </button>
                   <button
                     onClick={handleVerifyAndChangeEmail}
                     disabled={isSaving || !verifyEmailPassword.trim()}
                     className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSaving ? 'Verificando...' : 'Confirmar'}
+                    {isSaving ? t('account.verifying') : t('account.confirm')}
                   </button>
                 </div>
               </div>

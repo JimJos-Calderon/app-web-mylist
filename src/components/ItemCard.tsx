@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Trash2, Loader2, Film } from 'lucide-react'
 import { ListItem } from '@/types'
 import { useUsername } from '@hooks/useUsername'
@@ -23,6 +24,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
   onOpenDetails,
   disableVistoEffect = false,
 }) => {
+  const { t } = useTranslation()
   const [deleting, setDeleting] = React.useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false)
   const { username } = useUsername(item.user_id)
@@ -80,7 +82,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
             <div>
               <Film className="w-12 h-12 mx-auto mb-2 text-zinc-500" />
               <div className="text-[10px] text-zinc-500 font-black uppercase">
-                {item.tipo === 'pelicula' ? 'Película' : 'Serie'}
+                {item.tipo === 'pelicula' ? t('movies.title') : t('series.title')}
               </div>
             </div>
           </div>
@@ -104,7 +106,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 : 'border-pink-500/30 text-pink-500 bg-pink-500/5'
             }`}
           >
-            {isOwn ? 'TUYO' : (username || item.user_email?.split('@')[0] || 'Usuario')}
+            {isOwn ? t('own_item') : (username || item.user_email?.split('@')[0] || 'Usuario')}
             {item.genero && (
               <>
                 <span className="mx-1.5">•</span>
@@ -131,8 +133,8 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 ? 'text-cyan-400 hover:text-cyan-300'
                 : 'text-zinc-500 hover:text-cyan-400'
             }`}
-            title={item.visto ? 'Marcar como no visto' : 'Marcar como visto'}
-            aria-label={item.visto ? 'Marcar como no visto' : 'Marcar como visto'}
+            title={item.visto ? t('item.mark_unwatched') : t('item.mark_watched')}
+            aria-label={item.visto ? t('item.mark_unwatched') : t('item.mark_watched')}
           >
             {item.visto ? (
               <Eye className="h-4 w-4" aria-hidden="true" />
@@ -148,8 +150,8 @@ const ItemCard: React.FC<ItemCardProps> = ({
             }}
             disabled={deleting}
             className="text-zinc-500 hover:text-red-500 transition-all p-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Eliminar"
-            aria-label="Eliminar elemento"
+            title={t('buttons.delete')}
+            aria-label={`${t('buttons.delete')} ${item.titulo}`}
           >
             {deleting ? (
               <Loader2 className="animate-spin h-4 w-4" aria-hidden="true" />
@@ -163,10 +165,10 @@ const ItemCard: React.FC<ItemCardProps> = ({
       {/* Confirm Delete Dialog */}
       <ConfirmDialog
         isOpen={showConfirmDialog}
-        title="¿Eliminar?"
-        message={`¿Estás seguro de que deseas eliminar "${item.titulo}"? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        title={t('buttons.delete')}
+        message={t('item.delete_confirm')}
+        confirmText={t('buttons.delete')}
+        cancelText={t('buttons.cancel')}
         onConfirm={handleDelete}
         onCancel={() => setShowConfirmDialog(false)}
       />

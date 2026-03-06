@@ -1,4 +1,13 @@
 {
+  "navbar": {
+    "appName": "Our List",
+    "movies": "Movies",
+    "series": "Series",
+    "profile": "My Profile",
+    "settings": "Settings",
+    "logout": "Sign Out",
+    "myAccount": "My Account"
+  },
   "buttons": {
     "save": "Save",
     "cancel": "Cancel",

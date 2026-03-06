@@ -23,9 +23,9 @@
     "mark_unwatched": "Marcar como no visto",
     "delete_confirm": "¿Estás seguro de que deseas eliminar este elemento?",
     "no_synopsis": "No hay sinopsis disponible.",
-    "add_first": "Agrega tu primer {type} a la lista",
+    "add_first": "Agrega tu primer {{type}} a la lista",
     "no_results": "No hay resultados",
-    "search_no_results": "No se encontraron {type}s con \"{query}\""
+    "search_no_results": "No se encontraron {{type}}s con \"{{query}}\""
   },
   "stats": {
     "total": "Total",
@@ -39,7 +39,8 @@
     "grid": "Grid",
     "slider": "Slider",
     "ring": "Ring",
-    "normal": "Normal"
+    "normal": "Normal",
+    "loading_3d": "Cargando vista 3D..."
   },
   "filters": {
     "all": "Todas",
@@ -47,7 +48,101 @@
     "unwatched": "Pendientes",
     "favorites": "Favoritas"
   },
-  "own_item": "Tus película",
+  "own_item": "Tuyo",
   "shared_item": "Película compartida",
-  "click_for_details": "Haz clic para ver detalles"
+  "click_for_details": "Haz clic para ver detalles",
+  "loading": {
+    "items": "Cargando...",
+    "synopsis": "Cargando sinopsis..."
+  },
+  "pagination": {
+    "previous": "‹ Anterior",
+    "next": "Siguiente ›",
+    "page": "Página {{current}} de {{total}}",
+    "showing": "Mostrando {{from}}-{{to}}"
+  },
+  "modal": {
+    "close": "Cerrar",
+    "delete_title": "¿Eliminar \"{{title}}\"?"
+  },
+  "filter": {
+    "pending": "Pendientes",
+    "watched": "Vistas",
+    "sort_by": "Ordenar por",
+    "sort_order_toggle": "Invertir orden",
+    "search_placeholder": "Filtrar por título...",
+    "search_label": "Filtrar por título",
+    "reset": "Limpiar"
+  },
+  "sort_order": {
+    "most_recent": "Más recientes",
+    "oldest": "Más antiguas",
+    "title_asc": "Título A-Z",
+    "title_desc": "Título Z-A",
+    "best_rated": "Mejor calificadas",
+    "worst_rated": "Peor calificadas"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "description": "Gestiona tu cuenta y preferencias",
+    "loading": "Cargando ajustes...",
+    "profile_section": "Modificar Perfil",
+    "security_section": "Seguridad",
+    "logout_button": "Cerrar Sesión",
+    "logout_confirm": "¿Estás seguro de que deseas cerrar sesión?",
+    "username_label": "Nombre de Usuario",
+    "username_placeholder": "Tu nombre de usuario",
+    "username_error_empty": "El nombre de usuario no puede estar vacío",
+    "username_error_short": "El nombre de usuario debe tener al menos 3 caracteres",
+    "username_error_long": "El nombre de usuario no puede exceder 20 caracteres",
+    "bio_error_long": "La bio no puede exceder 150 caracteres",
+    "avatar_label": "Foto de Perfil",
+    "avatar_changing": "⏳ Subiendo...",
+    "avatar_uploading": "Subiendo...",
+    "avatar_button": "Cambiar foto de perfil",
+    "avatar_upload_hint": "Formatos: JPG, PNG, GIF (máx. 2MB)",
+    "save_button": "Guardar Cambios",
+    "saving_button": "Guardando...",
+    "save_success": "✓ Cambios guardados correctamente",
+    "bio_label": "Sobre mí (Bio)",
+    "bio_placeholder": "Cuéntanos sobre ti...",
+    "email_change_title": "Cambiar Correo Electrónico",
+    "email_current_label": "Correo Actual",
+    "email_new_label": "Nuevo Correo Electrónico",
+    "email_button": "Cambiar Correo",
+    "email_updating": "Actualizando...",
+    "email_error_empty": "Ingresa un correo electrónico",
+    "email_error_same": "El correo es el mismo que el actual",
+    "email_success": "Se ha enviado un correo de confirmación a tu nueva dirección",
+    "email_error": "Error al cambiar correo",
+    "password_change_title": "Cambiar Contraseña",
+    "password_current_label": "Contraseña Actual",
+    "password_current_placeholder": "Ingresa tu contraseña actual",
+    "password_new_label": "Nueva Contraseña",
+    "password_confirm_label": "Confirmar Contraseña",
+    "password_confirm_placeholder": "Repite tu contraseña",
+    "password_button": "Cambiar Contraseña",
+    "password_show_label": "Mostrar contraseña",
+    "password_hide_label": "Ocultar contraseña",
+    "password_error_empty": "Completa todos los campos",
+    "password_error_short": "La contraseña debe tener al menos 6 caracteres",
+    "password_error_mismatch": "Las contraseñas no coinciden",
+    "password_error_same": "La nueva contraseña no puede ser igual a la actual",
+    "password_error_wrong": "La contraseña actual es incorrecta",
+    "password_success": "✓ Contraseña actualizada correctamente",
+    "password_error": "Error al cambiar contraseña",
+    "verify_email_title": "Confirmar cambio de correo",
+    "verify_email_description": "Ingresa tu contraseña para confirmar el cambio de correo electrónico",
+    "verify_email_label": "Contraseña",
+    "verify_email_placeholder": "Ingresa tu contraseña"
+  },
+  "account": {
+    "info_title": "Información de la Cuenta",
+    "email": "Email",
+    "bio": "Bio",
+    "user_id": "ID de Usuario",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "verifying": "Verificando..."
+  }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, Suspense, lazy } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@hooks/useAuth'
 import { useItems } from '@hooks/useItems'
 import { useSuggestions } from '@hooks/useSuggestions'
@@ -28,13 +29,13 @@ interface ListaContenidoProps {
 }
 
 // ─── RingSlider Loading Fallback ───────────────────────────────────────────
-const RingSliderSkeleton: React.FC = () => (
+const RingSliderSkeleton: React.FC<{ t: any }> = ({ t }) => (
   <div className="relative z-10 w-full h-screen flex items-center justify-center bg-gradient-to-b from-black via-purple-900/10 to-black">
     <div className="text-center space-y-4">
       <div className="inline-flex items-center justify-center">
         <div className="w-16 h-16 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin"></div>
       </div>
-      <p className="text-purple-400 font-bold text-sm uppercase tracking-widest">Cargando vista 3D...</p>
+      <p className="text-purple-400 font-bold text-sm uppercase tracking-widest">{t('view_modes.loading_3d')}</p>
     </div>
   </div>
 )
@@ -42,6 +43,7 @@ const RingSliderSkeleton: React.FC = () => (
 // Removed duplicate definition below
 const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, lists, currentList, setCurrentList, loadingLists }) => {
   const { user } = useAuth()
+  const { t } = useTranslation()
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [searchInput, setSearchInput] = useState('')
@@ -419,7 +421,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
       {/* Ring view - Full Screen */}
       {!loading && filteredItems.length > 0 && viewMode === 'ring' && (
-        <Suspense fallback={<RingSliderSkeleton />}>
+        <Suspense fallback={<RingSliderSkeleton t={t} />}>
           <div className="relative z-10 w-full">
             <RingSlider
               items={filteredItems}
@@ -506,7 +508,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                 <div className="inline-flex flex-col items-center gap-4">
                   <div className="w-12 h-12 rounded-full border-4 border-pink-500/20 border-t-pink-500 animate-spin"></div>
                   <p className="text-cyan-400 font-black text-sm uppercase tracking-widest">
-                    Cargando {tipo}s...
+                    {t('loading.items')}
                   </p>
                 </div>
               </div>
@@ -518,13 +520,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                 <div className="text-6xl mb-4">🍿</div>
                 <h3 className="text-xl font-black text-white mb-2">
                   {filters.searchQuery
-                    ? 'No hay resultados'
-                    : 'Sin elementos aún'}
+                    ? t('item.no_results')
+                    : t('item.add_first', { type: tipo })}
                 </h3>
                 <p className="text-slate-400">
                   {filters.searchQuery
-                    ? `No se encontraron ${tipo}s con "${filters.searchQuery}"`
-                    : `Agrega tu primer ${tipo} a la lista`}
+                    ? t('item.search_no_results', { type: tipo, query: filters.searchQuery })
+                    : t('item.add_first', { type: tipo })}
                 </p>
               </div>
             )}
@@ -561,7 +563,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                         }
                   `}
                     >
-                      <span className="hidden sm:inline">‹ Anterior</span>
+                      <span className="hidden sm:inline">{t('pagination.previous')}</span>
                       <span className="sm:hidden">‹</span>
                     </button>
 
@@ -629,7 +631,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                         }
                   `}
                     >
-                      <span className="hidden sm:inline">Siguiente ›</span>
+                      <span className="hidden sm:inline">{t('pagination.next')}</span>
                       <span className="sm:hidden">›</span>
                     </button>
                   </div>
@@ -639,12 +641,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                 {totalPages > 1 && (
                   <div className="mt-3 md:mt-4 text-center px-4">
                     <p className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider md:tracking-widest font-bold">
-                      <span className="hidden sm:inline">Página {currentPage} de {totalPages} • </span>
+                      <span className="hidden sm:inline">{t('pagination.page', { current: currentPage, total: totalPages })} • </span>
                       {filteredItems.length} {tipo}s
-                      <span className="hidden sm:inline"> en total</span>
+                      <span className="hidden sm:inline"> {t('stats.in_total')}</span>
                     </p>
                   </div>
                 )}
+
               </>
             )}
 
@@ -713,7 +716,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                 type="button"
                 onClick={handleCloseDetails}
                 className="text-slate-400 hover:text-white transition"
-                aria-label="Cerrar"
+                aria-label={t('modal.close')}
               >
                 ✕
               </button>
@@ -738,10 +741,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               </div>
 
               <div className="text-sm text-slate-200 leading-relaxed">
-                {synopsisLoading && <p className="text-slate-400">Cargando sinopsis...</p>}
+                {synopsisLoading && <p className="text-slate-400">{t('loading.synopsis')}</p>}
                 {synopsisError && <p className="text-red-400">{synopsisError}</p>}
                 {!synopsisLoading && !synopsisError && (
-                  <p>{synopsis || 'No hay sinopsis disponible.'}</p>
+                  <p>{synopsis || t('item.no_synopsis')}</p>
                 )}
               </div>
 
@@ -766,7 +769,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   <button
                     type="button"
                     onClick={async () => {
-                      if (!confirm(`¿Eliminar "${selectedItem.titulo}"?`)) return
+                      if (!confirm(t('modal.delete_title', { title: selectedItem.titulo }))) return
                       try {
                         await deleteItem(selectedItem.id)
                         handleCloseDetails()

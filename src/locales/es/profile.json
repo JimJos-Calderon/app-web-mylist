@@ -14,7 +14,7 @@
   "username": {
     "label": "Nombre de Usuario",
     "placeholder": "Tu nombre de usuario",
-    "character_count": "{current}/20 caracteres"
+    "character_count": "{{current}}/20 caracteres"
   },
   "avatar": {
     "label": "Avatar",
@@ -23,7 +23,7 @@
   "bio": {
     "label": "Sobre mí (Bio)",
     "placeholder": "Cuéntanos sobre ti...",
-    "character_count": "{current}/150 caracteres"
+    "character_count": "{{current}}/150 caracteres"
   },
   "email": {
     "label": "Email",
