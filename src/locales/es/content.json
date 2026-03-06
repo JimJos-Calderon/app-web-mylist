@@ -1,0 +1,53 @@
+{
+  "movies": {
+    "title": "Películas",
+    "icon": "🎬"
+  },
+  "series": {
+    "title": "Series",
+    "icon": "📺"
+  },
+  "list": {
+    "create_list": "Crear Lista",
+    "share_list": "Compartir Lista",
+    "join_list": "Unirse a Lista",
+    "list_name": "Nombre de la Lista",
+    "list_description": "Descripción",
+    "description_placeholder": "Una lista de películas y series para ver juntos...",
+    "description_optional": "(opcional)"
+  },
+  "item": {
+    "watched": "✓ Visto",
+    "not_watched": "○ No visto",
+    "mark_watched": "Marcar como visto",
+    "mark_unwatched": "Marcar como no visto",
+    "delete_confirm": "¿Estás seguro de que deseas eliminar este elemento?",
+    "no_synopsis": "No hay sinopsis disponible.",
+    "add_first": "Agrega tu primer {type} a la lista",
+    "no_results": "No hay resultados",
+    "search_no_results": "No se encontraron {type}s con \"{query}\""
+  },
+  "stats": {
+    "total": "Total",
+    "watched": "Vistas",
+    "pending": "Pendientes",
+    "rated": "Calificadas",
+    "favorites": "Favoritas",
+    "in_total": "en total"
+  },
+  "view_modes": {
+    "grid": "Grid",
+    "slider": "Slider",
+    "ring": "Ring",
+    "normal": "Normal"
+  },
+  "filters": {
+    "all": "Todas",
+    "watched": "Vistas",
+    "unwatched": "Pendientes",
+    "favorites": "Favoritas"
+  },
+  "own_item": "Tus película",
+  "shared_item": "Película compartida",
+  "click_for_details": "Haz clic para ver detalles"
+}

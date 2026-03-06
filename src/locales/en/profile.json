@@ -1,0 +1,51 @@
+{
+  "profile": {
+    "title": "Profile",
+    "explore_movies": "Explore Movies",
+    "no_profile": "Loading profile...",
+    "stats_title": "Statistics"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile_section": "Profile",
+    "security_section": "Security",
+    "logout": "Sign Out"
+  },
+  "username": {
+    "label": "Username",
+    "placeholder": "Your username",
+    "character_count": "{current}/20 characters"
+  },
+  "avatar": {
+    "label": "Avatar",
+    "upload_hint": "Formats: JPG, PNG, GIF (max. 2MB)"
+  },
+  "bio": {
+    "label": "About Me (Bio)",
+    "placeholder": "Tell us about you...",
+    "character_count": "{current}/150 characters"
+  },
+  "email": {
+    "label": "Email",
+    "change": "Change Email"
+  },
+  "password": {
+    "label": "Password",
+    "change_button": "Change Password",
+    "current_password": "Current Password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm New Password",
+    "current_placeholder": "Enter your current password",
+    "new_placeholder": "Enter your new password",
+    "confirm_placeholder": "Confirm your new password",
+    "button_change": "Change Password",
+    "loading": "Updating..."
+  },
+  "buttons": {
+    "save": "Save Changes"
+  },
+  "messages": {
+    "success": "Changes saved successfully",
+    "error": "Error saving changes"
+  }
+}
