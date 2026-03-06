@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
 import { validateEmail, validatePassword, validateUsername } from '@utils/validation'
 import { ERROR_MESSAGES } from '@constants/index'
@@ -23,6 +24,7 @@ interface RegisterModalProps {
 }
 
 const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -73,10 +75,10 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
           .maybeSingle()
         if (data) {
           setUsernameStatus('taken')
-          setUsernameMessage('Este usuario ya está en uso')
+          setUsernameMessage(t('auth.signup.username_taking'))
         } else {
           setUsernameStatus('available')
-          setUsernameMessage('¡Usuario disponible!')
+          setUsernameMessage(t('auth.signup.username_available'))
         }
       } catch {
         setUsernameStatus('idle')
@@ -92,18 +94,18 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
     // Validate username format
     const usernameCheck = validateUsername(username)
     if (!usernameCheck.valid) {
-      setError(usernameCheck.message || 'Usuario inválido')
+      setError(usernameCheck.message || t('auth.signup.username_invalid'))
       return
     }
 
     // Block if username is taken
     if (usernameStatus === 'taken') {
-      setError('Ese usuario ya está en uso. Elige otro.')
+      setError(t('auth.signup.username_taken'))
       return
     }
 
     if (!validateEmail(email)) {
-      setError('Por favor ingresa un email válido')
+      setError(t('auth.signup.error_invalid_email'))
       return
     }
 
@@ -114,7 +116,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
     }
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden')
+      setError(t('auth.signup.password_mismatch'))
       return
     }
 
@@ -123,7 +125,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password })
       if (signUpError) {
         if (signUpError.message.includes('already registered')) {
-          setError('Este email ya está registrado. Intenta iniciar sesión.')
+          setError(t('auth.signup.error_user_exists'))
         } else {
           setError(signUpError.message)
         }
@@ -141,7 +143,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
           .maybeSingle()
 
         if (existing) {
-          setError('Ese usuario ya fue tomado justo ahora. Elige otro.')
+          setError(t('auth.signup.username_just_taken'))
           // Roll back: sign out the newly created user
           await supabase.auth.signOut()
           return
@@ -161,7 +163,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
       setSuccess(true)
     } catch (err) {
       console.error(err)
-      setError('Ocurrió un error inesperado. Inténtalo de nuevo.')
+      setError(t('auth.signup.error_unexpected'))
     } finally {
       setLoading(false)
     }
@@ -193,7 +195,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               <UserPlus className="w-4 h-4 text-pink-400" />
             </div>
             <h2 className="text-xl font-black uppercase tracking-wider text-white">
-              Crear cuenta
+              {t('auth.signup.title')}
             </h2>
           </div>
           <button
@@ -214,12 +216,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                 <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
               <div>
-                <h3 className="text-xl font-black text-white mb-2">¡Cuenta creada!</h3>
+                <h3 className="text-xl font-black text-white mb-2">{t('auth.signup.account_created')}</h3>
                 <p className="text-zinc-400 text-xl leading-relaxed">
-                  Hemos enviado un correo de confirmación a{' '}
+                  {t('auth.signup.confirmation_email')}{' '}
                   <span className="text-pink-400 font-semibold">{email}</span>.
                   <br />
-                  Revisa tu bandeja de entrada y confirma tu cuenta para poder iniciar sesión.
+                  {t('auth.signup.confirmation_instruction')}
                 </p>
               </div>
               <button
@@ -227,7 +229,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                 className="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black text-xl
                            hover:shadow-[0_0_25px_rgba(219,39,119,0.5)] transition-all"
               >
-                Entendido
+                {t('auth.signup.button_done')}
               </button>
             </div>
           ) : (
@@ -236,7 +238,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               {/* Username */}
               <div>
                 <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                  Usuario
+                  {t('auth.signup.username_label')}
                 </label>
                 <div className="relative">
                   <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -270,13 +272,13 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     {usernameMessage}
                   </p>
                 )}
-                <p className="text-xl text-zinc-400 mt-1">Solo letras, números y _ (3-20 caracteres)</p>
+                <p className="text-xl text-zinc-400 mt-1">{t('auth.signup.username_hint')}</p>
               </div>
 
               {/* Email */}
               <div>
                 <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                  Email
+                  {t('auth.signup.email_label')}
                 </label>
                 <input
                   type="email"
@@ -294,7 +296,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               {/* Password */}
               <div>
                 <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                  Contraseña
+                  {t('auth.signup.password_label')}
                 </label>
                 <div className="relative">
                   <input
@@ -322,7 +324,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               {/* Confirm password */}
               <div>
                 <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                  Confirmar contraseña
+                  {t('auth.signup.confirm_password_label')}
                 </label>
                 <div className="relative">
                   <input
@@ -368,7 +370,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     />
                   ))}
                   <span className="text-xl text-zinc-500 whitespace-nowrap">
-                    {password.length < 4 ? 'Muy débil' : password.length < 7 ? 'Débil' : password.length < 10 ? 'Buena' : 'Fuerte'}
+                    {password.length < 4 ? t('auth.signup.password_strength_veryWeak') : password.length < 7 ? t('auth.signup.password_strength_weak') : password.length < 10 ? t('auth.signup.password_strength_good') : t('auth.signup.password_strength_strong')}
                   </span>
                 </div>
               )}
@@ -382,7 +384,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold text-xl
                              hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
                 >
-                  Cancelar
+                  {t('auth.signup.button_cancel')}
                 </button>
                 <button
                   type="submit"
@@ -395,12 +397,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Creando…
+                      {t('auth.signup.loading')}
                     </>
                   ) : (
                     <>
                       <UserPlus className="w-4 h-4" />
-                      Registrarse
+                      {t('auth.signup.button_signup')}
                     </>
                   )}
                 </button>
@@ -420,6 +422,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 // ─── Login Page ──────────────────────────────────────────────────────────────
 
 const Login: React.FC = () => {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -441,7 +444,7 @@ const Login: React.FC = () => {
       if (error) setError(error.message)
     } catch (err) {
       console.error('Google login error:', err)
-      setError('Error al iniciar sesión con Google')
+      setError(t('auth.login.error_google'))
     } finally {
       setGoogleLoading(false)
     }
@@ -452,7 +455,7 @@ const Login: React.FC = () => {
     setError(null)
 
     if (!validateEmail(email)) {
-      setError('Por favor ingresa un email válido')
+      setError(t('auth.signup.error_invalid_email'))
       return
     }
 
@@ -467,9 +470,9 @@ const Login: React.FC = () => {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
       if (signInError) {
         if (signInError.message.includes('Invalid login credentials')) {
-          setError('Email o contraseña incorrectos')
+          setError(t('auth.login.error_invalid'))
         } else if (signInError.message.includes('Email not confirmed')) {
-          setError('Debes confirmar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.')
+          setError(t('auth.login.error_email_not_confirmed'))
         } else {
           setError(signInError.message)
         }
@@ -511,7 +514,7 @@ const Login: React.FC = () => {
                   Nuestra Lista <Heart className="inline w-6 h-6 text-red-500 fill-red-500 -mt-1" />
                 </h1>
                 <p className="text-zinc-400 text-xl">
-                  Tu lista compartida de películas y series
+                  {t('auth.login.subtitle')}
                 </p>
               </div>
 
@@ -527,7 +530,7 @@ const Login: React.FC = () => {
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
                   <label htmlFor="login-email" className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                    Email
+                    {t('auth.login.email_label')}
                   </label>
                   <input
                     id="login-email"
@@ -545,7 +548,7 @@ const Login: React.FC = () => {
 
                 <div>
                   <label htmlFor="login-password" className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                    Contraseña
+                    {t('auth.login.password_label')}
                   </label>
                   <div className="relative">
                     <input
@@ -583,10 +586,10 @@ const Login: React.FC = () => {
                   {loading ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Entrando…
+                      {t('auth.login.loading')}
                     </>
                   ) : (
-                    'Iniciar sesión'
+                    t('auth.login.button_login')
                   )}
                 </button>
               </form>
@@ -594,7 +597,7 @@ const Login: React.FC = () => {
               {/* Divider */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-zinc-400 text-xl uppercase tracking-widest">o</span>
+                <span className="text-zinc-400 text-xl uppercase tracking-widest">{t('auth.login.divider')}</span>
                 <div className="flex-1 h-px bg-zinc-800" />
               </div>
 
@@ -609,15 +612,15 @@ const Login: React.FC = () => {
                            disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {googleLoading ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> Conectando…</>
+                  <><Loader2 className="w-5 h-5 animate-spin" /> {t('auth.login.loading_google')}</>
                 ) : (
-                  <><GoogleIcon /> Continuar con Google</>
+                  <><GoogleIcon /> {t('auth.login.button_google')}</>
                 )}
               </button>
 
               {/* Register CTA */}
               <div className="text-center space-y-3">
-                <p className="text-zinc-400 text-xl">¿No tienes cuenta todavía?</p>
+                <p className="text-zinc-400 text-xl">{t('auth.login.no_account')}</p>
                 <button
                   onClick={() => setShowRegister(true)}
                   className="w-full py-3 border border-pink-500/40 text-pink-400 font-black rounded-xl text-xl
@@ -625,7 +628,7 @@ const Login: React.FC = () => {
                              transition-all flex items-center justify-center gap-2"
                 >
                   <UserPlus className="w-4 h-4" />
-                  Crear cuenta nueva
+                  {t('auth.signup.button_signup')}
                 </button>
               </div>
             </div>

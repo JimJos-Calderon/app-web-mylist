@@ -9,6 +9,7 @@ import { queryClient } from '@config/queryClient'
 import { GlobalErrorFallback } from '@components/GlobalErrorFallback'
 import App from './App'
 import './index.css'
+import './i18n' // ← Inicializar i18n
 
 // ─── Sentry Initialization ─────────────────────────────────────────────────
 Sentry.init({

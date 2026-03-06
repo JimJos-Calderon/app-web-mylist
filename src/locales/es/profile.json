@@ -1,0 +1,51 @@
+{
+  "profile": {
+    "title": "Perfil",
+    "explore_movies": "Explorar Películas",
+    "no_profile": "Cargando perfil...",
+    "stats_title": "Estadísticas"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "profile_section": "Perfil",
+    "security_section": "Seguridad",
+    "logout": "Cerrar sesión"
+  },
+  "username": {
+    "label": "Nombre de Usuario",
+    "placeholder": "Tu nombre de usuario",
+    "character_count": "{current}/20 caracteres"
+  },
+  "avatar": {
+    "label": "Avatar",
+    "upload_hint": "Formatos: JPG, PNG, GIF (máx. 2MB)"
+  },
+  "bio": {
+    "label": "Sobre mí (Bio)",
+    "placeholder": "Cuéntanos sobre ti...",
+    "character_count": "{current}/150 caracteres"
+  },
+  "email": {
+    "label": "Email",
+    "change": "Cambiar Email"
+  },
+  "password": {
+    "label": "Contraseña",
+    "change_button": "Cambiar Contraseña",
+    "current_password": "Contraseña Actual",
+    "new_password": "Nueva Contraseña",
+    "confirm_password": "Confirmar Nueva Contraseña",
+    "current_placeholder": "Ingresa tu contraseña actual",
+    "new_placeholder": "Ingresa tu nueva contraseña",
+    "confirm_placeholder": "Confirma tu nueva contraseña",
+    "button_change": "Cambiar Contraseña",
+    "loading": "Actualizando..."
+  },
+  "buttons": {
+    "save": "Guardar Cambios"
+  },
+  "messages": {
+    "success": "Cambios guardados exitosamente",
+    "error": "Error al guardar los cambios"
+  }
+}

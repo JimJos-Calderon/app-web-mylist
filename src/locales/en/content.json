@@ -1,0 +1,53 @@
+{
+  "movies": {
+    "title": "Movies",
+    "icon": "🎬"
+  },
+  "series": {
+    "title": "Shows",
+    "icon": "📺"
+  },
+  "list": {
+    "create_list": "Create List",
+    "share_list": "Share List",
+    "join_list": "Join List",
+    "list_name": "List Name",
+    "list_description": "Description",
+    "description_placeholder": "A list of movies and shows to watch together...",
+    "description_optional": "(optional)"
+  },
+  "item": {
+    "watched": "✓ Watched",
+    "not_watched": "○ Unwatched",
+    "mark_watched": "Mark as watched",
+    "mark_unwatched": "Mark as unwatched",
+    "delete_confirm": "Are you sure you want to delete this item?",
+    "no_synopsis": "No synopsis available.",
+    "add_first": "Add your first {type} to the list",
+    "no_results": "No results found",
+    "search_no_results": "No {type}s found with \"{query}\""
+  },
+  "stats": {
+    "total": "Total",
+    "watched": "Watched",
+    "pending": "Pending",
+    "rated": "Rated",
+    "favorites": "Favorites",
+    "in_total": "in total"
+  },
+  "view_modes": {
+    "grid": "Grid",
+    "slider": "Slider",
+    "ring": "Ring",
+    "normal": "Normal"
+  },
+  "filters": {
+    "all": "All",
+    "watched": "Watched",
+    "unwatched": "Unwatched",
+    "favorites": "Favorites"
+  },
+  "own_item": "Your movie",
+  "shared_item": "Shared movie",
+  "click_for_details": "Click to view details"
+}
