@@ -310,7 +310,7 @@ const Ajustes: React.FC = () => {
                       className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2"
                     />
                     <div className="text-xs text-zinc-500">
-                      {username.length}/20 caracteres
+                      {username.length}/20 {t('placeholders.character_count')}
                     </div>
                   </div>
 
@@ -355,7 +355,7 @@ const Ajustes: React.FC = () => {
                       className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2 resize-none"
                     />
                     <div className="text-xs text-zinc-500">
-                      {bio.length}/150 caracteres
+                      {bio.length}/150 {t('placeholders.character_count')}
                     </div>
                   </div>
 
@@ -435,7 +435,7 @@ const Ajustes: React.FC = () => {
                         type="email"
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
-                        placeholder="nuevo@ejemplo.com"
+                        placeholder={t('placeholders.email_new')}
                         disabled={isSaving}
                         className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                       />
@@ -493,7 +493,7 @@ const Ajustes: React.FC = () => {
                           type={showNewPassword ? 'text' : 'password'}
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="Mínimo 6 caracteres"
+                          placeholder={t('placeholders.password_hint')}
                           disabled={isSaving}
                           className="w-full px-4 py-3 pr-12 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus-visible:border-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all disabled:opacity-50"
                         />

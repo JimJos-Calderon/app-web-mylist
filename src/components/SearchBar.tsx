@@ -1,4 +1,5 @@
 import React, { Ref } from 'react'
+import { useTranslation } from 'react-i18next'
 import { OmdbSuggestion } from '@/types'
 import { Loader2 } from 'lucide-react'
 import OptimizedImage from './OptimizedImage'
@@ -31,6 +32,10 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     },
     ref
   ) => {
+    const { t, i18n } = useTranslation()
+    // Dependencia explícita del idioma para forzar re-render
+    const ariaLabel = React.useMemo(() => t('placeholders.search_aria_label'), [t, i18n.language])
+    
     return (
       <div className="relative mb-8 md:mb-16 max-w-xl" ref={ref}>
         <form onSubmit={onSubmit} className="flex gap-2 md:gap-3">
@@ -38,7 +43,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
             <input
               type="text"
               placeholder={placeholder}
-              aria-label="Buscar título"
+              aria-label={ariaLabel}
               className="w-full bg-black/70 border-2 border-cyan-500/30 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-sm md:text-base text-white outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all font-bold uppercase tracking-tight"
               value={value}
               onChange={(e) => onChange(e.target.value)}
@@ -56,7 +61,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
             disabled={loading}
             className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 px-4 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-white shadow-[0_0_20px_rgba(255,0,255,0.4)] transition-all italic uppercase text-[10px] md:text-xs disabled:cursor-not-allowed"
           >
-            {loading ? '...' : 'OK'}
+            {loading ? '...' : t('action.search_ok_button')}
           </button>
         </form>
 

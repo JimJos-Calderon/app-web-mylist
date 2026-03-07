@@ -2,8 +2,13 @@
   "profile": {
     "title": "Profile",
     "explore_movies": "Explore Movies",
+    "loading": "Loading profile...",
     "no_profile": "Loading profile...",
-    "stats_title": "Statistics"
+    "stats_title": "Statistics",
+    "my_ratings": "My Ratings",
+    "settings_button": "Settings",
+    "no_ratings": "You haven't rated anything yet",
+    "start_rating": "Start rating movies and shows to see them here"
   },
   "settings": {
     "title": "Settings",

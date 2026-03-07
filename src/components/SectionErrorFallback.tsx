@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, RotateCw } from 'lucide-react'
 
 interface SectionErrorFallbackProps {
@@ -17,6 +18,7 @@ export const SectionErrorFallback: React.FC<SectionErrorFallbackProps> = ({
   error,
   resetErrorBoundary,
 }) => {
+  const { t } = useTranslation()
   const isDev = import.meta.env.DEV
 
   return (
@@ -48,7 +50,7 @@ export const SectionErrorFallback: React.FC<SectionErrorFallbackProps> = ({
           className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium rounded-lg transition-colors"
         >
           <RotateCw className="w-4 h-4" />
-          Reintentar
+          {t('common.retry')}
         </button>
       </div>
     </div>

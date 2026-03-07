@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Heart, HeartOff, Star } from 'lucide-react'
 import { useItemRating } from '@/hooks/useItemRating'
 
@@ -8,6 +9,7 @@ interface RatingWidgetProps {
 }
 
 const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) => {
+  const { t } = useTranslation()
   const { rating, loading, error, updateRating, updateLike } = useItemRating(itemId)
   const [showRatingMenu, setShowRatingMenu] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -110,8 +112,8 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
               ? 'bg-pink-500/30 text-pink-400 border border-pink-500/50'
               : 'hover:bg-zinc-800 text-zinc-400'
           }`}
-          title="Me gusta"
-          aria-label="Me gusta"
+          title={t('buttons.like')}
+          aria-label={t('buttons.like')}
           aria-pressed={currentLike === true}
         >
           <Heart className="w-5 h-5" fill={currentLike === true ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -128,8 +130,8 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
               ? 'bg-purple-500/30 text-purple-400 border border-purple-500/50'
               : 'hover:bg-zinc-800 text-zinc-400'
           }`}
-          title="No me gusta"
-          aria-label="No me gusta"
+          title={t('buttons.dislike')}
+          aria-label={t('buttons.dislike')}
           aria-pressed={currentLike === false}
         >
           <HeartOff className="w-5 h-5" aria-hidden="true" />

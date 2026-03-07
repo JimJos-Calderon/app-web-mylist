@@ -1,9 +1,11 @@
 import React, { useCallback, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { EffectCoverflow } from 'swiper/modules'
 import { ListItem } from '@/types'
 import { Grid3x3, ChevronLeft, ChevronRight, Film, Tv } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import StatsWidget from '@components/StatsWidget'
 
 interface RingSliderProps {
   items: ListItem[]
@@ -20,6 +22,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
   userOwnerId,
   onViewModeChange,
 }) => {
+  const { t } = useTranslation()
   const itemsWithPoster = items.filter((item) => Boolean(item.poster_url))
   const swiperRef = useRef<any>(null)
   const [activeItemId, setActiveItemId] = useState<string>(itemsWithPoster[0]?.id || '')
@@ -28,7 +31,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
   if (itemsWithPoster.length === 0) {
     return (
       <div className="w-full py-12 bg-black/20 backdrop-blur-sm border-y border-cyan-500/30 text-center">
-        <p className="text-slate-400 text-sm">No hay imágenes disponibles.</p>
+        <p className="text-slate-400 text-sm">{t('states.no_images')}</p>
       </div>
     )
   }
@@ -108,7 +111,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
       <div
         tabIndex={0}
         role="group"
-        aria-label="Usa las flechas izquierda y derecha para navegar"
+        aria-label={t('buttons.ring_navigation')}
         onKeyDown={handleCarouselKeyDown}
         className="w-full relative z-10 outline-none"
       >
@@ -144,7 +147,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
               <div
                 role="button"
                 tabIndex={-1}
-                aria-label={`${item.titulo}${isActive ? ' — activo' : ''}. Presiona Enter para ver detalles`}
+                aria-label={`${item.titulo}${isActive ? ' — activo' : ''}. ${t('press_enter_for_details')}`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
@@ -225,9 +228,9 @@ const RingSlider: React.FC<RingSliderProps> = ({
                           }`}
                         >
                           {item.tipo === 'pelicula' ? (
-                            <><Film className="w-3 h-3" /> Film</>
+                            <><Film className="w-3 h-3" /> {t('content.movie_type')}</>
                           ) : (
-                            <><Tv className="w-3 h-3" /> Series</>
+                            <><Tv className="w-3 h-3" /> {t('content.series_type')}</>
                           )}
                         </span>
                       </div>
@@ -246,7 +249,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
         type="button"
         onClick={() => onViewModeChange?.('grid')}
         className="absolute bottom-32 right-6 z-20 bg-gradient-to-r from-pink-500/30 to-pink-500/10 hover:from-pink-500/50 hover:to-pink-500/30 border border-pink-400/40 hover:border-pink-400/80 text-pink-300 hover:text-pink-200 rounded-full p-2.5 sm:p-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]"
-        aria-label="Volver a rejilla"
+        aria-label={t('buttons.back_to_grid')}
       >
         <Grid3x3 className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
@@ -256,7 +259,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
         type="button"
         onClick={handlePrevious}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-cyan-500/30 to-cyan-500/10 hover:from-cyan-500/50 hover:to-cyan-500/30 border border-cyan-400/40 hover:border-cyan-400/80 text-cyan-300 hover:text-cyan-200 rounded-full p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)]"
-        aria-label="Anterior"
+        aria-label={t('buttons.previous')}
       >
         <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
@@ -265,7 +268,7 @@ const RingSlider: React.FC<RingSliderProps> = ({
         type="button"
         onClick={handleNext}
         className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-gradient-to-r from-cyan-500/10 to-cyan-500/30 hover:from-cyan-500/30 hover:to-cyan-500/50 border border-cyan-400/40 hover:border-cyan-400/80 text-cyan-300 hover:text-cyan-200 rounded-full p-3 sm:p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.4)]"
-        aria-label="Siguiente"
+        aria-label={t('buttons.next')}
       >
         <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
@@ -274,39 +277,18 @@ const RingSlider: React.FC<RingSliderProps> = ({
       {activeItem && (
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 text-center z-10 max-w-md px-4">
           <p className="text-slate-400 text-xs uppercase tracking-widest font-bold opacity-70">
-            {isOwn ? 'Tus película' : 'Película compartida'}
+            {isOwn ? t('own_item') : t('shared_item')}
           </p>
           <p className="text-slate-300 text-sm mt-1">
-            Haz clic para ver detalles
+            {t('click_for_details')}
           </p>
         </div>
       )}
 
       {/* Stats - Bottom */}
       <div className="absolute bottom-0 left-0 right-0 z-10 w-full bg-gradient-to-t from-black via-black/80 to-transparent px-4 md:px-6 py-6 md:py-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
-          <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-lg p-3 md:p-4">
-            <div className="text-lg md:text-xl font-black text-cyan-400">{allItems.length}</div>
-            <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Total</div>
-          </div>
-          <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg p-3 md:p-4">
-            <div className="text-lg md:text-xl font-black text-green-400">
-              {allItems.filter((i) => i.visto).length}
-            </div>
-            <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Vistas</div>
-          </div>
-          <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg p-3 md:p-4">
-            <div className="text-lg md:text-xl font-black text-purple-400">
-              {allItems.filter((i) => !i.visto).length}
-            </div>
-            <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Pendientes</div>
-          </div>
-          <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-lg p-3 md:p-4">
-            <div className="text-lg md:text-xl font-black text-pink-400">
-              {allItems.filter((i) => i.user_id === userOwnerId).length}
-            </div>
-            <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Propias</div>
-          </div>
+        <div className="max-w-6xl mx-auto">
+          <StatsWidget items={allItems} userOwnerId={userOwnerId} size="small" />
         </div>
       </div>
     </div>

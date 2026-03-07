@@ -1,16 +1,18 @@
 {
   "movies": {
     "title": "Movies",
-    "icon": "🎬"
+    "subtitle": "station_sync // jimjos"
   },
   "series": {
     "title": "Shows",
-    "icon": "📺"
+    "subtitle": "station_sync // jimjos"
   },
   "list": {
     "create_list": "Create List",
     "share_list": "Share List",
     "join_list": "Join List",
+    "join_button": "Join the list",
+    "joining": "Joining…",
     "list_name": "List Name",
     "list_description": "Description",
     "description_placeholder": "A list of movies and shows to watch together...",
@@ -33,7 +35,9 @@
     "pending": "Pending",
     "rated": "Rated",
     "favorites": "Favorites",
-    "in_total": "in total"
+    "in_total": "in total",
+    "liked": "Liked",
+    "own": "Yours"
   },
   "view_modes": {
     "grid": "Grid",
@@ -48,9 +52,13 @@
     "unwatched": "Unwatched",
     "favorites": "Favorites"
   },
+  "no_image": "No image",
   "own_item": "Yours",
   "shared_item": "Shared movie",
+  "details_title": "Details of",
   "click_for_details": "Click to see details",
+  "press_enter_for_details": "Press Enter to see details",
+  "explore_movies": "Explore Movies",
   "loading": {
     "items": "Loading...",
     "synopsis": "Loading synopsis..."
@@ -144,5 +152,51 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "verifying": "Verifying..."
+  },
+  "dialog": {
+    "create_list_title": "New List",
+    "list_name_label": "List Name",
+    "list_name_placeholder": "My favorite list...",
+    "description_label": "Description",
+    "description_optional": "(optional)",
+    "description_placeholder": "A list of movies and shows to watch together...",
+    "create_error": "Error creating list. Try again.",
+    "cancel_button": "Cancel",
+    "creating_button": "Creating...",
+    "create_button": "Create list",
+    "invite_title": "Invite to list",
+    "list_label": "List",
+    "invite_link_label": "Invite Link",
+    "invite_help_text": "Share this link. Anyone with the link can join the list.",
+    "copy_button": "Copy",
+    "copied_button": "Copied",
+    "close_button": "Close"
+  },
+  "action": {
+    "create_list": "Create list",
+    "invite": "Invite",
+    "delete": "Delete",
+    "search_placeholder": "SEARCH",
+    "search_ok_button": "OK",
+    "movie_type": "Movie",
+    "series_type": "Show",
+    "search_movie_placeholder": "SEARCH MOVIE...",
+    "search_series_placeholder": "SEARCH SHOW...",
+    "grid_view": "📋 Grid",
+    "ring_view": "💎 Ring"
+  },
+  "movie_singular": "movie",
+  "movie_plural": "movies",
+  "series_singular": "series",
+  "series_plural": "shows",
+  "join_list": {
+    "joined_title": "You've joined!",
+    "joined_description": "You are now part of",
+    "redirecting": "Redirecting…",
+    "already_member_description": "You are already part of",
+    "go_to_list": "Go to list",
+    "invited_intro": "You've been invited to",
+    "login_required_title": "Invitation received",
+    "login_required_description": "Sign in to join this list."
   }
 }

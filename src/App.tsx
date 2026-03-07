@@ -29,26 +29,30 @@ const JoinList = lazy(() => import('@pages/JoinList'))
 const SpotifyGlassCard = lazy(() => import('@components/SpotifyGlassCard'))
 
 // ─── Per-route Loading Fallback ─────────────────────────────────────────────
-const PageLoadingSkeleton: React.FC = () => (
-  <div className="min-h-screen bg-black flex items-center justify-center">
-    <div className="text-center space-y-6">
-      <div className="inline-flex items-center justify-center">
-        <div className="w-20 h-20 rounded-full border-4 border-pink-500/20 border-t-pink-500 border-r-purple-500 animate-spin"></div>
-      </div>
-      <div className="space-y-2">
-        <p className="text-pink-400 font-black text-xl uppercase tracking-widest">Cargando...</p>
-        <p className="text-zinc-500 text-sm">Optimizando recursos</p>
+const PageLoadingSkeleton: React.FC = () => {
+  const { t } = useTranslation()
+  
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="text-center space-y-6">
+        <div className="inline-flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full border-4 border-pink-500/20 border-t-pink-500 border-r-purple-500 animate-spin"></div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-pink-400 font-black text-xl uppercase tracking-widest">{t('status.loading')}</p>
+          <p className="text-zinc-500 text-sm">{t('states.optimizing')}</p>
+        </div>
       </div>
     </div>
-  </div>
-)
+  )
+}
 
 // ─── Component Loading Skeleton (for Spotify widgets) ──────────────────────
 const SpotifyWidgetSkeleton: React.FC = () => (
   <div className="w-80 h-[480px] rounded-2xl bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/20 backdrop-blur-xl animate-pulse flex items-center justify-center">
     <div className="flex flex-col items-center gap-3">
       <div className="w-12 h-12 rounded-full bg-purple-500/20 animate-pulse"></div>
-      <p className="text-zinc-500 text-xs">Cargando widget...</p>
+      <p className="text-zinc-500 text-xs">{t('states.loading_widget')}</p>
     </div>
   </div>
 )
@@ -56,6 +60,7 @@ const SpotifyWidgetSkeleton: React.FC = () => (
 // ─── Username Setup Modal (for new Google users) ─────────────────────────────
 const UsernameSetupModal: React.FC = () => {
   const { completeGoogleProfile } = useAuth()
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -81,17 +86,17 @@ const UsernameSetupModal: React.FC = () => {
           .maybeSingle()
         if (data) {
           setUsernameStatus('taken')
-          setUsernameMessage('Este usuario ya está en uso')
+          setUsernameMessage(t('signup.username_taking'))
         } else {
           setUsernameStatus('available')
-          setUsernameMessage('¡Usuario disponible!')
+          setUsernameMessage(t('signup.username_available'))
         }
       } catch {
         setUsernameStatus('idle')
       }
     }, 500)
     return () => clearTimeout(timer)
-  }, [username])
+  }, [username, t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -119,18 +124,18 @@ const UsernameSetupModal: React.FC = () => {
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-pink-600/20 border border-pink-500/40 mb-2">
               <AtSign className="w-7 h-7 text-pink-400" />
             </div>
-            <h2 className="text-2xl font-black text-white">Elige tu usuario</h2>
-            <p className="text-zinc-400 text-sm">Es la primera vez que entras con Google.<br />Elige un nombre de usuario único.</p>
+            <h2 className="text-2xl font-black text-white">{t('needs_username.title')}</h2>
+            <p className="text-zinc-400 text-sm">{t('needs_username.subtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">Usuario</label>
+              <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">{t('signup.username_label')}</label>
               <div className="relative">
                 <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input
                   type="text"
-                  placeholder="tu_usuario"
+                  placeholder={t('needs_username.username_placeholder')}
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   disabled={loading}
@@ -155,7 +160,7 @@ const UsernameSetupModal: React.FC = () => {
                   {usernameMessage}
                 </p>
               )}
-              <p className="text-xs text-zinc-400 mt-1">Solo letras, números y _ (3-20 caracteres)</p>
+              <p className="text-xs text-zinc-400 mt-1">{t('signup.username_hint')}</p>
             </div>
 
             {error && (
@@ -173,7 +178,7 @@ const UsernameSetupModal: React.FC = () => {
                          disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
                          flex items-center justify-center gap-2"
             >
-              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando…</> : 'Confirmar usuario'}
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('buttons.saving')}</> : t('buttons.confirm_user')}
             </button>
           </form>
         </div>
@@ -359,7 +364,7 @@ const App: React.FC = () => {
                 <Users className="w-8 h-8 text-cyan-400" />
               </div>
               <div>
-                <p className="text-sm font-bold uppercase tracking-widest text-cyan-500/70 mb-2">¡Tienes una invitación!</p>
+                <p className="text-sm font-bold uppercase tracking-widest text-cyan-500/70 mb-2">{t('invite_notification.title')}</p>
                 <h2 className="text-2xl font-black text-white mb-2">{pendingInvite.list_name}</h2>
                 {pendingInvite.list_description && (
                   <p className="text-zinc-400 text-sm">{pendingInvite.list_description}</p>
@@ -377,7 +382,7 @@ const App: React.FC = () => {
                   disabled={inviteJoining}
                   className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
                 >
-                  Rechazar
+                  {t('invite_notification.reject_button')}
                 </button>
                 <button
                   disabled={inviteJoining}
@@ -407,9 +412,9 @@ const App: React.FC = () => {
                              flex items-center justify-center gap-2"
                 >
                   {inviteJoining ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Uniéndome…</>
+                    <><Loader2 className="w-4 h-4 animate-spin" /> {t('invite_notification.joining')}</>
                   ) : (
-                    <>Unirme <ArrowRight className="w-4 h-4" /></>
+                    <>{t('invite_notification.join_button')} <ArrowRight className="w-4 h-4" /></>
                   )}
                 </button>
               </div>
@@ -429,11 +434,11 @@ const App: React.FC = () => {
       <nav className="sticky top-0 z-40 backdrop-blur-md bg-black/60 border-b border-pink-500/20 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
         <Link to="/" className="group flex items-center gap-2 sm:gap-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-pink-600 rounded-lg flex items-center justify-center font-black text-white text-xs sm:text-base shadow-[0_0_15px_rgba(219,39,119,0.5)] group-hover:scale-110 transition-all">
-            J&N
+            {t('appLogo')}
           </div>
           <span className="text-base sm:text-2xl font-black tracking-tighter text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
-            <span className="hidden sm:inline">Nuestra Lista <Heart className="inline w-5 h-5 text-red-500 fill-red-500" /></span>
-            <span className="sm:hidden">Mi Lista <Heart className="inline w-4 h-4 text-red-500 fill-red-500" /></span>
+            <span className="hidden sm:inline">{t('appTitle')} <Heart className="inline w-5 h-5 text-red-500 fill-red-500" /></span>
+            <span className="sm:hidden">{t('navbar.myAccount')} <Heart className="inline w-4 h-4 text-red-500 fill-red-500" /></span>
           </span>
         </Link>
 
@@ -610,11 +615,10 @@ const App: React.FC = () => {
                 <div className="text-center mt-20 animate-in fade-in zoom-in duration-700 space-y-8">
                   <div>
                     <h2 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-violet-500">
-                      ¡Hola de nuevo!
+                      {t('greeting.welcome_back')}
                     </h2>
                     <p className="text-zinc-400 text-lg">
-                      ¿Qué vamos a ver hoy,{' '}
-                      <span className="text-zinc-200 font-bold">{displayName}</span>?
+                      {t('greeting.what_to_watch', { name: displayName })}
                     </p>
                   </div>
                 </div>

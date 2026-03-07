@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/supabaseClient';
 import { List } from '@typings/index';
 import { X, Plus, Copy, Check, Users } from 'lucide-react';
@@ -25,6 +26,7 @@ interface CreateListDialogProps {
 }
 
 export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClose, onCreated }) => {
+  const { t } = useTranslation();
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [loading, setLoading] = useState(false);
@@ -100,12 +102,12 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
               <Plus className="w-4 h-4 text-pink-400" />
             </div>
             <h2 className="text-lg font-black uppercase tracking-wider text-white">
-              Nueva Lista
+              {t('dialog.create_list_title')}
             </h2>
           </div>
           <button
             onClick={onClose}
-            aria-label="Cerrar diálogo"
+            aria-label={t('dialog.close_button')}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
           >
             <X className="w-4 h-4" aria-hidden="true" />
@@ -116,11 +118,11 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
         <div className="px-6 py-6 space-y-5">
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">
-              Nombre de la lista
+              {t('dialog.list_name_label')}
             </label>
             <input
               type="text"
-              placeholder="Mi lista favorita..."
+              placeholder={t('dialog.list_name_placeholder')}
               value={nombre}
               onChange={e => setNombre(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && nombre.trim() && handleCreate()}
@@ -134,11 +136,11 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
-              Descripción{' '}
-              <span className="text-zinc-400 normal-case tracking-normal font-normal">(opcional)</span>
+              {t('dialog.description_label')}{' '}
+              <span className="text-zinc-400 normal-case tracking-normal font-normal">({t('dialog.description_optional')})</span>
             </label>
             <textarea
-              placeholder="Una lista de películas y series para ver juntos..."
+              placeholder={t('dialog.description_placeholder')}
               value={descripcion}
               onChange={e => setDescripcion(e.target.value)}
               maxLength={200}
@@ -151,7 +153,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
 
           {error && (
             <div className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
-              {error}
+              {t('dialog.create_error')}
             </div>
           )}
         </div>
@@ -164,7 +166,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
             className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold
                        hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
           >
-            Cancelar
+            {t('dialog.cancel_button')}
           </button>
           <button
             onClick={handleCreate}
@@ -177,12 +179,12 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
             {loading ? (
               <>
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creando...
+                {t('dialog.creating_button')}
               </>
             ) : (
               <>
                 <Plus className="w-4 h-4" />
-                Crear lista
+                {t('dialog.create_button')}
               </>
             )}
           </button>
@@ -202,6 +204,7 @@ interface InviteDialogProps {
 }
 
 export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list }) => {
+  const { t } = useTranslation();
   const [copiedCode, setCopiedCode] = useState(false);
 
   useEscapeKey(open, onClose);
@@ -239,12 +242,12 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
               <Users className="w-4 h-4 text-cyan-400" />
             </div>
             <h2 className="text-lg font-black uppercase tracking-wider text-white">
-              Invitar a la lista
+              {t('dialog.invite_title')}
             </h2>
           </div>
           <button
             onClick={onClose}
-            aria-label="Cerrar diálogo"
+            aria-label={t('dialog.close_button')}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
           >
             <X className="w-4 h-4" aria-hidden="true" />
@@ -254,7 +257,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
         {/* Body */}
         <div className="px-6 py-6 space-y-5">
           <div className="px-4 py-3 bg-cyan-500/5 border border-cyan-500/20 rounded-xl">
-            <p className="text-xs font-bold uppercase tracking-widest text-cyan-400/70 mb-1">Lista</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-cyan-400/70 mb-1">{t('dialog.list_label')}</p>
             <p className="text-white font-bold">{list.name}</p>
             {list.description && (
               <p className="text-zinc-400 text-sm mt-1">{list.description}</p>
@@ -263,10 +266,10 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-cyan-400 mb-2">
-              Link de invitación
+              {t('dialog.invite_link_label')}
             </label>
             <p className="text-zinc-400 text-sm mb-3">
-              Comparte este enlace. Cualquier persona con el link puede unirse a la lista.
+              {t('dialog.invite_help_text')}
             </p>
             <div className="flex gap-2">
               <a
@@ -288,9 +291,9 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                   }`}
               >
                 {copiedCode ? (
-                  <><Check className="w-4 h-4" /> Copiado</>
+                  <><Check className="w-4 h-4" /> {t('dialog.copied_button')}</>
                 ) : (
-                  <><Copy className="w-4 h-4" /> Copiar</>
+                  <><Copy className="w-4 h-4" /> {t('dialog.copy_button')}</>
                 )}
               </button>
             </div>
@@ -304,7 +307,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
             className="w-full px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold
                        hover:bg-zinc-800 hover:text-white transition-all"
           >
-            Cerrar
+            {t('dialog.close_button')}
           </button>
         </div>
       </div>

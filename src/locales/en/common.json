@@ -1,4 +1,6 @@
 {
+  "appTitle": "Our List",
+  "appLogo": "J&N",
   "navbar": {
     "appName": "Our List",
     "movies": "Movies",
@@ -14,7 +16,17 @@
     "delete": "Delete",
     "edit": "Edit",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "confirm_user": "Confirm user",
+    "saving": "Saving…",
+    "close_alert": "Close alert",
+    "close_signup_window": "Close signup window",
+    "like": "Like",
+    "dislike": "Dislike",
+    "back_to_grid": "Back to grid",
+    "previous": "Previous",
+    "next": "Next",
+    "ring_navigation": "Use left and right arrows to navigate"
   },
   "status": {
     "loading": "Loading...",
@@ -29,6 +41,41 @@
   },
   "placeholders": {
     "search": "Search...",
-    "email": "your@email.com"
+    "search_aria_label": "Search title",
+    "email": "your@email.com",
+    "username": "your_username",
+    "password": "••••••••",
+    "password_confirm": "Repeat your password",
+    "password_hint": "Minimum 6 characters",
+    "email_new": "newemail@example.com",
+    "character_count": "characters",
+    "back_home": "Back to home",
+    "back_to_home": "Back to home",
+    "retry": "Retry",
+    "error_persists": "If the problem persists, contact support.",
+    "loading": "Loading...",
+    "joining": "Joining…"
+  },
+  "greeting": {
+    "welcome_back": "Welcome back!",
+    "what_to_watch": "What are we watching today, {{name}}?"
+  },
+  "states": {
+    "optimizing": "Optimizing resources",
+    "loading_widget": "Loading widget...",
+    "verifying_invitation": "Verifying invitation…",
+    "already_member": "Already a member",
+    "invalid_link": "Invalid link",
+    "link_expired": "This invite link does not exist or has expired.",
+    "error_occurred": "Something went wrong",
+    "no_images": "No images available."
+  },
+  "footer": {
+    "by": "by JimJos"
+  },
+  "list_selector": {
+    "loading": "Loading lists...",
+    "no_lists": "You have no available lists",
+    "label": "List:"
   }
 }

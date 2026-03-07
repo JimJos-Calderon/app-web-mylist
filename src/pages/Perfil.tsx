@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Cog, UserCircle, Film } from 'lucide-react'
 import { useAuth } from '@hooks/useAuth'
 import { useUserProfile } from '@hooks/useUserProfile'
@@ -13,6 +14,7 @@ interface RatingInfo {
 }
 
 const Perfil: React.FC = () => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { profile, loading } = useUserProfile()
   const navigate = useNavigate()
@@ -102,7 +104,7 @@ const Perfil: React.FC = () => {
   if (loading || isLoadingItems) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center">
-        <div className="text-white">Cargando perfil...</div>
+        <div className="text-white">{t('profile.loading')}</div>
       </div>
     )
   }
@@ -144,15 +146,15 @@ const Perfil: React.FC = () => {
             <div className="flex-1 grid grid-cols-3 gap-4 w-full sm:w-auto">
               <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-cyan-400">{totalRatings}</div>
-                <div className="text-xs text-zinc-400 mt-1">Calificadas</div>
+                <div className="text-xs text-zinc-400 mt-1">{t('stats.rated')}</div>
               </div>
               <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-yellow-400">{favoriteCount}</div>
-                <div className="text-xs text-zinc-400 mt-1">Favoritas</div>
+                <div className="text-xs text-zinc-400 mt-1">{t('stats.favorites')}</div>
               </div>
               <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-xl p-4 text-center">
                 <div className="text-2xl font-black text-red-400">{likedCount}</div>
-                <div className="text-xs text-zinc-400 mt-1">Me gusta</div>
+                <div className="text-xs text-zinc-400 mt-1">{t('stats.liked')}</div>
               </div>
             </div>
           </div>
@@ -164,7 +166,7 @@ const Perfil: React.FC = () => {
               className="px-6 py-3 bg-black/60 backdrop-blur-lg border border-cyan-500/30 text-cyan-400 font-bold rounded-lg hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all flex items-center justify-center gap-2"
             >
               <Cog className="w-5 h-5" />
-              <span>Ajustes</span>
+              <span>{t('profile.settings_button')}</span>
             </button>
           </div>
         </div>
@@ -172,7 +174,7 @@ const Perfil: React.FC = () => {
         {/* Rated Items Grid */}
         {ratedItems.length > 0 ? (
           <div>
-            <h2 className="text-2xl font-black mb-6">Mis Calificaciones</h2>
+            <h2 className="text-2xl font-black mb-6">{t('profile.my_ratings')}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {ratedItems.map(({ item }) => (
                 <ItemCard
@@ -190,15 +192,15 @@ const Perfil: React.FC = () => {
         ) : (
           <div className="text-center py-20">
             <Film className="w-16 h-16 mx-auto mb-4 text-zinc-500" />
-            <h2 className="text-2xl font-bold mb-2">Aún sin calificaciones</h2>
+            <h2 className="text-2xl font-bold mb-2">{t('profile.no_ratings')}</h2>
             <p className="text-zinc-400 mb-6">
-              Comienza a calificar películas y series para verlas aquí
+              {t('profile.start_rating')}
             </p>
             <button
               onClick={() => navigate('/peliculas')}
               className="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] transition-all inline-block"
             >
-              Explorar Películas
+              {t('explore_movies')}
             </button>
           </div>
         )}

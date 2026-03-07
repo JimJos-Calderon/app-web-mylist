@@ -14,6 +14,7 @@ import FilterPanel from '@components/FilterPanel'
 import ErrorAlert from '@components/ErrorAlert'
 import { CreateListDialog, InviteDialog } from '@components/ListDialogs'
 import ListSelector from '@components/ListSelector'
+import StatsWidget from '@components/StatsWidget'
 
 // ─── Lazy load heavy component (uses Swiper) ───────────────────────────────
 const RingSlider = lazy(() => import('@components/RingSlider'))
@@ -378,14 +379,14 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
           className="px-3 py-2 bg-pink-500 text-white rounded font-bold text-sm"
           onClick={() => setShowCreateDialog(true)}
         >
-          Crear lista
+          {t('action.create_list')}
         </button>
         {currentList && (
           <button
             className="px-3 py-2 bg-cyan-500 text-white rounded font-bold text-sm"
             onClick={() => setShowInviteDialog(true)}
           >
-            Invitar
+            {t('action.invite')}
           </button>
         )}
       </div>
@@ -442,11 +443,11 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               <div className="flex items-center gap-3 md:gap-5 mb-2 md:mb-3">
                 <span className="text-4xl md:text-6xl drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]">{icono}</span>
                 <h2 className="text-4xl md:text-5xl lg:text-7xl font-black italic uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 tracking-tighter">
-                  {tipo}s
+                  {tipo === 'pelicula' ? t('movies.title') : t('series.title')}
                 </h2>
               </div>
               <p className="text-cyan-400 font-black text-[8px] md:text-[10px] uppercase tracking-[0.3em] md:tracking-[0.5em] border-l-2 md:border-l-4 border-pink-500 pl-2 md:pl-4 opacity-90">
-                STATION_SYNC // {user?.email?.split('@')[0] || 'user'}
+                {t('movies.subtitle')}
               </p>
             </header>
 
@@ -463,7 +464,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               value={searchInput}
               onChange={setSearchInput}
               onSubmit={handleAddManual}
-              placeholder={`BUSCAR ${tipo.toUpperCase()}...`}
+              placeholder={t(tipo === 'pelicula' ? 'action.search_movie_placeholder' : 'action.search_series_placeholder')}
               loading={suggestionsLoading}
               showDropdown={showSuggestions && suggestions.length > 0}
               suggestions={suggestions}
@@ -488,7 +489,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
                   }`}
               >
-                📋 Grilla
+                {t('action.grid_view')}
               </button>
               <button
                 type="button"
@@ -498,7 +499,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
                   }`}
               >
-                💎 Ring
+                {t('action.ring_view')}
               </button>
             </div>
 
@@ -642,7 +643,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   <div className="mt-3 md:mt-4 text-center px-4">
                     <p className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider md:tracking-widest font-bold">
                       <span className="hidden sm:inline">{t('pagination.page', { current: currentPage, total: totalPages })} • </span>
-                      {filteredItems.length} {tipo}s
+                      {filteredItems.length} {t(tipo === 'pelicula' ? 'movie_plural' : 'series_plural')}
                       <span className="hidden sm:inline"> {t('stats.in_total')}</span>
                     </p>
                   </div>
@@ -653,29 +654,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
             {/* Stats */}
             {!loading && items.length > 0 && viewMode === 'grid' && (
-              <div className="mt-8 md:mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
-                <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-lg p-3 md:p-4">
-                  <div className="text-xl md:text-2xl font-black text-cyan-400">{items.length}</div>
-                  <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Total</div>
-                </div>
-                <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg p-3 md:p-4">
-                  <div className="text-xl md:text-2xl font-black text-green-400">
-                    {items.filter((i) => i.visto).length}
-                  </div>
-                  <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Vistas</div>
-                </div>
-                <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg p-3 md:p-4">
-                  <div className="text-xl md:text-2xl font-black text-purple-400">
-                    {items.filter((i) => !i.visto).length}
-                  </div>
-                  <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Pendientes</div>
-                </div>
-                <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-lg p-3 md:p-4">
-                  <div className="text-xl md:text-2xl font-black text-pink-400">
-                    {items.filter((i) => i.user_id === user.id).length}
-                  </div>
-                  <div className="text-[10px] md:text-xs text-slate-400 uppercase font-bold">Propias</div>
-                </div>
+              <div className="mt-8 md:mt-12">
+                <StatsWidget items={items} userOwnerId={user.id} size="large" />
               </div>
             )}
           </div>
@@ -688,7 +668,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
             }`}
           role="dialog"
           aria-modal="true"
-          aria-label={`Detalles de ${selectedItem.titulo}`}
+          aria-label={`${t('details_title')} ${selectedItem.titulo}`}
           onClick={handleCloseDetails}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
@@ -708,7 +688,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   {selectedItem.titulo}
                 </h3>
                 <p className="text-xs text-slate-400">
-                  {selectedItem.tipo === 'pelicula' ? 'Pelicula' : 'Serie'}
+                  {selectedItem.tipo === 'pelicula' ? t('action.movie_type') : t('action.series_type')}
                 </p>
               </div>
               <button
@@ -735,7 +715,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   </div>
                 ) : (
                   <div className="h-48 w-full rounded-xl bg-slate-900 flex items-center justify-center text-slate-500">
-                    Sin imagen
+                    {t('no_image')}
                   </div>
                 )}
               </div>
@@ -762,7 +742,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   }}
                   className="flex-1 px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 hover:border-cyan-400 text-cyan-300 hover:text-cyan-200 rounded-lg transition-all text-sm font-semibold uppercase tracking-wide"
                 >
-                  {selectedItem.visto ? '✓ Visto' : '○ No visto'}
+                  {selectedItem.visto ? t('item.watched') : t('item.not_watched')}
                 </button>
 
                 {selectedItem.user_id === user?.id && (
@@ -779,7 +759,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                     }}
                     className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-400 text-red-300 hover:text-red-200 rounded-lg transition-all text-sm font-semibold uppercase tracking-wide"
                   >
-                    🗑️ Borrar
+                    🗑️ {t('action.delete')}
                   </button>
                 )}
               </div>

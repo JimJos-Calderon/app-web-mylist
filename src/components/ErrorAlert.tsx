@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { XCircle, X } from 'lucide-react'
 
 interface ErrorAlertProps {
@@ -7,6 +8,8 @@ interface ErrorAlertProps {
 }
 
 const ErrorAlert: React.FC<ErrorAlertProps> = ({ message, onClose }) => {
+  const { t } = useTranslation()
+  
   React.useEffect(() => {
     const timer = setTimeout(onClose, 5000)
     return () => clearTimeout(timer)
@@ -21,7 +24,7 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({ message, onClose }) => {
       <button
         onClick={onClose}
         className="text-red-400 hover:text-red-300 transition-colors"
-        aria-label="Cerrar alerta"
+        aria-label={t('buttons.close_alert')}
       >
         <X className="w-4 h-4" aria-hidden="true" />
       </button>

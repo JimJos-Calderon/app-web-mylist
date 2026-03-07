@@ -1,4 +1,5 @@
 import { List } from '@typings/index'
+import { useTranslation } from 'react-i18next'
 
 interface ListSelectorProps {
   lists: List[]
@@ -13,11 +14,13 @@ const ListSelector = ({
   onChange,
   loading = false
 }: ListSelectorProps) => {
+  const { t } = useTranslation()
+
   if (loading) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
         <span className="text-sm text-gray-600 dark:text-gray-400">
-          Cargando listas...
+          {t('list_selector.loading')}
         </span>
       </div>
     )
@@ -27,7 +30,7 @@ const ListSelector = ({
     return (
       <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
         <span className="text-sm text-gray-600 dark:text-gray-400">
-          No tienes listas disponibles
+          {t('list_selector.no_lists')}
         </span>
       </div>
     )
@@ -39,7 +42,7 @@ const ListSelector = ({
         htmlFor="list-selector"
         className="text-sm font-medium text-gray-700 dark:text-gray-300"
       >
-        Lista:
+        {t('list_selector.label')}
       </label>
       <select
         id="list-selector"

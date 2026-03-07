@@ -52,7 +52,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       <div className={`bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center ${className}`}>
         <div className="text-center">
           <Film className="w-8 h-8 mx-auto mb-1 text-zinc-500" />
-          <div className="text-[10px] text-zinc-500 font-black uppercase">Sin imagen</div>
+          <div className="text-[10px] text-zinc-500 font-black uppercase">{t('no_image')}</div>
         </div>
       </div>
     )

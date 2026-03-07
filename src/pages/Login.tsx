@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
 import { validateEmail, validatePassword, validateUsername } from '@utils/validation'
 import { ERROR_MESSAGES } from '@constants/index'
+import { LanguageSwitcher } from '@components/LanguageSwitcher'
 import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, Heart, AtSign, Check, AlertCircle } from 'lucide-react'
 
 // ─── Google SVG Icon ─────────────────────────────────────────────────────────
@@ -75,10 +76,10 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
           .maybeSingle()
         if (data) {
           setUsernameStatus('taken')
-          setUsernameMessage(t('auth.signup.username_taking'))
+          setUsernameMessage(t('signup.username_taking'))
         } else {
           setUsernameStatus('available')
-          setUsernameMessage(t('auth.signup.username_available'))
+          setUsernameMessage(t('signup.username_available'))
         }
       } catch {
         setUsernameStatus('idle')
@@ -94,18 +95,18 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
     // Validate username format
     const usernameCheck = validateUsername(username)
     if (!usernameCheck.valid) {
-      setError(usernameCheck.message || t('auth.signup.username_invalid'))
+      setError(usernameCheck.message || t('signup.username_invalid'))
       return
     }
 
     // Block if username is taken
     if (usernameStatus === 'taken') {
-      setError(t('auth.signup.username_taken'))
+      setError(t('signup.username_taken'))
       return
     }
 
     if (!validateEmail(email)) {
-      setError(t('auth.signup.error_invalid_email'))
+      setError(t('signup.error_invalid_email'))
       return
     }
 
@@ -116,7 +117,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
     }
 
     if (password !== confirmPassword) {
-      setError(t('auth.signup.password_mismatch'))
+      setError(t('signup.password_mismatch'))
       return
     }
 
@@ -125,7 +126,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password })
       if (signUpError) {
         if (signUpError.message.includes('already registered')) {
-          setError(t('auth.signup.error_user_exists'))
+          setError(t('signup.error_user_exists'))
         } else {
           setError(signUpError.message)
         }
@@ -143,7 +144,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
           .maybeSingle()
 
         if (existing) {
-          setError(t('auth.signup.username_just_taken'))
+          setError(t('signup.username_just_taken'))
           // Roll back: sign out the newly created user
           await supabase.auth.signOut()
           return
@@ -163,7 +164,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
       setSuccess(true)
     } catch (err) {
       console.error(err)
-      setError(t('auth.signup.error_unexpected'))
+      setError(t('signup.error_unexpected'))
     } finally {
       setLoading(false)
     }
@@ -195,12 +196,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               <UserPlus className="w-4 h-4 text-pink-400" />
             </div>
             <h2 className="text-xl font-black uppercase tracking-wider text-white">
-              {t('auth.signup.title')}
+              {t('signup.title')}
             </h2>
           </div>
           <button
             onClick={onClose}
-            aria-label="Cerrar ventana de registro"
+            aria-label={t('buttons.close_signup_window')}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
           >
             <X className="w-4 h-4" aria-hidden="true" />
@@ -216,12 +217,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                 <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
               <div>
-                <h3 className="text-xl font-black text-white mb-2">{t('auth.signup.account_created')}</h3>
+                <h3 className="text-xl font-black text-white mb-2">{t('signup.account_created')}</h3>
                 <p className="text-zinc-400 text-xl leading-relaxed">
-                  {t('auth.signup.confirmation_email')}{' '}
+                  {t('signup.confirmation_email')}{' '}
                   <span className="text-pink-400 font-semibold">{email}</span>.
                   <br />
-                  {t('auth.signup.confirmation_instruction')}
+                  {t('signup.confirmation_instruction')}
                 </p>
               </div>
               <button
@@ -229,7 +230,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                 className="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black text-xl
                            hover:shadow-[0_0_25px_rgba(219,39,119,0.5)] transition-all"
               >
-                {t('auth.signup.button_done')}
+                {t('signup.button_done')}
               </button>
             </div>
           ) : (
@@ -238,13 +239,13 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               {/* Username */}
               <div>
                 <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                  {t('auth.signup.username_label')}
+                  {t('signup.username_label')}
                 </label>
                 <div className="relative">
                   <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                   <input
                     type="text"
-                    placeholder="tu_usuario"
+                    placeholder={t('placeholders.username')}
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                     disabled={loading}
@@ -272,17 +273,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     {usernameMessage}
                   </p>
                 )}
-                <p className="text-xl text-zinc-400 mt-1">{t('auth.signup.username_hint')}</p>
+                <p className="text-xl text-zinc-400 mt-1">{t('signup.username_hint')}</p>
               </div>
 
               {/* Email */}
               <div>
                 <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                  {t('auth.signup.email_label')}
+                  {t('signup.email_label')}
                 </label>
                 <input
                   type="email"
-                  placeholder="tu@email.com"
+                  placeholder={t('placeholders.email')}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   disabled={loading}
@@ -296,12 +297,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               {/* Password */}
               <div>
                 <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                  {t('auth.signup.password_label')}
+                  {t('signup.password_label')}
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder={t('placeholders.password_hint')}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     disabled={loading}
@@ -324,12 +325,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
               {/* Confirm password */}
               <div>
                 <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                  {t('auth.signup.confirm_password_label')}
+                  {t('signup.confirm_password_label')}
                 </label>
                 <div className="relative">
                   <input
                     type={showConfirm ? 'text' : 'password'}
-                    placeholder="Repite tu contraseña"
+                    placeholder={t('placeholders.password_confirm')}
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     disabled={loading}
@@ -341,7 +342,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   <button
                     type="button"
                     onClick={() => setShowConfirm(v => !v)}
-                    aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-label={showConfirm ? t('hide_password') : t('show_password')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
                   >
                     {showConfirm ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
@@ -370,7 +371,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     />
                   ))}
                   <span className="text-xl text-zinc-500 whitespace-nowrap">
-                    {password.length < 4 ? t('auth.signup.password_strength_veryWeak') : password.length < 7 ? t('auth.signup.password_strength_weak') : password.length < 10 ? t('auth.signup.password_strength_good') : t('auth.signup.password_strength_strong')}
+                    {password.length < 4 ? t('signup.password_strength_veryWeak') : password.length < 7 ? t('signup.password_strength_weak') : password.length < 10 ? t('signup.password_strength_good') : t('signup.password_strength_strong')}
                   </span>
                 </div>
               )}
@@ -384,7 +385,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold text-xl
                              hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
                 >
-                  {t('auth.signup.button_cancel')}
+                  {t('signup.button_cancel')}
                 </button>
                 <button
                   type="submit"
@@ -397,12 +398,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      {t('auth.signup.loading')}
+                      {t('signup.loading')}
                     </>
                   ) : (
                     <>
                       <UserPlus className="w-4 h-4" />
-                      {t('auth.signup.button_signup')}
+                      {t('signup.button_signup')}
                     </>
                   )}
                 </button>
@@ -444,7 +445,7 @@ const Login: React.FC = () => {
       if (error) setError(error.message)
     } catch (err) {
       console.error('Google login error:', err)
-      setError(t('auth.login.error_google'))
+      setError(t('login.error_google'))
     } finally {
       setGoogleLoading(false)
     }
@@ -455,7 +456,7 @@ const Login: React.FC = () => {
     setError(null)
 
     if (!validateEmail(email)) {
-      setError(t('auth.signup.error_invalid_email'))
+      setError(t('signup.error_invalid_email'))
       return
     }
 
@@ -470,9 +471,9 @@ const Login: React.FC = () => {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
       if (signInError) {
         if (signInError.message.includes('Invalid login credentials')) {
-          setError(t('auth.login.error_invalid'))
+          setError(t('login.error_invalid'))
         } else if (signInError.message.includes('Email not confirmed')) {
-          setError(t('auth.login.error_email_not_confirmed'))
+          setError(t('login.error_email_not_confirmed'))
         } else {
           setError(signInError.message)
         }
@@ -508,13 +509,13 @@ const Login: React.FC = () => {
               {/* Logo / Header */}
               <div className="text-center space-y-2">
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-pink-600 shadow-[0_0_30px_rgba(219,39,119,0.6)] mb-3">
-                  <span className="text-white font-black text-lg">J&N</span>
+                  <span className="text-white font-black text-lg">{t('appLogo')}</span>
                 </div>
                 <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
-                  Nuestra Lista <Heart className="inline w-6 h-6 text-red-500 fill-red-500 -mt-1" />
+                  {t('appTitle')} <Heart className="inline w-6 h-6 text-red-500 fill-red-500 -mt-1" />
                 </h1>
                 <p className="text-zinc-400 text-xl">
-                  {t('auth.login.subtitle')}
+                  {t('login.subtitle')}
                 </p>
               </div>
 
@@ -530,12 +531,12 @@ const Login: React.FC = () => {
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
                   <label htmlFor="login-email" className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                    {t('auth.login.email_label')}
+                    {t('login.email_label')}
                   </label>
                   <input
                     id="login-email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder={t('placeholders.email')}
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     disabled={loading}
@@ -548,13 +549,13 @@ const Login: React.FC = () => {
 
                 <div>
                   <label htmlFor="login-password" className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
-                    {t('auth.login.password_label')}
+                    {t('login.password_label')}
                   </label>
                   <div className="relative">
                     <input
                       id="login-password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
+                      placeholder={t('placeholders.password')}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       disabled={loading}
@@ -567,7 +568,7 @@ const Login: React.FC = () => {
                       type="button"
                       onClick={() => setShowPassword(v => !v)}
                       disabled={loading}
-                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      aria-label={showPassword ? t('hide_password') : t('show_password')}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors disabled:opacity-50"
                     >
                       {showPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
@@ -586,10 +587,10 @@ const Login: React.FC = () => {
                   {loading ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      {t('auth.login.loading')}
+                      {t('login.loading')}
                     </>
                   ) : (
-                    t('auth.login.button_login')
+                    t('login.button_login')
                   )}
                 </button>
               </form>
@@ -597,7 +598,7 @@ const Login: React.FC = () => {
               {/* Divider */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-zinc-400 text-xl uppercase tracking-widest">{t('auth.login.divider')}</span>
+                <span className="text-zinc-400 text-xl uppercase tracking-widest">{t('login.divider')}</span>
                 <div className="flex-1 h-px bg-zinc-800" />
               </div>
 
@@ -612,15 +613,15 @@ const Login: React.FC = () => {
                            disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {googleLoading ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> {t('auth.login.loading_google')}</>
+                  <><Loader2 className="w-5 h-5 animate-spin" /> {t('login.loading_google')}</>
                 ) : (
-                  <><GoogleIcon /> {t('auth.login.button_google')}</>
+                  <><GoogleIcon /> {t('login.button_google')}</>
                 )}
               </button>
 
               {/* Register CTA */}
               <div className="text-center space-y-3">
-                <p className="text-zinc-400 text-xl">{t('auth.login.no_account')}</p>
+                <p className="text-zinc-400 text-xl">{t('login.no_account')}</p>
                 <button
                   onClick={() => setShowRegister(true)}
                   className="w-full py-3 border border-pink-500/40 text-pink-400 font-black rounded-xl text-xl
@@ -628,7 +629,7 @@ const Login: React.FC = () => {
                              transition-all flex items-center justify-center gap-2"
                 >
                   <UserPlus className="w-4 h-4" />
-                  {t('auth.signup.button_signup')}
+                  {t('signup.button_signup')}
                 </button>
               </div>
             </div>
@@ -637,7 +638,11 @@ const Login: React.FC = () => {
             <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/30 to-transparent" />
           </div>
 
-          <p className="text-center mt-5 text-zinc-700 text-xl">by JimJos</p>
+          <p className="text-center mt-5 text-zinc-700 text-xl">{t('footer.by')}</p>
+          
+          <div className="fixed bottom-6 right-6">
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
     </>

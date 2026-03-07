@@ -2,8 +2,13 @@
   "profile": {
     "title": "Perfil",
     "explore_movies": "Explorar Películas",
+    "loading": "Cargando perfil...",
     "no_profile": "Cargando perfil...",
-    "stats_title": "Estadísticas"
+    "stats_title": "Estadísticas",
+    "my_ratings": "Mis Calificaciones",
+    "settings_button": "Ajustes",
+    "no_ratings": "Aún no has calificado nada",
+    "start_rating": "Comienza a calificar películas y series para verlas aquí"
   },
   "settings": {
     "title": "Ajustes",

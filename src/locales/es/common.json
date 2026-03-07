@@ -1,4 +1,6 @@
 {
+  "appTitle": "Nuestra Lista",
+  "appLogo": "J&N",
   "navbar": {
     "appName": "Nuestra Lista",
     "movies": "Películas",
@@ -14,7 +16,17 @@
     "delete": "Eliminar",
     "edit": "Editar",
     "confirm": "Confirmar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "confirm_user": "Confirmar usuario",
+    "saving": "Guardando…",
+    "close_alert": "Cerrar alerta",
+    "close_signup_window": "Cerrar ventana de registro",
+    "like": "Me gusta",
+    "dislike": "No me gusta",
+    "back_to_grid": "Volver a rejilla",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "ring_navigation": "Usa las flechas izquierda y derecha para navegar"
   },
   "status": {
     "loading": "Cargando...",
@@ -29,6 +41,41 @@
   },
   "placeholders": {
     "search": "Buscar...",
-    "email": "tu@email.com"
+    "search_aria_label": "Buscar título",
+    "email": "tu@email.com",
+    "username": "tu_usuario",
+    "password": "••••••••",
+    "password_confirm": "Repite tu contraseña",
+    "password_hint": "Mínimo 6 caracteres",
+    "email_new": "nuevo@ejemplo.com",
+    "character_count": "caracteres",
+    "back_home": "Volver a inicio",
+    "back_to_home": "Volver al inicio",
+    "retry": "Reintentar",
+    "error_persists": "Si el problema persiste, contacta con soporte.",
+    "loading": "Cargando...",
+    "joining": "Uniéndome…"
+  },
+  "greeting": {
+    "welcome_back": "¡Hola de nuevo!",
+    "what_to_watch": "¿Qué vamos a ver hoy, {{name}}?"
+  },
+  "states": {
+    "optimizing": "Optimizando recursos",
+    "loading_widget": "Cargando widget...",
+    "verifying_invitation": "Verificando invitación…",
+    "already_member": "Ya eres miembro",
+    "invalid_link": "Link inválido",
+    "link_expired": "Este link de invitación no existe o ha expirado.",
+    "error_occurred": "Algo salió mal",
+    "no_images": "No hay imágenes disponibles."
+  },
+  "footer": {
+    "by": "by JimJos"
+  },
+  "list_selector": {
+    "loading": "Cargando listas...",
+    "no_lists": "No tienes listas disponibles",
+    "label": "Lista:"
   }
 }

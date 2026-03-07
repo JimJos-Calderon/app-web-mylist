@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, RotateCw, Home } from 'lucide-react'
 
 interface ErrorFallbackProps {
@@ -20,6 +21,7 @@ export const GlobalErrorFallback: React.FC<ErrorFallbackProps> = ({
   error,
   resetErrorBoundary,
 }) => {
+  const { t } = useTranslation()
   const isDevelopment = import.meta.env.DEV
 
   return (
@@ -79,13 +81,13 @@ export const GlobalErrorFallback: React.FC<ErrorFallbackProps> = ({
             className="w-full px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
           >
             <Home className="w-4 h-4" />
-            Volver a inicio
+            {t('common.back_home')}
           </a>
         </div>
 
         {/* Footer Info */}
         <p className="text-center text-xs text-zinc-500 mt-6">
-          Si el problema persiste, contacta con soporte.
+          {t('common.error_persists')}
         </p>
       </div>
     </div>
