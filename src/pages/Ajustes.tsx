@@ -4,7 +4,8 @@ import { useUserProfile } from '@hooks/useUserProfile'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
-import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key } from 'lucide-react'
+import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key, Globe } from 'lucide-react'
+import { LanguageSwitcher } from '@components/LanguageSwitcher'
 
 type Section = 'perfil' | 'seguridad'
 
@@ -255,6 +256,11 @@ const Ajustes: React.FC = () => {
                   <LockKeyhole className="w-5 h-5" /> {t('settings.security_section')}
                 </button>
               </nav>
+              
+              {/* Language Switcher */}
+              <div className="flex justify-center mt-6 mb-6 p-3 bg-zinc-800/30 rounded-lg border border-zinc-700/50">
+                <LanguageSwitcher />
+              </div>
               
               {/* Logout Button */}
               <button

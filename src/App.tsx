@@ -9,7 +9,7 @@ import { useUserProfile } from '@hooks/useUserProfile'
 import { supabase } from '@/supabaseClient'
 import { validateUsername } from '@utils/validation'
 import { SectionErrorFallback } from '@components/SectionErrorFallback'
-import { LanguageSwitcher } from '@components/LanguageSwitcher'
+
 import Login from '@pages/Login'
 
 const handleSectionError = (error: Error, info: { componentStack?: string | null }) => {
@@ -48,14 +48,18 @@ const PageLoadingSkeleton: React.FC = () => {
 }
 
 // ─── Component Loading Skeleton (for Spotify widgets) ──────────────────────
-const SpotifyWidgetSkeleton: React.FC = () => (
-  <div className="w-80 h-[480px] rounded-2xl bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/20 backdrop-blur-xl animate-pulse flex items-center justify-center">
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-12 h-12 rounded-full bg-purple-500/20 animate-pulse"></div>
-      <p className="text-zinc-500 text-xs">{t('states.loading_widget')}</p>
+const SpotifyWidgetSkeleton: React.FC = () => {
+  const { t } = useTranslation()
+  
+  return (
+    <div className="w-80 h-[480px] rounded-2xl bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/20 backdrop-blur-xl animate-pulse flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-purple-500/20 animate-pulse"></div>
+        <p className="text-zinc-500 text-xs">{t('states.loading_widget')}</p>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 // ─── Username Setup Modal (for new Google users) ─────────────────────────────
 const UsernameSetupModal: React.FC = () => {
@@ -473,11 +477,6 @@ const App: React.FC = () => {
           <Menu className="w-6 h-6" />
         </button>
 
-        {/* Language Switcher - Desktop */}
-        <div className="hidden md:block">
-          <LanguageSwitcher />
-        </div>
-
         <div className="relative hidden md:block" ref={userMenuRef}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
@@ -588,10 +587,6 @@ const App: React.FC = () => {
             >
               <Settings className="w-4 h-4" /> {t('navbar.settings')}
             </Link>
-            {/* Language Switcher - Mobile */}
-            <div className="px-4 py-3 border-b border-pink-500/10 flex justify-center">
-              <LanguageSwitcher />
-            </div>
             {/* Invitación link removed from mobile menu */}
             <button
               onClick={() => {
