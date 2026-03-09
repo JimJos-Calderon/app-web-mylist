@@ -8,6 +8,7 @@ import { AuthProvider } from '@context/AuthContext'
 import { queryClient } from '@config/queryClient'
 import { persistOptions } from '@config/queryPersistence'
 import { GlobalErrorFallback } from '@components/GlobalErrorFallback'
+import { InstallPwaPrompt } from '@components/InstallPwaPrompt'
 import App from './App'
 import './index.css'
 import './i18n' // ← Inicializar i18n
@@ -50,6 +51,7 @@ ReactDOM.createRoot(rootElement).render(
         }}
       >
         <BrowserRouter>
+          <InstallPwaPrompt />
           <AuthProvider>
             <App />
           </AuthProvider>

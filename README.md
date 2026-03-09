@@ -26,7 +26,9 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 - 🎨 **Diseño único** — Interfaz retro-futurista con efectos cyberpunk y animaciones
 - 🔍 **Filtros avanzados** — Filtra por estado (vistas/pendientes), texto y ordenamiento
 - 💎 **Dos modos de vista** — Grid clásico con paginación y carrusel Ring en 3D
-- ⚡ **Cache inteligente** — Sistema de caché TTL para optimizar búsquedas repetidas en OMDB
+- ⚡ **Cache inteligente** — React Query con persistencia local y política offline-first
+- 📲 **PWA instalable** — Soporte de instalación nativa en Android (prompt) e iOS (Add to Home Screen)
+- 📴 **Modo offline lectura** — Usuarios pueden seguir viendo listas/items cacheados sin conexión
 - 📡 **Tiempo real** — Sincronización en vivo con Supabase Realtime Subscriptions
 - 👤 **Perfiles de usuario** — Username, bio y avatar personalizable (subido a Supabase Storage)
 - 🔒 **Ajustes de seguridad** — Cambio de email y contraseña con verificación
@@ -45,8 +47,10 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 - **Vite 7** — Build tool ultra-rápido
 - **TailwindCSS 4** — Framework CSS utility-first (via plugin de Vite)
 - **React Router DOM 7.13** — Navegación SPA
-- **Framer Motion 12** — Animaciones fluidas
 - **TanStack Query 5.90** — Gestión de estado asincrónico y caché
+- **@tanstack/react-query-persist-client** — Persistencia de caché para modo offline
+- **@tanstack/query-sync-storage-persister** — Persistencia en localStorage
+- **vite-plugin-pwa** — Manifest + Service Worker (Workbox generateSW)
 - **Swiper 12** — Biblioteca de carruseles (usada en la vista Ring)
 - **Lucide React** — Iconos SVG modernos
 
@@ -391,13 +395,18 @@ npm run test:e2e:ui      # UI de Playwright (modo debug)
 app-web-mylist/
 ├── src/
 │   ├── App.tsx                 # Componente raíz: routing, navbar, Spotify widgets
-│   ├── main.tsx                # Entry point + AuthProvider
+│   ├── main.tsx                # Entry point + PersistQueryClientProvider + AuthProvider
 │   ├── index.css               # Estilos globales
 │   ├── supabaseClient.ts       # Cliente de Supabase
 │   ├── vite-env.d.ts           # Tipos de variables de entorno
 │   │
+│   ├── config/
+│   │   ├── queryClient.ts      # Config global React Query (offlineFirst)
+│   │   ├── queryKeys.ts        # Query keys centralizadas
+│   │   └── queryPersistence.ts # Persistencia local de cache (TanStack)
+│   │
 │   ├── context/
-│   │   └── AuthContext.tsx     # Proveedor global de autenticación
+│   │   └── AuthContext.tsx     # Proveedor global + limpieza de cache al cerrar sesión
 │   │
 │   ├── types/
 │   │   └── index.ts            # Interfaces TypeScript (User, ListItem, List, ListMember…)
@@ -433,13 +442,15 @@ app-web-mylist/
 │   │   ├── ListSelector.tsx    # Selector desplegable de lista activa
 │   │   ├── ListDialogs.tsx     # Modales: crear lista e invitar usuarios
 │   │   ├── ConfirmDialog.tsx   # Diálogo de confirmación genérico
+│   │   ├── InstallPwaPrompt.tsx# Botón de instalación PWA con beforeinstallprompt
+│   │   ├── OptimizedImage.tsx  # Imagen lazy + placeholder + fallback i18n
 │   │   ├── SpotifyGlassCard.tsx# Embed de Spotify draggable (sólo desktop, solo Home)
 │   │   └── ErrorAlert.tsx      # Componente de alerta de error
 │   │
 │   └── utils/
 │       └── validation.ts       # Validación y sanitización de títulos
 │
-├── public/                     # Assets estáticos
+├── public/                     # Assets estáticos + iconos PWA/iOS
 ├── migration-to-shared-lists.sql  # Script SQL de migración desde esquema antiguo
 ├── fix-rls-insert-policy.sql      # Fix de política RLS de inserción
 ├── .env                        # Variables de entorno (no commitear)
@@ -527,7 +538,37 @@ Ajusta `DEBOUNCE_DELAY` en `src/constants/index.ts` (por defecto: 300ms)
 Modifica `MAX_SUGGESTIONS` en `src/constants/index.ts` (por defecto: 10)
 
 ### Configurar TTL del caché
-La gestión de caché se realiza automáticamente con React Query. Modifica `staleTime` y `gcTime` en [src/config/queryClient.ts](src/config/queryClient.ts) para ajustar el comportamiento de caché global (por defecto: staleTime 5 min, gcTime 10 min).
+La gestión de caché se realiza con React Query + persistencia local. Ajusta estos valores en `src/config/queryClient.ts` y `src/config/queryPersistence.ts`:
+
+- `staleTime`: 5 min
+- `gcTime`: 24 h
+- `networkMode`: `offlineFirst` para queries y `online` para mutations
+- `maxAge` de persistencia: 24 h
+
+La app persiste solo claves de lectura offline (`lists`, `items`, `userProfile`).
+
+### Configuración PWA
+La configuración del manifest y Workbox está en `vite.config.ts` usando `vite-plugin-pwa` con estrategia `generateSW`.
+
+Archivos de iconos requeridos en `public/`:
+
+- `pwa-192x192.png`
+- `pwa-512x512.png`
+- `pwa-512x512-maskable.png`
+- `apple-touch-icon.png`
+- `masked-icon.svg`
+
+Metadatos iOS: `index.html` incluye `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`, `apple-mobile-web-app-title` y `apple-touch-icon`.
+
+### Probar PWA localmente
+Para validar instalación y service worker, usa build de producción:
+
+```bash
+npm run build
+npm run preview
+```
+
+En Chrome: `Application > Manifest` y `Application > Service Workers`.
 
 ---
 
@@ -551,6 +592,13 @@ La gestión de caché se realiza automáticamente con React Query. Modifica `sta
 ---
 
 ## 🐛 Solución de Problemas
+
+### PWA y Offline
+- **No aparece el botón "Instalar App"**: verifica que estás en `npm run preview` (o en producción HTTPS), no solo en `npm run dev`.
+- **Manifest con `icon ... failed to load`**: confirma que existen los iconos en `public/` con los nombres exactos.
+- **Android no sugiere instalación**: revisa que el Service Worker esté activo y el manifest no tenga errores críticos.
+- **iOS no dispara `beforeinstallprompt`**: comportamiento esperado; usar Safari → Compartir → Añadir a pantalla de inicio.
+- **Datos de otro usuario después de logout**: el cierre de sesión limpia caché en memoria y persistida; si no se refleja, fuerza recarga completa.
 
 ### Seguridad y RLS
 - **Error 500 con RLS**: Verifica que has ejecutado el archivo `04_security_rls_and_constraints.sql`
@@ -594,7 +642,12 @@ La gestión de caché se realiza automáticamente con React Query. Modifica `sta
 
 4. **Node Version**: 18 o superior
 
-5. **Configura en Supabase** (este paso es crucial):
+5. **Para soporte PWA real en móviles**:
+  - Despliega en **HTTPS** (requisito para service worker fuera de localhost)
+  - Verifica en Android que el prompt de instalación aparezca
+  - En iOS, valida flujo manual de "Añadir a pantalla de inicio"
+
+6. **Configura en Supabase** (este paso es crucial):
    - Ve a tu proyecto Supabase
    - Edge Functions → Secrets
    - Agrega `OMDB_API_KEY` con tu API key
@@ -741,7 +794,7 @@ Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 - [OMDB API](http://www.omdbapi.com) por la base de datos de películas
 - [Supabase](https://supabase.com) por el excelente BaaS
 - [Vite](https://vitejs.dev) por el increíble DX
-- [Framer Motion](https://www.framer.com/motion/) por las animaciones
+- [Vite Plugin PWA](https://vite-pwa-org.netlify.app/) por la integración de PWA y Workbox
 - [Lucide](https://lucide.dev) por los iconos
 
 ---
