@@ -25,7 +25,7 @@ export default defineConfig({
         name: 'MyList - Peliculas y Series',
         short_name: 'MyList',
         description: 'Gestiona tus listas de peliculas y series',
-        theme_color: '#00f5d4',
+        theme_color: '#0b0b12',
         background_color: '#0b0b12',
         display: 'standalone',
         start_url: '/',
