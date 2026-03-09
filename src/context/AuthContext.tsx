@@ -1,6 +1,8 @@
 import React, { createContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { Session, User } from '@/types'
 import { supabase } from '@/supabaseClient'
+import { queryClient } from '@config/queryClient'
+import { clearPersistedQueryCache } from '@config/queryPersistence'
 
 interface AuthContextType {
   session: Session | null
@@ -68,6 +70,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
+      queryClient.clear()
+      clearPersistedQueryCache()
       setSession(null)
       setUser(null)
       setError(null)

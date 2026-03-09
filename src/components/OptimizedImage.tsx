@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Film } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface OptimizedImageProps {
   src?: string
@@ -27,6 +28,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   fallbackElement,
   onError
 }) => {
+  const { t } = useTranslation()
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
 

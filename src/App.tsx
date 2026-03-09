@@ -9,6 +9,7 @@ import { useUserProfile } from '@hooks/useUserProfile'
 import { supabase } from '@/supabaseClient'
 import { validateUsername } from '@utils/validation'
 import { SectionErrorFallback } from '@components/SectionErrorFallback'
+import { InstallPwaPrompt } from '@components/InstallPwaPrompt'
 
 import Login from '@pages/Login'
 
@@ -687,6 +688,8 @@ const App: React.FC = () => {
           </>
         )}
       </main>
+
+      <InstallPwaPrompt />
     </div>
   )
 }

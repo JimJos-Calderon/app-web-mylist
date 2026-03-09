@@ -1,11 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { ErrorBoundary } from 'react-error-boundary'
 import * as Sentry from '@sentry/react'
 import { AuthProvider } from '@context/AuthContext'
 import { queryClient } from '@config/queryClient'
+import { persistOptions } from '@config/queryPersistence'
 import { GlobalErrorFallback } from '@components/GlobalErrorFallback'
 import App from './App'
 import './index.css'
@@ -41,13 +42,19 @@ ReactDOM.createRoot(rootElement).render(
         })
       }}
     >
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={persistOptions}
+        onSuccess={() => {
+          queryClient.resumePausedMutations().catch(() => undefined)
+        }}
+      >
         <BrowserRouter>
           <AuthProvider>
             <App />
           </AuthProvider>
         </BrowserRouter>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>
 )
