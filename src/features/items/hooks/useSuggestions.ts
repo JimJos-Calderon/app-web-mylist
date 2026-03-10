@@ -21,12 +21,13 @@ export const useSuggestions = (
   tipo: 'pelicula' | 'serie'
 ): UseSuggestionsReturn => {
   const [debouncedQuery, setDebouncedQuery] = useState('')
-  const [localSuggestions, setLocalSuggestions] = useState<OmdbSuggestion[]>([])
+  const [manualSuggestions, setManualSuggestions] = useState<OmdbSuggestion[] | null>(null)
 
   // Debounce logic
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setDebouncedQuery(searchQuery)
+      setManualSuggestions(null)
     }, DEBOUNCE_DELAY)
 
     return () => clearTimeout(timeoutId)
@@ -72,19 +73,12 @@ export const useSuggestions = (
     staleTime: 60 * 60 * 1000, // 60 minutos (mismo TTL que antes)
   })
 
-  // Actualizar sugerencias cuando sea necesario
-  useEffect(() => {
-    if (data) {
-      setLocalSuggestions(data)
-    } else if (!debouncedQuery || debouncedQuery.length < 3) {
-      setLocalSuggestions([])
-    }
-  }, [data, debouncedQuery])
+  const resolvedSuggestions = manualSuggestions ?? data ?? []
 
   return {
-    suggestions: localSuggestions,
+    suggestions: resolvedSuggestions,
     loading: isLoading,
     error: error?.message || null,
-    setSuggestions: setLocalSuggestions,
+    setSuggestions: setManualSuggestions,
   }
 }

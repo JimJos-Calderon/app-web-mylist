@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cog, UserCircle, Film } from 'lucide-react'
 import { useAuth } from '@/features/auth'
@@ -24,13 +24,7 @@ const Perfil: React.FC = () => {
   const [favoriteCount, setFavoriteCount] = useState(0)
   const [likedCount, setLikedCount] = useState(0)
 
-  useEffect(() => {
-    if (user) {
-      fetchRatedItems()
-    }
-  }, [user])
-
-  const fetchRatedItems = async () => {
+  const fetchRatedItems = useCallback(async () => {
     try {
       setIsLoadingItems(true)
       const { data, error } = await supabase
@@ -86,7 +80,13 @@ const Perfil: React.FC = () => {
     } finally {
       setIsLoadingItems(false)
     }
-  }
+  }, [user?.id])
+
+  useEffect(() => {
+    if (user) {
+      fetchRatedItems()
+    }
+  }, [user, fetchRatedItems])
 
   const handleDelete = async (_id: string) => {
     // No eliminar desde perfil - solo ver
