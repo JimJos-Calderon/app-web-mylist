@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
 import * as Sentry from '@sentry/react'
 import { Menu, Film, Tv, User, Settings, LogOut, Heart, XCircle, Users, ArrowRight, Loader2, AtSign, Check, AlertCircle } from 'lucide-react'
-import { useAuth } from '@hooks/useAuth'
-import { useUserProfile } from '@hooks/useUserProfile'
+import { useAuth } from '@/features/auth'
+import { useUserProfile } from '@/features/profile'
+import { validateUsername, SectionErrorFallback } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
-import { validateUsername } from '@utils/validation'
-import { SectionErrorFallback } from '@components/SectionErrorFallback'
 
 import Login from '@pages/Login'
 
@@ -26,7 +25,11 @@ const Ajustes = lazy(() => import('@pages/Ajustes'))
 const JoinList = lazy(() => import('@pages/JoinList'))
 
 // ─── Lazy load heavy components ────────────────────────────────────────────
-const SpotifyGlassCard = lazy(() => import('@components/SpotifyGlassCard'))
+const SpotifyGlassCard = lazy(() =>
+  import('@/features/shared').then((module) => ({
+    default: module.SpotifyGlassCard,
+  }))
+)
 
 // ─── Per-route Loading Fallback ─────────────────────────────────────────────
 const PageLoadingSkeleton: React.FC = () => {

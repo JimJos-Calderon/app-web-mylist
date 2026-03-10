@@ -1,7 +1,6 @@
 import React from 'react'
-import { useAuth } from '@hooks/useAuth'
-import ListaContenido from '@components/ListaContenido'
-import { useLists } from '@hooks/useLists'
+import { useAuth } from '@/features/auth'
+import { ListaContenido, useLists } from '@/features/lists'
 
 const Series: React.FC = () => {
   const { user } = useAuth()

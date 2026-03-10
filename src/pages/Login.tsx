@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { validateEmail, validatePassword, validateUsername, ERROR_MESSAGES, LanguageSwitcher } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
-import { validateEmail, validatePassword, validateUsername } from '@utils/validation'
-import { ERROR_MESSAGES } from '@constants/index'
-import { LanguageSwitcher } from '@components/LanguageSwitcher'
 import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, Heart, AtSign, Check, AlertCircle } from 'lucide-react'
 
 // ─── Google SVG Icon ─────────────────────────────────────────────────────────

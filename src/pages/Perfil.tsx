@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cog, UserCircle, Film } from 'lucide-react'
-import { useAuth } from '@hooks/useAuth'
-import { useUserProfile } from '@hooks/useUserProfile'
+import { useAuth } from '@/features/auth'
+import { useUserProfile } from '@/features/profile'
+import { ItemCard } from '@/features/items'
+import { ListItem } from '@/features/shared'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/supabaseClient'
-import ItemCard from '@components/ItemCard'
-import { ListItem } from '@/types'
 
 interface RatingInfo {
   rating: number
