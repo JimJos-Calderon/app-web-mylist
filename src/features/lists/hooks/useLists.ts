@@ -18,6 +18,13 @@ interface UseListsReturn {
   isJoiningList: boolean
 }
 
+type JoinListRpcResult = {
+  joined: boolean
+  status: string
+  list_id: string | null
+  membership_role: string | null
+}
+
 /**
  * Hook para gestionar listas de usuario
  * Lectura con useQuery + Mutaciones con useMutation
@@ -139,39 +146,32 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
         throw new Error('Usuario no autenticado')
       }
 
-      // Buscar la lista por código
-      const { data: list, error: listError } = await supabase
-        .from('lists')
-        .select('id')
-        .eq('invite_code', inviteCode.toUpperCase())
-        .single()
+      const { data, error } = await supabase.rpc('join_list_with_code', {
+        p_user_id: userId,
+        p_invite_code: inviteCode.toUpperCase(),
+      })
 
-      if (listError || !list) {
-        throw new Error('Código de invitación inválido')
+      if (error) throw error
+
+      const result = Array.isArray(data)
+        ? (data[0] as JoinListRpcResult | undefined)
+        : (data as JoinListRpcResult | null)
+
+      if (!result) {
+        throw new Error('Respuesta vacía del servidor')
       }
 
-      // Verificar si ya es miembro
-      const { data: existingMember } = await supabase
-        .from('list_members')
-        .select('id')
-        .eq('list_id', list.id)
-        .eq('user_id', userId)
-        .single()
-
-      if (existingMember) {
+      if (result.status === 'ALREADY_MEMBER') {
         throw new Error('Ya eres miembro de esta lista')
       }
 
-      // Agregar al usuario como miembro
-      const { error: memberError } = await supabase
-        .from('list_members')
-        .insert({
-          list_id: list.id,
-          user_id: userId,
-          role: 'member',
-        })
+      if (result.status === 'LIST_NOT_FOUND' || result.status === 'INVALID_CODE') {
+        throw new Error('Código de invitación inválido')
+      }
 
-      if (memberError) throw memberError
+      if (result.status !== 'JOINED') {
+        throw new Error('No se pudo unir a la lista')
+      }
     },
     onSuccess: () => {
       // Invalidar y re-fetchear listas
