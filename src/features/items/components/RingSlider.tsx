@@ -25,7 +25,28 @@ const RingSlider: React.FC<RingSliderProps> = ({
   const itemsWithPoster = items.filter((item) => Boolean(item.poster_url))
   const swiperRef = useRef<any>(null)
   const [activeItemId, setActiveItemId] = useState<string>(itemsWithPoster[0]?.id || '')
+  const [liveText, setLiveText] = useState('')
   const prefersReducedMotion = useReducedMotion()
+
+  const handleCarouselKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      swiperRef.current?.swiper.slidePrev()
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      swiperRef.current?.swiper.slideNext()
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      swiperRef.current?.swiper.slideToLoop(0)
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      swiperRef.current?.swiper.slideToLoop(itemsWithPoster.length - 1)
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      const active = itemsWithPoster.find((i) => i.id === activeItemId)
+      if (active) onOpenDetails(active)
+    }
+  }, [activeItemId, itemsWithPoster, onOpenDetails])
 
   if (itemsWithPoster.length === 0) {
     return (
@@ -59,27 +80,6 @@ const RingSlider: React.FC<RingSliderProps> = ({
 
   const activeItem = itemsWithPoster.find((item) => item.id === activeItemId)
   const isOwn = activeItem?.user_id === userOwnerId
-  const [liveText, setLiveText] = useState('')
-
-  const handleCarouselKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault()
-      swiperRef.current?.swiper.slidePrev()
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault()
-      swiperRef.current?.swiper.slideNext()
-    } else if (e.key === 'Home') {
-      e.preventDefault()
-      swiperRef.current?.swiper.slideToLoop(0)
-    } else if (e.key === 'End') {
-      e.preventDefault()
-      swiperRef.current?.swiper.slideToLoop(itemsWithPoster.length - 1)
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      const active = itemsWithPoster.find((i) => i.id === activeItemId)
-      if (active) onOpenDetails(active)
-    }
-  }, [itemsWithPoster.length, activeItemId, itemsWithPoster, onOpenDetails])
 
   return (
     <div

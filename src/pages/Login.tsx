@@ -84,7 +84,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
       }
     }, 500)
     return () => clearTimeout(timer)
-  }, [username])
+  }, [username, t])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()

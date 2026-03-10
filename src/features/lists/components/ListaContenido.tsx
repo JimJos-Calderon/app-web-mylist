@@ -69,7 +69,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     tipo
   )
 
-  const { getPosterUrl, getSynopsis, getGenre, fetchPlot } = useOmdb()
+  const { fetchPlot } = useOmdb()
 
   const { filters, updateFilter, resetFilters } = useFilters()
 

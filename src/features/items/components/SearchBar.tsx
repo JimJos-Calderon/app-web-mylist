@@ -31,9 +31,8 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     },
     ref
   ) => {
-    const { t, i18n } = useTranslation()
-    // Dependencia explícita del idioma para forzar re-render
-    const ariaLabel = React.useMemo(() => t('placeholders.search_aria_label'), [t, i18n.language])
+    const { t } = useTranslation()
+    const ariaLabel = React.useMemo(() => t('placeholders.search_aria_label'), [t])
     
     return (
       <div className="relative mb-8 md:mb-16 max-w-xl" ref={ref}>

@@ -532,10 +532,10 @@ El proyecto cuenta con un diseño **retro-futurista** inspirado en la estética 
 Edita `src/index.css` para modificar los colores del tema.
 
 ### Modificar tiempo de debounce
-Ajusta `DEBOUNCE_DELAY` en `src/constants/index.ts` (por defecto: 300ms)
+Ajusta `DEBOUNCE_DELAY` en `src/features/shared/model/constants.ts` (por defecto: 300ms)
 
 ### Cambiar límite de sugerencias OMDB
-Modifica `MAX_SUGGESTIONS` en `src/constants/index.ts` (por defecto: 10)
+Modifica `MAX_SUGGESTIONS` en `src/features/shared/model/constants.ts` (por defecto: 10)
 
 ### Configurar TTL del caché
 La gestión de caché se realiza con React Query + persistencia local. Ajusta estos valores en `src/config/queryClient.ts` y `src/config/queryPersistence.ts`:
