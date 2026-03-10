@@ -8,6 +8,13 @@ import { CheckCircle, XCircle, Users, ArrowRight, Loader2 } from 'lucide-react'
 
 type Status = 'loading' | 'found' | 'joining' | 'success' | 'already_member' | 'not_found' | 'error' | 'login_required'
 
+type JoinListRpcResult = {
+    joined: boolean
+    status: string
+    list_id: string | null
+    membership_role: string | null
+}
+
 const JoinList: React.FC = () => {
     const { t } = useTranslation()
     const { code: routeCode } = useParams<{ code: string }>()
@@ -74,19 +81,33 @@ const JoinList: React.FC = () => {
 
         setStatus('joining')
         try {
-            const { error } = await supabase.from('list_members').insert({
-                list_id: list.id,
-                user_id: session.user.id,
-                role: 'member',
+            const { data, error } = await supabase.rpc('join_list_with_code', {
+                p_user_id: session.user.id,
+                p_invite_code: code?.toUpperCase() ?? list.invite_code,
             })
 
-            if (error) {
-                if (error.code === '23505') {
-                    setStatus('already_member')
-                } else {
-                    throw error
-                }
+            if (error) throw error
+
+            const result = Array.isArray(data)
+                ? (data[0] as JoinListRpcResult | undefined)
+                : (data as JoinListRpcResult | null)
+
+            if (!result) {
+                throw new Error('Respuesta vacía del servidor al unirse a la lista')
+            }
+
+            if (result.status === 'ALREADY_MEMBER') {
+                setStatus('already_member')
                 return
+            }
+
+            if (result.status === 'LIST_NOT_FOUND' || result.status === 'INVALID_CODE') {
+                setStatus('not_found')
+                return
+            }
+
+            if (result.status !== 'JOINED') {
+                throw new Error('Estado inesperado al unirse a la lista')
             }
 
             setStatus('success')

@@ -22,6 +22,19 @@ const mockLists = [
 vi.mock('@/supabaseClient', () => {
   return {
     supabase: {
+      rpc: vi.fn(() =>
+        Promise.resolve({
+          data: [
+            {
+              joined: true,
+              status: 'JOINED',
+              list_id: 'list-1',
+              membership_role: 'member',
+            },
+          ],
+          error: null,
+        })
+      ),
       from: vi.fn((table: string) => {
         if (table === 'list_members') {
           return {

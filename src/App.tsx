@@ -211,9 +211,16 @@ const App: React.FC = () => {
   const [playlistDragOffset, setPlaylistDragOffset] = useState({ x: 0, y: 0 })
 
   // Pending invite
-  const [pendingInvite, setPendingInvite] = useState<{ list_id: string; list_name: string; list_description: string | null } | null>(null)
+  const [pendingInvite, setPendingInvite] = useState<{ list_id: string; list_name: string; list_description: string | null; invite_code: string } | null>(null)
   const [inviteJoining, setInviteJoining] = useState(false)
   const [inviteError, setInviteError] = useState<string | null>(null)
+
+  type JoinListRpcResult = {
+    joined: boolean
+    status: string
+    list_id: string | null
+    membership_role: string | null
+  }
 
   // Refs para cerrar menús al hacer click fuera
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -250,7 +257,7 @@ const App: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('lists')
-          .select('id, name, description')
+          .select('id, name, description, invite_code')
           .eq('invite_code', code)
           .maybeSingle()
         if (error) {
@@ -265,7 +272,12 @@ const App: React.FC = () => {
             .eq('user_id', session.user.id)
             .maybeSingle()
           if (!membership) {
-            setPendingInvite({ list_id: data.id, list_name: data.name, list_description: data.description })
+            setPendingInvite({
+              list_id: data.id,
+              list_name: data.name,
+              list_description: data.description,
+              invite_code: data.invite_code,
+            })
           }
         }
       } catch (err) {
@@ -398,12 +410,28 @@ const App: React.FC = () => {
                     setInviteJoining(true)
                     setInviteError(null)
                     try {
-                      const { error } = await supabase.from('list_members').insert({
-                        list_id: pendingInvite.list_id,
-                        user_id: session.user.id,
-                        role: 'member',
+                      const { data, error } = await supabase.rpc('join_list_with_code', {
+                        p_user_id: session.user.id,
+                        p_invite_code: pendingInvite.invite_code,
                       })
+
                       if (error) throw error
+
+                      const result = Array.isArray(data)
+                        ? (data[0] as JoinListRpcResult | undefined)
+                        : (data as JoinListRpcResult | null)
+
+                      if (!result) {
+                        throw new Error('Respuesta vacía del servidor')
+                      }
+
+                      if (result.status !== 'JOINED' && result.status !== 'ALREADY_MEMBER') {
+                        if (result.status === 'LIST_NOT_FOUND' || result.status === 'INVALID_CODE') {
+                          throw new Error('El código de invitación ya no es válido')
+                        }
+                        throw new Error('No se pudo unir a la lista')
+                      }
+
                       setPendingInvite(null)
                       window.location.href = '/peliculas'
                     } catch (err: any) {
