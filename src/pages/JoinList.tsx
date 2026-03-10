@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/features/auth'
+import { LanguageSwitcher, List } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
-import { useAuth } from '@hooks/useAuth'
-import { LanguageSwitcher } from '@components/LanguageSwitcher'
-import { List } from '@typings/index'
 import { CheckCircle, XCircle, Users, ArrowRight, Loader2 } from 'lucide-react'
 
 type Status = 'loading' | 'found' | 'joining' | 'success' | 'already_member' | 'not_found' | 'error' | 'login_required'

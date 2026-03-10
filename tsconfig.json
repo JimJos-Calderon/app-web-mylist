@@ -11,7 +11,6 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "ignoreDeprecations": "6.0",
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -29,26 +28,8 @@
       "@/*": [
         "src/*"
       ],
-      "@components/*": [
-        "src/components/*"
-      ],
       "@pages/*": [
         "src/pages/*"
-      ],
-      "@hooks/*": [
-        "src/hooks/*"
-      ],
-      "@context/*": [
-        "src/context/*"
-      ],
-      "@typings/*": [
-        "src/types/*"
-      ],
-      "@utils/*": [
-        "src/utils/*"
-      ],
-      "@constants/*": [
-        "src/constants/*"
       ],
       "@config/*": [
         "src/config/*"

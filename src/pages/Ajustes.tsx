@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { useAuth } from '@hooks/useAuth'
-import { useUserProfile } from '@hooks/useUserProfile'
+import { useAuth } from '@/features/auth'
+import { useUserProfile } from '@/features/profile'
+import { LanguageSwitcher } from '@/features/shared'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
 import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key, Globe } from 'lucide-react'
-import { LanguageSwitcher } from '@components/LanguageSwitcher'
 
 type Section = 'perfil' | 'seguridad'
 
