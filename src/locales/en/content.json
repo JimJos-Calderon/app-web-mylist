@@ -96,6 +96,7 @@
     "loading": "Loading settings...",
     "profile_section": "Edit Profile",
     "security_section": "Security",
+    "notifications_section": "Notifications",
     "logout_button": "Sign Out",
     "logout_confirm": "Are you sure you want to sign out?",
     "username_label": "Username",
@@ -142,7 +143,18 @@
     "verify_email_title": "Confirm email change",
     "verify_email_description": "Enter your password to confirm email change",
     "verify_email_label": "Password",
-    "verify_email_placeholder": "Enter your password"
+    "verify_email_placeholder": "Enter your password",
+    "push_title": "Push Notifications",
+    "push_description": "Enable notifications to get alerts when there is activity in your shared lists.",
+    "push_support_label": "Browser support",
+    "push_support_yes": "Available",
+    "push_support_no": "Not available",
+    "push_permission_label": "Current permission",
+    "push_button": "Enable push notifications",
+    "push_button_loading": "Enabling...",
+    "push_success": "Push notifications enabled successfully",
+    "push_permission_denied": "Notifications are blocked by the browser. Enable them in site settings.",
+    "push_not_authenticated": "You must be signed in to enable notifications"
   },
   "account": {
     "info_title": "Account Information",

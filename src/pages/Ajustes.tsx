@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
-import { LanguageSwitcher } from '@/features/shared'
+import { LanguageSwitcher, usePushNotifications } from '@/features/shared'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
-import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key, Globe } from 'lucide-react'
+import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key, Bell } from 'lucide-react'
 
-type Section = 'perfil' | 'seguridad'
+type Section = 'perfil' | 'seguridad' | 'notificaciones'
 
 const Ajustes: React.FC = () => {
   const { t } = useTranslation()
@@ -33,6 +33,15 @@ const Ajustes: React.FC = () => {
   const [verifyEmailPassword, setVerifyEmailPassword] = useState('')
   const [showVerifyEmailPassword, setShowVerifyEmailPassword] = useState(false)
   const [securityMessage, setSecurityMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [pushMessage, setPushMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+
+  const {
+    isSupported: isPushSupported,
+    permission: pushPermission,
+    isSubscribing: isSubscribingPush,
+    error: pushError,
+    subscribeCurrentUser,
+  } = usePushNotifications()
   
   const navigate = useNavigate()
 
@@ -211,6 +220,30 @@ const Ajustes: React.FC = () => {
     }
   }
 
+  const handleEnablePush = async () => {
+    if (!user?.id) {
+      setPushMessage({ type: 'error', text: t('settings.push_not_authenticated') })
+      return
+    }
+
+    setPushMessage(null)
+    const subscription = await subscribeCurrentUser(user.id)
+
+    if (subscription) {
+      setPushMessage({ type: 'success', text: t('settings.push_success') })
+      return
+    }
+
+    if (pushPermission === 'denied') {
+      setPushMessage({ type: 'error', text: t('settings.push_permission_denied') })
+      return
+    }
+
+    if (pushError) {
+      setPushMessage({ type: 'error', text: pushError })
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center">
@@ -254,6 +287,16 @@ const Ajustes: React.FC = () => {
                   }`}
                 >
                   <LockKeyhole className="w-5 h-5" /> {t('settings.security_section')}
+                </button>
+                <button
+                  onClick={() => setActiveSection('notificaciones')}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                    activeSection === 'notificaciones'
+                      ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-black'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                  }`}
+                >
+                  <Bell className="w-5 h-5" /> {t('settings.notifications_section')}
                 </button>
               </nav>
               
@@ -560,6 +603,56 @@ const Ajustes: React.FC = () => {
                     {securityMessage.text}
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeSection === 'notificaciones' && (
+              <div className="space-y-6">
+                <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-3xl p-8">
+                  <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+                    <Bell className="w-5 h-5" />
+                    {t('settings.push_title')}
+                  </h2>
+                  <p className="text-zinc-400 mb-6">{t('settings.push_description')}</p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">
+                    <div className="bg-zinc-900/60 border border-zinc-700 rounded-lg p-4">
+                      <span className="text-zinc-400">{t('settings.push_support_label')}:</span>
+                      <p className="mt-1 font-semibold text-white">
+                        {isPushSupported ? t('settings.push_support_yes') : t('settings.push_support_no')}
+                      </p>
+                    </div>
+                    <div className="bg-zinc-900/60 border border-zinc-700 rounded-lg p-4">
+                      <span className="text-zinc-400">{t('settings.push_permission_label')}:</span>
+                      <p className="mt-1 font-semibold text-white">{pushPermission}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleEnablePush}
+                    disabled={!isPushSupported || isSubscribingPush}
+                    className="w-full px-4 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubscribingPush ? t('settings.push_button_loading') : t('settings.push_button')}
+                  </button>
+
+                  {pushMessage && (
+                    <div className={`mt-4 px-4 py-3 rounded-lg text-sm ${
+                      pushMessage.type === 'success'
+                        ? 'bg-green-500/10 border border-green-500/30 text-green-400'
+                        : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                    }`}>
+                      {pushMessage.text}
+                    </div>
+                  )}
+
+                  {!pushMessage && pushError && (
+                    <div className="mt-4 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm">
+                      {pushError}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
