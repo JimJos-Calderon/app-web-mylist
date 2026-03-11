@@ -74,7 +74,6 @@ const ItemCard: React.FC<ItemCardProps> = ({
             src={item.poster_url}
             alt={item.titulo}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            placeholderUrl="https://via.placeholder.com/300x450?text=No+Image"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-center px-4">

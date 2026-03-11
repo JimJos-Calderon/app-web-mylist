@@ -6,7 +6,6 @@ interface OptimizedImageProps {
   src?: string
   alt: string
   className?: string
-  placeholderUrl?: string
   fallbackElement?: React.ReactNode
   onError?: (e: React.SyntheticEvent<HTMLImageElement>) => void
 }
@@ -24,7 +23,6 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
   className = '',
-  placeholderUrl = 'https://via.placeholder.com/300x450?text=No+Image',
   fallbackElement,
   onError
 }) => {
@@ -40,14 +38,11 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     setHasError(true)
     if (onError) {
       onError(e)
-    } else {
-      // Default fallback
-      (e.target as HTMLImageElement).src = placeholderUrl
     }
   }
 
-  // If no src provided, show fallback
-  if (!src) {
+  // If no src provided or image fails, show fallback
+  if (!src || hasError) {
     return fallbackElement ? (
       <>{fallbackElement}</>
     ) : (
@@ -65,12 +60,8 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Blur placeholder while loading */}
       {!isLoaded && (
         <div
-          className={`absolute inset-0 bg-cover bg-center blur-lg scale-110 ${className}`}
-          style={{
-            backgroundImage: `url(${src})`,
-            opacity: hasError ? 0 : 0.6,
-            zIndex: 1
-          }}
+          className={`absolute inset-0 animate-pulse bg-gradient-to-br from-zinc-800 to-zinc-700 ${className}`}
+          style={{ zIndex: 1 }}
           aria-hidden="true"
         />
       )}
