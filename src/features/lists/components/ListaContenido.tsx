@@ -143,9 +143,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
       }
 
       const data = await response.json()
-      console.log('OMDB Response:', data)
       const result = data.Search?.[0]
-      console.log('OMDB Search Result:', result)
       const omdbResult = {
         Genre:
           result?.Genre && result.Genre !== 'N/A'
@@ -153,7 +151,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
             : undefined,
         Poster: result?.Poster !== 'N/A' ? result.Poster : undefined,
       }
-      console.log('Extracted OMDB Data:', omdbResult)
       return omdbResult
     } catch (err) {
       console.error('Error fetching OMDB data:', err)
@@ -179,7 +176,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
         genero: omdbData.Genre || undefined,
         list_id: listId || '',
       }
-      console.log('Adding item with data:', itemData)
       await addItem(itemData)
 
       setSearchInput('')
@@ -214,7 +210,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
         genero: omdbData.Genre || undefined,
         list_id: listId || '',
       }
-      console.log('Adding item manually with data:', itemData)
       await addItem(itemData)
 
       setSearchInput('')
