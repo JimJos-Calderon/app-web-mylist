@@ -96,6 +96,7 @@
     "loading": "Cargando ajustes...",
     "profile_section": "Modificar Perfil",
     "security_section": "Seguridad",
+    "notifications_section": "Notificaciones",
     "logout_button": "Cerrar Sesión",
     "logout_confirm": "¿Estás seguro de que deseas cerrar sesión?",
     "username_label": "Nombre de Usuario",
@@ -142,7 +143,18 @@
     "verify_email_title": "Confirmar cambio de correo",
     "verify_email_description": "Ingresa tu contraseña para confirmar el cambio de correo electrónico",
     "verify_email_label": "Contraseña",
-    "verify_email_placeholder": "Ingresa tu contraseña"
+    "verify_email_placeholder": "Ingresa tu contraseña",
+    "push_title": "Notificaciones Push",
+    "push_description": "Activa notificaciones para recibir avisos cuando haya actividad en tus listas compartidas.",
+    "push_support_label": "Soporte del navegador",
+    "push_support_yes": "Disponible",
+    "push_support_no": "No disponible",
+    "push_permission_label": "Permiso actual",
+    "push_button": "Activar notificaciones push",
+    "push_button_loading": "Activando...",
+    "push_success": "Notificaciones push activadas correctamente",
+    "push_permission_denied": "El navegador bloqueó las notificaciones. Habilítalas en la configuración del sitio.",
+    "push_not_authenticated": "Debes iniciar sesión para activar notificaciones"
   },
   "account": {
     "info_title": "Información de la Cuenta",

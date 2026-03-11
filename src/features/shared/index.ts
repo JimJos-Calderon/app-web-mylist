@@ -8,6 +8,7 @@ export { SectionErrorFallback } from './components/SectionErrorFallback'
 export { default as SpotifyGlassCard } from './components/SpotifyGlassCard'
 
 export { useReducedMotion } from './hooks/useReducedMotion'
+export { usePushNotifications } from './hooks/usePushNotifications'
 
 export * from './lib/validation'
 export * from './model/constants'

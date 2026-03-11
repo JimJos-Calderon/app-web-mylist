@@ -379,6 +379,10 @@ npm run build            # Construye la aplicación para producción
 npm run preview          # Previsualiza la build de producción
 npm run lint             # Ejecuta el linter
 
+# Health-check Push (PowerShell)
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\scripts\push-health-check.ps1 -ProjectRef <tu_project_ref> -RunAutomationProbe
+
 # Testing
 npm run test             # Ejecuta tests unitarios (Vitest)
 npm run test:ui          # Interfaz visual de Vitest
@@ -580,14 +584,52 @@ En Chrome: `Application > Manifest` y `Application > Service Workers`.
 |----------|-------------|----------|
 | `VITE_SUPABASE_URL` | URL de tu proyecto Supabase | ✅ Sí |
 | `VITE_SUPABASE_ANON_KEY` | Clave anónima de Supabase | ✅ Sí |
+| `VITE_VAPID_PUBLIC_KEY` | Clave pública VAPID para suscripción Push en navegador | ✅ Sí (si usas Push) |
 
 ### Supabase Edge Functions Secrets
 
 | Variable | Descripción | Configuración |
 |----------|-------------|----------|
 | `OMDB_API_KEY` | API Key de OMDB (protegida en servidor) | Supabase → Edge Functions → Secrets |
+| `VAPID_PUBLIC_KEY` | Clave pública VAPID usada por `send-push` | Supabase → Edge Functions → Secrets |
+| `VAPID_PRIVATE_KEY` | Clave privada VAPID usada por `send-push` | Supabase → Edge Functions → Secrets |
+| `VAPID_SUBJECT` | Contacto VAPID (`mailto:...`) | Supabase → Edge Functions → Secrets |
+| `PUSH_WEBHOOK_SECRET` | Secret compartido entre trigger SQL y `send-push` | Supabase → Edge Functions → Secrets |
+| `SUPABASE_URL` | URL del proyecto para cliente admin en Edge Function | Supabase → Edge Functions → Secrets |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave service role para enviar push y leer suscripciones | Supabase → Edge Functions → Secrets |
 
-**Nota importante**: `OMDB_API_KEY` se mantiene **seguro en el servidor** y **NUNCA se expone en el frontend**. Las llamadas a OMDB se hacen a través de la Edge Function `search-omdb` que inyecta la clave automáticamente.
+**Nota importante**:
+- `OMDB_API_KEY` se mantiene **seguro en el servidor** y **NUNCA se expone en el frontend**.
+- `PUSH_WEBHOOK_SECRET` debe existir en ambos lados: secret de función y fila `public.push_dispatch_config`.
+- Nunca guardes claves sensibles reales en el repositorio.
+
+### Health-check de Push (post-deploy)
+
+Script incluido: `scripts/push-health-check.ps1`
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\scripts\push-health-check.ps1 -ProjectRef <tu_project_ref> -RunAutomationProbe
+```
+
+Qué valida:
+- Configuración activa (`push_dispatch_config.is_enabled = true`)
+- Envío directo a `send-push`
+- Sonda de automatización (`audit_logs -> trigger -> send-push`)
+
+Diagnóstico rápido adicional:
+
+```sql
+SELECT id, status_code, error_msg, content, created
+FROM net._http_response
+ORDER BY id DESC
+LIMIT 20;
+```
+
+Interpretación rápida:
+- `status_code = 200`: flujo OK
+- `status_code = 401`: `PUSH_WEBHOOK_SECRET` desalineado
+- `status_code = 500`: error interno en `send-push`
 
 ---
 
@@ -609,6 +651,9 @@ En Chrome: `Application > Manifest` y `Application > Service Workers`.
 - **Error en búsqueda**: Verifica que `OMDB_API_KEY` está configurado en Supabase Secrets
 - **Búsqueda muy lenta**: Puede ser el límite de rate limiting (30/hora), espera o usa otra cuenta
 - **Error de validación en búsqueda**: Asegúrate de escribir 2-100 caracteres, sin caracteres especiales
+- **Push devuelve 401**: Verifica que `PUSH_WEBHOOK_SECRET` coincida entre secrets y `public.push_dispatch_config`
+- **Push no llega pero hay 200**: Revisa permisos del navegador y que exista una fila activa en `push_subscriptions`
+- **Push no dispara en automático**: Confirma que la migración `supabase/migrations/07_audit_logs_push_dispatch.sql` esté aplicada
 
 ### API y Datos
 - **Las imágenes no cargan**: Verifica que `OMDB_API_KEY` sea válida. Algunas películas no tienen póster (placeholder automático)
@@ -633,6 +678,7 @@ En Chrome: `Application > Manifest` y `Application > Service Workers`.
 1. **Configura las variables de entorno** en tu plataforma:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
+  - `VITE_VAPID_PUBLIC_KEY` (si habilitas Push en frontend)
 
    **Nota**: `OMDB_API_KEY` NO va en el frontend. Se configura como Secret en Supabase.
 
@@ -704,6 +750,28 @@ const { data, error } = await supabase.functions.invoke('search-omdb', {
 - `400`: Validación de entrada fallida
 - `429`: Rate limit excedido
 - `500`: Error interno
+
+### send-push Function
+
+**Ubicación**: `supabase/functions/send-push/index.ts`
+
+**Propósito**:
+1. Recibir solicitudes de notificación push.
+2. Validar `x-push-secret` cuando `PUSH_WEBHOOK_SECRET` está configurado.
+3. Buscar suscripciones activas en `push_subscriptions`.
+4. Enviar notificaciones Web Push y desactivar endpoints expirados (`404/410`).
+
+**Invocación manual (prueba técnica)**:
+```bash
+curl -X POST "https://<project-ref>.supabase.co/functions/v1/send-push" \
+  -H "Content-Type: application/json" \
+  -H "x-push-secret: <PUSH_WEBHOOK_SECRET>" \
+  -d '{"user_id":"<uuid>","message":"Test push","title":"MyList"}'
+```
+
+**Automatización**:
+- Trigger SQL definido en `supabase/migrations/07_audit_logs_push_dispatch.sql`
+- Flujo: `audit_logs` -> `dispatch_push_from_audit_logs()` -> `net.http_post()` -> `send-push`
 
 ---
 
