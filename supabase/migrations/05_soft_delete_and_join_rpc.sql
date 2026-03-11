@@ -75,13 +75,14 @@ CREATE POLICY "items_insert_owner_or_admin"
   TO authenticated
   WITH CHECK (
     deleted_at IS NULL
+    AND user_id = auth.uid()
     AND EXISTS (
       SELECT 1
       FROM public.list_members lm
       JOIN public.lists l ON l.id = lm.list_id
       WHERE lm.list_id = items.list_id
         AND lm.user_id = auth.uid()
-        AND lm.role IN ('owner', 'admin')
+        AND lm.role IN ('owner', 'admin', 'member')
         AND l.deleted_at IS NULL
     )
   );

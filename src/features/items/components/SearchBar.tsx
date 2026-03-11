@@ -78,7 +78,6 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
                     src={suggestion.Poster !== 'N/A' ? suggestion.Poster : undefined}
                     alt={suggestion.Title}
                     className="w-full h-full object-cover"
-                    placeholderUrl="https://via.placeholder.com/60x90?text=No+Image"
                   />
                 </div>
                 <div>
