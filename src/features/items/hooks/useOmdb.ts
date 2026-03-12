@@ -1,4 +1,5 @@
 import { OmdbResponse } from '@/features/shared'
+import { supabase } from '@/supabaseClient'
 
 interface UseOmdbReturn {
   fetchPlot: (title: string) => Promise<string | null>
@@ -12,20 +13,16 @@ interface UseOmdbReturn {
 export const useOmdb = (): UseOmdbReturn => {
   /** Plain async function — safe to call from event handlers (no hooks). */
   const fetchPlot = async (title: string): Promise<string | null> => {
-    const response = await fetch(
-      'https://lpaysuasdjgajiftyush.supabase.co/functions/v1/search-omdb',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwYXlzdWFzZGpnYWppZnR5dXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDgyNzUxNDIsImV4cCI6MTk5Mzg1MTE0Mn0.I6I8scpqFLX0xc7OgPRQvQ5zBBBEO1_4rCjQhljW6lI',
-        },
-        body: JSON.stringify({ query: title, type: 'movie', mode: 'detail' }),
-      }
-    )
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data: OmdbResponse = await response.json()
-    return data.Plot && data.Plot !== 'N/A' ? data.Plot : null
+    const { data, error } = await supabase.functions.invoke('search-omdb', {
+      body: { query: title, type: 'movie', mode: 'detail' },
+    })
+
+    if (error) {
+      throw new Error(error.message || 'Failed to fetch OMDB plot')
+    }
+
+    const omdbData = data as OmdbResponse
+    return omdbData.Plot && omdbData.Plot !== 'N/A' ? omdbData.Plot : null
   }
 
   return {

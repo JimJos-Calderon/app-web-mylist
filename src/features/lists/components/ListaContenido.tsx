@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth'
 import { useItems, useSuggestions, useFilters, useOmdb } from '@/features/items'
 import { OmdbSuggestion, ListItem, List, FilterState, validateTitle, sanitizeInput, SORT_OPTIONS, ErrorAlert } from '@/features/shared'
 import { ItemCard, SearchBar, FilterPanel, StatsWidget } from '@/features/items'
+import { supabase } from '@/supabaseClient'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
 import ListSelector from './ListSelector'
 
@@ -121,29 +122,21 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   // Función helper para obtener datos de OMDB directamente
   const fetchOmdbData = async (title: string) => {
     try {
-      const response = await fetch(
-        'https://lpaysuasdjgajiftyush.supabase.co/functions/v1/search-omdb',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwYXlzdWFzZGpnYWppZnR5dXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDgyNzUxNDIsImV4cCI6MTk5Mzg1MTE0Mn0.I6I8scpqFLX0xc7OgPRQvQ5zBBBEO1_4rCjQhljW6lI',
-          },
-          body: JSON.stringify({
-            query: title,
-            type: tipo === 'pelicula' ? 'movie' : 'series',
-            page: 1,
-          }),
-        }
-      )
+      const { data, error } = await supabase.functions.invoke('search-omdb', {
+        body: {
+          query: title,
+          type: tipo === 'pelicula' ? 'movie' : 'series',
+          page: 1,
+        },
+      })
 
-      if (!response.ok) {
-        console.warn(`OMDB response not ok: ${response.status}`)
+      if (error) {
+        console.warn('OMDB invoke error:', error.message)
         return { Genre: undefined, Poster: undefined }
       }
 
-      const data = await response.json()
-      const result = data.Search?.[0]
+      const omdbData = data as { Search?: Array<{ Genre?: string; Poster?: string }> }
+      const result = omdbData.Search?.[0]
       const omdbResult = {
         Genre:
           result?.Genre && result.Genre !== 'N/A'
