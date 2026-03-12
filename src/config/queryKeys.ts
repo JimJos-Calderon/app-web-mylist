@@ -25,6 +25,7 @@ export const queryKeys = {
     byUser: (userId: string) => [...queryKeys.lists.all, userId] as const,
     detail: (listId: string) => ['lists', listId] as const,
     members: (listId: string) => [...queryKeys.lists.detail(listId), 'members'] as const,
+    activityFeed: (listId: string, limit: number) => [...queryKeys.lists.all, 'activityFeed', listId, limit] as const,
   },
 
   // ─── OMDB (External API) ──────────────────────────────────────

@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect, Suspense, lazy } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ErrorBoundary } from 'react-error-boundary'
 import { useAuth } from '@/features/auth'
 import { useItems, useSuggestions, useFilters, useOmdb } from '@/features/items'
-import { OmdbSuggestion, ListItem, List, FilterState, validateTitle, sanitizeInput, SORT_OPTIONS, ErrorAlert } from '@/features/shared'
+import { OmdbSuggestion, ListItem, List, FilterState, validateTitle, sanitizeInput, SORT_OPTIONS, ErrorAlert, SectionErrorFallback } from '@/features/shared'
 import { ItemCard, SearchBar, FilterPanel, StatsWidget } from '@/features/items'
 import { supabase } from '@/supabaseClient'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
@@ -10,6 +11,7 @@ import ListSelector from './ListSelector'
 
 // ─── Lazy load heavy component (uses Swiper) ───────────────────────────────
 const RingSlider = lazy(() => import('@/features/items/components/RingSlider'))
+const ActivityFeedPanel = lazy(() => import('@/features/lists/components/ActivityFeed'))
 
 interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
@@ -33,6 +35,27 @@ const RingSliderSkeleton: React.FC<{ t: any }> = ({ t }) => (
   </div>
 )
 
+const ActivityFeedSkeleton: React.FC<{ t: any }> = ({ t }) => (
+  <div className="rounded-2xl border border-cyan-500/20 bg-black/70 backdrop-blur-lg p-5">
+    <div className="flex items-center justify-between gap-3 mb-4">
+      <h3 className="text-sm font-black uppercase tracking-wider text-white">
+        {t('activity_feed.title')}
+      </h3>
+      <div className="w-24 h-3 rounded bg-cyan-400/10 animate-pulse" />
+    </div>
+
+    <div className="space-y-3">
+      {[1, 2, 3].map((line) => (
+        <div key={line} className="h-12 rounded-xl bg-zinc-900/70 border border-zinc-800/80 animate-pulse" />
+      ))}
+    </div>
+
+    <p className="mt-3 text-xs uppercase tracking-wider text-zinc-500">
+      {t('activity_feed.loading')}
+    </p>
+  </div>
+)
+
 // Removed duplicate definition below
 const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, lists, currentList, setCurrentList, loadingLists }) => {
   const { user } = useAuth()
@@ -41,6 +64,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [showActivityFeed, setShowActivityFeed] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth >= 640
+  })
   const [currentPage, setCurrentPage] = useState(1)
   const [isMobile, setIsMobile] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'ring'>('grid' as 'grid' | 'ring')
@@ -73,6 +100,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   const { fetchPlot } = useOmdb()
 
   const { filters, updateFilter, resetFilters } = useFilters()
+  const resolvedListId = currentList?.id ?? listId
 
   // Handler para cambios en los filtros
   const handleFilterChange = (filterKey: keyof FilterState, value: any) => {
@@ -458,6 +486,40 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               onReset={resetFilters}
               sortOptions={SORT_OPTIONS}
             />
+
+            {resolvedListId && (
+              <section className="mb-6 rounded-2xl border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-black/60 to-cyan-950/20 p-4 md:p-5 shadow-[0_0_25px_rgba(168,85,247,0.12)]">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm md:text-base font-black uppercase tracking-wider text-cyan-300">
+                      {t('activity_feed.title')}
+                    </h3>
+                    <p className="text-[11px] md:text-xs uppercase tracking-wide text-zinc-400 mt-1">
+                      {t('activity_feed.subtitle')}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowActivityFeed((prev) => !prev)}
+                    className="px-3 py-2 rounded-lg border border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400 transition text-xs md:text-sm font-semibold uppercase tracking-wide"
+                    aria-expanded={showActivityFeed}
+                  >
+                    {showActivityFeed ? t('activity_feed.collapse') : t('activity_feed.expand')}
+                  </button>
+                </div>
+
+                {showActivityFeed && (
+                  <div className="mt-4">
+                    <ErrorBoundary FallbackComponent={SectionErrorFallback}>
+                      <Suspense fallback={<ActivityFeedSkeleton t={t} />}>
+                        <ActivityFeedPanel listId={resolvedListId} limit={20} />
+                      </Suspense>
+                    </ErrorBoundary>
+                  </div>
+                )}
+              </section>
+            )}
 
             <div className="mb-6 flex justify-end gap-2 flex-wrap">
               <button
