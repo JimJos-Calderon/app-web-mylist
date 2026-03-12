@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { queryKeys } from '@config/queryKeys'
 
@@ -45,6 +46,7 @@ const normalizeLimit = (limit?: number): number => {
 export const useActivityFeed = (options: UseActivityFeedOptions = {}): UseActivityFeedReturn => {
   const { listId, enabled = true } = options
   const limit = normalizeLimit(options.limit)
+  const queryClient = useQueryClient()
 
   const {
     data: events = [],
@@ -74,6 +76,34 @@ export const useActivityFeed = (options: UseActivityFeedOptions = {}): UseActivi
     },
     enabled,
   })
+
+  // Setup realtime listener para actualizaciones automáticas en activity feed
+  useEffect(() => {
+    if (!enabled) return
+
+    const channelName = `activity_feed:${listId || 'all'}`
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'audit_logs',
+        },
+        (_payload) => {
+          // Invalidar la query para re-fetchear
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.lists.activityFeed(listId ?? 'all', limit),
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [listId, enabled, limit, queryClient])
 
   const refetchActivityFeed = async () => {
     await refetch()
