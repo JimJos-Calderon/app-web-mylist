@@ -210,5 +210,40 @@
     "invited_intro": "You've been invited to",
     "login_required_title": "Invitation received",
     "login_required_description": "Sign in to join this list."
+  },
+  "activity_feed": {
+    "title": "Activity Feed",
+    "subtitle": "Recent events from this collaborative list",
+    "expand": "Show feed",
+    "collapse": "Hide feed",
+    "loading": "Loading activity...",
+    "error": "Could not load activity feed.",
+    "empty": "No activity recorded for this list yet.",
+    "latest_count": "Latest {{count}} events",
+    "in_list": "in",
+    "actions": {
+      "insert": "added",
+      "update": "updated",
+      "delete": "deleted",
+      "generic": "performed an action on"
+    },
+    "action_keys": {
+      "items_insert": "added",
+      "items_update": "updated",
+      "items_delete": "deleted",
+      "lists_insert": "created",
+      "lists_update": "updated",
+      "lists_delete": "deleted",
+      "item_ratings_insert": "rated",
+      "item_ratings_update": "updated rating for",
+      "item_ratings_delete": "removed rating for",
+      "list_members_insert": "added a member in",
+      "list_members_update": "updated permissions in",
+      "list_members_delete": "removed a member from"
+    },
+    "fallback": {
+      "item": "an item",
+      "list": "a list"
+    }
   }
 }
