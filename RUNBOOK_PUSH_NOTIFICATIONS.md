@@ -57,6 +57,7 @@ Ejecutar migraciones en este orden:
 2. `06_audit_logs_triggers.sql`
 3. `07_0_push_subscriptions.sql`
 4. `07_audit_logs_push_dispatch.sql`
+5. `08_dispatch_push_record_id_text_match.sql`
 
 ### 4.2 Activar dispatcher de push
 Actualizar `push_dispatch_config` con URL real y secreto real:
@@ -187,6 +188,12 @@ Causa:
 - Trigger no creado, `is_enabled=false`, o evento no cumple condiciones.
 Accion:
 - Verificar trigger, funcion y `push_dispatch_config`.
+
+### Hay fila 200 en `net._http_response` pero no llega push automatico a miembros
+Causa comun:
+- `audit_logs.record_id` llega en formato no UUID (por ejemplo bigint en texto), pero la funcion de dispatch intenta resolver registros con casteo UUID.
+Accion:
+- Aplicar migracion `08_dispatch_push_record_id_text_match.sql` para comparar `record_id` por texto (`id::text = NEW.record_id`) y soportar IDs UUID y numericos.
 
 ## 8) Operaciones de mantenimiento
 
