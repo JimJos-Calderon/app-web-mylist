@@ -154,7 +154,24 @@
     "push_button_loading": "Activando...",
     "push_success": "Notificaciones push activadas correctamente",
     "push_permission_denied": "El navegador bloqueó las notificaciones. Habilítalas en la configuración del sitio.",
-    "push_not_authenticated": "Debes iniciar sesión para activar notificaciones"
+    "push_not_authenticated": "Debes iniciar sesión para activar notificaciones",
+    "theme_title": "Tema visual",
+    "theme_description": "Elige la apariencia de la app. Tu preferencia se sincroniza entre dispositivos.",
+    "theme_active": "Activo",
+    "theme_options": {
+      "cyberpunk": {
+        "title": "Cyberpunk",
+        "description": "Neón cyan/pink con alto contraste y glow vibrante."
+      },
+      "advanced": {
+        "title": "2Advanced HUD",
+        "description": "Azules hielo y acero con estética táctica limpia."
+      },
+      "terminal": {
+        "title": "Terminal",
+        "description": "Verde fósforo sobre negro puro, estilo consola retro."
+      }
+    }
   },
   "account": {
     "info_title": "Información de la Cuenta",

@@ -6,13 +6,16 @@ import { useItemRating } from '../hooks/useItemRating'
 interface RatingWidgetProps {
   itemId: string
   onlyOwn?: boolean
+  tone?: 'owner' | 'shared'
 }
 
-const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) => {
+const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true, tone = 'owner' }) => {
   const { t } = useTranslation()
   const { rating, loading, error, updateRating, updateLike } = useItemRating(itemId)
   const [showRatingMenu, setShowRatingMenu] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
+  const toneClass = tone === 'owner' ? 'owner' : 'shared'
+  const toneAccentClass = toneClass === 'owner' ? 'text-accent-primary' : 'text-accent-secondary'
 
   const handleStarClick = async (stars: number) => {
     setIsUpdating(true)
@@ -37,8 +40,10 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 opacity-50">
-        <div className="animate-pulse h-5 w-12 bg-zinc-700 rounded" />
+      <div className={`hud-rating-skeleton hud-rating-skeleton--${toneClass}`} aria-hidden="true">
+        <div className="hud-rating-skeleton-chip" />
+        <div className="hud-rating-skeleton-dot" />
+        <div className="hud-rating-skeleton-dot" />
       </div>
     )
   }
@@ -56,18 +61,18 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
             setShowRatingMenu(!showRatingMenu)
           }}
           disabled={isUpdating}
-          className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`flex items-center gap-1 px-2 py-1 transition-colors hud-rating-trigger hud-rating-trigger--${toneClass} disabled:opacity-50 disabled:cursor-not-allowed`}
           title={currentRating ? `Calificación: ${currentRating}/5` : 'Calificar'}
           aria-label={currentRating ? `Calificación: ${currentRating} de 5. Cambiar` : 'Calificar'}
           aria-expanded={showRatingMenu}
         >
-          <Star className="w-4 h-4 text-cyan-400" fill={currentRating ? 'currentColor' : 'none'} aria-hidden="true" />
-          {currentRating && <span className="text-xs font-semibold text-cyan-400">{currentRating}</span>}
+          <Star className={`w-4 h-4 ${toneAccentClass}`} fill={currentRating ? 'currentColor' : 'none'} aria-hidden="true" />
+          {currentRating && <span className={`text-xs font-semibold ${toneAccentClass}`}>{currentRating}</span>}
         </button>
 
         {/* Rating Menu */}
         {showRatingMenu && (
-          <div className="absolute bottom-full left-0 mb-2 bg-black/95 border border-zinc-700 rounded-lg p-3 shadow-lg z-50">
+          <div className={`absolute bottom-full left-0 mb-2 rounded-lg p-3 z-50 hud-rating-menu hud-rating-menu--${toneClass}`}>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -77,7 +82,7 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
                     handleStarClick(star)
                   }}
                   disabled={isUpdating}
-                  className="text-cyan-400 hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`hud-star-button hud-star-button--${toneClass} transition-transform disabled:opacity-50 disabled:cursor-not-allowed`}
                   title={`${star} estrella${star > 1 ? 's' : ''}`}
                   aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
                 >
@@ -91,7 +96,7 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
                 handleStarClick(0)
               }}
               disabled={isUpdating}
-              className="text-xs mt-2 w-full px-2 py-1 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors disabled:opacity-50"
+              className={`text-xs mt-2 w-full px-2 py-1 transition-colors hud-clear-button hud-clear-button--${toneClass} disabled:opacity-50`}
             >
               Limpiar
             </button>
@@ -107,10 +112,10 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
             handleLikeClick(true)
           }}
           disabled={isUpdating}
-          className={`px-2 py-1 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`px-2 py-1 transition-all hud-reaction-button hud-reaction-button--${toneClass} disabled:opacity-50 disabled:cursor-not-allowed ${
             currentLike === true
-              ? 'bg-pink-500/30 text-pink-400 border border-pink-500/50'
-              : 'hover:bg-zinc-800 text-zinc-400'
+              ? 'hud-reaction-button--like-active'
+              : ''
           }`}
           title={t('buttons.like')}
           aria-label={t('buttons.like')}
@@ -125,10 +130,10 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
             handleLikeClick(false)
           }}
           disabled={isUpdating}
-          className={`px-2 py-1 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`px-2 py-1 transition-all hud-reaction-button hud-reaction-button--${toneClass} disabled:opacity-50 disabled:cursor-not-allowed ${
             currentLike === false
-              ? 'bg-purple-500/30 text-purple-400 border border-purple-500/50'
-              : 'hover:bg-zinc-800 text-zinc-400'
+              ? 'hud-reaction-button--dislike-active'
+              : ''
           }`}
           title={t('buttons.dislike')}
           aria-label={t('buttons.dislike')}
@@ -138,7 +143,7 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true }) =
         </button>
       </div>
 
-      {error && <span className="text-xs text-red-400">{error}</span>}
+      {error && <span className="text-xs hud-rating-error">{error}</span>}
     </div>
   )
 }

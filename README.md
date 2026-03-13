@@ -23,6 +23,7 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 - 📋 **Listas compartidas** — Crea listas, invita a otras personas con un código y colabora en tiempo real
 - 📊 **Gestión completa** — Agrega, elimina y marca películas/series como vistas
 - ⭐ **Sistema de calificaciones** — Puntúa del 1 al 5 y marca con "me gusta / no me gusta"
+- 🕒 **Historial de actividad** — Timeline colaborativo por lista con eventos recientes de cambios
 - 🎨 **Diseño único** — Interfaz retro-futurista con efectos cyberpunk y animaciones
 - 🔍 **Filtros avanzados** — Filtra por estado (vistas/pendientes), texto y ordenamiento
 - 💎 **Dos modos de vista** — Grid clásico con paginación y carrusel Ring en 3D
@@ -50,7 +51,7 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 - **TanStack Query 5.90** — Gestión de estado asincrónico y caché
 - **@tanstack/react-query-persist-client** — Persistencia de caché para modo offline
 - **@tanstack/query-sync-storage-persister** — Persistencia en localStorage
-- **vite-plugin-pwa** — Manifest + Service Worker (Workbox generateSW)
+- **vite-plugin-pwa** — Manifest + Service Worker custom con Workbox (injectManifest)
 - **Swiper 12** — Biblioteca de carruseles (usada en la vista Ring)
 - **Lucide React** — Iconos SVG modernos
 
@@ -331,6 +332,13 @@ WITH CHECK (user_id = auth.uid());
 - Contiene: RLS completo + Check Constraints + Índices optimizados
 - Ejecución en Supabase: SQL Editor → Copiar contenido → Run
 
+Para habilitar auditoría, push y dispatch automático end-to-end, aplica también:
+- `supabase/migrations/05_soft_delete_and_join_rpc.sql`
+- `supabase/migrations/06_audit_logs_triggers.sql`
+- `supabase/migrations/07_0_push_subscriptions.sql`
+- `supabase/migrations/07_audit_logs_push_dispatch.sql`
+- `supabase/migrations/08_dispatch_push_record_id_text_match.sql`
+
 5. **Configura Supabase Edge Functions & Secrets**
 
 En tu proyecto [Supabase](https://app.supabase.com):
@@ -389,6 +397,7 @@ npm run test:ui          # Interfaz visual de Vitest
 npm run test:coverage    # Reporte de cobertura de tests
 npm run test:e2e         # Ejecuta tests E2E (Playwright)
 npm run test:e2e:ui      # UI de Playwright (modo debug)
+npm run test:e2e:debug   # Playwright inspector (debug paso a paso)
 ```
 
 ---
@@ -398,73 +407,40 @@ npm run test:e2e:ui      # UI de Playwright (modo debug)
 ```
 app-web-mylist/
 ├── src/
-│   ├── App.tsx                 # Componente raíz: routing, navbar, Spotify widgets
-│   ├── main.tsx                # Entry point + PersistQueryClientProvider + AuthProvider
-│   ├── index.css               # Estilos globales
-│   ├── supabaseClient.ts       # Cliente de Supabase
-│   ├── vite-env.d.ts           # Tipos de variables de entorno
-│   │
+│   ├── App.tsx                   # Rutas, nav, guards y lazy loading por página
+│   ├── main.tsx                  # Bootstrap app + Query persistence + providers
+│   ├── sw.ts                     # Service Worker custom (Workbox + Push handlers)
+│   ├── i18n.ts                   # Configuración i18next
+│   ├── supabaseClient.ts         # Cliente Supabase (frontend)
 │   ├── config/
-│   │   ├── queryClient.ts      # Config global React Query (offlineFirst)
-│   │   ├── queryKeys.ts        # Query keys centralizadas
-│   │   └── queryPersistence.ts # Persistencia local de cache (TanStack)
-│   │
-│   ├── context/
-│   │   └── AuthContext.tsx     # Proveedor global + limpieza de cache al cerrar sesión
-│   │
-│   ├── types/
-│   │   └── index.ts            # Interfaces TypeScript (User, ListItem, List, ListMember…)
-│   │
-│   ├── constants/
-│   │   └── index.ts            # OMDB URL, DEBOUNCE_DELAY, mensajes de error/éxito
-│   │
-│   ├── hooks/
-│   │   ├── useAuth.ts          # Consume el AuthContext
-│   │   ├── useItems.ts         # CRUD de items + Supabase Realtime subscriptions
-│   │   ├── useLists.ts         # Gestión de listas: crear, unirse, miembros
-│   │   ├── useFilters.ts       # Estado de filtros (visto/pendiente, orden, búsqueda)
-│   │   ├── useOmdb.ts          # Llamadas a OMDB API (poster, sinopsis, género)
-│   │   ├── useSuggestions.ts   # Autocompletado con debounce
-│   │   ├── useUserProfile.ts   # Perfil: guardar, subir avatar, actualizar bio
-│   │   ├── useItemRating.ts    # Rating (1-5 estrellas) y like/dislike por item
-│   │   └── useUsername.ts      # Utilidad de nombre de usuario
-│   │
+│   │   ├── queryClient.ts        # Config global TanStack Query
+│   │   ├── queryKeys.ts          # Query keys centralizadas
+│   │   └── queryPersistence.ts   # Persistencia offline de cache
+│   ├── features/
+│   │   ├── auth/                 # Contexto y hook de autenticación
+│   │   ├── items/                # Búsqueda OMDB, cards, filtros, ratings
+│   │   ├── lists/                # Listas, dialogs, selector, Activity Feed
+│   │   ├── profile/              # Hooks de perfil/username
+│   │   └── shared/               # Componentes base, validaciones, tipos y constantes
 │   ├── pages/
-│   │   ├── Login.tsx           # Formulario de login y registro
-│   │   ├── Peliculas.tsx       # Página de películas (usa ListaContenido)
-│   │   ├── Series.tsx          # Página de series (usa ListaContenido)
-│   │   ├── Perfil.tsx          # Perfil del usuario con sus calificaciones
-│   │   └── Ajustes.tsx         # Editar perfil, cambiar email y contraseña
-│   │
-│   ├── components/
-│   │   ├── ListaContenido.tsx  # Componente principal: búsqueda, filtros, grid, paginación, modal
-│   │   ├── ItemCard.tsx        # Tarjeta de ítem individual
-│   │   ├── SearchBar.tsx       # Input de búsqueda con dropdown de sugerencias
-│   │   ├── FilterPanel.tsx     # Panel de filtros (estado, orden, texto)
-│   │   ├── RingSlider.tsx      # Vista alternativa: carrusel 3D tipo Ring
-│   │   ├── RatingWidget.tsx    # Widget de estrellas + like/dislike
-│   │   ├── ListSelector.tsx    # Selector desplegable de lista activa
-│   │   ├── ListDialogs.tsx     # Modales: crear lista e invitar usuarios
-│   │   ├── ConfirmDialog.tsx   # Diálogo de confirmación genérico
-│   │   ├── InstallPwaPrompt.tsx# Botón de instalación PWA con beforeinstallprompt
-│   │   ├── OptimizedImage.tsx  # Imagen lazy + placeholder + fallback i18n
-│   │   ├── SpotifyGlassCard.tsx# Embed de Spotify draggable (sólo desktop, solo Home)
-│   │   └── ErrorAlert.tsx      # Componente de alerta de error
-│   │
-│   └── utils/
-│       └── validation.ts       # Validación y sanitización de títulos
-│
-├── public/                     # Assets estáticos + iconos PWA/iOS
-├── migration-to-shared-lists.sql  # Script SQL de migración desde esquema antiguo
-├── fix-rls-insert-policy.sql      # Fix de política RLS de inserción
-├── .env                        # Variables de entorno (no commitear)
-├── .gitignore
-├── index.html
-├── package.json
-├── tsconfig.json
-├── tsconfig.node.json
-├── vite.config.ts
-└── eslint.config.js
+│   │   ├── Login.tsx
+│   │   ├── JoinList.tsx          # Ruta pública de invitación: /join/:code
+│   │   ├── Peliculas.tsx
+│   │   ├── Series.tsx
+│   │   ├── Perfil.tsx
+│   │   └── Ajustes.tsx
+│   └── locales/                  # Traducciones en ES/EN
+├── supabase/
+│   ├── functions/
+│   │   ├── search-omdb/          # Proxy seguro OMDB con rate limit
+│   │   ├── send-push/            # Envío web push
+│   │   └── notify-discord/       # Notificación opcional a Discord
+│   └── migrations/               # Esquema, RLS, auditoría, push y fixes
+├── scripts/
+│   └── push-health-check.ps1     # Verificación operativa de push
+├── RUNBOOK_PUSH_NOTIFICATIONS.md # Runbook operativo de push
+├── migration-to-shared-lists.sql # Migración desde esquema anterior
+└── README.md
 ```
 
 ---
@@ -478,7 +454,7 @@ app-web-mylist/
 ### Gestión de Listas
 1. **Crear lista**: Haz click en "Crear lista" para crear una nueva colección
 2. **Invitar**: Comparte el código de invitación con quien quieras
-3. **Unirse**: Introduce el código de invitación en Ajustes para unirte a una lista ajena
+3. **Unirse**: Usa el enlace de invitación `/join/:code` (si no hay sesión, se retoma al autenticar)
 4. **Cambiar lista activa**: Usa el selector de lista en la parte superior de Películas/Series
 
 ### Gestión de Películas/Series
@@ -492,6 +468,7 @@ app-web-mylist/
 ### Modos de Vista
 - 📋 **Grid**: Vista en cuadrícula con paginación (9 items por página)
 - 💎 **Ring**: Carrusel 3D, ideal para navegar visualmente
+- 🕒 **Activity Feed**: Panel colapsable por lista con timeline de eventos recientes
 
 ### Filtros Disponibles
 - 📋 **Pendientes**: Muestra solo las no vistas
@@ -514,6 +491,7 @@ app-web-mylist/
 | `/series` | Series | Gestión completa de series |
 | `/perfil` | Perfil | Estadísticas y calificaciones del usuario |
 | `/ajustes` | Ajustes | Edición de perfil, email y contraseña |
+| `/join/:code` | JoinList | Aceptar invitación a lista compartida |
 
 ---
 
@@ -552,7 +530,13 @@ La gestión de caché se realiza con React Query + persistencia local. Ajusta es
 La app persiste solo claves de lectura offline (`lists`, `items`, `userProfile`).
 
 ### Configuración PWA
-La configuración del manifest y Workbox está en `vite.config.ts` usando `vite-plugin-pwa` con estrategia `generateSW`.
+La configuración del manifest está en `vite.config.ts` usando `vite-plugin-pwa` con estrategia `injectManifest`.
+
+Service Worker custom:
+- Archivo: `src/sw.ts`
+- Incluye precache Workbox (`precacheAndRoute`)
+- Caching runtime para imágenes (`registerRoute` + `StaleWhileRevalidate`)
+- Handlers de push (`push` y `notificationclick`)
 
 Archivos de iconos requeridos en `public/`:
 
@@ -653,7 +637,7 @@ Interpretación rápida:
 - **Error de validación en búsqueda**: Asegúrate de escribir 2-100 caracteres, sin caracteres especiales
 - **Push devuelve 401**: Verifica que `PUSH_WEBHOOK_SECRET` coincida entre secrets y `public.push_dispatch_config`
 - **Push no llega pero hay 200**: Revisa permisos del navegador y que exista una fila activa en `push_subscriptions`
-- **Push no dispara en automático**: Confirma que la migración `supabase/migrations/07_audit_logs_push_dispatch.sql` esté aplicada
+- **Push no dispara en automático**: Confirma que estén aplicadas `07_audit_logs_push_dispatch.sql` y `08_dispatch_push_record_id_text_match.sql`
 
 ### API y Datos
 - **Las imágenes no cargan**: Verifica que `OMDB_API_KEY` sea válida. Algunas películas no tienen póster (placeholder automático)
@@ -771,6 +755,7 @@ curl -X POST "https://<project-ref>.supabase.co/functions/v1/send-push" \
 
 **Automatización**:
 - Trigger SQL definido en `supabase/migrations/07_audit_logs_push_dispatch.sql`
+- Fix de compatibilidad `record_id` (UUID y numérico) en `supabase/migrations/08_dispatch_push_record_id_text_match.sql`
 - Flujo: `audit_logs` -> `dispatch_push_from_audit_logs()` -> `net.http_post()` -> `send-push`
 
 ---
@@ -781,10 +766,12 @@ curl -X POST "https://<project-ref>.supabase.co/functions/v1/send-push" \
 
 ```
 src/
-├── hooks/
-│   ├── useItems.test.tsx        # 5 tests
-│   ├── useLists.test.tsx        # 6 tests
-│   └── useItemRating.test.tsx   # 7 tests
+├── features/
+│   ├── items/hooks/__tests__/
+│   │   ├── useItems.test.tsx        # 5 tests
+│   │   └── useItemRating.test.tsx   # 7 tests
+│   └── lists/hooks/__tests__/
+│       └── useLists.test.tsx        # 6 tests
 └── test-utils.tsx              # Wrapper de React Query
 
 tests/
@@ -802,6 +789,7 @@ npm run test:coverage       # Reporte de cobertura
 # E2E tests con Playwright
 npm run test:e2e            # Headless
 npm run test:e2e:ui         # Con navegador visible
+npm run test:e2e:debug      # Inspector interactivo
 ```
 
 ### CI/CD Workflow

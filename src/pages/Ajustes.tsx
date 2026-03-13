@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
-import { LanguageSwitcher, usePushNotifications } from '@/features/shared'
+import { LanguageSwitcher, ThemeSwitcher, usePushNotifications } from '@/features/shared'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
@@ -319,6 +319,8 @@ const Ajustes: React.FC = () => {
           <div className="flex-1">
             {activeSection === 'perfil' && (
               <div className="space-y-6">
+                <ThemeSwitcher />
+
                 {/* Profile Card */}
                 <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-3xl p-8">
                   {/* Avatar Preview */}

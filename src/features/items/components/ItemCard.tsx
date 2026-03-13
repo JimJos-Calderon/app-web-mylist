@@ -1,10 +1,9 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Trash2, Loader2, Film } from 'lucide-react'
-import { ListItem } from '@/features/shared'
+import { ConfirmDialog, HudContainer, ListItem, OptimizedImage, TechLabel } from '@/features/shared'
 import { useUsername } from '@/features/profile'
 import RatingWidget from './RatingWidget'
-import { ConfirmDialog, OptimizedImage } from '@/features/shared'
 
 interface ItemCardProps {
   item: ListItem
@@ -48,8 +47,11 @@ const ItemCard: React.FC<ItemCardProps> = ({
     }
   }
 
+  const isRated = (item.rating ?? 0) > 0
+  const statusLabel = isRated ? 'STATUS: RATED' : 'STATUS: PENDING'
+
   return (
-    <div
+    <HudContainer
       role="button"
       tabIndex={0}
       onClick={() => onOpenDetails(item)}
@@ -59,16 +61,24 @@ const ItemCard: React.FC<ItemCardProps> = ({
           onOpenDetails(item)
         }
       }}
-      className={`group relative flex flex-col rounded-[2rem] border-2 transition-all duration-500 overflow-hidden bg-black/60 backdrop-blur-md ${
+      className={`group flex flex-col transition-all duration-500 cursor-pointer ${
         item.visto && !disableVistoEffect
-          ? 'border-purple-900/20 opacity-30 scale-95'
+          ? 'opacity-30 scale-95'
           : isOwn
-            ? 'border-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(0,255,255,0.4)] hover:-translate-y-2'
-            : 'border-pink-500/20 hover:border-pink-500 hover:shadow-[0_0_30px_rgba(255,0,255,0.4)] hover:-translate-y-2'
+            ? 'hud-item-card--owner hover:-translate-y-2'
+            : 'hud-item-card--shared hover:-translate-y-2'
       }`}
+      contentClassName="relative flex h-full flex-col"
     >
       {/* Image */}
       <div className="relative aspect-[2/3] w-full overflow-hidden">
+        <TechLabel
+          text={statusLabel}
+          tone={isRated ? 'secondary' : 'primary'}
+          blink={!isRated}
+          className="absolute top-3 left-3 z-10"
+        />
+
         {item.poster_url ? (
           <OptimizedImage
             src={item.poster_url}
@@ -76,10 +86,10 @@ const ItemCard: React.FC<ItemCardProps> = ({
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-center px-4">
+          <div className="w-full h-full hud-item-poster-fallback flex items-center justify-center text-center px-4">
             <div>
-              <Film className="w-12 h-12 mx-auto mb-2 text-zinc-500" />
-              <div className="text-[10px] text-zinc-500 font-black uppercase">
+              <Film className="w-12 h-12 mx-auto mb-2 hud-item-poster-icon" />
+              <div className="text-[10px] font-black uppercase hud-item-poster-text">
                 {item.tipo === 'pelicula' ? t('movies.title') : t('series.title')}
               </div>
             </div>
@@ -92,17 +102,13 @@ const ItemCard: React.FC<ItemCardProps> = ({
         <div>
           <h3
             className={`text-[15px] font-black italic tracking-tighter leading-tight mb-3 uppercase break-words line-clamp-3 ${
-              item.visto ? 'text-zinc-700 line-through' : 'text-white'
+              item.visto ? 'text-muted line-through' : 'text-[var(--color-text-primary)]'
             }`}
           >
             {item.titulo}
           </h3>
           <div
-            className={`inline-block text-[9px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-md border ${
-              isOwn
-                ? 'border-cyan-400/30 text-cyan-400 bg-cyan-400/5'
-                : 'border-pink-500/30 text-pink-500 bg-pink-500/5'
-            }`}
+            className={`hud-item-meta ${isOwn ? 'hud-item-meta--owner' : 'hud-item-meta--shared'}`}
           >
             {isOwn ? t('own_item') : (username || item.user_email?.split('@')[0] || 'Usuario')}
             {item.genero && (
@@ -114,8 +120,8 @@ const ItemCard: React.FC<ItemCardProps> = ({
           </div>
 
           {/* Rating Widget */}
-          <div className="mt-4 border-t border-zinc-700 pt-3">
-            <RatingWidget itemId={item.id} onlyOwn={true} />
+          <div className="mt-4 pt-3 hud-item-rating-divider">
+            <RatingWidget itemId={item.id} onlyOwn={true} tone={isOwn ? 'owner' : 'shared'} />
           </div>
         </div>
 
@@ -126,10 +132,10 @@ const ItemCard: React.FC<ItemCardProps> = ({
               event.stopPropagation()
               handleToggle()
             }}
-            className={`p-2 transition-all ${
+            className={`p-2 transition-all hud-item-action ${
               item.visto
-                ? 'text-cyan-400 hover:text-cyan-300'
-                : 'text-zinc-500 hover:text-cyan-400'
+                ? 'hud-item-action--active'
+                : 'hud-item-action--idle'
             }`}
             title={item.visto ? t('item.mark_unwatched') : t('item.mark_watched')}
             aria-label={item.visto ? t('item.mark_unwatched') : t('item.mark_watched')}
@@ -147,7 +153,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
               setShowConfirmDialog(true)
             }}
             disabled={deleting}
-            className="text-zinc-500 hover:text-red-500 transition-all p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 transition-all hud-item-action hud-item-action--danger disabled:opacity-50 disabled:cursor-not-allowed"
             title={t('buttons.delete')}
             aria-label={`${t('buttons.delete')} ${item.titulo}`}
           >
@@ -170,7 +176,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
         onConfirm={handleDelete}
         onCancel={() => setShowConfirmDialog(false)}
       />
-    </div>
+    </HudContainer>
   )
 }
 
