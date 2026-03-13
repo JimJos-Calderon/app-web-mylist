@@ -28,9 +28,9 @@ const RingSliderSkeleton: React.FC<{ t: any }> = ({ t }) => (
   <div className="relative z-10 w-full h-screen flex items-center justify-center bg-transparent">
     <div className="text-center space-y-6">
       <div className="inline-flex items-center justify-center relative">
-         <div className="w-24 h-24 rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.1)] border-t-accent-primary border-r-[var(--color-accent-secondary)] animate-spin"></div>
-         <div className="absolute inset-0 border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)] rounded-full animate-[spin_3s_linear_infinite_reverse]"></div>
-         <div className="absolute inset-2 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded-full animate-pulse"></div>
+        <div className="w-24 h-24 rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.1)] border-t-accent-primary border-r-[var(--color-accent-secondary)] animate-spin"></div>
+        <div className="absolute inset-0 border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)] rounded-full animate-[spin_3s_linear_infinite_reverse]"></div>
+        <div className="absolute inset-2 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded-full animate-pulse"></div>
       </div>
       <div className="space-y-2">
         <p className="text-accent-primary font-mono font-bold text-sm uppercase tracking-[0.3em] animate-pulse">
@@ -46,22 +46,22 @@ const RingSliderSkeleton: React.FC<{ t: any }> = ({ t }) => (
 
 const ActivityFeedSkeleton: React.FC<{ t: any }> = ({ t }) => (
   <div className="border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] p-5"
-       style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
+    style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
     <div className="flex items-center justify-between gap-3 mb-6">
       <div className="flex items-center gap-2">
-         <div className="w-2 h-2 bg-accent-primary animate-pulse"></div>
-         <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
-           SYS.{t('activity_feed.title')}
-         </h3>
+        <div className="w-2 h-2 bg-accent-primary animate-pulse"></div>
+        <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
+          SYS.{t('activity_feed.title')}
+        </h3>
       </div>
       <div className="w-24 h-2 bg-[rgba(var(--color-accent-primary-rgb),0.2)] animate-pulse" />
     </div>
 
     <div className="space-y-3">
       {[1, 2, 3].map((line) => (
-        <div key={line} 
-             className="h-10 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.1)] animate-pulse" 
-             style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }} />
+        <div key={line}
+          className="h-10 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.1)] animate-pulse"
+          style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }} />
       ))}
     </div>
 
@@ -198,7 +198,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     try {
       // Use poster directly from suggestion
       const poster = suggestion.Poster !== 'N/A' ? suggestion.Poster : null
-      
+
       // Obtener género de OMDB usando la sugerencia
       const omdbData = await fetchOmdbData(suggestion.Title)
 
@@ -389,8 +389,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-black">
       {/* HUD Header for List Control */}
       <div className="relative z-10 mb-6 flex flex-wrap items-center justify-between gap-4 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] px-5 py-3 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] border-l-4 border-l-accent-primary"
-           style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
-        
+        style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
+
         <div className="flex items-center gap-4">
           {lists && currentList && setCurrentList && (
             <ListSelector
@@ -410,7 +410,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
           >
             <span className="opacity-70">+</span> [ {t('action.create_list')} ]
           </button>
-          
+
           {currentList && (
             <button
               className="px-4 py-2 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.5)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:border-[var(--color-accent-secondary)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)] transition-all font-mono text-[10px] uppercase font-bold tracking-widest flex items-center gap-2"
@@ -513,29 +513,31 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
             />
 
             {resolvedListId && (
-              <section className="mb-6 rounded-2xl border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-black/60 to-cyan-950/20 p-4 md:p-5 shadow-[0_0_25px_rgba(168,85,247,0.12)]">
+              <section className="mb-6 border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.4)] p-4 md:p-5 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] border-l-4 border-l-accent-primary"
+                style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm md:text-base font-black uppercase tracking-wider text-cyan-300">
-                      {t('activity_feed.title')}
+                  <div className="flex flex-col gap-1">
+                    <h3 className="text-sm md:text-base font-black uppercase tracking-widest text-accent-primary font-mono flex items-center gap-2">
+                      SYS.{t('activity_feed.title')}
                     </h3>
-                    <p className="text-[11px] md:text-xs uppercase tracking-wide text-zinc-400 mt-1">
-                      {t('activity_feed.subtitle')}
+                    <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] font-mono opacity-80">
+                      {'>'} {t('activity_feed.subtitle')}
                     </p>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setShowActivityFeed((prev) => !prev)}
-                    className="px-3 py-2 rounded-lg border border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400 transition text-xs md:text-sm font-semibold uppercase tracking-wide"
+                    className="px-4 py-2 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:border-[rgba(var(--color-accent-primary-rgb),1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all font-mono text-[10px] uppercase font-bold tracking-widest flex items-center gap-2"
+                    style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                     aria-expanded={showActivityFeed}
                   >
-                    {showActivityFeed ? t('activity_feed.collapse') : t('activity_feed.expand')}
+                    <span className="opacity-70">{showActivityFeed ? '-' : '+'}</span> [ {showActivityFeed ? t('activity_feed.collapse') : t('activity_feed.expand')} ]
                   </button>
                 </div>
 
                 {showActivityFeed && (
-                  <div className="mt-4">
+                  <div className="mt-5 border-t border-[rgba(var(--color-accent-primary-rgb),0.2)] pt-5">
                     <ErrorBoundary FallbackComponent={SectionErrorFallback}>
                       <Suspense fallback={<ActivityFeedSkeleton t={t} />}>
                         <ActivityFeedPanel listId={resolvedListId} limit={20} />
@@ -550,22 +552,24 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 rounded-lg border text-xs md:text-sm font-semibold uppercase tracking-wide transition ${viewMode === 'grid'
-                  ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
-                  : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
+                className={`px-4 py-2 border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${viewMode === 'grid'
+                  ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                  : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-accent-primary hover:text-accent-primary'
                   }`}
+                style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
               >
-                {t('action.grid_view')}
+                [ {t('action.grid_view')} ]
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('ring')}
-                className={`px-3 py-2 rounded-lg border text-xs md:text-sm font-semibold uppercase tracking-wide transition ${(viewMode as 'grid' | 'ring') === 'ring'
-                  ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
-                  : 'border-purple-500/40 text-purple-300 hover:border-purple-400'
+                className={`px-4 py-2 border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${(viewMode as 'grid' | 'ring') === 'ring'
+                  ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                  : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-accent-primary hover:text-accent-primary'
                   }`}
+                style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
               >
-                {t('action.ring_view')}
+                [ {t('action.ring_view')} ]
               </button>
             </div>
 
@@ -573,9 +577,12 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
             {loading && (
               <div className="text-center py-12">
                 <div className="inline-flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 rounded-full border-4 border-pink-500/20 border-t-pink-500 animate-spin"></div>
-                  <p className="text-cyan-400 font-black text-sm uppercase tracking-widest">
-                    {t('loading.items')}
+                  <div className="inline-flex items-center justify-center relative">
+                    <div className="w-12 h-12 rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.2)] border-t-accent-primary border-r-[var(--color-accent-secondary)] animate-spin"></div>
+                    <div className="absolute inset-0 border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)] rounded-full animate-[spin_3s_linear_infinite_reverse]"></div>
+                  </div>
+                  <p className="text-accent-primary font-mono font-bold text-xs uppercase tracking-[0.2em] animate-pulse">
+                    SYS.{t('loading.items')}...
                   </p>
                 </div>
               </div>
@@ -583,14 +590,17 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
             {/* Empty state */}
             {!loading && filteredItems.length === 0 && (
-              <div className="text-center py-20">
-                <div className="text-6xl mb-4">🍿</div>
-                <h3 className="text-xl font-black text-white mb-2">
-                  {filters.searchQuery
+              <div className="text-center py-20 flex flex-col items-center">
+                <div className="w-16 h-16 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.2)] mb-6 flex items-center justify-center text-2xl font-mono text-accent-primary"
+                  style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+                  SYS
+                </div>
+                <h3 className="text-lg font-black font-mono text-accent-primary uppercase tracking-widest mb-2">
+                  {'>'} {filters.searchQuery
                     ? t('item.no_results')
                     : t('item.add_first', { type: tipo })}
                 </h3>
-                <p className="text-slate-400">
+                <p className="text-[var(--color-text-muted)] font-mono text-xs uppercase opacity-70 tracking-widest">
                   {filters.searchQuery
                     ? t('item.search_no_results', { type: tipo, query: filters.searchQuery })
                     : t('item.add_first', { type: tipo })}
@@ -622,43 +632,30 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
                       className={`
-                    px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase tracking-wide md:tracking-wider
-                    border-2 transition-all duration-300 flex-shrink-0
+                    px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold tracking-widest
+                    border transition-all flex-shrink-0 flex items-center
                     ${currentPage === 1
-                          ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-slate-900/20'
-                          : 'border-cyan-500/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]'
+                          ? 'border-[rgba(var(--color-accent-primary-rgb),0.2)] text-[var(--color-text-muted)] opacity-50 cursor-not-allowed bg-[rgba(0,0,0,0.5)]'
+                          : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)]'
                         }
                   `}
+                      style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                     >
-                      <span className="hidden sm:inline">{t('pagination.previous')}</span>
-                      <span className="sm:hidden">‹</span>
+                      <span className="hidden sm:inline">[ {t('pagination.previous')} ]</span>
+                      <span className="sm:hidden">{'<'}</span>
                     </button>
 
                     {/* Page Numbers */}
                     <div className="flex gap-1 md:gap-2 overflow-x-auto max-w-[60vw] md:max-w-none scrollbar-none">
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                        // On mobile: show only current page, first, and last
-                        // On desktop: show first, last, current, and pages around current
-                        const showPageMobile =
-                          page === currentPage ||
-                          page === 1 ||
-                          page === totalPages
-
-                        const showPageDesktop =
-                          page === 1 ||
-                          page === totalPages ||
-                          (page >= currentPage - 1 && page <= currentPage + 1)
-
+                        const showPageMobile = page === currentPage || page === 1 || page === totalPages
+                        const showPageDesktop = page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)
                         const showPage = isMobile ? showPageMobile : showPageDesktop
 
                         if (!showPage) {
-                          // Show ellipsis on desktop only
                           if (!isMobile && (page === currentPage - 2 || page === currentPage + 2)) {
                             return (
-                              <span
-                                key={page}
-                                className="px-1 md:px-2 py-2 text-slate-500 font-black text-xs md:text-sm"
-                              >
+                              <span key={page} className="px-1 md:px-2 py-2 text-[var(--color-text-muted)] font-mono text-xs md:text-sm opacity-50">
                                 ...
                               </span>
                             )
@@ -671,13 +668,14 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                             key={page}
                             onClick={() => handlePageChange(page)}
                             className={`
-                          px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase
-                          border-2 transition-all duration-300 flex-shrink-0 min-w-[36px] md:min-w-[40px]
+                          px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold
+                          border transition-all flex-shrink-0 min-w-[36px] md:min-w-[40px] flex items-center justify-center
                           ${currentPage === page
-                                ? 'border-pink-500 bg-gradient-to-br from-pink-500/20 to-purple-500/20 text-pink-400 shadow-[0_0_20px_rgba(236,72,153,0.6)]'
-                                : 'border-purple-500/50 text-purple-400 hover:border-purple-400 hover:bg-purple-500/10 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+                                ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                                : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-muted)] hover:border-[rgba(var(--color-accent-primary-rgb),0.8)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary bg-[rgba(0,0,0,0.5)]'
                               }
                         `}
+                            style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                           >
                             {page}
                           </button>
@@ -690,16 +688,17 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
                       className={`
-                    px-2 py-2 md:px-4 md:py-2 rounded-lg font-black text-xs md:text-sm uppercase tracking-wide md:tracking-wider
-                    border-2 transition-all duration-300 flex-shrink-0
+                    px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold tracking-widest
+                    border transition-all flex-shrink-0 flex items-center
                     ${currentPage === totalPages
-                          ? 'border-slate-700 text-slate-600 cursor-not-allowed bg-slate-900/20'
-                          : 'border-cyan-500/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]'
+                          ? 'border-[rgba(var(--color-accent-primary-rgb),0.2)] text-[var(--color-text-muted)] opacity-50 cursor-not-allowed bg-[rgba(0,0,0,0.5)]'
+                          : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)]'
                         }
                   `}
+                      style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                     >
-                      <span className="hidden sm:inline">{t('pagination.next')}</span>
-                      <span className="sm:hidden">›</span>
+                      <span className="hidden sm:inline">[ {t('pagination.next')} ]</span>
+                      <span className="sm:hidden">{'>'}</span>
                     </button>
                   </div>
                 )}
