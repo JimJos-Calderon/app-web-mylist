@@ -41,6 +41,7 @@ export const queryKeys = {
   userProfile: {
     all: ['userProfile'] as const,
     byUser: (userId: string) => [...queryKeys.userProfile.all, userId] as const,
+    themePreferenceByUser: (userId: string) => [...queryKeys.userProfile.all, 'themePreference', userId] as const,
   },
 
   // ─── Suggestions ─────────────────────────────────────────────────

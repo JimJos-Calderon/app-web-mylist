@@ -154,7 +154,24 @@
     "push_button_loading": "Enabling...",
     "push_success": "Push notifications enabled successfully",
     "push_permission_denied": "Notifications are blocked by the browser. Enable them in site settings.",
-    "push_not_authenticated": "You must be signed in to enable notifications"
+    "push_not_authenticated": "You must be signed in to enable notifications",
+    "theme_title": "Visual theme",
+    "theme_description": "Choose the app appearance. Your preference syncs across devices.",
+    "theme_active": "Active",
+    "theme_options": {
+      "cyberpunk": {
+        "title": "Cyberpunk",
+        "description": "Neon cyan/pink with strong contrast and vivid glow."
+      },
+      "advanced": {
+        "title": "2Advanced HUD",
+        "description": "Ice blue and steel tones with a clean tactical look."
+      },
+      "terminal": {
+        "title": "Terminal",
+        "description": "Phosphor green on pure black, retro console style."
+      }
+    }
   },
   "account": {
     "info_title": "Account Information",
