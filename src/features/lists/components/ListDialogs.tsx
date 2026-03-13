@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '@/supabaseClient';
 import { List } from '@/features/shared';
 import { X, Plus, Copy, Check, Users } from 'lucide-react';
+import HudContainer from '../../shared/components/HudContainer';
+import TechLabel from '../../shared/components/TechLabel';
 
 // ─── Hook para cerrar con Escape ─────────────────────────────────────────────
 function useEscapeKey(open: boolean, onClose: () => void) {
@@ -83,112 +85,122 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
     <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
       {/* Overlay — clic directo aquí cierra */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
         onClick={onClose}
       />
 
       {/* Modal — stopPropagation para no cerrar al clicar dentro */}
       <div
-        className="relative w-full max-w-md rounded-2xl border border-pink-500/30 bg-black/90 backdrop-blur-xl shadow-[0_0_60px_rgba(219,39,119,0.2)] overflow-hidden"
+        className="relative w-full max-w-md animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
-        {/* Línea de brillo */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-pink-500/20">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-pink-500/20 border border-pink-500/40 flex items-center justify-center">
-              <Plus className="w-4 h-4 text-pink-400" />
+        <HudContainer
+          className="p-0 border-[rgba(var(--color-accent-primary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
+            <div className="flex items-center gap-4">
+              <div 
+                className="w-10 h-10 bg-[rgba(var(--color-accent-primary-rgb),0.08)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center shrink-0"
+                style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+              >
+                <Plus className="w-5 h-5 text-accent-primary drop-shadow-[0_0_8px_rgba(var(--color-accent-primary-rgb),0.6)]" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <TechLabel text="SYS.CREATE_LNK" blink />
+                <h2 className="text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] font-mono leading-none">
+                  {t('dialog.create_list_title')}
+                </h2>
+              </div>
             </div>
-            <h2 className="text-lg font-black uppercase tracking-wider text-white">
-              {t('dialog.create_list_title')}
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('dialog.close_button')}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
-          >
-            <X className="w-4 h-4" aria-hidden="true" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="px-6 py-6 space-y-5">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">
-              {t('dialog.list_name_label')}
-            </label>
-            <input
-              type="text"
-              placeholder={t('dialog.list_name_placeholder')}
-              value={nombre}
-              onChange={e => setNombre(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && nombre.trim() && handleCreate()}
-              autoFocus
-              maxLength={60}
-              className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
-                         focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
-                         transition-all font-medium"
-            />
+            <button
+              onClick={onClose}
+              aria-label={t('dialog.close_button')}
+              className="w-8 h-8 flex items-center justify-center text-[var(--color-text-muted)] hover:text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] transition-all"
+              style={{ clipPath: 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 25%)' }}
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
+            </button>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
-              {t('dialog.description_label')}{' '}
-              <span className="text-zinc-400 normal-case tracking-normal font-normal">({t('dialog.description_optional')})</span>
-            </label>
-            <textarea
-              placeholder={t('dialog.description_placeholder')}
-              value={descripcion}
-              onChange={e => setDescripcion(e.target.value)}
-              maxLength={200}
-              rows={3}
-              className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white placeholder-zinc-500
-                         focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
-                         transition-all font-medium resize-none"
-            />
-          </div>
-
-          {error && (
-            <div className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
-              {t('dialog.create_error')}
+          {/* Body */}
+          <div className="px-6 py-6 space-y-6">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-mono">
+                {'>'} {t('dialog.list_name_label')}
+              </label>
+              <input
+                type="text"
+                placeholder={t('dialog.list_name_placeholder')}
+                value={nombre}
+                onChange={e => setNombre(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && nombre.trim() && handleCreate()}
+                autoFocus
+                maxLength={60}
+                className="w-full px-4 py-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] opacity-80
+                           focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.5)] focus-visible:outline-none focus:opacity-100
+                           transition-all font-mono text-sm"
+                style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+              />
             </div>
-          )}
-        </div>
 
-        {/* Footer */}
-        <div className="flex gap-3 px-6 pb-6">
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold
-                       hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
-          >
-            {t('dialog.cancel_button')}
-          </button>
-          <button
-            onClick={handleCreate}
-            disabled={loading || !nombre.trim()}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black
-                       hover:shadow-[0_0_25px_rgba(219,39,119,0.5)] transition-all
-                       disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
-                       flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {t('dialog.creating_button')}
-              </>
-            ) : (
-              <>
-                <Plus className="w-4 h-4" />
-                {t('dialog.create_button')}
-              </>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-mono">
+                {'>'} {t('dialog.description_label')} <span className="opacity-50 tracking-normal normal-case text-[10px]">({t('dialog.description_optional')})</span>
+              </label>
+              <textarea
+                placeholder={t('dialog.description_placeholder')}
+                value={descripcion}
+                onChange={e => setDescripcion(e.target.value)}
+                maxLength={200}
+                rows={3}
+                className="w-full px-4 py-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] opacity-80
+                           focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.5)] focus-visible:outline-none focus:opacity-100
+                           transition-all font-mono text-sm resize-none"
+                style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+              />
+            </div>
+
+            {error && (
+              <div 
+                className="px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono text-xs"
+                style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+              >
+                {'> ERR:'} {t('dialog.create_error')}
+              </div>
             )}
-          </button>
-        </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex gap-4 px-6 pb-6 mt-2">
+            <button
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-primary-rgb),0.4)] hover:border-[rgba(var(--color-accent-primary-rgb),0.8)] hover:text-accent-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+            >
+              {t('dialog.cancel_button')}
+            </button>
+            <button
+              onClick={handleCreate}
+              disabled={loading || !nombre.trim()}
+              className="flex-1 px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.15)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.25)] text-accent-primary font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-primary-rgb),0.6)] hover:border-[rgba(var(--color-accent-primary-rgb),1)] hover:shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
+              style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+            >
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-[rgba(var(--color-accent-primary-rgb),0.3)] border-t-accent-primary rounded-full animate-spin" />
+                  {t('dialog.creating_button')}
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  {t('dialog.create_button')}
+                </>
+              )}
+            </button>
+          </div>
+        </HudContainer>
       </div>
     </div>,
     document.body
@@ -223,93 +235,105 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
     <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
       {/* Overlay — clic directo aquí cierra */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
         onClick={onClose}
       />
 
       {/* Modal — stopPropagation para no cerrar al clicar dentro */}
       <div
-        className="relative w-full max-w-md rounded-2xl border border-cyan-500/30 bg-black/90 backdrop-blur-xl shadow-[0_0_60px_rgba(6,182,212,0.2)] overflow-hidden"
+        className="relative w-full max-w-md animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
-        {/* Línea de brillo */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-cyan-500/20">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
-              <Users className="w-4 h-4 text-cyan-400" />
-            </div>
-            <h2 className="text-lg font-black uppercase tracking-wider text-white">
-              {t('dialog.invite_title')}
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label={t('dialog.close_button')}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
-          >
-            <X className="w-4 h-4" aria-hidden="true" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="px-6 py-6 space-y-5">
-          <div className="px-4 py-3 bg-cyan-500/5 border border-cyan-500/20 rounded-xl">
-            <p className="text-xs font-bold uppercase tracking-widest text-cyan-400/70 mb-1">{t('dialog.list_label')}</p>
-            <p className="text-white font-bold">{list.name}</p>
-            {list.description && (
-              <p className="text-zinc-400 text-sm mt-1">{list.description}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-cyan-400 mb-2">
-              {t('dialog.invite_link_label')}
-            </label>
-            <p className="text-zinc-400 text-sm mb-3">
-              {t('dialog.invite_help_text')}
-            </p>
-            <div className="flex gap-2">
-              <a
-                href={inviteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl flex items-center min-w-0
-                           hover:border-cyan-500/50 transition-all group"
+        <HudContainer
+          className="p-0 border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)]">
+            <div className="flex items-center gap-4">
+              <div 
+                className="w-10 h-10 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center shrink-0"
+                style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
               >
-                <span className="text-sm font-mono text-cyan-400 group-hover:text-cyan-300 truncate transition-colors">
-                  {inviteUrl}
-                </span>
-              </a>
-              <button
-                onClick={handleCopyCode}
-                className={`px-4 py-3 rounded-xl font-bold border transition-all flex items-center gap-2 whitespace-nowrap ${copiedCode
-                    ? 'bg-green-500/20 border-green-500/50 text-green-400'
-                    : 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-                  }`}
-              >
-                {copiedCode ? (
-                  <><Check className="w-4 h-4" /> {t('dialog.copied_button')}</>
-                ) : (
-                  <><Copy className="w-4 h-4" /> {t('dialog.copy_button')}</>
-                )}
-              </button>
+                <Users className="w-5 h-5 text-accent-secondary drop-shadow-[0_0_8px_rgba(var(--color-accent-secondary-rgb),0.6)]" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <TechLabel text="SYS.INVITE_REQ" tone="secondary" blink />
+                <h2 className="text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] font-mono leading-none">
+                  {t('dialog.invite_title')}
+                </h2>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              aria-label={t('dialog.close_button')}
+              className="w-8 h-8 flex items-center justify-center text-[var(--color-text-muted)] hover:text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] transition-all"
+              style={{ clipPath: 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 25%)' }}
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="px-6 py-6 space-y-6">
+            <div 
+              className="px-5 py-4 bg-[rgba(var(--color-accent-secondary-rgb),0.05)] border border-[rgba(var(--color-accent-secondary-rgb),0.2)]"
+              style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-accent-secondary opacity-70 mb-1 font-mono">
+                {'>'} TARGET: {t('dialog.list_label')}
+              </p>
+              <p className="text-[var(--color-text-primary)] font-mono font-bold text-sm leading-tight">{list.name}</p>
+              {list.description && (
+                <p className="text-[var(--color-text-muted)] text-xs mt-2 font-mono opacity-80">{list.description}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-mono">
+                {'>'} {t('dialog.invite_link_label')}
+              </label>
+              <p className="text-[var(--color-text-muted)] text-xs font-mono mb-3 opacity-80">
+                {t('dialog.invite_help_text')}
+              </p>
+              <div className="flex flex-col gap-3">
+                <div
+                  className="w-full px-4 py-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] flex items-center overflow-x-auto"
+                  style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                >
+                  <span className="text-sm font-mono text-[var(--color-text-primary)] whitespace-nowrap">
+                    {inviteUrl}
+                  </span>
+                </div>
+                
+                <button
+                  onClick={handleCopyCode}
+                  className={`px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest transition-all border flex justify-center items-center gap-2 ${copiedCode
+                      ? 'bg-[rgba(var(--color-accent-primary-rgb),0.15)] border-accent-primary text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.2)]'
+                      : 'bg-[rgba(var(--color-accent-secondary-rgb),0.15)] border-[rgba(var(--color-accent-secondary-rgb),0.6)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)]'
+                    }`}
+                  style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+                >
+                  {copiedCode ? (
+                    <><Check className="w-4 h-4" /> {t('dialog.copied_button')}</>
+                  ) : (
+                    <><Copy className="w-4 h-4" /> {t('dialog.copy_button')}</>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="px-6 pb-6">
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold
-                       hover:bg-zinc-800 hover:text-white transition-all"
-          >
-            {t('dialog.close_button')}
-          </button>
-        </div>
+          {/* Footer */}
+          <div className="px-6 pb-6 mt-2">
+            <button
+              onClick={onClose}
+              className="w-full px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.4)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.8)] hover:text-accent-secondary"
+              style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+            >
+              {t('dialog.close_button')}
+            </button>
+          </div>
+        </HudContainer>
       </div>
     </div>,
     document.body

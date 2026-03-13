@@ -8,6 +8,8 @@ import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
 import { validateUsername, SectionErrorFallback } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
+import HudContainer from '@/features/shared/components/HudContainer'
+import TechLabel from '@/features/shared/components/TechLabel'
 
 import Login from '@pages/Login'
 
@@ -38,12 +40,17 @@ const PageLoadingSkeleton: React.FC = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="text-center space-y-6">
-        <div className="inline-flex items-center justify-center">
-          <div className="w-20 h-20 rounded-full border-4 border-pink-500/20 border-t-pink-500 border-r-purple-500 animate-spin"></div>
+        <div className="inline-flex items-center justify-center relative">
+          <div className="w-20 h-20 border-2 border-[rgba(var(--color-accent-primary-rgb),0.2)] border-t-accent-primary border-r-[var(--color-accent-secondary)] rounded-full animate-spin"></div>
+          <div className="absolute inset-0 border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)] rounded-full animate-[spin_3s_linear_infinite_reverse]"></div>
         </div>
         <div className="space-y-2">
-          <p className="text-pink-400 font-black text-xl uppercase tracking-widest">{t('status.loading')}</p>
-          <p className="text-zinc-500 text-sm">{t('states.optimizing')}</p>
+          <p className="text-accent-primary font-mono font-bold text-lg uppercase tracking-[0.2em] animate-pulse">
+            SYS.{t('status.loading')}...
+          </p>
+          <p className="text-[var(--color-text-muted)] font-mono text-xs uppercase opacity-70">
+            {'>'} {t('states.optimizing')}
+          </p>
         </div>
       </div>
     </div>
@@ -55,10 +62,15 @@ const SpotifyWidgetSkeleton: React.FC = () => {
   const { t } = useTranslation()
   
   return (
-    <div className="w-80 h-[480px] rounded-2xl bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/20 backdrop-blur-xl animate-pulse flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-purple-500/20 animate-pulse"></div>
-        <p className="text-zinc-500 text-xs">{t('states.loading_widget')}</p>
+    <div 
+      className="w-80 h-[480px] bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] backdrop-blur-xl animate-pulse flex items-center justify-center"
+      style={{ clipPath: 'polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)' }}
+    >
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary flex items-center justify-center animate-pulse"
+             style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+        </div>
+        <p className="text-accent-primary font-mono text-[10px] uppercase tracking-widest opacity-80">{'>'} {t('states.loading_widget')}</p>
       </div>
     </div>
   )
@@ -123,73 +135,95 @@ const UsernameSetupModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" />
-      <div className="relative w-full max-w-md rounded-2xl border border-pink-500/30 bg-black/95 backdrop-blur-xl shadow-[0_0_80px_rgba(219,39,119,0.2)] overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
-        <div className="px-8 py-10 space-y-6">
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-pink-600/20 border border-pink-500/40 mb-2">
-              <AtSign className="w-7 h-7 text-pink-400" />
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200" />
+      <div className="relative w-full max-w-md animate-in zoom-in-95 duration-200">
+        <HudContainer
+          className="p-0 border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)]">
+            <div className="flex items-center gap-4">
+              <div 
+                className="w-10 h-10 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center shrink-0"
+                style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+              >
+                <AtSign className="w-5 h-5 text-accent-secondary drop-shadow-[0_0_8px_rgba(var(--color-accent-secondary-rgb),0.6)]" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <TechLabel text="SYS.USER_INIT" tone="secondary" blink />
+                <h2 className="text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] font-mono leading-none">
+                  {t('needs_username.title')}
+                </h2>
+              </div>
             </div>
-            <h2 className="text-2xl font-black text-white">{t('needs_username.title')}</h2>
-            <p className="text-zinc-400 text-sm">{t('needs_username.subtitle')}</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-pink-400 mb-2">{t('signup.username_label')}</label>
-              <div className="relative">
-                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                <input
-                  type="text"
-                  placeholder={t('needs_username.username_placeholder')}
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  disabled={loading}
-                  autoFocus
-                  maxLength={20}
-                  className={`w-full pl-9 pr-10 py-3 bg-zinc-900/80 border rounded-xl text-white placeholder-zinc-500
-                             focus-visible:ring-2 transition-all font-medium disabled:opacity-50
-                             ${usernameStatus === 'available' ? 'border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/20' :
-                      usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/20' :
-                        'border-zinc-700 focus-visible:border-pink-500 focus-visible:ring-pink-500/20'
-                    }`}
-                  required
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />}
-                  {usernameStatus === 'available' && <Check className="w-4 h-4 text-green-400" />}
-                  {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle className="w-4 h-4 text-red-400" />}
+          <div className="px-6 py-6 space-y-6">
+            <p className="text-[var(--color-text-muted)] text-sm font-mono opacity-80 leading-relaxed">
+              {'>'} {t('needs_username.subtitle')}
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-mono">
+                  {'>'} {t('signup.username_label')}
+                </label>
+                <div className="relative">
+                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] opacity-60" />
+                  <input
+                    type="text"
+                    placeholder={t('needs_username.username_placeholder')}
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    disabled={loading}
+                    autoFocus
+                    maxLength={20}
+                    className={`w-full pl-9 pr-10 py-3 bg-[rgba(0,0,0,0.5)] border text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] opacity-80
+                               focus-visible:outline-none focus:opacity-100 transition-all font-mono text-sm disabled:opacity-50
+                               ${usernameStatus === 'available' ? 'border-accent-primary focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.5)]' :
+                        usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-[rgba(var(--color-accent-secondary-rgb),0.6)] focus-visible:border-accent-secondary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-secondary-rgb),0.5)] text-accent-secondary' :
+                          'border-[rgba(var(--color-accent-secondary-rgb),0.3)] focus-visible:border-accent-secondary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-secondary-rgb),0.5)]'
+                      }`}
+                    style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                    required
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-accent-secondary animate-spin" />}
+                    {usernameStatus === 'available' && <Check className="w-4 h-4 text-accent-primary" />}
+                    {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle className="w-4 h-4 text-accent-secondary" />}
+                  </div>
                 </div>
+                {usernameMessage && (
+                  <p className={`text-[10px] uppercase font-mono tracking-widest mt-2 ${usernameStatus === 'available' ? 'text-accent-primary' : 'text-accent-secondary'}`}>
+                    {usernameMessage}
+                  </p>
+                )}
+                <p className="text-[10px] text-[var(--color-text-muted)] font-mono mt-2 opacity-60 uppercase">{t('signup.username_hint')}</p>
               </div>
-              {usernameMessage && (
-                <p className={`text-xs mt-1.5 font-medium ${usernameStatus === 'available' ? 'text-green-400' : 'text-red-400'}`}>
-                  {usernameMessage}
-                </p>
+
+              {error && (
+                <div 
+                  className="px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono text-xs flex items-start gap-3"
+                  style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                >
+                  <XCircle className="w-4 h-4 text-accent-secondary shrink-0 mt-0.5" />
+                  <span>{'> ERR:'} {error}</span>
+                </div>
               )}
-              <p className="text-xs text-zinc-400 mt-1">{t('signup.username_hint')}</p>
-            </div>
 
-            {error && (
-              <div className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
-                <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                <span className="text-red-400 text-sm">{error}</span>
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="w-full py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.15)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] text-accent-secondary font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.6)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
+                  style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+                >
+                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('buttons.saving')}</> : t('buttons.confirm_user')}
+                </button>
               </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-black rounded-xl
-                         hover:shadow-[0_0_30px_rgba(219,39,119,0.5)] transition-all
-                         disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
-                         flex items-center justify-center gap-2"
-            >
-              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('buttons.saving')}</> : t('buttons.confirm_user')}
-            </button>
-          </form>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/30 to-transparent" />
+            </form>
+          </div>
+        </HudContainer>
       </div>
     </div>
   )
@@ -340,13 +374,19 @@ const App: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full border-4 border-pink-500/20 border-t-pink-500 animate-spin"></div>
+        <div className="text-center space-y-6">
+          <div className="inline-flex items-center justify-center relative">
+            <div className="w-20 h-20 border-2 border-[rgba(var(--color-accent-primary-rgb),0.2)] border-t-accent-primary border-r-[var(--color-accent-secondary)] rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)] rounded-full animate-[spin_3s_linear_infinite_reverse]"></div>
           </div>
-          <p className="text-cyan-400 font-black text-lg uppercase tracking-widest">
-            Iniciando...
-          </p>
+          <div className="space-y-2">
+            <p className="text-accent-primary font-mono font-bold text-lg uppercase tracking-[0.2em] animate-pulse">
+              SYS.INIT_SEQUENCE...
+            </p>
+            <p className="text-[var(--color-text-muted)] font-mono text-xs uppercase opacity-70">
+              {'>'} AUTH_CHECK_PENDING
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -373,88 +413,112 @@ const App: React.FC = () => {
       {/* ── Pending Invite Modal ── */}
       {pendingInvite && (
         <div className="fixed inset-0 z-[500] flex items-center justify-center px-4">
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-          {/* Card */}
-          <div className="relative w-full max-w-md rounded-2xl border border-cyan-500/40 bg-black/95 backdrop-blur-xl shadow-[0_0_80px_rgba(6,182,212,0.25)] overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
-            <div className="px-8 py-10 flex flex-col items-center gap-6 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center">
-                <Users className="w-8 h-8 text-cyan-400" />
-              </div>
-              <div>
-                <p className="text-sm font-bold uppercase tracking-widest text-cyan-500/70 mb-2">{t('invite_notification.title')}</p>
-                <h2 className="text-2xl font-black text-white mb-2">{pendingInvite.list_name}</h2>
-                {pendingInvite.list_description && (
-                  <p className="text-zinc-400 text-sm">{pendingInvite.list_description}</p>
-                )}
-              </div>
-              {inviteError && (
-                <div className="w-full px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-2">
-                  <XCircle className="w-4 h-4 text-red-400 shrink-0" />
-                  <span className="text-red-400 text-sm">{inviteError}</span>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200" />
+          <div className="relative w-full max-w-md animate-in zoom-in-95 duration-200">
+            <HudContainer
+              className="p-0 border-[rgba(var(--color-accent-primary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
+                <div className="flex items-center gap-4">
+                  <div 
+                    className="w-10 h-10 bg-[rgba(var(--color-accent-primary-rgb),0.08)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center shrink-0"
+                    style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                  >
+                    <Users className="w-5 h-5 text-accent-primary drop-shadow-[0_0_8px_rgba(var(--color-accent-primary-rgb),0.6)]" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <TechLabel text="SYS.PENDING_REQ" blink />
+                    <h2 className="text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] font-mono leading-none">
+                      {t('invite_notification.title')}
+                    </h2>
+                  </div>
                 </div>
-              )}
-              <div className="flex gap-3 w-full">
-                <button
-                  onClick={() => setPendingInvite(null)}
-                  disabled={inviteJoining}
-                  className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
-                >
-                  {t('invite_notification.reject_button')}
-                </button>
-                <button
-                  disabled={inviteJoining}
-                  onClick={async () => {
-                    if (!session?.user?.id) return
-                    setInviteJoining(true)
-                    setInviteError(null)
-                    try {
-                      const { data, error } = await supabase.rpc('join_list_with_code', {
-                        p_user_id: session.user.id,
-                        p_invite_code: pendingInvite.invite_code,
-                      })
-
-                      if (error) throw error
-
-                      const result = Array.isArray(data)
-                        ? (data[0] as JoinListRpcResult | undefined)
-                        : (data as JoinListRpcResult | null)
-
-                      if (!result) {
-                        throw new Error('Respuesta vacía del servidor')
-                      }
-
-                      if (result.status !== 'JOINED' && result.status !== 'ALREADY_MEMBER') {
-                        if (result.status === 'LIST_NOT_FOUND' || result.status === 'INVALID_CODE') {
-                          throw new Error('El código de invitación ya no es válido')
-                        }
-                        throw new Error('No se pudo unir a la lista')
-                      }
-
-                      setPendingInvite(null)
-                      window.location.href = '/peliculas'
-                    } catch (err: any) {
-                      console.error(err)
-                      setInviteError(err?.message || 'Error al unirse a la lista')
-                    } finally {
-                      setInviteJoining(false)
-                    }
-                  }}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black rounded-xl
-                             hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all
-                             disabled:opacity-50 disabled:cursor-not-allowed
-                             flex items-center justify-center gap-2"
-                >
-                  {inviteJoining ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> {t('invite_notification.joining')}</>
-                  ) : (
-                    <>{t('invite_notification.join_button')} <ArrowRight className="w-4 h-4" /></>
-                  )}
-                </button>
               </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+
+              <div className="px-6 py-6 space-y-6">
+                <div 
+                  className="px-5 py-4 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.2)]"
+                  style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent-primary opacity-70 mb-1 font-mono">
+                    {'>'} TARGET: LIST
+                  </p>
+                  <h2 className="text-[var(--color-text-primary)] font-mono font-bold text-sm leading-tight text-xl mb-2">{pendingInvite.list_name}</h2>
+                  {pendingInvite.list_description && (
+                    <p className="text-[var(--color-text-muted)] text-xs mt-2 font-mono opacity-80">{pendingInvite.list_description}</p>
+                  )}
+                </div>
+
+                {inviteError && (
+                  <div 
+                    className="px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono text-xs flex items-center gap-2"
+                    style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                  >
+                    <XCircle className="w-4 h-4 text-accent-secondary shrink-0" />
+                    <span>{'> ERR:'} {inviteError}</span>
+                  </div>
+                )}
+                
+                <div className="flex gap-4 pt-2 w-full">
+                  <button
+                    onClick={() => setPendingInvite(null)}
+                    disabled={inviteJoining}
+                    className="flex-1 px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-primary-rgb),0.4)] hover:border-accent-primary hover:text-accent-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+                  >
+                    {t('invite_notification.reject_button')}
+                  </button>
+                  <button
+                    disabled={inviteJoining}
+                    onClick={async () => {
+                      if (!session?.user?.id) return
+                      setInviteJoining(true)
+                      setInviteError(null)
+                      try {
+                        const { data, error } = await supabase.rpc('join_list_with_code', {
+                          p_user_id: session.user.id,
+                          p_invite_code: pendingInvite.invite_code,
+                        })
+
+                        if (error) throw error
+
+                        const result = Array.isArray(data)
+                          ? (data[0] as JoinListRpcResult | undefined)
+                          : (data as JoinListRpcResult | null)
+
+                        if (!result) {
+                          throw new Error('Respuesta vacía del servidor')
+                        }
+
+                        if (result.status !== 'JOINED' && result.status !== 'ALREADY_MEMBER') {
+                          if (result.status === 'LIST_NOT_FOUND' || result.status === 'INVALID_CODE') {
+                            throw new Error('El código de invitación ya no es válido')
+                          }
+                          throw new Error('No se pudo unir a la lista')
+                        }
+
+                        setPendingInvite(null)
+                        window.location.href = '/peliculas'
+                      } catch (err: any) {
+                        console.error(err)
+                        setInviteError(err?.message || 'Error al unirse a la lista')
+                      } finally {
+                        setInviteJoining(false)
+                      }
+                    }}
+                    className="flex-1 px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.15)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.25)] text-accent-primary font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-primary-rgb),0.6)] hover:border-[rgba(var(--color-accent-primary-rgb),1)] hover:shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.35)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+                  >
+                    {inviteJoining ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> {t('invite_notification.joining')}</>
+                    ) : (
+                      <>{t('invite_notification.join_button')} <ArrowRight className="w-4 h-4" /></>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </HudContainer>
           </div>
         </div>
       )}

@@ -25,33 +25,48 @@ interface ListaContenidoProps {
 
 // ─── RingSlider Loading Fallback ───────────────────────────────────────────
 const RingSliderSkeleton: React.FC<{ t: any }> = ({ t }) => (
-  <div className="relative z-10 w-full h-screen flex items-center justify-center bg-gradient-to-b from-black via-purple-900/10 to-black">
-    <div className="text-center space-y-4">
-      <div className="inline-flex items-center justify-center">
-        <div className="w-16 h-16 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin"></div>
+  <div className="relative z-10 w-full h-screen flex items-center justify-center bg-transparent">
+    <div className="text-center space-y-6">
+      <div className="inline-flex items-center justify-center relative">
+         <div className="w-24 h-24 rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.1)] border-t-accent-primary border-r-[var(--color-accent-secondary)] animate-spin"></div>
+         <div className="absolute inset-0 border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)] rounded-full animate-[spin_3s_linear_infinite_reverse]"></div>
+         <div className="absolute inset-2 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded-full animate-pulse"></div>
       </div>
-      <p className="text-purple-400 font-bold text-sm uppercase tracking-widest">{t('view_modes.loading_3d')}</p>
+      <div className="space-y-2">
+        <p className="text-accent-primary font-mono font-bold text-sm uppercase tracking-[0.3em] animate-pulse">
+          TARGET: {t('view_modes.loading_3d')}
+        </p>
+        <p className="text-[var(--color-text-muted)] font-mono text-[10px] uppercase opacity-70 tracking-widest">
+          {'>'} ENGINE_WARMUP
+        </p>
+      </div>
     </div>
   </div>
 )
 
 const ActivityFeedSkeleton: React.FC<{ t: any }> = ({ t }) => (
-  <div className="rounded-2xl border border-cyan-500/20 bg-black/70 backdrop-blur-lg p-5">
-    <div className="flex items-center justify-between gap-3 mb-4">
-      <h3 className="text-sm font-black uppercase tracking-wider text-white">
-        {t('activity_feed.title')}
-      </h3>
-      <div className="w-24 h-3 rounded bg-cyan-400/10 animate-pulse" />
+  <div className="border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] p-5"
+       style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
+    <div className="flex items-center justify-between gap-3 mb-6">
+      <div className="flex items-center gap-2">
+         <div className="w-2 h-2 bg-accent-primary animate-pulse"></div>
+         <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
+           SYS.{t('activity_feed.title')}
+         </h3>
+      </div>
+      <div className="w-24 h-2 bg-[rgba(var(--color-accent-primary-rgb),0.2)] animate-pulse" />
     </div>
 
     <div className="space-y-3">
       {[1, 2, 3].map((line) => (
-        <div key={line} className="h-12 rounded-xl bg-zinc-900/70 border border-zinc-800/80 animate-pulse" />
+        <div key={line} 
+             className="h-10 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.1)] animate-pulse" 
+             style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }} />
       ))}
     </div>
 
-    <p className="mt-3 text-xs uppercase tracking-wider text-zinc-500">
-      {t('activity_feed.loading')}
+    <p className="mt-4 text-[10px] font-mono uppercase tracking-widest text-[var(--color-text-muted)] opacity-70">
+      {'>'} {t('activity_feed.loading')}
     </p>
   </div>
 )
@@ -372,30 +387,40 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-black">
-      {/* Selector y botones arriba del filtro de búsqueda */}
-      <div className="relative z-10 mb-4 flex items-center gap-2">
-        {lists && currentList && setCurrentList && (
-          <ListSelector
-            lists={lists}
-            currentList={currentList}
-            onChange={setCurrentList}
-            loading={loadingLists}
-          />
-        )}
-        <button
-          className="px-3 py-2 bg-pink-500 text-white rounded font-bold text-sm"
-          onClick={() => setShowCreateDialog(true)}
-        >
-          {t('action.create_list')}
-        </button>
-        {currentList && (
+      {/* HUD Header for List Control */}
+      <div className="relative z-10 mb-6 flex flex-wrap items-center justify-between gap-4 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] px-5 py-3 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] border-l-4 border-l-accent-primary"
+           style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
+        
+        <div className="flex items-center gap-4">
+          {lists && currentList && setCurrentList && (
+            <ListSelector
+              lists={lists}
+              currentList={currentList}
+              onChange={setCurrentList}
+              loading={loadingLists}
+            />
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
           <button
-            className="px-3 py-2 bg-cyan-500 text-white rounded font-bold text-sm"
-            onClick={() => setShowInviteDialog(true)}
+            className="px-4 py-2 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.5)] text-[#0ff] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:border-[#0ff] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all font-mono text-[10px] uppercase font-bold tracking-widest flex items-center gap-2"
+            style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+            onClick={() => setShowCreateDialog(true)}
           >
-            {t('action.invite')}
+            <span className="opacity-70">+</span> [ {t('action.create_list')} ]
           </button>
-        )}
+          
+          {currentList && (
+            <button
+              className="px-4 py-2 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.5)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:border-[var(--color-accent-secondary)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)] transition-all font-mono text-[10px] uppercase font-bold tracking-widest flex items-center gap-2"
+              style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+              onClick={() => setShowInviteDialog(true)}
+            >
+              <span className="opacity-70">{'>'}</span> [ {t('action.invite')} ]
+            </button>
+          )}
+        </div>
       </div>
       {/* Diálogos modales */}
       <CreateListDialog
