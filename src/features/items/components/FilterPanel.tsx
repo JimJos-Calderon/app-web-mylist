@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { SORT_OPTIONS, FilterState } from '@/features/shared'
+import { HudContainer, SORT_OPTIONS, FilterState, TechLabel } from '@/features/shared'
 
 interface FilterPanelProps {
   filters: any
@@ -29,40 +29,49 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   }
 
   return (
-    <div className="mb-6 md:mb-8 bg-gradient-to-r from-slate-900/30 to-slate-800/30 border border-slate-700/30 rounded-xl p-4 md:p-6 backdrop-blur-sm">
-      <div className="flex flex-col gap-4 md:gap-6">
-        {/* Toggle switches */}
-        <div className="flex gap-4 md:gap-6">
-          <label className="flex items-center gap-2 md:gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filters.showUnwatched}
-              onChange={(e) => onFilterChange('showUnwatched', e.target.checked)}
-              className="w-4 h-4 md:w-5 md:h-5 rounded border-2 border-cyan-500 accent-cyan-400"
-            />
-            <span className="text-xs md:text-sm font-semibold text-slate-300">{t('filter.pending')}</span>
-          </label>
-
-          <label className="flex items-center gap-2 md:gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={filters.showWatched}
-              onChange={(e) => onFilterChange('showWatched', e.target.checked)}
-              className="w-4 h-4 md:w-5 md:h-5 rounded border-2 border-cyan-500 accent-cyan-400"
-            />
-            <span className="text-xs md:text-sm font-semibold text-slate-300">{t('filter.watched')}</span>
-          </label>
+    <HudContainer className="mb-6 md:mb-8 hud-filter-panel" contentClassName="p-4 md:p-5">
+      <div className="flex flex-col gap-4 md:gap-5">
+        <div className="flex items-center justify-between gap-3">
+          <TechLabel text="SYS.FILTERS" tone="secondary" blink />
+          <button
+            onClick={onReset}
+            className="px-4 md:px-5 py-2 hud-filter-reset text-xs md:text-sm font-semibold whitespace-nowrap"
+          >
+            {t('filter.reset')}
+          </button>
         </div>
 
-        {/* Second row: Sort and Search */}
+        <div className="flex flex-wrap gap-3 md:gap-4">
+          <button
+            type="button"
+            onClick={() => onFilterChange('showUnwatched', !filters.showUnwatched)}
+            className={`hud-filter-switch ${filters.showUnwatched ? 'hud-filter-switch--active-primary' : 'hud-filter-switch--inactive'}`}
+            aria-pressed={filters.showUnwatched}
+            aria-label={t('filter.pending')}
+          >
+            <span className={`hud-filter-switch-dot ${filters.showUnwatched ? 'hud-filter-switch-dot--active-primary' : ''}`} />
+            <span className="hud-filter-switch-label">{t('filter.pending')}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onFilterChange('showWatched', !filters.showWatched)}
+            className={`hud-filter-switch ${filters.showWatched ? 'hud-filter-switch--active-secondary' : 'hud-filter-switch--inactive'}`}
+            aria-pressed={filters.showWatched}
+            aria-label={t('filter.watched')}
+          >
+            <span className={`hud-filter-switch-dot ${filters.showWatched ? 'hud-filter-switch-dot--active-secondary' : ''}`} />
+            <span className="hud-filter-switch-label">{t('filter.watched')}</span>
+          </button>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-          {/* Sort dropdown */}
           <div className="flex flex-col sm:flex-row gap-2">
             <select
               value={filters.sortBy}
               onChange={(e) => onFilterChange('sortBy', e.target.value)}
               aria-label={t('filter.sort_by')}
-              className="bg-slate-800 border border-slate-600 text-white px-3 md:px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-xs md:text-sm"
+              className="hud-filter-field hud-filter-select px-3 md:px-4 py-2 text-xs md:text-sm"
             >
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -79,33 +88,24 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                   filters.sortOrder === 'desc' ? 'asc' : 'desc'
                 )
               }
-              className="px-3 md:px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 text-slate-200 rounded-lg transition-all text-xs md:text-sm font-semibold whitespace-nowrap"
+              className="px-3 md:px-4 py-2 hud-filter-order text-xs md:text-sm font-semibold whitespace-nowrap"
               aria-label={t('filter.sort_order_toggle')}
             >
               {getSortOrderLabel()}
             </button>
           </div>
 
-          {/* Search within filtered */}
           <input
             type="text"
             placeholder={t('filter.search_placeholder')}
             aria-label={t('filter.search_label')}
             value={filters.searchQuery}
             onChange={(e) => onFilterChange('searchQuery', e.target.value)}
-            className="flex-1 bg-slate-800 border border-slate-600 text-white px-3 md:px-4 py-2 rounded-lg outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-xs md:text-sm"
+            className="flex-1 hud-filter-field hud-filter-search px-3 md:px-4 py-2 text-xs md:text-sm"
           />
-
-          {/* Reset button */}
-          <button
-            onClick={onReset}
-            className="px-4 md:px-6 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white rounded-lg transition-all text-xs md:text-sm font-semibold whitespace-nowrap"
-          >
-            {t('filter.reset')}
-          </button>
         </div>
       </div>
-    </div>
+    </HudContainer>
   )
 }
 
