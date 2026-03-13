@@ -1,7 +1,9 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Clock3, Loader2, AlertTriangle, Activity } from 'lucide-react'
+import { Clock3, Loader2, AlertTriangle, TerminalSquare } from 'lucide-react'
 import { useActivityFeed } from '../hooks/useActivityFeed'
+import HudContainer from '../../shared/components/HudContainer'
+import TechLabel from '../../shared/components/TechLabel'
 
 interface ActivityFeedProps {
   listId?: string
@@ -68,104 +70,109 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
   if (loading) {
     return (
-      <section className={`rounded-2xl border border-cyan-500/20 bg-black/70 backdrop-blur-lg p-5 ${className || ''}`}>
-        <header className="flex items-center gap-2 mb-4">
-          <Activity className="w-5 h-5 text-cyan-400" />
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
-            {t('activity_feed.title')}
-          </h3>
+      <HudContainer className={`p-4 ${className || ''}`}>
+        <header className="flex items-center gap-2 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-2 mb-3">
+          <TerminalSquare className="w-4 h-4 text-accent-primary" />
+          <TechLabel text="SYS.LOG" blink />
         </header>
-
-        <div className="flex items-center gap-3 text-zinc-300 text-sm">
-          <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
-          <span>{t('activity_feed.loading')}</span>
+        <div className="flex items-center gap-2 text-[var(--color-text-muted)] font-mono text-xs">
+          <Loader2 className="w-3 h-3 animate-spin text-accent-primary" />
+          <span>INITIALIZING MEMORY BANK...</span>
         </div>
-      </section>
+      </HudContainer>
     )
   }
 
   if (error) {
     return (
-      <section className={`rounded-2xl border border-red-500/30 bg-black/70 backdrop-blur-lg p-5 ${className || ''}`}>
-        <header className="flex items-center gap-2 mb-4">
-          <Activity className="w-5 h-5 text-red-400" />
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
-            {t('activity_feed.title')}
-          </h3>
+      <HudContainer className={`p-4 border-[rgba(var(--color-accent-secondary-rgb),0.3)] ${className || ''}`}>
+        <header className="flex items-center gap-2 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)] pb-2 mb-3">
+          <AlertTriangle className="w-4 h-4 text-accent-secondary" />
+          <TechLabel text="ERR.LOG" tone="secondary" blink />
         </header>
-
-        <div className="flex items-start gap-3 text-red-300 text-sm">
-          <AlertTriangle className="w-4 h-4 mt-0.5 text-red-400" />
-          <span>{t('activity_feed.error')}</span>
+        <div className="flex items-start gap-2 text-accent-secondary font-mono text-xs">
+          <span>{'> ERROR:'} {t('activity_feed.error')}</span>
         </div>
-      </section>
+      </HudContainer>
     )
   }
 
   if (events.length === 0) {
     return (
-      <section className={`rounded-2xl border border-cyan-500/20 bg-black/70 backdrop-blur-lg p-5 ${className || ''}`}>
-        <header className="flex items-center gap-2 mb-4">
-          <Activity className="w-5 h-5 text-cyan-400" />
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
-            {t('activity_feed.title')}
-          </h3>
+      <HudContainer className={`p-4 ${className || ''}`}>
+        <header className="flex items-center gap-2 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-2 mb-3">
+          <TerminalSquare className="w-4 h-4 text-accent-primary" />
+          <TechLabel text="SYS.LOG" />
         </header>
-
-        <p className="text-zinc-400 text-sm">{t('activity_feed.empty')}</p>
-      </section>
+        <p className="text-[var(--color-text-muted)] font-mono text-xs">
+          {'>'} {t('activity_feed.empty')}
+        </p>
+      </HudContainer>
     )
   }
 
   return (
-    <section className={`rounded-2xl border border-cyan-500/20 bg-black/70 backdrop-blur-lg p-5 ${className || ''}`}>
-      <header className="flex items-center justify-between gap-3 mb-5">
+    <HudContainer className={`p-4 ${className || ''}`}>
+      <header className="flex items-center justify-between border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-2 mb-3">
         <div className="flex items-center gap-2">
-          <Activity className="w-5 h-5 text-cyan-400" />
-          <h3 className="text-sm font-black uppercase tracking-wider text-white">
-            {t('activity_feed.title')}
-          </h3>
+          <TerminalSquare className="w-4 h-4 text-accent-primary" />
+          <TechLabel text="SYS.LOG" />
         </div>
-
-        <span className="text-[10px] uppercase tracking-widest text-cyan-300/70 font-bold">
-          {t('activity_feed.latest_count', { count: events.length })}
+        <span className="text-[10px] uppercase font-mono tracking-widest text-accent-primary opacity-60">
+          COUNT: [{events.length.toString().padStart(2, '0')}]
         </span>
       </header>
 
-      <div className="relative pl-6">
-        <div className="absolute left-[11px] top-1 bottom-1 w-px bg-gradient-to-b from-cyan-400/50 via-purple-400/20 to-transparent" />
+      <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar space-y-2">
+        {events.map((event) => {
+          const actionLabel = resolveActionLabel(event.action_key, event.table_name, event.action, t)
+          const relativeTime = formatRelativeTime(event.created_at, i18n.language || 'es')
+          const itemTitle = event.item_title || t('activity_feed.fallback.item')
+          const listName = event.list_name || t('activity_feed.fallback.list')
 
-        <ul className="space-y-4">
-          {events.map((event) => {
-            const actionLabel = resolveActionLabel(event.action_key, event.table_name, event.action, t)
-            const relativeTime = formatRelativeTime(event.created_at, i18n.language || 'es')
-            const itemTitle = event.item_title || t('activity_feed.fallback.item')
-            const listName = event.list_name || t('activity_feed.fallback.list')
-
-            return (
-              <li key={event.activity_id} className="relative">
-                <span className="absolute -left-6 top-1.5 w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_0_4px_rgba(34,211,238,0.18)]" />
-
-                <article className="rounded-xl border border-zinc-800/80 bg-zinc-950/70 px-4 py-3 hover:border-cyan-400/40 transition-colors">
-                  <p className="text-sm text-zinc-100 leading-relaxed">
-                    <span className="font-black text-cyan-300">{event.actor_name}</span>{' '}
-                    <span className="text-zinc-300">{actionLabel}</span>{' '}
-                    <span className="font-semibold text-white">{itemTitle}</span>{' '}
-                    <span className="text-zinc-500">{t('activity_feed.in_list')}</span>{' '}
-                    <span className="font-semibold text-fuchsia-300">{listName}</span>
-                  </p>
-
-                  <div className="mt-2 flex items-center gap-2 text-[11px] uppercase tracking-wide text-zinc-500">
-                    <Clock3 className="w-3.5 h-3.5" />
-                    <span>{relativeTime}</span>
-                  </div>
-                </article>
-              </li>
-            )
-          })}
-        </ul>
+          return (
+            <article 
+              key={event.activity_id} 
+              className="font-mono text-xs hover:bg-[rgba(var(--color-accent-primary-rgb),0.05)] transition-colors p-1.5 -mx-1.5 rounded"
+            >
+              <div className="flex gap-2">
+                <span className="text-accent-primary opacity-40 shrink-0">
+                  [{new Date(event.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}]
+                </span>
+                <span className="text-[var(--color-text-muted)] min-w-0 break-words leading-relaxed">
+                  <span className="text-accent-primary font-bold">{event.actor_name}</span>{' '}
+                  <span className="opacity-80">executed:</span> <span className="text-[var(--color-text-primary)]">[{actionLabel}]</span>{' '}
+                  <span className="opacity-80">on target:</span> <span className="text-accent-secondary">'{itemTitle}'</span>{' '}
+                  <span className="opacity-80">in region:</span> <span className="opacity-60">{listName}</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] text-accent-primary opacity-40 mt-1 pl-20">
+                <Clock3 className="w-3 h-3" />
+                <span>{relativeTime.toUpperCase()}</span>
+                <span className="mx-1">|</span>
+                <span>ID:{String(event.activity_id).substring(0,8)}</span>
+              </div>
+            </article>
+          )
+        })}
       </div>
-    </section>
+      
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(var(--color-accent-primary-rgb), 0.3);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(var(--color-accent-primary-rgb), 0.5);
+        }
+      `}</style>
+    </HudContainer>
   )
 }
 
