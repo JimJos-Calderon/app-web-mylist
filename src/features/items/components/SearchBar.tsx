@@ -1,6 +1,6 @@
 import React, { Ref } from 'react'
 import { useTranslation } from 'react-i18next'
-import { OmdbSuggestion, OptimizedImage } from '@/features/shared'
+import { HudContainer, OmdbSuggestion, OptimizedImage, TechLabel } from '@/features/shared'
 import { Loader2 } from 'lucide-react'
 
 interface SearchBarProps {
@@ -38,17 +38,24 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
       <div className="relative mb-8 md:mb-16 max-w-xl" ref={ref}>
         <form onSubmit={onSubmit} className="flex gap-2 md:gap-3">
           <div className="relative flex-1">
+            <TechLabel
+              text="INPUT.QUERY"
+              tone="primary"
+              blink
+              className="absolute left-4 -top-2 z-10"
+            />
+
             <input
               type="text"
               placeholder={placeholder}
               aria-label={ariaLabel}
-              className="w-full bg-black/70 border-2 border-cyan-500/30 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 text-sm md:text-base text-white outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all font-bold uppercase tracking-tight"
+              className="w-full hud-search-input px-4 md:px-5 py-3 md:py-4 text-sm md:text-base outline-none transition-all font-mono tracking-wide"
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onFocus={onFocus}
             />
             {loading && (
-              <div className="absolute right-3 md:right-4 top-3 md:top-4 text-cyan-400">
+              <div className="absolute right-3 md:right-4 top-3 md:top-4 text-accent-primary">
                 <Loader2 className="animate-spin h-4 w-4 md:h-5 md:w-5" />
               </div>
             )}
@@ -57,7 +64,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
           <button
             type="submit"
             disabled={loading}
-            className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-600 px-4 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-white shadow-[0_0_20px_rgba(255,0,255,0.4)] transition-all italic uppercase text-[10px] md:text-xs disabled:cursor-not-allowed"
+            className="hud-search-submit px-4 md:px-7 py-3 md:py-4 font-black transition-all uppercase text-[10px] md:text-xs disabled:cursor-not-allowed"
           >
             {loading ? '...' : t('action.search_ok_button')}
           </button>
@@ -65,15 +72,18 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
 
         {/* Suggestions Dropdown */}
         {showDropdown && suggestions.length > 0 && (
-          <div className="absolute w-full mt-2 bg-black/95 border-2 border-pink-500/50 rounded-2xl overflow-hidden z-50 backdrop-blur-xl shadow-lg max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-pink-500/50 scrollbar-track-black/30">
+          <HudContainer
+            className="absolute w-full mt-2 z-50 hud-search-dropdown"
+            contentClassName="max-h-[500px] overflow-y-auto hud-search-dropdown-content"
+          >
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion.imdbID}
                 type="button"
                 onClick={() => onSuggestionSelect?.(suggestion)}
-                className="w-full flex items-center gap-4 p-3 hover:bg-pink-500/20 border-b border-white/5 text-left transition-all last:border-b-0"
+                className="w-full flex items-center gap-4 p-3 hud-search-suggestion text-left transition-all"
               >
-                <div className="w-10 h-14 flex-shrink-0 rounded border border-pink-500/30 overflow-hidden">
+                <div className="w-10 h-14 flex-shrink-0 rounded hud-search-suggestion-thumb overflow-hidden">
                   <OptimizedImage
                     src={suggestion.Poster !== 'N/A' ? suggestion.Poster : undefined}
                     alt={suggestion.Title}
@@ -81,16 +91,16 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
                   />
                 </div>
                 <div>
-                  <div className="text-white font-black text-sm uppercase italic">
+                  <div className="hud-search-suggestion-title font-black text-sm uppercase italic">
                     {suggestion.Title}
                   </div>
-                  <div className="text-cyan-400 text-[10px] font-bold mt-1">
+                  <div className="hud-search-suggestion-meta text-[10px] font-bold mt-1">
                     {suggestion.Year}
                   </div>
                 </div>
               </button>
             ))}
-          </div>
+          </HudContainer>
         )}
       </div>
     )
