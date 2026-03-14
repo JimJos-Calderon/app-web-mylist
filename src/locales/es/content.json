@@ -53,6 +53,8 @@
     "favorites": "Favoritas"
   },
   "no_image": "Sin imagen",
+  "movie_type": "Película",
+  "series_type": "Serie",
   "own_item": "Tuyo",
   "shared_item": "Película compartida",
   "details_title": "Detalles de",
