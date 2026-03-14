@@ -41,22 +41,24 @@ export const LanguageSwitcher: React.FC = () => {
       onClick={toggleLanguage}
       disabled={isTransitioning}
       className={`
-        flex items-center gap-2 px-4 py-2.5 rounded-full
-        bg-gradient-to-r from-purple-500/10 to-pink-500/10
-        border border-purple-400/30 backdrop-blur-md
-        hover:border-purple-400/60 hover:from-purple-500/20 hover:to-pink-500/20
+        relative overflow-hidden flex items-center justify-center gap-2 px-4 py-2.5 rounded
+        bg-[rgba(var(--color-bg-base-rgb),0.6)]
+        border border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] backdrop-blur-md
+        hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]
+        hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]
         transition-all duration-300 ease-out
         disabled:opacity-70 cursor-pointer group
-        font-semibold text-sm uppercase tracking-wide
+        font-bold text-xs uppercase tracking-widest font-mono
       `}
+      style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
       title={`Cambiar idioma (${currentLang === 'es' ? 'Change language' : 'Cambiar idioma'})`}
       aria-label={`Language switcher: currently ${currentLang}`}
     >
       <Globe
-        size={18}
+        size={16}
         className={`
-          transition-all duration-300 group-hover:text-pink-400
-          ${currentLang === 'es' ? 'text-purple-400' : 'text-pink-400'}
+          transition-all duration-300 
+          text-[var(--color-text-muted)] group-hover:text-accent-primary
           ${isTransitioning ? 'animate-spin' : ''}
         `}
       />
@@ -64,8 +66,8 @@ export const LanguageSwitcher: React.FC = () => {
       <span
         className={`
           transition-all duration-300
-          ${currentLang === 'es' ? 'text-purple-300' : 'text-pink-300'}
-          group-hover:text-white
+          text-[var(--color-text-primary)]
+          group-hover:text-accent-primary
         `}
       >
         {currentLang.toUpperCase()}
@@ -74,10 +76,10 @@ export const LanguageSwitcher: React.FC = () => {
       {/* Indicador visual del estado */}
       <span
         className={`
-          absolute right-2 w-2 h-2 rounded-full
+          w-1.5 h-1.5 rounded-full ml-1
           transition-all duration-300
-          ${currentLang === 'es' ? 'bg-purple-400' : 'bg-pink-400'}
-          group-hover:shadow-lg group-hover:shadow-pink-500/50
+          bg-accent-secondary
+          group-hover:shadow-[0_0_8px_var(--color-accent-secondary)]
         `}
       />
     </button>

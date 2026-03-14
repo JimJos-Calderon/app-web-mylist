@@ -77,7 +77,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
         </header>
         <div className="flex items-center gap-2 text-[var(--color-text-muted)] font-mono text-xs">
           <Loader2 className="w-3 h-3 animate-spin text-accent-primary" />
-          <span>INITIALIZING MEMORY BANK...</span>
+          <span>{t('activity_feed.initializing')}</span>
         </div>
       </HudContainer>
     )
@@ -119,7 +119,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
           <TechLabel text="SYS.LOG" />
         </div>
         <span className="text-[10px] uppercase font-mono tracking-widest text-accent-primary opacity-60">
-          COUNT: [{events.length.toString().padStart(2, '0')}]
+          {t('activity_feed.count')}: [{events.length.toString().padStart(2, '0')}]
         </span>
       </header>
 
@@ -141,9 +141,9 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
                 </span>
                 <span className="text-[var(--color-text-muted)] min-w-0 break-words leading-relaxed">
                   <span className="text-accent-primary font-bold">{event.actor_name}</span>{' '}
-                  <span className="opacity-80">executed:</span> <span className="text-[var(--color-text-primary)]">[{actionLabel}]</span>{' '}
-                  <span className="opacity-80">on target:</span> <span className="text-accent-secondary">'{itemTitle}'</span>{' '}
-                  <span className="opacity-80">in region:</span> <span className="opacity-60">{listName}</span>
+                  <span className="opacity-80">{t('activity_feed.executed')}</span> <span className="text-[var(--color-text-primary)]">[{actionLabel}]</span>{' '}
+                  <span className="opacity-80">{t('activity_feed.on_target')}</span> <span className="text-accent-secondary">'{itemTitle}'</span>{' '}
+                  <span className="opacity-80">{t('activity_feed.in_region')}</span> <span className="opacity-60">{listName}</span>
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-accent-primary opacity-40 mt-1 pl-20">

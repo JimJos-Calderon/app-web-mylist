@@ -7,6 +7,8 @@ import { ItemCard } from '@/features/items'
 import { ListItem } from '@/features/shared'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/supabaseClient'
+import HudContainer from '@/features/shared/components/HudContainer'
+import TechLabel from '@/features/shared/components/TechLabel'
 
 interface RatingInfo {
   rating: number
@@ -63,7 +65,8 @@ const Perfil: React.FC = () => {
             poster_url: r.items.poster_url,
             created_at: r.items.created_at,
             genero: r.items.genero,
-            rating: r.rating
+            rating: r.rating,
+            list_id: '' // Satisfy ListItem typing for global ratings without a specific list context
           },
           rating: {
             rating: r.rating,
@@ -103,21 +106,27 @@ const Perfil: React.FC = () => {
 
   if (loading || isLoadingItems) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 flex items-center justify-center">
-        <div className="text-white">{t('profile.loading')}</div>
+      <div className="min-h-screen bg-[var(--color-bg-base)] flex items-center justify-center">
+        <div className="text-[var(--color-text-primary)] font-mono">{t('profile.loading')}</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-black to-zinc-900 text-white p-4 sm:p-8">
+    <div className="min-h-screen bg-[var(--color-bg-base)] text-[var(--color-text-primary)] p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Profile Header */}
         <div className="mb-12">
           <div className="flex flex-col sm:flex-row gap-8 items-start">
             {/* Avatar and Info */}
             <div className="flex flex-col items-center sm:items-start gap-4">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-cyan-400/30 bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+              <div 
+                className="w-32 h-32 rounded-full overflow-hidden border-4 flex items-center justify-center flex-shrink-0"
+                style={{ 
+                  borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)',
+                  background: 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)'
+                }}
+              >
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -128,34 +137,42 @@ const Perfil: React.FC = () => {
                     }}
                   />
                 ) : (
-                  <UserCircle className="w-20 h-20 text-white" />
+                  <UserCircle className="w-20 h-20 text-accent-primary opacity-60" />
                 )}
               </div>
               
               <div className="text-center sm:text-left">
-                <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                <h1 
+                  className="text-3xl sm:text-4xl font-black font-mono tracking-tighter"
+                  style={{
+                    background: 'linear-gradient(to right, var(--color-accent-primary), var(--color-accent-secondary))',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    filter: 'drop-shadow(0 0 10px rgba(var(--color-accent-primary-rgb), 0.3))'
+                  }}
+                >
                   {profile?.username || 'Usuario'}
                 </h1>
                 {profile?.bio && (
-                  <p className="text-zinc-400 mt-2 max-w-sm">{profile.bio}</p>
+                  <p className="text-[var(--color-text-muted)] mt-2 max-w-sm">{profile.bio}</p>
                 )}
               </div>
             </div>
 
             {/* Stats */}
             <div className="flex-1 grid grid-cols-3 gap-4 w-full sm:w-auto">
-              <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-xl p-4 text-center">
-                <div className="text-2xl font-black text-cyan-400">{totalRatings}</div>
-                <div className="text-xs text-zinc-400 mt-1">{t('stats.rated')}</div>
-              </div>
-              <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-xl p-4 text-center">
-                <div className="text-2xl font-black text-yellow-400">{favoriteCount}</div>
-                <div className="text-xs text-zinc-400 mt-1">{t('stats.favorites')}</div>
-              </div>
-              <div className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-xl p-4 text-center">
-                <div className="text-2xl font-black text-red-400">{likedCount}</div>
-                <div className="text-xs text-zinc-400 mt-1">{t('stats.liked')}</div>
-              </div>
+              <HudContainer className="p-4 text-center">
+                <div className="text-2xl font-black text-[var(--color-text-primary)]">{totalRatings}</div>
+                <div className="text-xs text-[var(--color-text-muted)] mt-1 font-mono uppercase tracking-widest">{t('stats.rated')}</div>
+              </HudContainer>
+              <HudContainer className="p-4 text-center" style={{ borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)' }}>
+                <div className="text-2xl font-black text-accent-primary drop-shadow-[0_0_8px_rgba(var(--color-accent-primary-rgb),0.5)]">{favoriteCount}</div>
+                <div className="text-xs text-[var(--color-text-muted)] mt-1 font-mono uppercase tracking-widest">{t('stats.favorites')}</div>
+              </HudContainer>
+              <HudContainer className="p-4 text-center" style={{ borderColor: 'rgba(var(--color-accent-secondary-rgb), 0.5)' }}>
+                <div className="text-2xl font-black text-accent-secondary drop-shadow-[0_0_8px_rgba(var(--color-accent-secondary-rgb),0.5)]">{likedCount}</div>
+                <div className="text-xs text-[var(--color-text-muted)] mt-1 font-mono uppercase tracking-widest">{t('stats.liked')}</div>
+              </HudContainer>
             </div>
           </div>
 
@@ -163,7 +180,8 @@ const Perfil: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <button
               onClick={() => navigate('/ajustes')}
-              className="px-6 py-3 bg-black/60 backdrop-blur-lg border border-cyan-500/30 text-cyan-400 font-bold rounded-lg hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.05)] backdrop-blur-md border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-accent-primary font-bold hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:border-accent-primary hover:shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.3)] transition-all flex items-center justify-center gap-2"
+              style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
             >
               <Cog className="w-5 h-5" />
               <span>{t('profile.settings_button')}</span>
@@ -174,7 +192,10 @@ const Perfil: React.FC = () => {
         {/* Rated Items Grid */}
         {ratedItems.length > 0 ? (
           <div>
-            <h2 className="text-2xl font-black mb-6">{t('profile.my_ratings')}</h2>
+            <div className="flex items-center gap-3 mb-6">
+              <TechLabel text="USER.DATA" blink={false} />
+              <h2 className="text-xl font-black uppercase tracking-widest text-[var(--color-text-primary)] font-mono">{t('profile.my_ratings')}</h2>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {ratedItems.map(({ item }) => (
                 <ItemCard
@@ -190,19 +211,20 @@ const Perfil: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center py-20">
-            <Film className="w-16 h-16 mx-auto mb-4 text-zinc-500" />
-            <h2 className="text-2xl font-bold mb-2">{t('profile.no_ratings')}</h2>
-            <p className="text-zinc-400 mb-6">
-              {t('profile.start_rating')}
+          <HudContainer className="text-center py-20 px-4 border-[rgba(var(--color-accent-primary-rgb),0.2)]">
+            <Film className="w-16 h-16 mx-auto mb-4 text-accent-primary opacity-50" />
+            <h2 className="text-xl font-bold mb-2 font-mono uppercase tracking-widest text-accent-primary">{t('profile.no_ratings')}</h2>
+            <p className="text-[var(--color-text-muted)] mb-6 font-mono text-sm max-w-md mx-auto">
+              {'>'} {t('profile.start_rating')}
             </p>
             <button
               onClick={() => navigate('/peliculas')}
-              className="px-6 py-3 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] transition-all inline-block"
+              className="px-8 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-bold font-mono tracking-widest hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all inline-block uppercase"
+              style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
             >
               {t('explore_movies')}
             </button>
-          </div>
+          </HudContainer>
         )}
       </div>
     </div>
