@@ -2,10 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, RotateCw } from 'lucide-react'
 
-interface SectionErrorFallbackProps {
-  error: Error
-  resetErrorBoundary: () => void
-}
+import { FallbackProps } from 'react-error-boundary'
 
 /**
  * SectionErrorFallback
@@ -14,7 +11,7 @@ interface SectionErrorFallbackProps {
  * A diferencia del GlobalErrorFallback, este no ocupa toda la pantalla,
  * permitiendo que el resto de la app siga funcionando.
  */
-export const SectionErrorFallback: React.FC<SectionErrorFallbackProps> = ({
+export const SectionErrorFallback: React.FC<FallbackProps> = ({
   error,
   resetErrorBoundary,
 }) => {

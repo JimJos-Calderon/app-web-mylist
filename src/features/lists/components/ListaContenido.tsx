@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect, Suspense, lazy } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ErrorBoundary } from 'react-error-boundary'
 import { useAuth } from '@/features/auth'
 import { useItems, useSuggestions, useFilters, useOmdb } from '@/features/items'
-import { OmdbSuggestion, ListItem, List, FilterState, validateTitle, sanitizeInput, SORT_OPTIONS, ErrorAlert, SectionErrorFallback } from '@/features/shared'
+import { OmdbSuggestion, ListItem, List, FilterState, validateTitle, sanitizeInput, SORT_OPTIONS, ErrorAlert } from '@/features/shared'
 import { ItemCard, SearchBar, FilterPanel, StatsWidget } from '@/features/items'
 import { supabase } from '@/supabaseClient'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
@@ -11,7 +10,6 @@ import ListSelector from './ListSelector'
 
 // ─── Lazy load heavy component (uses Swiper) ───────────────────────────────
 const RingSlider = lazy(() => import('@/features/items/components/RingSlider'))
-const ActivityFeedPanel = lazy(() => import('@/features/lists/components/ActivityFeed'))
 
 interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
@@ -44,33 +42,6 @@ const RingSliderSkeleton: React.FC<{ t: any }> = ({ t }) => (
   </div>
 )
 
-const ActivityFeedSkeleton: React.FC<{ t: any }> = ({ t }) => (
-  <div className="border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] p-5"
-    style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
-    <div className="flex items-center justify-between gap-3 mb-6">
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 bg-accent-primary animate-pulse"></div>
-        <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
-          SYS.{t('activity_feed.title')}
-        </h3>
-      </div>
-      <div className="w-24 h-2 bg-[rgba(var(--color-accent-primary-rgb),0.2)] animate-pulse" />
-    </div>
-
-    <div className="space-y-3">
-      {[1, 2, 3].map((line) => (
-        <div key={line}
-          className="h-10 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.1)] animate-pulse"
-          style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }} />
-      ))}
-    </div>
-
-    <p className="mt-4 text-[10px] font-mono uppercase tracking-widest text-[var(--color-text-muted)] opacity-70">
-      {'>'} {t('activity_feed.loading')}
-    </p>
-  </div>
-)
-
 // Removed duplicate definition below
 const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, lists, currentList, setCurrentList, loadingLists }) => {
   const { user } = useAuth()
@@ -79,10 +50,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [showActivityFeed, setShowActivityFeed] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth >= 640
-  })
   const [currentPage, setCurrentPage] = useState(1)
   const [isMobile, setIsMobile] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'ring'>('grid' as 'grid' | 'ring')
@@ -101,7 +68,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
   const ITEMS_PER_PAGE = 9
 
-  const { items, loading, error: itemsError, addItem, deleteItem, toggleVisto, clearError } = useItems(
+  const { items, loading, error: itemsError, addItem, deleteItem, toggleVisto } = useItems(
     tipo,
     user?.id || '',
     listId
@@ -115,7 +82,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   const { fetchPlot } = useOmdb()
 
   const { filters, updateFilter, resetFilters } = useFilters()
-  const resolvedListId = currentList?.id ?? listId
 
   // Handler para cambios en los filtros
   const handleFilterChange = (filterKey: keyof FilterState, value: any) => {
@@ -485,7 +451,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
             {/* Error alerts */}
             {itemsError && (
-              <ErrorAlert message={itemsError} onClose={clearError} />
+              <ErrorAlert message={itemsError} onClose={() => { }} />
             )}
             {suggestionsError && (
               <ErrorAlert message={suggestionsError} onClose={() => { }} />
@@ -512,41 +478,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               sortOptions={SORT_OPTIONS}
             />
 
-            {resolvedListId && (
-              <section className="mb-6 border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.4)] p-4 md:p-5 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] border-l-4 border-l-accent-primary"
-                style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-col gap-1">
-                    <h3 className="text-sm md:text-base font-black uppercase tracking-widest text-accent-primary font-mono flex items-center gap-2">
-                      SYS.{t('activity_feed.title')}
-                    </h3>
-                    <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] font-mono opacity-80">
-                      {'>'} {t('activity_feed.subtitle')}
-                    </p>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowActivityFeed((prev) => !prev)}
-                    className="px-4 py-2 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:border-[rgba(var(--color-accent-primary-rgb),1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all font-mono text-[10px] uppercase font-bold tracking-widest flex items-center gap-2"
-                    style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
-                    aria-expanded={showActivityFeed}
-                  >
-                    <span className="opacity-70">{showActivityFeed ? '-' : '+'}</span> [ {showActivityFeed ? t('activity_feed.collapse') : t('activity_feed.expand')} ]
-                  </button>
-                </div>
-
-                {showActivityFeed && (
-                  <div className="mt-5 border-t border-[rgba(var(--color-accent-primary-rgb),0.2)] pt-5">
-                    <ErrorBoundary FallbackComponent={SectionErrorFallback}>
-                      <Suspense fallback={<ActivityFeedSkeleton t={t} />}>
-                        <ActivityFeedPanel listId={resolvedListId} limit={20} />
-                      </Suspense>
-                    </ErrorBoundary>
-                  </div>
-                )}
-              </section>
-            )}
 
             <div className="mb-6 flex justify-end gap-2 flex-wrap">
               <button

@@ -2,6 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Palette, Cpu, Monitor } from 'lucide-react'
 import { ThemePreference, useTheme } from '@/features/shared'
+import HudContainer from '@/features/shared/components/HudContainer'
 
 type ThemeOption = {
   value: ThemePreference
@@ -40,10 +41,13 @@ const ThemeSwitcher: React.FC = () => {
   const { theme, changeTheme, isChangingTheme, error } = useTheme()
 
   return (
-    <section className="bg-black/60 backdrop-blur-lg border border-cyan-500/20 rounded-3xl p-6 sm:p-8">
-      <header className="mb-5">
-        <h2 className="text-xl font-bold text-white mb-1">{t('settings.theme_title')}</h2>
-        <p className="text-zinc-400 text-sm">{t('settings.theme_description')}</p>
+    <HudContainer className="p-6 sm:p-8">
+      <header className="mb-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-4">
+        <h2 className="text-xl font-black font-mono tracking-widest uppercase mb-2 flex items-center gap-3 text-[var(--color-text-primary)]">
+          <Palette className="w-5 h-5 text-accent-primary" />
+          {t('settings.theme_title')}
+        </h2>
+        <p className="text-[var(--color-text-muted)] text-sm font-mono">{t('settings.theme_description')}</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -57,29 +61,34 @@ const ThemeSwitcher: React.FC = () => {
               onClick={() => changeTheme(value)}
               disabled={isChangingTheme}
               aria-pressed={isActive}
-              className={`text-left rounded-2xl border p-4 transition-all duration-300 group disabled:opacity-60 disabled:cursor-not-allowed ${
+              className={`text-left rounded-lg border p-4 transition-all duration-300 group disabled:opacity-60 disabled:cursor-not-allowed ${
                 isActive
-                  ? 'border-cyan-400 bg-cyan-500/10 shadow-[0_0_25px_rgba(34,211,238,0.25)]'
-                  : 'border-zinc-700 bg-zinc-900/60 hover:border-cyan-500/40 hover:bg-zinc-900/80'
+                  ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.1)] shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.25)]'
+                  : 'border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] bg-black/40 hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.05)]'
               }`}
+              style={isActive ? { clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' } : {}}
             >
               <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center group-hover:border-cyan-400/60 transition-colors">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-300' : 'text-zinc-300 group-hover:text-cyan-300'}`} />
+                <div className={`w-9 h-9 rounded bg-black/80 border flex items-center justify-center transition-colors ${
+                  isActive 
+                    ? 'border-accent-primary' 
+                    : 'border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] group-hover:border-accent-primary'
+                }`}>
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-accent-primary' : 'text-[var(--color-text-muted)] group-hover:text-accent-primary'}`} />
                 </div>
                 {isActive && (
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-cyan-300">
+                  <span className="text-[10px] uppercase tracking-widest font-bold font-mono text-accent-primary">
                     {t('settings.theme_active')}
                   </span>
                 )}
               </div>
 
-              <div className={`h-2 rounded-full bg-gradient-to-r ${previewClassName} mb-3`} />
+              <div className={`h-2 rounded bg-gradient-to-r ${previewClassName} mb-3`} />
 
-              <h3 className="text-sm font-black uppercase tracking-wide text-white mb-1">
+              <h3 className={`text-sm font-black uppercase tracking-widest font-mono mb-1 ${isActive ? 'text-accent-primary' : 'text-[var(--color-text-primary)]'}`}>
                 {t(titleKey)}
               </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed font-mono">
                 {t(descriptionKey)}
               </p>
             </button>
@@ -88,11 +97,11 @@ const ThemeSwitcher: React.FC = () => {
       </div>
 
       {error && (
-        <div className="mt-4 bg-red-500/10 border border-red-500/30 text-red-300 text-sm px-4 py-3 rounded-xl">
+        <div className="mt-4 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary text-sm px-4 py-3 rounded font-mono tracking-wide">
           {error}
         </div>
       )}
-    </section>
+    </HudContainer>
   )
 }
 

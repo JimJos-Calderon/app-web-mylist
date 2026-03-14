@@ -72,7 +72,28 @@ export const useActivityFeed = (options: UseActivityFeedOptions = {}): UseActivi
         throw error
       }
 
-      return (data || []) as ActivityFeedEvent[]
+      let events = (data || []) as ActivityFeedEvent[]
+      
+      // Fallback: If list_name is missing but we have a list_id, fetch it
+      const missingListIds = [...new Set(events.filter(e => !e.list_name && e.list_id).map(e => e.list_id))]
+      if (missingListIds.length > 0) {
+        const { data: listData } = await supabase
+          .from('lists')
+          .select('id, name')
+          .in('id', missingListIds as string[])
+          
+        if (listData) {
+          const listMap = new Map(listData.map(l => [l.id, l.name]))
+          events = events.map(e => {
+            if (!e.list_name && e.list_id && listMap.has(e.list_id)) {
+              return { ...e, list_name: listMap.get(e.list_id) as string }
+            }
+            return e
+          })
+        }
+      }
+
+      return events
     },
     enabled,
   })

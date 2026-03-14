@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense, lazy } from 'react'
+import React, { useState, useEffect, useRef, Suspense, lazy, ErrorInfo } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -13,7 +13,7 @@ import TechLabel from '@/features/shared/components/TechLabel'
 
 import Login from '@pages/Login'
 
-const handleSectionError = (error: Error, info: { componentStack?: string | null }) => {
+const handleSectionError = (error: unknown, info: ErrorInfo) => {
   Sentry.captureException(error, {
     extra: { componentStack: info.componentStack },
   })
@@ -32,6 +32,9 @@ const SpotifyGlassCard = lazy(() =>
     default: module.SpotifyGlassCard,
   }))
 )
+
+// ─── Activity Feed Panel ────────────────────────────────────────────────────
+const ActivityFeedPanel = lazy(() => import('@/features/lists/components/ActivityFeed'))
 
 // ─── Per-route Loading Fallback ─────────────────────────────────────────────
 const PageLoadingSkeleton: React.FC = () => {
@@ -53,6 +56,36 @@ const PageLoadingSkeleton: React.FC = () => {
           </p>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ─── Activity Feed Loading Skeleton ─────────────────────────────────────────
+const ActivityFeedSkeleton: React.FC = () => {
+  const { t } = useTranslation()
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-2">
+           <div className="w-2 h-2 bg-accent-primary animate-pulse"></div>
+           <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
+             SYS.{t('activity_feed.title')}
+           </h3>
+        </div>
+        <div className="w-24 h-2 bg-[rgba(var(--color-accent-primary-rgb),0.2)] animate-pulse" />
+      </div>
+
+      <div className="space-y-3">
+        {[1, 2, 3].map((line) => (
+          <div key={line} 
+               className="h-10 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.1)] animate-pulse" 
+               style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }} />
+        ))}
+      </div>
+
+      <p className="mt-4 text-[10px] font-mono uppercase tracking-widest text-[var(--color-text-muted)] opacity-70">
+        {'>'} {t('activity_feed.loading')}
+      </p>
     </div>
   )
 }
@@ -575,9 +608,15 @@ const App: React.FC = () => {
         <div className="relative hidden md:block" ref={userMenuRef}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-slate-700/30 transition-all"
+            className="flex items-center gap-3 px-3 py-2 rounded border border-transparent hover:border-[rgba(var(--color-accent-primary-rgb),0.2)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.05)] transition-all"
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs overflow-hidden bg-gradient-to-br from-cyan-500 to-pink-500">
+            <div 
+              className="w-8 h-8 rounded flex items-center justify-center text-[var(--color-text-primary)] font-bold text-xs overflow-hidden border-2"
+              style={{ 
+                borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)',
+                background: 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)'
+              }}
+            >
               {profile?.avatar_url ? (
                 <img
                   src={profile.avatar_url}
@@ -591,30 +630,30 @@ const App: React.FC = () => {
                 userInitials
               )}
             </div>
-            <span className="text-sm font-semibold hidden sm:inline text-slate-300">{displayName}</span>
+            <span className="text-xs font-bold font-mono tracking-widest uppercase hidden sm:inline text-[var(--color-text-primary)]">{displayName}</span>
             <Menu
-              className={`w-4 h-4 text-slate-400 transition-transform ${showUserMenu ? 'rotate-180' : ''
+              className={`w-4 h-4 text-[var(--color-text-muted)] transition-transform ${showUserMenu ? 'rotate-180' : ''
                 }`}
             />
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-black/95 backdrop-blur-lg border border-cyan-500/20 rounded-lg shadow-[0_0_30px_rgba(0,255,255,0.2)] overflow-hidden z-50">
-              <div className="px-4 py-3 border-b border-cyan-500/20 bg-black/60">
-                <p className="text-sm font-semibold text-white">{displayName}</p>
-                <p className="text-xs text-zinc-400">{userEmail}</p>
+            <HudContainer className="!absolute right-0 mt-2 w-56 z-50 p-0 overflow-hidden shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.2)] animate-in slide-in-from-top-2 duration-200 block">
+              <div className="px-5 py-4 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)]">
+                <p className="font-mono text-sm font-bold text-[var(--color-accent-primary)] truncate">{displayName}</p>
+                <p className="font-mono text-xs text-[var(--color-text-muted)] truncate opacity-80">{userEmail}</p>
               </div>
               <Link
                 to="/perfil"
                 onClick={() => setShowUserMenu(false)}
-                className="block w-full text-left px-4 py-2 text-sm text-zinc-200 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors font-medium"
+                className="block w-full text-left px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold"
               >
                 {t('navbar.profile')}
               </Link>
               <Link
                 to="/ajustes"
                 onClick={() => setShowUserMenu(false)}
-                className="block w-full text-left px-4 py-2 text-sm text-zinc-200 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors font-medium"
+                className="block w-full text-left px-5 py-3 font-mono text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold"
               >
                 {t('navbar.settings')}
               </Link>
@@ -623,19 +662,25 @@ const App: React.FC = () => {
                   signOut()
                   setShowUserMenu(false)
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors font-medium border-t border-cyan-500/20"
+                className="w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold border-t border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-bg-base-rgb),0.6)] flex items-center gap-2"
               >
-                {t('navbar.logout')}
+                <LogOut className="w-4 h-4 opacity-70" /> {t('navbar.logout')}
               </button>
-            </div>
+            </HudContainer>
           )}
         </div>
 
         {/* Mobile Navigation Menu */}
         {showMobileMenu && (
-          <div ref={mobileMenuRef} className="md:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-lg border-b border-pink-500/20 shadow-[0_0_30px_rgba(219,39,119,0.2)] z-50">
-            <div className="px-4 py-3 border-b border-pink-500/20 bg-black/60 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm overflow-hidden bg-gradient-to-br from-cyan-500 to-pink-500">
+          <HudContainer className="md:hidden !absolute top-full left-0 right-0 z-50 p-0 overflow-hidden shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.2)] animate-in slide-in-from-top-2 duration-200 block border-t-0 rounded-t-none">
+            <div className="px-4 py-3 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-[var(--color-text-primary)] font-bold text-sm overflow-hidden border-2"
+                style={{ 
+                  borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)',
+                  background: 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)'
+                }}
+              >
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -649,38 +694,38 @@ const App: React.FC = () => {
                   userInitials
                 )}
               </div>
-              <div>
-                <p className="text-sm font-semibold text-white">{displayName}</p>
-                <p className="text-xs text-zinc-400">{userEmail}</p>
+              <div className="overflow-hidden">
+                <p className="font-mono text-sm font-bold text-[var(--color-accent-primary)] truncate">{displayName}</p>
+                <p className="font-mono text-xs text-[var(--color-text-muted)] truncate">{userEmail}</p>
               </div>
             </div>
             <Link
               to="/peliculas"
               onClick={() => setShowMobileMenu(false)}
-              className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
+              className="block w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] flex items-center gap-3"
             >
-              <Film className="w-4 h-4" /> {t('navbar.movies')}
+              <Film className="w-4 h-4 opacity-70" /> {t('navbar.movies')}
             </Link>
             <Link
               to="/series"
               onClick={() => setShowMobileMenu(false)}
-              className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
+              className="block w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] flex items-center gap-3"
             >
-              <Tv className="w-4 h-4" /> {t('navbar.series')}
+              <Tv className="w-4 h-4 opacity-70" /> {t('navbar.series')}
             </Link>
             <Link
               to="/perfil"
               onClick={() => setShowMobileMenu(false)}
-              className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
+              className="block w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] flex items-center gap-3"
             >
-              <User className="w-4 h-4" /> {t('navbar.profile')}
+              <User className="w-4 h-4 opacity-70" /> {t('navbar.profile')}
             </Link>
             <Link
               to="/ajustes"
               onClick={() => setShowMobileMenu(false)}
-              className="block w-full text-left px-4 py-3 text-sm text-zinc-200 hover:bg-pink-500/10 hover:text-pink-400 transition-colors font-bold border-b border-pink-500/10 flex items-center gap-2"
+              className="block w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] flex items-center gap-3"
             >
-              <Settings className="w-4 h-4" /> {t('navbar.settings')}
+              <Settings className="w-4 h-4 opacity-70" /> {t('navbar.settings')}
             </Link>
             {/* Invitación link removed from mobile menu */}
             <button
@@ -688,11 +733,11 @@ const App: React.FC = () => {
                 signOut()
                 setShowMobileMenu(false)
               }}
-              className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors font-bold flex items-center gap-2"
+              className="w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold flex items-center gap-3 bg-[rgba(var(--color-bg-base-rgb),0.6)]"
             >
-              <LogOut className="w-4 h-4" /> {t('navbar.logout')}
+              <LogOut className="w-4 h-4 opacity-70" /> {t('navbar.logout')}
             </button>
-          </div>
+          </HudContainer>
         )}
       </nav>
 
@@ -702,14 +747,44 @@ const App: React.FC = () => {
             <Route
               path="/"
               element={
-                <div className="text-center mt-20 animate-in fade-in zoom-in duration-700 space-y-8">
-                  <div>
-                    <h2 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-violet-500">
-                      {t('greeting.welcome_back')}
-                    </h2>
-                    <p className="text-zinc-400 text-lg">
-                      {t('greeting.what_to_watch', { name: displayName })}
-                    </p>
+                <div className="max-w-4xl mx-auto space-y-12 pb-24">
+                  <div className="text-center mt-12 animate-in fade-in zoom-in duration-700 space-y-6">
+                    <div>
+                      <h2 
+                        className="text-5xl font-black mb-4 font-mono tracking-tighter"
+                        style={{
+                          background: 'linear-gradient(to right, var(--color-accent-primary), var(--color-accent-secondary))',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          filter: 'drop-shadow(0 0 15px rgba(var(--color-accent-primary-rgb), 0.5))'
+                        }}
+                      >
+                        {t('greeting.welcome_back')}
+                      </h2>
+                      <p className="text-[var(--color-text-muted)] text-lg">
+                        {t('greeting.what_to_watch', { name: displayName })}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both px-4">
+                    <section className="border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.6)] p-5 md:p-8 shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.1)] border-l-4 border-l-accent-primary text-left"
+                      style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
+                      <div className="flex flex-col gap-1 mb-6">
+                        <h3 className="text-sm md:text-base font-black uppercase tracking-widest text-accent-primary font-mono flex items-center gap-2">
+                          SYS.{t('activity_feed.title')}
+                        </h3>
+                        <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] font-mono opacity-80">
+                          {'>'} GLOBAL_ACTIVITY_LOG
+                        </p>
+                      </div>
+
+                      <ErrorBoundary FallbackComponent={SectionErrorFallback}>
+                        <Suspense fallback={<ActivityFeedSkeleton />}>
+                          <ActivityFeedPanel limit={20} />
+                        </Suspense>
+                      </ErrorBoundary>
+                    </section>
                   </div>
                 </div>
               }

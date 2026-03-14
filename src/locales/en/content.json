@@ -261,6 +261,11 @@
     "fallback": {
       "item": "an item",
       "list": "a list"
-    }
+    },
+    "count": "COUNT",
+    "executed": "executed:",
+    "on_target": "on:",
+    "in_region": "in list:",
+    "initializing": "INITIALIZING MEMORY BANK..."
   }
 }
