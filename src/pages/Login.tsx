@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { validateEmail, validatePassword, validateUsername, ERROR_MESSAGES, LanguageSwitcher } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
-import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, Heart, AtSign, Check, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, AtSign, Check, AlertCircle } from 'lucide-react'
 
 // ─── Google SVG Icon ─────────────────────────────────────────────────────────
 const GoogleIcon = () => (
@@ -90,14 +90,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
     e.preventDefault()
     setError(null)
 
-    // Validate username format
     const usernameCheck = validateUsername(username)
     if (!usernameCheck.valid) {
       setError(usernameCheck.message || t('signup.username_invalid'))
       return
     }
 
-    // Block if username is taken
     if (usernameStatus === 'taken') {
       setError(t('signup.username_taken'))
       return
@@ -131,10 +129,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
         return
       }
 
-      // With confirm email OFF, we get an immediate session + user
       const newUser = signUpData?.user
       if (newUser) {
-        // Double-check username availability (race condition guard)
         const { data: existing } = await supabase
           .from('user_profiles')
           .select('id')
@@ -143,12 +139,10 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
         if (existing) {
           setError(t('signup.username_just_taken'))
-          // Roll back: sign out the newly created user
           await supabase.auth.signOut()
           return
         }
 
-        // Insert user profile
         await supabase.from('user_profiles').insert([{
           user_id: newUser.id,
           username: username.trim().toLowerCase(),
@@ -180,27 +174,26 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
       {/* Card */}
       <div
-        className="relative w-full max-w-md rounded-2xl border border-pink-500/30 bg-black/95 backdrop-blur-xl
-                   shadow-[0_0_80px_rgba(219,39,119,0.2)] overflow-hidden"
+        className="relative w-full max-w-md border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-bg-base-rgb),0.95)] backdrop-blur-xl rounded-2xl shadow-[0_0_80px_rgba(var(--color-accent-primary-rgb),0.2)] overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Top glow line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-primary to-transparent" />
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-pink-500/20">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-pink-500/20 border border-pink-500/40 flex items-center justify-center">
-              <UserPlus className="w-4 h-4 text-pink-400" />
+            <div className="w-8 h-8 rounded-lg bg-[rgba(var(--color-accent-primary-rgb),0.2)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center">
+              <UserPlus className="w-4 h-4 text-accent-primary" />
             </div>
-            <h2 className="text-xl font-black uppercase tracking-wider text-white">
+            <h2 className="text-xl font-black uppercase tracking-wider text-[var(--color-text-primary)]">
               {t('signup.title')}
             </h2>
           </div>
           <button
             onClick={onClose}
             aria-label={t('buttons.close_signup_window')}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] transition-all"
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -215,18 +208,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                 <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
               <div>
-                <h3 className="text-xl font-black text-white mb-2">{t('signup.account_created')}</h3>
-                <p className="text-zinc-400 text-xl leading-relaxed">
+                <h3 className="text-xl font-black text-[var(--color-text-primary)] mb-2">{t('signup.account_created')}</h3>
+                <p className="text-[var(--color-text-muted)] text-xl leading-relaxed">
                   {t('signup.confirmation_email')}{' '}
-                  <span className="text-pink-400 font-semibold">{email}</span>.
+                  <span className="text-accent-primary font-semibold">{email}</span>.
                   <br />
                   {t('signup.confirmation_instruction')}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black text-xl
-                           hover:shadow-[0_0_25px_rgba(219,39,119,0.5)] transition-all"
+                className="w-full px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all"
               >
                 {t('signup.button_done')}
               </button>
@@ -236,11 +228,11 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
             <form onSubmit={handleRegister} className="space-y-4">
               {/* Username */}
               <div>
-                <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
+                <label className="block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2">
                   {t('signup.username_label')}
                 </label>
                 <div className="relative">
-                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
                   <input
                     type="text"
                     placeholder={t('placeholders.username')}
@@ -249,17 +241,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     disabled={loading}
                     autoFocus
                     maxLength={20}
-                    className={`w-full pl-9 pr-10 py-3 bg-zinc-900/80 border rounded-xl text-white text-xl placeholder-zinc-500
+                    className={`w-full pl-9 pr-10 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)]
                                focus-visible:ring-2 transition-all font-medium disabled:opacity-50
                                ${usernameStatus === 'available' ? 'border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/20' :
                         usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/20' :
-                          'border-zinc-700 focus-visible:border-pink-500 focus-visible:ring-pink-500/20'
+                          'border-[rgba(var(--color-accent-primary-rgb),0.3)] focus-visible:border-accent-primary focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)]'
                       }`}
                     required
                   />
                   {/* Status icon */}
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />}
+                    {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-[var(--color-text-muted)] animate-spin" />}
                     {usernameStatus === 'available' && <Check className="w-4 h-4 text-green-400" />}
                     {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle className="w-4 h-4 text-red-400" />}
                   </div>
@@ -271,12 +263,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     {usernameMessage}
                   </p>
                 )}
-                <p className="text-xl text-zinc-400 mt-1">{t('signup.username_hint')}</p>
+                <p className="text-xl text-[var(--color-text-muted)] mt-1">{t('signup.username_hint')}</p>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
+                <label className="block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2">
                   {t('signup.email_label')}
                 </label>
                 <input
@@ -285,8 +277,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   disabled={loading}
-                  className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                             focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
+                  className="w-full px-4 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)]
+                             focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)]
                              transition-all font-medium disabled:opacity-50"
                   required
                 />
@@ -294,7 +286,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
               {/* Password */}
               <div>
-                <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
+                <label className="block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2">
                   {t('signup.password_label')}
                 </label>
                 <div className="relative">
@@ -304,8 +296,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                               focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
+                    className="w-full px-4 py-3 pr-12 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)]
+                               focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)]
                                transition-all font-medium disabled:opacity-50"
                     required
                   />
@@ -313,7 +305,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
                     aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
                   >
                     {showPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                   </button>
@@ -322,7 +314,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
               {/* Confirm password */}
               <div>
-                <label className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
+                <label className="block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2">
                   {t('signup.confirm_password_label')}
                 </label>
                 <div className="relative">
@@ -332,8 +324,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                               focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
+                    className="w-full px-4 py-3 pr-12 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)]
+                               focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)]
                                transition-all font-medium disabled:opacity-50"
                     required
                   />
@@ -341,7 +333,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     type="button"
                     onClick={() => setShowConfirm(v => !v)}
                     aria-label={showConfirm ? t('hide_password') : t('show_password')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
                   >
                     {showConfirm ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                   </button>
@@ -364,11 +356,11 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                       key={i}
                       className={`flex-1 h-1 rounded-full transition-all ${password.length >= i * 3
                         ? i <= 1 ? 'bg-red-500' : i === 2 ? 'bg-yellow-500' : i === 3 ? 'bg-blue-400' : 'bg-green-400'
-                        : 'bg-zinc-800'
+                        : 'bg-[rgba(var(--color-accent-primary-rgb),0.1)]'
                         }`}
                     />
                   ))}
-                  <span className="text-xl text-zinc-500 whitespace-nowrap">
+                  <span className="text-xl text-[var(--color-text-muted)] whitespace-nowrap">
                     {password.length < 4 ? t('signup.password_strength_veryWeak') : password.length < 7 ? t('signup.password_strength_weak') : password.length < 10 ? t('signup.password_strength_good') : t('signup.password_strength_strong')}
                   </span>
                 </div>
@@ -380,16 +372,16 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   type="button"
                   onClick={onClose}
                   disabled={loading}
-                  className="flex-1 px-4 py-3 border border-zinc-700 text-zinc-300 rounded-xl font-bold text-xl
-                             hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
+                  className="flex-1 px-4 py-3 border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-muted)] rounded-xl font-bold text-xl
+                             hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-[var(--color-text-primary)] transition-all disabled:opacity-50"
                 >
                   {t('signup.button_cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !email || !password || !confirmPassword || !username || usernameStatus === 'taken' || usernameStatus === 'invalid' || usernameStatus === 'checking'}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-black text-xl
-                             hover:shadow-[0_0_25px_rgba(219,39,119,0.5)] transition-all
+                  className="flex-1 px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl
+                             hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all
                              disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
                              flex items-center justify-center gap-2"
                 >
@@ -411,7 +403,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
         </div>
 
         {/* Bottom glow line */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/30 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary to-transparent opacity-30" />
       </div>
     </div>,
     document.body
@@ -489,46 +481,45 @@ const Login: React.FC = () => {
     <>
       <RegisterModal open={showRegister} onClose={() => setShowRegister(false)} />
 
-      <div className="min-h-screen bg-black flex items-center justify-center px-4 py-8 relative overflow-hidden">
-        {/* Background glows */}
+      <div
+        className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden"
+        style={{
+          backgroundImage: 'url(/login-bg.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        {/* Dark overlay + accent tint so card is readable */}
+        <div className="absolute inset-0 bg-black/60" />
+        {/* Subtle accent glow on top of the overlay */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-pink-600/8 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/8 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-2xl" />
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[rgba(var(--color-accent-primary-rgb),0.06)] rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[rgba(var(--color-accent-secondary-rgb),0.06)] rounded-full blur-3xl" />
         </div>
 
         <div className="w-full max-w-md relative">
           {/* Card */}
-          <div className="relative rounded-2xl border border-pink-500/25 bg-black/90 backdrop-blur-xl shadow-[0_0_80px_rgba(219,39,119,0.12)] overflow-hidden">
+          <div
+            className="relative rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-black/70 backdrop-blur-xl shadow-[0_0_60px_rgba(var(--color-accent-primary-rgb),0.15)] overflow-hidden"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
             {/* Top glow line */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-pink-500 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-primary to-transparent" />
 
-            <div className="px-8 py-10 space-y-7">
-              {/* Logo / Header */}
-              <div className="text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-pink-600 shadow-[0_0_30px_rgba(219,39,119,0.6)] mb-3">
-                  <span className="text-white font-black text-lg">{t('appLogo')}</span>
-                </div>
-                <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
-                  {t('appTitle')} <Heart className="inline w-6 h-6 text-red-500 fill-red-500 -mt-1" />
-                </h1>
-                <p className="text-zinc-400 text-xl">
-                  {t('login.subtitle')}
-                </p>
-              </div>
-
+            <div className="px-8 py-8 space-y-4">
               {/* Error */}
               {error && (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-3">
-                  <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                  <span className="text-red-400 text-xl font-medium">{error}</span>
+                  <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <span className="text-red-400 text-sm">{error}</span>
                 </div>
               )}
 
               {/* Login Form */}
-              <form onSubmit={handleLogin} className="space-y-5">
+              <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <label htmlFor="login-email" className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
+                  <label htmlFor="login-email" className="block text-xs font-bold uppercase tracking-widest text-accent-primary mb-1.5">
                     {t('login.email_label')}
                   </label>
                   <input
@@ -538,15 +529,15 @@ const Login: React.FC = () => {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                               focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
-                               transition-all font-medium disabled:opacity-50"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30
+                               focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.3)]
+                               transition-all disabled:opacity-50 outline-none"
                     required
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="login-password" className="block text-xl font-bold uppercase tracking-widest text-pink-400 mb-2">
+                  <label htmlFor="login-password" className="block text-xs font-bold uppercase tracking-widest text-accent-primary mb-1.5">
                     {t('login.password_label')}
                   </label>
                   <div className="relative">
@@ -557,9 +548,9 @@ const Login: React.FC = () => {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       disabled={loading}
-                      className="w-full px-4 py-3 pr-12 bg-zinc-900/80 border border-zinc-700 rounded-xl text-white text-xl placeholder-zinc-500
-                                 focus-visible:border-pink-500 focus-visible:ring-2 focus-visible:ring-pink-500/20
-                                 transition-all font-medium disabled:opacity-50"
+                      className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30
+                                 focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.3)]
+                                 transition-all disabled:opacity-50 outline-none"
                       required
                     />
                     <button
@@ -567,9 +558,9 @@ const Login: React.FC = () => {
                       onClick={() => setShowPassword(v => !v)}
                       disabled={loading}
                       aria-label={showPassword ? t('hide_password') : t('show_password')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors disabled:opacity-50"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
                     >
-                      {showPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
+                      {showPassword ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -577,16 +568,14 @@ const Login: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-black rounded-xl text-xl
-                             hover:shadow-[0_0_30px_rgba(219,39,119,0.5)] transition-all
-                             disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                  className="w-full py-3 text-white font-bold rounded-xl text-base tracking-wide mt-2
+                             active:scale-[0.99] transition-all
+                             disabled:opacity-50 disabled:cursor-not-allowed
                              flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary))' }}
                 >
                   {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      {t('login.loading')}
-                    </>
+                    <><Loader2 className="w-4 h-4 animate-spin" />{t('login.loading')}</>
                   ) : (
                     t('login.button_login')
                   )}
@@ -595,9 +584,9 @@ const Login: React.FC = () => {
 
               {/* Divider */}
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-zinc-400 text-xl uppercase tracking-widest">{t('login.divider')}</span>
-                <div className="flex-1 h-px bg-zinc-800" />
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-white/40 text-xs uppercase tracking-widest">{t('login.divider')}</span>
+                <div className="flex-1 h-px bg-white/10" />
               </div>
 
               {/* Google Login */}
@@ -605,39 +594,35 @@ const Login: React.FC = () => {
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={googleLoading || loading}
-                className="w-full py-3 bg-white/5 border border-zinc-700 text-white font-black rounded-xl text-xl
-                           hover:bg-white/10 hover:border-zinc-500 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]
+                className="w-full py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl text-sm
+                           hover:bg-white/10 hover:border-white/20
                            transition-all flex items-center justify-center gap-3
                            disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {googleLoading ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> {t('login.loading_google')}</>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> {t('login.loading_google')}</>
                 ) : (
                   <><GoogleIcon /> {t('login.button_google')}</>
                 )}
               </button>
 
-              {/* Register CTA */}
-              <div className="text-center space-y-3">
-                <p className="text-zinc-400 text-xl">{t('login.no_account')}</p>
-                <button
-                  onClick={() => setShowRegister(true)}
-                  className="w-full py-3 border border-pink-500/40 text-pink-400 font-black rounded-xl text-xl
-                             hover:bg-pink-500/10 hover:border-pink-500/70 hover:shadow-[0_0_20px_rgba(219,39,119,0.2)]
-                             transition-all flex items-center justify-center gap-2"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  {t('signup.button_signup')}
-                </button>
-              </div>
+              {/* Register */}
+              <button
+                onClick={() => setShowRegister(true)}
+                className="w-full py-3 border border-[rgba(var(--color-accent-primary-rgb),0.35)] text-accent-primary font-semibold rounded-xl text-sm
+                           hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:border-accent-primary
+                           transition-all flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                {t('signup.button_signup')}
+              </button>
+              <p className="text-center text-white/25 text-xs">{t('footer.by')}</p>
             </div>
 
             {/* Bottom glow */}
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/30 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary to-transparent opacity-30" />
           </div>
 
-          <p className="text-center mt-5 text-zinc-700 text-xl">{t('footer.by')}</p>
-          
           <div className="fixed bottom-6 right-6">
             <LanguageSwitcher />
           </div>

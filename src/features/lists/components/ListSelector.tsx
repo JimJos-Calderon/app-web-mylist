@@ -20,7 +20,7 @@ const ListSelector = ({
         className="flex items-center gap-3 px-4 py-2 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] animate-pulse"
         style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
       >
-        <span className="text-[10px] uppercase font-mono tracking-widest text-[#0ff] opacity-70">
+        <span className="text-[10px] uppercase font-mono tracking-widest text-accent-primary opacity-70">
           SYS.LOADING_LNK...
         </span>
       </div>
@@ -58,18 +58,18 @@ const ListSelector = ({
               onChange(selectedList)
             }
           }}
-          className="appearance-none pl-4 pr-10 py-2 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] text-[#0ff] font-mono text-xs uppercase tracking-wide
-                     hover:border-[#0ff] hover:bg-[rgba(var(--color-accent-primary-rgb),0.15)] focus:outline-none focus:border-[#0ff] focus:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] transition-all cursor-pointer"
+          className="appearance-none pl-4 pr-10 py-2 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] text-accent-primary font-mono text-xs uppercase tracking-wide
+                     hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.15)] focus:outline-none focus:border-accent-primary focus:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] transition-all cursor-pointer"
           style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
         >
           {lists.map((list) => (
-            <option key={list.id} value={list.id} className="bg-black text-white font-mono">
+            <option key={list.id} value={list.id} style={{ backgroundColor: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }} className="font-mono">
               {list.name}
             </option>
           ))}
         </select>
         <div className="absolute right-0 top-0 bottom-0 w-8 flex items-center justify-center pointer-events-none border-l border-[rgba(var(--color-accent-primary-rgb),0.2)]">
-          <div className="w-2 h-2 border-b-2 border-r-2 border-[#0ff] transform rotate-45 -translate-y-1"></div>
+          <div className="w-2 h-2 border-b-2 border-r-2 border-accent-primary transform rotate-45 -translate-y-1"></div>
         </div>
       </div>
     </div>

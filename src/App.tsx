@@ -39,7 +39,7 @@ const ActivityFeedPanel = lazy(() => import('@/features/lists/components/Activit
 // ─── Per-route Loading Fallback ─────────────────────────────────────────────
 const PageLoadingSkeleton: React.FC = () => {
   const { t } = useTranslation()
-  
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="text-center space-y-6">
@@ -67,19 +67,19 @@ const ActivityFeedSkeleton: React.FC = () => {
     <div className="w-full">
       <div className="flex items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-2">
-           <div className="w-2 h-2 bg-accent-primary animate-pulse"></div>
-           <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
-             SYS.{t('activity_feed.title')}
-           </h3>
+          <div className="w-2 h-2 bg-accent-primary animate-pulse"></div>
+          <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
+            SYS.{t('activity_feed.title')}
+          </h3>
         </div>
         <div className="w-24 h-2 bg-[rgba(var(--color-accent-primary-rgb),0.2)] animate-pulse" />
       </div>
 
       <div className="space-y-3">
         {[1, 2, 3].map((line) => (
-          <div key={line} 
-               className="h-10 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.1)] animate-pulse" 
-               style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }} />
+          <div key={line}
+            className="h-10 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.1)] animate-pulse"
+            style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }} />
         ))}
       </div>
 
@@ -93,15 +93,15 @@ const ActivityFeedSkeleton: React.FC = () => {
 // ─── Component Loading Skeleton (for Spotify widgets) ──────────────────────
 const SpotifyWidgetSkeleton: React.FC = () => {
   const { t } = useTranslation()
-  
+
   return (
-    <div 
+    <div
       className="w-80 h-[480px] bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] backdrop-blur-xl animate-pulse flex items-center justify-center"
       style={{ clipPath: 'polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)' }}
     >
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary flex items-center justify-center animate-pulse"
-             style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+          style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
         </div>
         <p className="text-accent-primary font-mono text-[10px] uppercase tracking-widest opacity-80">{'>'} {t('states.loading_widget')}</p>
       </div>
@@ -176,7 +176,7 @@ const UsernameSetupModal: React.FC = () => {
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)]">
             <div className="flex items-center gap-4">
-              <div 
+              <div
                 className="w-10 h-10 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center shrink-0"
                 style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
               >
@@ -235,7 +235,7 @@ const UsernameSetupModal: React.FC = () => {
               </div>
 
               {error && (
-                <div 
+                <div
                   className="px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono text-xs flex items-start gap-3"
                   style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                 >
@@ -454,7 +454,7 @@ const App: React.FC = () => {
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
                 <div className="flex items-center gap-4">
-                  <div 
+                  <div
                     className="w-10 h-10 bg-[rgba(var(--color-accent-primary-rgb),0.08)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center shrink-0"
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                   >
@@ -470,7 +470,7 @@ const App: React.FC = () => {
               </div>
 
               <div className="px-6 py-6 space-y-6">
-                <div 
+                <div
                   className="px-5 py-4 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.2)]"
                   style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                 >
@@ -484,7 +484,7 @@ const App: React.FC = () => {
                 </div>
 
                 {inviteError && (
-                  <div 
+                  <div
                     className="px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono text-xs flex items-center gap-2"
                     style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                   >
@@ -492,7 +492,7 @@ const App: React.FC = () => {
                     <span>{'> ERR:'} {inviteError}</span>
                   </div>
                 )}
-                
+
                 <div className="flex gap-4 pt-2 w-full">
                   <button
                     onClick={() => setPendingInvite(null)}
@@ -610,9 +610,9 @@ const App: React.FC = () => {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-3 px-3 py-2 rounded border border-transparent hover:border-[rgba(var(--color-accent-primary-rgb),0.2)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.05)] transition-all"
           >
-            <div 
+            <div
               className="w-8 h-8 rounded flex items-center justify-center text-[var(--color-text-primary)] font-bold text-xs overflow-hidden border-2"
-              style={{ 
+              style={{
                 borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)',
                 background: 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)'
               }}
@@ -674,9 +674,9 @@ const App: React.FC = () => {
         {showMobileMenu && (
           <HudContainer className="md:hidden !absolute top-full left-0 right-0 z-50 p-0 overflow-hidden shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.2)] animate-in slide-in-from-top-2 duration-200 block border-t-0 rounded-t-none">
             <div className="px-4 py-3 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] flex items-center gap-3">
-              <div 
+              <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center text-[var(--color-text-primary)] font-bold text-sm overflow-hidden border-2"
-                style={{ 
+                style={{
                   borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)',
                   background: 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)'
                 }}
@@ -750,7 +750,7 @@ const App: React.FC = () => {
                 <div className="max-w-4xl mx-auto space-y-12 pb-24">
                   <div className="text-center mt-12 animate-in fade-in zoom-in duration-700 space-y-6">
                     <div>
-                      <h2 
+                      <h2
                         className="text-5xl font-black mb-4 font-mono tracking-tighter"
                         style={{
                           background: 'linear-gradient(to right, var(--color-accent-primary), var(--color-accent-secondary))',
@@ -766,7 +766,7 @@ const App: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both px-4">
                     <section className="border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.6)] p-5 md:p-8 shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.1)] border-l-4 border-l-accent-primary text-left"
                       style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
@@ -829,7 +829,7 @@ const App: React.FC = () => {
               >
                 <SpotifyGlassCard
                   spotifyUrl="https://open.spotify.com/embed/playlist/3WyehWydbIc9FCDVDHbTbZ?utm_source=generator&theme=0"
-                  accentColor="rgb(168, 85, 247)"
+                  accentColor="var(--color-accent-primary)"
                   isDragging={isDragging}
                 />
               </div>
@@ -849,7 +849,7 @@ const App: React.FC = () => {
               >
                 <SpotifyGlassCard
                   spotifyUrl="https://open.spotify.com/embed/playlist/6y6uFhkd4QSgiZ4XBZekNb?utm_source=generator"
-                  accentColor="rgb(168, 85, 247)"
+                  accentColor="var(--color-accent-secondary)"
                   isDragging={isPlaylistDragging}
                 />
               </div>
