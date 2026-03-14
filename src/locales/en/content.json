@@ -53,6 +53,8 @@
     "favorites": "Favorites"
   },
   "no_image": "No image",
+  "movie_type": "Movie",
+  "series_type": "Show",
   "own_item": "Yours",
   "shared_item": "Shared movie",
   "details_title": "Details of",
