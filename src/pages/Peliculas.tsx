@@ -5,7 +5,7 @@ import { useActiveList } from '@/features/lists/hooks/useActiveList'
 
 const Peliculas: React.FC = () => {
   const { user } = useAuth()
-  const { lists, currentList, setCurrentList, loading } = useLists(user?.id)
+  const { lists, currentList, setCurrentList, loading, createList } = useLists(user?.id)
   const { activeList, setActiveList } = useActiveList()
 
   useEffect(() => {
@@ -39,6 +39,7 @@ const Peliculas: React.FC = () => {
       currentList={currentList ?? undefined}
       setCurrentList={setCurrentList}
       loadingLists={loading}
+      createList={createList}
     />
   )
 }
