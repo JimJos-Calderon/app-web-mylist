@@ -1,106 +1,93 @@
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { useTranslation } from 'react-i18next';
-import { supabase } from '@/supabaseClient';
-import { List } from '@/features/shared';
-import { X, Plus, Copy, Check, Users } from 'lucide-react';
-import HudContainer from '../../shared/components/HudContainer';
-import TechLabel from '../../shared/components/TechLabel';
+import React, { useState, useEffect } from 'react'
+import ReactDOM from 'react-dom'
+import { useTranslation } from 'react-i18next'
+import { List } from '@/features/shared'
+import { X, Plus, Copy, Check, Users } from 'lucide-react'
+import HudContainer from '../../shared/components/HudContainer'
+import TechLabel from '../../shared/components/TechLabel'
 
 // ─── Hook para cerrar con Escape ─────────────────────────────────────────────
 function useEscapeKey(open: boolean, onClose: () => void) {
   useEffect(() => {
-    if (!open) return;
+    if (!open) return
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, onClose]);
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [open, onClose])
 }
 
 // ─── CreateListDialog ────────────────────────────────────────────────────────
 
 interface CreateListDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onCreated: (list: List) => void;
+  open: boolean
+  onClose: () => void
+  onCreated: (list: List) => void
+  onCreate?: (name: string, description?: string) => Promise<List>
 }
 
-export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClose, onCreated }) => {
-  const { t } = useTranslation();
-  const [nombre, setNombre] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const CreateListDialog: React.FC<CreateListDialogProps> = ({
+  open,
+  onClose,
+  onCreated,
+  onCreate,
+}) => {
+  const { t } = useTranslation()
+  const [nombre, setNombre] = useState('')
+  const [descripcion, setDescripcion] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  useEscapeKey(open, onClose);
+  useEscapeKey(open, onClose)
 
   const handleCreate = async () => {
-    if (!nombre.trim()) return;
-    setLoading(true);
-    setError(null);
+    if (!nombre.trim()) return
+
+    setLoading(true)
+    setError(null)
+
     try {
-      const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const { data: authData } = await supabase.auth.getUser();
-      const userId = authData.user?.id;
-
-      const { data, error: insertError } = await supabase
-        .from('lists')
-        .insert([{
-          name: nombre.trim(),
-          description: descripcion.trim() || null,
-          owner_id: userId,
-          invite_code: inviteCode,
-          is_private: false,
-        }])
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-
-      if (data && userId) {
-        await supabase.from('list_members').insert({
-          list_id: data.id,
-          user_id: userId,
-          role: 'owner',
-        });
+      if (!onCreate) {
+        throw new Error('No hay manejador para crear listas')
       }
 
-      setNombre('');
-      setDescripcion('');
-      onCreated(data as List);
-      onClose();
-    } catch (err) {
-      setError('Error al crear la lista. Inténtalo de nuevo.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const newList = await onCreate(nombre.trim(), descripcion.trim() || undefined)
 
-  if (!open) return null;
+      setNombre('')
+      setDescripcion('')
+      onCreated(newList)
+      onClose()
+    } catch (err: any) {
+      console.error('Create list error message:', err?.message)
+      console.error('Create list error code:', err?.code)
+      console.error('Create list error details:', err?.details)
+      console.error('Create list error hint:', err?.hint)
+      console.error('Create list full:', JSON.stringify(err, null, 2))
+
+      setError(err?.message || 'Error al crear la lista. Inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!open) return null
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
-      {/* Overlay — clic directo aquí cierra */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
         onClick={onClose}
       />
 
-      {/* Modal — stopPropagation para no cerrar al clicar dentro */}
       <div
         className="relative w-full max-w-md animate-in zoom-in-95 duration-200"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
-        <HudContainer
-          className="p-0 border-[rgba(var(--color-accent-primary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]"
-        >
-          {/* Header */}
+        <HudContainer className="p-0 border-[rgba(var(--color-accent-primary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]">
           <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
             <div className="flex items-center gap-4">
-              <div 
+              <div
                 className="w-10 h-10 bg-[rgba(var(--color-accent-primary-rgb),0.08)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center shrink-0"
                 style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
               >
@@ -123,7 +110,6 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
             </button>
           </div>
 
-          {/* Body */}
           <div className="px-6 py-6 space-y-6">
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-mono">
@@ -133,8 +119,8 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
                 type="text"
                 placeholder={t('dialog.list_name_placeholder')}
                 value={nombre}
-                onChange={e => setNombre(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && nombre.trim() && handleCreate()}
+                onChange={(e) => setNombre(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && nombre.trim() && handleCreate()}
                 autoFocus
                 maxLength={60}
                 className="w-full px-4 py-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] opacity-80
@@ -146,12 +132,15 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
 
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-mono">
-                {'>'} {t('dialog.description_label')} <span className="opacity-50 tracking-normal normal-case text-[10px]">({t('dialog.description_optional')})</span>
+                {'>'} {t('dialog.description_label')}{' '}
+                <span className="opacity-50 tracking-normal normal-case text-[10px]">
+                  ({t('dialog.description_optional')})
+                </span>
               </label>
               <textarea
                 placeholder={t('dialog.description_placeholder')}
                 value={descripcion}
-                onChange={e => setDescripcion(e.target.value)}
+                onChange={(e) => setDescripcion(e.target.value)}
                 maxLength={200}
                 rows={3}
                 className="w-full px-4 py-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] opacity-80
@@ -162,16 +151,15 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
             </div>
 
             {error && (
-              <div 
+              <div
                 className="px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono text-xs"
                 style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
               >
-                {'> ERR:'} {t('dialog.create_error')}
+                {'> ERR:'} {error}
               </div>
             )}
           </div>
 
-          {/* Footer */}
           <div className="flex gap-4 px-6 pb-6 mt-2">
             <button
               onClick={onClose}
@@ -204,53 +192,48 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
       </div>
     </div>,
     document.body
-  );
-};
+  )
+}
 
 // ─── InviteDialog ─────────────────────────────────────────────────────────────
 
 interface InviteDialogProps {
-  open: boolean;
-  onClose: () => void;
-  list: List;
+  open: boolean
+  onClose: () => void
+  list: List
 }
 
 export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list }) => {
-  const { t } = useTranslation();
-  const [copiedCode, setCopiedCode] = useState(false);
+  const { t } = useTranslation()
+  const [copiedCode, setCopiedCode] = useState(false)
 
-  useEscapeKey(open, onClose);
+  useEscapeKey(open, onClose)
 
-  const inviteUrl = `${window.location.origin}/join/${list.invite_code}`;
+  const inviteUrl = `${window.location.origin}/join/${list.invite_code}`
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(inviteUrl);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
+    navigator.clipboard.writeText(inviteUrl)
+    setCopiedCode(true)
+    setTimeout(() => setCopiedCode(false), 2000)
+  }
 
-  if (!open) return null;
+  if (!open) return null
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
-      {/* Overlay — clic directo aquí cierra */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
         onClick={onClose}
       />
 
-      {/* Modal — stopPropagation para no cerrar al clicar dentro */}
       <div
         className="relative w-full max-w-md animate-in zoom-in-95 duration-200"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
-        <HudContainer
-          className="p-0 border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]"
-        >
-          {/* Header */}
+        <HudContainer className="p-0 border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]">
           <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)]">
             <div className="flex items-center gap-4">
-              <div 
+              <div
                 className="w-10 h-10 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center shrink-0"
                 style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
               >
@@ -273,18 +256,21 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
             </button>
           </div>
 
-          {/* Body */}
           <div className="px-6 py-6 space-y-6">
-            <div 
+            <div
               className="px-5 py-4 bg-[rgba(var(--color-accent-secondary-rgb),0.05)] border border-[rgba(var(--color-accent-secondary-rgb),0.2)]"
               style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
             >
               <p className="text-[10px] font-bold uppercase tracking-widest text-accent-secondary opacity-70 mb-1 font-mono">
                 {'>'} TARGET: {t('dialog.list_label')}
               </p>
-              <p className="text-[var(--color-text-primary)] font-mono font-bold text-sm leading-tight">{list.name}</p>
+              <p className="text-[var(--color-text-primary)] font-mono font-bold text-sm leading-tight">
+                {list.name}
+              </p>
               {list.description && (
-                <p className="text-[var(--color-text-muted)] text-xs mt-2 font-mono opacity-80">{list.description}</p>
+                <p className="text-[var(--color-text-muted)] text-xs mt-2 font-mono opacity-80">
+                  {list.description}
+                </p>
               )}
             </div>
 
@@ -304,26 +290,30 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                     {inviteUrl}
                   </span>
                 </div>
-                
+
                 <button
                   onClick={handleCopyCode}
-                  className={`px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest transition-all border flex justify-center items-center gap-2 ${copiedCode
+                  className={`px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest transition-all border flex justify-center items-center gap-2 ${
+                    copiedCode
                       ? 'bg-[rgba(var(--color-accent-primary-rgb),0.15)] border-accent-primary text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.2)]'
                       : 'bg-[rgba(var(--color-accent-secondary-rgb),0.15)] border-[rgba(var(--color-accent-secondary-rgb),0.6)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)]'
-                    }`}
+                  }`}
                   style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                 >
                   {copiedCode ? (
-                    <><Check className="w-4 h-4" /> {t('dialog.copied_button')}</>
+                    <>
+                      <Check className="w-4 h-4" /> {t('dialog.copied_button')}
+                    </>
                   ) : (
-                    <><Copy className="w-4 h-4" /> {t('dialog.copy_button')}</>
+                    <>
+                      <Copy className="w-4 h-4" /> {t('dialog.copy_button')}
+                    </>
                   )}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Footer */}
           <div className="px-6 pb-6 mt-2">
             <button
               onClick={onClose}
@@ -337,5 +327,5 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
       </div>
     </div>,
     document.body
-  );
-};
+  )
+}

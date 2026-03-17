@@ -2,7 +2,17 @@ import React, { useState, useRef, useEffect, Suspense, lazy } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth'
 import { useItems, useSuggestions, useFilters, useOmdb } from '@/features/items'
-import { OmdbSuggestion, ListItem, List, FilterState, validateTitle, sanitizeInput, SORT_OPTIONS, ErrorAlert } from '@/features/shared'
+import { useActiveList } from '@/features/lists/hooks/useActiveList'
+import {
+  OmdbSuggestion,
+  ListItem,
+  List,
+  FilterState,
+  validateTitle,
+  sanitizeInput,
+  SORT_OPTIONS,
+  ErrorAlert,
+} from '@/features/shared'
 import { ItemCard, SearchBar, FilterPanel, StatsWidget } from '@/features/items'
 import { supabase } from '@/supabaseClient'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
@@ -19,6 +29,7 @@ interface ListaContenidoProps {
   currentList?: List
   setCurrentList?: (list: List) => void
   loadingLists?: boolean
+  createList?: (name: string, description?: string) => Promise<List>
 }
 
 // ─── RingSlider Loading Fallback ───────────────────────────────────────────
@@ -42,17 +53,27 @@ const RingSliderSkeleton: React.FC<{ t: any }> = ({ t }) => (
   </div>
 )
 
-// Removed duplicate definition below
-const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, lists, currentList, setCurrentList, loadingLists }) => {
+const ListaContenido: React.FC<ListaContenidoProps> = ({
+  tipo,
+  icono,
+  listId,
+  lists,
+  currentList,
+  setCurrentList,
+  loadingLists,
+  createList,
+}) => {
   const { user } = useAuth()
   const { t } = useTranslation()
+  const { setActiveList } = useActiveList()
+
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [isMobile, setIsMobile] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'ring'>('grid' as 'grid' | 'ring')
+  const [viewMode, setViewMode] = useState<'grid' | 'ring'>('grid')
   const handleSetViewMode = (mode: 'grid' | 'ring') => setViewMode(mode)
   const [selectedItem, setSelectedItem] = useState<ListItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -61,6 +82,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   const [synopsisLoading, setSynopsisLoading] = useState(false)
   const [synopsisError, setSynopsisError] = useState<string | null>(null)
   const [synopsisCache, setSynopsisCache] = useState<Record<string, string>>({})
+
   const sugerenciasRef = useRef<HTMLDivElement>(null)
   const closeTimeoutRef = useRef<number | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -74,21 +96,20 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     listId
   )
 
-  const { suggestions, loading: suggestionsLoading, error: suggestionsError, setSuggestions } = useSuggestions(
-    searchInput,
-    tipo
-  )
+  const {
+    suggestions,
+    loading: suggestionsLoading,
+    error: suggestionsError,
+    setSuggestions,
+  } = useSuggestions(searchInput, tipo)
 
   const { fetchPlot } = useOmdb()
-
   const { filters, updateFilter, resetFilters } = useFilters()
 
-  // Handler para cambios en los filtros
   const handleFilterChange = (filterKey: keyof FilterState, value: any) => {
     updateFilter(filterKey, value)
   }
 
-  // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640)
@@ -99,13 +120,9 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Close suggestions dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        sugerenciasRef.current &&
-        !sugerenciasRef.current.contains(e.target as Node)
-      ) {
+      if (sugerenciasRef.current && !sugerenciasRef.current.contains(e.target as Node)) {
         setShowSuggestions(false)
       }
     }
@@ -114,7 +131,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Show suggestions when they arrive and input has 3+ chars
   useEffect(() => {
     if (searchInput.length >= 3 && suggestions.length > 0) {
       setShowSuggestions(true)
@@ -123,12 +139,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     }
   }, [suggestions, searchInput])
 
-  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1)
   }, [filters.searchQuery, filters.showWatched, filters.showUnwatched, filters.sortBy, filters.sortOrder])
 
-  // Función helper para obtener datos de OMDB directamente
   const fetchOmdbData = async (title: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('search-omdb', {
@@ -146,14 +160,11 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
       const omdbData = data as { Search?: Array<{ Genre?: string; Poster?: string }> }
       const result = omdbData.Search?.[0]
-      const omdbResult = {
-        Genre:
-          result?.Genre && result.Genre !== 'N/A'
-            ? result.Genre
-            : undefined,
+
+      return {
+        Genre: result?.Genre && result.Genre !== 'N/A' ? result.Genre : undefined,
         Poster: result?.Poster !== 'N/A' ? result.Poster : undefined,
       }
-      return omdbResult
     } catch (err) {
       console.error('Error fetching OMDB data:', err)
       return { Genre: undefined, Poster: undefined }
@@ -162,10 +173,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
   const handleAddFromSuggestion = async (suggestion: OmdbSuggestion) => {
     try {
-      // Use poster directly from suggestion
       const poster = suggestion.Poster !== 'N/A' ? suggestion.Poster : null
-
-      // Obtener género de OMDB usando la sugerencia
       const omdbData = await fetchOmdbData(suggestion.Title)
 
       const itemData = {
@@ -178,6 +186,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
         genero: omdbData.Genre || undefined,
         list_id: listId || '',
       }
+
       await addItem(itemData)
 
       setSearchInput('')
@@ -199,7 +208,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     }
 
     try {
-      // Obtener género y poster de OMDB
       const omdbData = await fetchOmdbData(searchInput)
 
       const itemData = {
@@ -212,6 +220,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
         genero: omdbData.Genre || undefined,
         list_id: listId || '',
       }
+
       await addItem(itemData)
 
       setSearchInput('')
@@ -233,10 +242,12 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     setSelectedItem(item)
     setIsModalOpen(true)
     setIsModalAnimating(false)
+
     requestAnimationFrame(() => {
       setIsModalAnimating(true)
       closeButtonRef.current?.focus()
     })
+
     setSynopsisError(null)
 
     if (synopsisCache[item.id]) {
@@ -250,6 +261,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     try {
       const plot = await fetchPlot(item.titulo)
       setSynopsis(plot)
+
       if (plot) {
         setSynopsisCache((prev) => ({
           ...prev,
@@ -308,7 +320,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
     }
   }, [])
 
-  // Filter and sort items
   const filteredItems = items
     .filter((item) => {
       if (filters.showWatched && item.visto) return true
@@ -338,7 +349,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
       return filters.sortOrder === 'desc' ? -compareResult : compareResult
     })
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
@@ -353,16 +363,22 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden font-sans bg-black">
-      {/* HUD Header for List Control */}
-      <div className="relative z-10 mb-6 flex flex-wrap items-center justify-between gap-4 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] px-5 py-3 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] border-l-4 border-l-accent-primary"
-        style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}>
-
+      <div
+        className="relative z-10 mb-6 flex flex-wrap items-center justify-between gap-4 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] px-5 py-3 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] border-l-4 border-l-accent-primary"
+        style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
+      >
         <div className="flex items-center gap-4">
           {lists && currentList && setCurrentList && (
             <ListSelector
               lists={lists}
               currentList={currentList}
-              onChange={setCurrentList}
+              onChange={(list) => {
+                setCurrentList?.(list)
+                setActiveList({
+                  id: list.id,
+                  name: list.name,
+                })
+              }}
               loading={loadingLists}
             />
           )}
@@ -388,15 +404,23 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
           )}
         </div>
       </div>
-      {/* Diálogos modales */}
+
       <CreateListDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
         onCreated={(newList: List) => {
           setShowCreateDialog(false)
-          if (setCurrentList) setCurrentList(newList)
+          if (setCurrentList) {
+            setCurrentList(newList)
+          }
+          setActiveList({
+            id: newList.id,
+            name: newList.name,
+          })
         }}
+        onCreate={createList}
       />
+
       {currentList && (
         <InviteDialog
           open={showInviteDialog}
@@ -404,12 +428,14 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
           list={currentList}
         />
       )}
+
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black"></div>
         <div
           className="absolute bottom-0 left-0 right-0 h-[40%] opacity-10"
           style={{
-            backgroundImage: `linear-gradient(to right, #ff00ff 1px, transparent 1px), linear-gradient(to bottom, #ff00ff 1px, transparent 1px)`,
+            backgroundImage:
+              'linear-gradient(to right, #ff00ff 1px, transparent 1px), linear-gradient(to bottom, #ff00ff 1px, transparent 1px)',
             backgroundSize: '50px 50px',
             transform: 'perspective(500px) rotateX(60deg)',
             transformOrigin: 'bottom center',
@@ -418,7 +444,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60"></div>
       </div>
 
-      {/* Ring view - Full Screen */}
       {!loading && filteredItems.length > 0 && viewMode === 'ring' && (
         <Suspense fallback={<RingSliderSkeleton t={t} />}>
           <div className="relative z-10 w-full">
@@ -433,7 +458,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
         </Suspense>
       )}
 
-      {/* Grid/Slider/Normal views */}
       {viewMode !== 'ring' && (
         <>
           <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
@@ -449,15 +473,9 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               </p>
             </header>
 
-            {/* Error alerts */}
-            {itemsError && (
-              <ErrorAlert message={itemsError} onClose={() => { }} />
-            )}
-            {suggestionsError && (
-              <ErrorAlert message={suggestionsError} onClose={() => { }} />
-            )}
+            {itemsError && <ErrorAlert message={itemsError} onClose={() => {}} />}
+            {suggestionsError && <ErrorAlert message={suggestionsError} onClose={() => {}} />}
 
-            {/* Search Bar */}
             <SearchBar
               value={searchInput}
               onChange={setSearchInput}
@@ -470,7 +488,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               ref={sugerenciasRef}
             />
 
-            {/* Filter Panel */}
             <FilterPanel
               filters={filters}
               onFilterChange={handleFilterChange}
@@ -478,16 +495,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               sortOptions={SORT_OPTIONS}
             />
 
-
-
             <div className="mb-6 flex justify-end gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${viewMode === 'grid'
-                  ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
-                  : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-accent-primary hover:text-accent-primary'
-                  }`}
+                className={`px-4 py-2 border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  viewMode === 'grid'
+                    ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                    : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-accent-primary hover:text-accent-primary'
+                }`}
                 style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
               >
                 [ {t('action.grid_view')} ]
@@ -495,17 +511,17 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               <button
                 type="button"
                 onClick={() => setViewMode('ring')}
-                className={`px-4 py-2 border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${(viewMode as 'grid' | 'ring') === 'ring'
-                  ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
-                  : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-accent-primary hover:text-accent-primary'
-                  }`}
+                className={`px-4 py-2 border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  viewMode === 'ring'
+                    ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                    : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-accent-primary hover:text-accent-primary'
+                }`}
                 style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
               >
                 [ {t('action.ring_view')} ]
               </button>
             </div>
 
-            {/* Loading state */}
             {loading && (
               <div className="text-center py-12">
                 <div className="inline-flex flex-col items-center gap-4">
@@ -520,15 +536,17 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               </div>
             )}
 
-            {/* Empty state */}
             {!loading && filteredItems.length === 0 && (
               <div className="text-center py-20 flex flex-col items-center">
-                <div className="w-16 h-16 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.2)] mb-6 flex items-center justify-center text-2xl font-mono text-accent-primary"
-                  style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+                <div
+                  className="w-16 h-16 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.2)] mb-6 flex items-center justify-center text-2xl font-mono text-accent-primary"
+                  style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                >
                   SYS
                 </div>
                 <h3 className="text-lg font-black font-mono text-accent-primary uppercase tracking-widest mb-2">
-                  {'>'} {filters.searchQuery
+                  {'>'}{' '}
+                  {filters.searchQuery
                     ? t('item.no_results')
                     : t('item.add_first', { type: tipo })}
                 </h3>
@@ -540,7 +558,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               </div>
             )}
 
-            {/* Grid of items */}
             {!loading && filteredItems.length > 0 && viewMode === 'grid' && (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -556,38 +573,38 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   ))}
                 </div>
 
-                {/* Pagination Controls */}
                 {totalPages > 1 && (
                   <div className="mt-8 md:mt-10 flex items-center justify-center gap-1 md:gap-2">
-                    {/* Previous Button */}
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className={`
-                    px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold tracking-widest
-                    border transition-all flex-shrink-0 flex items-center
-                    ${currentPage === 1
+                      className={`px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold tracking-widest border transition-all flex-shrink-0 flex items-center ${
+                        currentPage === 1
                           ? 'border-[rgba(var(--color-accent-primary-rgb),0.2)] text-[var(--color-text-muted)] opacity-50 cursor-not-allowed bg-[rgba(0,0,0,0.5)]'
                           : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)]'
-                        }
-                  `}
+                      }`}
                       style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                     >
                       <span className="hidden sm:inline">[ {t('pagination.previous')} ]</span>
                       <span className="sm:hidden">{'<'}</span>
                     </button>
 
-                    {/* Page Numbers */}
                     <div className="flex gap-1 md:gap-2 overflow-x-auto max-w-[60vw] md:max-w-none scrollbar-none">
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
                         const showPageMobile = page === currentPage || page === 1 || page === totalPages
-                        const showPageDesktop = page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)
+                        const showPageDesktop =
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
                         const showPage = isMobile ? showPageMobile : showPageDesktop
 
                         if (!showPage) {
                           if (!isMobile && (page === currentPage - 2 || page === currentPage + 2)) {
                             return (
-                              <span key={page} className="px-1 md:px-2 py-2 text-[var(--color-text-muted)] font-mono text-xs md:text-sm opacity-50">
+                              <span
+                                key={page}
+                                className="px-1 md:px-2 py-2 text-[var(--color-text-muted)] font-mono text-xs md:text-sm opacity-50"
+                              >
                                 ...
                               </span>
                             )
@@ -599,14 +616,11 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                           <button
                             key={page}
                             onClick={() => handlePageChange(page)}
-                            className={`
-                          px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold
-                          border transition-all flex-shrink-0 min-w-[36px] md:min-w-[40px] flex items-center justify-center
-                          ${currentPage === page
+                            className={`px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold border transition-all flex-shrink-0 min-w-[36px] md:min-w-[40px] flex items-center justify-center ${
+                              currentPage === page
                                 ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
                                 : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-muted)] hover:border-[rgba(var(--color-accent-primary-rgb),0.8)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary bg-[rgba(0,0,0,0.5)]'
-                              }
-                        `}
+                            }`}
                             style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                           >
                             {page}
@@ -615,18 +629,14 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                       })}
                     </div>
 
-                    {/* Next Button */}
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className={`
-                    px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold tracking-widest
-                    border transition-all flex-shrink-0 flex items-center
-                    ${currentPage === totalPages
+                      className={`px-3 py-2 md:px-4 md:py-2 font-mono text-xs md:text-sm uppercase font-bold tracking-widest border transition-all flex-shrink-0 flex items-center ${
+                        currentPage === totalPages
                           ? 'border-[rgba(var(--color-accent-primary-rgb),0.2)] text-[var(--color-text-muted)] opacity-50 cursor-not-allowed bg-[rgba(0,0,0,0.5)]'
                           : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)]'
-                        }
-                  `}
+                      }`}
                       style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                     >
                       <span className="hidden sm:inline">[ {t('pagination.next')} ]</span>
@@ -635,21 +645,20 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
                   </div>
                 )}
 
-                {/* Page Info */}
                 {totalPages > 1 && (
                   <div className="mt-3 md:mt-4 text-center px-4">
                     <p className="text-slate-400 text-[10px] md:text-xs uppercase tracking-wider md:tracking-widest font-bold">
-                      <span className="hidden sm:inline">{t('pagination.page', { current: currentPage, total: totalPages })} • </span>
+                      <span className="hidden sm:inline">
+                        {t('pagination.page', { current: currentPage, total: totalPages })} •{' '}
+                      </span>
                       {filteredItems.length} {t(tipo === 'pelicula' ? 'movie_plural' : 'series_plural')}
                       <span className="hidden sm:inline"> {t('stats.in_total')}</span>
                     </p>
                   </div>
                 )}
-
               </>
             )}
 
-            {/* Stats */}
             {!loading && items.length > 0 && viewMode === 'grid' && (
               <div className="mt-8 md:mt-12">
                 <StatsWidget items={items} userOwnerId={user.id} size="large" />
@@ -661,8 +670,9 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
 
       {isModalOpen && selectedItem && (
         <div
-          className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity duration-200 ${isModalAnimating ? 'bg-black/70 opacity-100' : 'bg-black/0 opacity-0'
-            }`}
+          className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity duration-200 ${
+            isModalAnimating ? 'bg-black/70 opacity-100' : 'bg-black/0 opacity-0'
+          }`}
           role="dialog"
           aria-modal="true"
           aria-label={`${t('details_title')} ${selectedItem.titulo}`}
@@ -675,8 +685,9 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
           }}
         >
           <div
-            className={`w-full max-w-2xl rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl overflow-hidden transition-all duration-200 ${isModalAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-              }`}
+            className={`w-full max-w-2xl rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl overflow-hidden transition-all duration-200 ${
+              isModalAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4 p-5 border-b border-slate-800/60">
@@ -720,12 +731,9 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
               <div className="text-sm text-slate-200 leading-relaxed">
                 {synopsisLoading && <p className="text-slate-400">{t('loading.synopsis')}</p>}
                 {synopsisError && <p className="text-red-400">{synopsisError}</p>}
-                {!synopsisLoading && !synopsisError && (
-                  <p>{synopsis || t('item.no_synopsis')}</p>
-                )}
+                {!synopsisLoading && !synopsisError && <p>{synopsis || t('item.no_synopsis')}</p>}
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-3 pt-4 border-t border-slate-800/60">
                 <button
                   type="button"
