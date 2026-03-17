@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { List, ListMember } from '@/features/shared'
 import { queryKeys } from '@config/queryKeys'
+import { useActiveList } from './useActiveList'
 
 interface UseListsReturn {
   lists: List[]
@@ -27,13 +28,13 @@ type JoinListRpcResult = {
 
 /**
  * Hook para gestionar listas de usuario
- * Lectura con useQuery + Mutaciones con useMutation
+ * activeList = fuente de verdad persistida
+ * currentList = derivado desde lists + activeList
  */
 export const useLists = (userId: string | undefined): UseListsReturn => {
-  const [currentList, setCurrentList] = useState<List | null>(null)
   const queryClient = useQueryClient()
+  const { activeList, setActiveList, clearActiveList } = useActiveList()
 
-  // Query para obtener listas del usuario
   const {
     data: lists = [],
     isLoading: loading,
@@ -47,7 +48,6 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
       }
 
       try {
-        // Obtener todas las listas donde el usuario es miembro
         const { data: memberData, error: memberError } = await supabase
           .from('list_members')
           .select('list_id')
@@ -61,7 +61,6 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
           return []
         }
 
-        // Obtener los detalles de las listas
         const { data: listsData, error: listsError } = await supabase
           .from('lists')
           .select('*')
@@ -79,28 +78,66 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
     enabled: !!userId,
   })
 
-  // Auto-select first list if none is selected
+  const currentList = lists.find((list) => list.id === activeList?.id) || null
+
+  const setCurrentList = useCallback(
+    (list: List) => {
+      setActiveList({
+        id: list.id,
+        name: list.name,
+      })
+    },
+    [setActiveList]
+  )
+
   useEffect(() => {
-    if (!currentList && lists && lists.length > 0) {
-      setCurrentList(lists[0])
+    if (!lists.length) {
+      if (activeList) {
+        clearActiveList()
+      }
+      return
     }
-  }, [lists, currentList])
+
+    if (!activeList) {
+      const firstList = lists[0]
+      setActiveList({
+        id: firstList.id,
+        name: firstList.name,
+      })
+      return
+    }
+
+    const existingActiveList = lists.find((list) => list.id === activeList.id)
+
+    if (!existingActiveList) {
+      const firstList = lists[0]
+      setActiveList({
+        id: firstList.id,
+        name: firstList.name,
+      })
+      return
+    }
+
+    if (existingActiveList.name !== activeList.name) {
+      setActiveList({
+        id: existingActiveList.id,
+        name: existingActiveList.name,
+      })
+    }
+  }, [lists, activeList, setActiveList, clearActiveList])
 
   const refreshLists = useCallback(async () => {
     await refetch()
   }, [refetch])
 
-  // ─── MUTACIÓN: Crear Lista ────────────────────────────────────
   const createListMutation = useMutation({
     mutationFn: async ({ name, description }: { name: string; description?: string }) => {
       if (!userId) {
         throw new Error('Usuario no autenticado')
       }
 
-      // Generar código de invitación
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase()
 
-      // Crear la lista
       const { data: list, error: listError } = await supabase
         .from('lists')
         .insert({
@@ -115,43 +152,51 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
 
       if (listError) throw listError
 
-      // Agregar al usuario como owner en list_members
-      const { error: memberError } = await supabase
-        .from('list_members')
-        .insert({
-          list_id: list.id,
-          user_id: userId,
-          role: 'owner',
-        })
+      const { error: memberError } = await supabase.from('list_members').insert({
+        list_id: list.id,
+        user_id: userId,
+        role: 'owner',
+      })
 
       if (memberError) throw memberError
 
       return list as List
     },
-    onSuccess: () => {
-      // Invalidar y re-fetchear listas
+    onSuccess: (newList) => {
+      const queryKey = queryKeys.lists.byUser(userId || '')
+
+      queryClient.setQueryData<List[]>(queryKey, (previous = []) => {
+        const exists = previous.some((list) => list.id === newList.id)
+        if (exists) return previous
+        return [newList, ...previous]
+      })
+
+      setActiveList({
+        id: newList.id,
+        name: newList.name,
+      })
+
       queryClient.invalidateQueries({
-        queryKey: queryKeys.lists.byUser(userId || ''),
+        queryKey,
       })
     },
-    onError: (error) => {
-      console.error('Error creating list:', error)
+    onError: (mutationError) => {
+      console.error('Error creating list:', mutationError)
     },
   })
 
-  // ─── MUTACIÓN: Unirse a Lista ─────────────────────────────────
   const joinListMutation = useMutation({
     mutationFn: async (inviteCode: string) => {
       if (!userId) {
         throw new Error('Usuario no autenticado')
       }
 
-      const { data, error } = await supabase.rpc('join_list_with_code', {
+      const { data, error: rpcError } = await supabase.rpc('join_list_with_code', {
         p_user_id: userId,
         p_invite_code: inviteCode.toUpperCase(),
       })
 
-      if (error) throw error
+      if (rpcError) throw rpcError
 
       const result = Array.isArray(data)
         ? (data[0] as JoinListRpcResult | undefined)
@@ -174,13 +219,12 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
       }
     },
     onSuccess: () => {
-      // Invalidar y re-fetchear listas
       queryClient.invalidateQueries({
         queryKey: queryKeys.lists.byUser(userId || ''),
       })
     },
-    onError: (error) => {
-      console.error('Error joining list:', error)
+    onError: (mutationError) => {
+      console.error('Error joining list:', mutationError)
     },
   })
 

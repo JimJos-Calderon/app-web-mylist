@@ -24,7 +24,7 @@ interface CreateListDialogProps {
   open: boolean
   onClose: () => void
   onCreated: (list: List) => void
-  onCreate?: (name: string, description?: string) => Promise<List>
+  onCreate?: (name: string, description?: string) => Promise<List | null>
 }
 
 export const CreateListDialog: React.FC<CreateListDialogProps> = ({
@@ -53,6 +53,10 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
       }
 
       const newList = await onCreate(nombre.trim(), descripcion.trim() || undefined)
+
+      if (!newList) {
+        throw new Error('No se pudo crear la lista')
+      }
 
       setNombre('')
       setDescripcion('')
@@ -293,11 +297,10 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
                 <button
                   onClick={handleCopyCode}
-                  className={`px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest transition-all border flex justify-center items-center gap-2 ${
-                    copiedCode
+                  className={`px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest transition-all border flex justify-center items-center gap-2 ${copiedCode
                       ? 'bg-[rgba(var(--color-accent-primary-rgb),0.15)] border-accent-primary text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.2)]'
                       : 'bg-[rgba(var(--color-accent-secondary-rgb),0.15)] border-[rgba(var(--color-accent-secondary-rgb),0.6)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)]'
-                  }`}
+                    }`}
                   style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                 >
                   {copiedCode ? (
