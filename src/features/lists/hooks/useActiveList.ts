@@ -1,34 +1,76 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
-type ActiveList = {
+export type ActiveList = {
   id: string
   name: string
-}
+} | null
 
 const STORAGE_KEY = 'activeList'
 
-export const useActiveList = () => {
-  const [activeList, setActiveListState] = useState<ActiveList | null>(null)
+let activeListState: ActiveList = readStoredActiveList()
+const listeners = new Set<() => void>()
+let storageListenerInitialized = false
 
-  useEffect(() => {
+function readStoredActiveList(): ActiveList {
+  if (typeof window === 'undefined') return null
+
+  try {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        setActiveListState(JSON.parse(stored))
-      } catch {
-        localStorage.removeItem(STORAGE_KEY)
-      }
-    }
-  }, [])
+    return stored ? (JSON.parse(stored) as ActiveList) : null
+  } catch {
+    localStorage.removeItem(STORAGE_KEY)
+    return null
+  }
+}
 
-  const setActiveList = (list: ActiveList) => {
-    setActiveListState(list)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
+function emitChange() {
+  listeners.forEach((listener) => listener())
+}
+
+function writeStoredActiveList(value: ActiveList) {
+  activeListState = value
+
+  if (typeof window !== 'undefined') {
+    if (value) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  }
+
+  emitChange()
+}
+
+function ensureStorageListener() {
+  if (storageListenerInitialized || typeof window === 'undefined') return
+
+  window.addEventListener('storage', (event) => {
+    if (event.key !== STORAGE_KEY) return
+    activeListState = readStoredActiveList()
+    emitChange()
+  })
+
+  storageListenerInitialized = true
+}
+
+export const useActiveList = () => {
+  ensureStorageListener()
+
+  const activeList = useSyncExternalStore(
+    (callback) => {
+      listeners.add(callback)
+      return () => listeners.delete(callback)
+    },
+    () => activeListState,
+    () => null
+  )
+
+  const setActiveList = (list: { id: string; name: string }) => {
+    writeStoredActiveList(list)
   }
 
   const clearActiveList = () => {
-    setActiveListState(null)
-    localStorage.removeItem(STORAGE_KEY)
+    writeStoredActiveList(null)
   }
 
   return {
