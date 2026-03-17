@@ -7,6 +7,7 @@ import { ItemCard, SearchBar, FilterPanel, StatsWidget } from '@/features/items'
 import { supabase } from '@/supabaseClient'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
 import ListSelector from './ListSelector'
+import { useActiveList } from '@/features/lists/hooks/useActiveList'
 
 // ─── Lazy load heavy component (uses Swiper) ───────────────────────────────
 const RingSlider = lazy(() => import('@/features/items/components/RingSlider'))
@@ -65,6 +66,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
   const closeTimeoutRef = useRef<number | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const { setActiveList } = useActiveList()
 
   const ITEMS_PER_PAGE = 9
 
@@ -362,7 +364,14 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({ tipo, icono, listId, li
             <ListSelector
               lists={lists}
               currentList={currentList}
-              onChange={setCurrentList}
+              onChange={(list) => {
+  setCurrentList?.(list)
+
+  setActiveList({
+    id: list.id,
+    name: list.name,
+  })
+}}
               loading={loadingLists}
             />
           )}

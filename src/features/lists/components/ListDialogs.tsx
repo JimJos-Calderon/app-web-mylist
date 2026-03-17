@@ -37,47 +37,73 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
   useEscapeKey(open, onClose);
 
   const handleCreate = async () => {
-    if (!nombre.trim()) return;
-    setLoading(true);
-    setError(null);
+    if (!nombre.trim()) return
+
+    setLoading(true)
+    setError(null)
+
     try {
-      const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-      const { data: authData } = await supabase.auth.getUser();
-      const userId = authData.user?.id;
+      const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase()
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+
+      if (authError) throw authError
+
+      const userId = authData.user?.id
+      if (!userId) {
+        throw new Error('Usuario no autenticado')
+      }
+
+      console.log('Creating list with userId:', userId)
+      console.log('Creating list payload:', {
+        name: nombre.trim(),
+        description: descripcion.trim() || null,
+        owner_id: userId,
+        invite_code: inviteCode,
+        is_private: false,
+      })
 
       const { data, error: insertError } = await supabase
         .from('lists')
-        .insert([{
-          name: nombre.trim(),
-          description: descripcion.trim() || null,
-          owner_id: userId,
-          invite_code: inviteCode,
-          is_private: false,
-        }])
+        .insert([
+          {
+            name: nombre.trim(),
+            description: descripcion.trim() || null,
+            owner_id: userId,
+            invite_code: inviteCode,
+            is_private: false,
+          },
+        ])
         .select()
-        .single();
+        .single()
 
-      if (insertError) throw insertError;
+      if (insertError) throw insertError
 
-      if (data && userId) {
-        await supabase.from('list_members').insert({
+      const { error: memberError } = await supabase
+        .from('list_members')
+        .insert({
           list_id: data.id,
           user_id: userId,
           role: 'owner',
-        });
-      }
+        })
 
-      setNombre('');
-      setDescripcion('');
-      onCreated(data as List);
-      onClose();
-    } catch (err) {
-      setError('Error al crear la lista. Inténtalo de nuevo.');
-      console.error(err);
+      if (memberError) throw memberError
+
+      setNombre('')
+      setDescripcion('')
+      onCreated(data as List)
+      onClose()
+    } catch (err: any) {
+      console.error('Create list error message:', err?.message)
+      console.error('Create list error code:', err?.code)
+      console.error('Create list error details:', err?.details)
+      console.error('Create list error hint:', err?.hint)
+      console.error('Create list full:', JSON.stringify(err, null, 2))
+
+      setError(err?.message || 'Error al crear la lista. Inténtalo de nuevo.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (!open) return null;
 
@@ -100,7 +126,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
             <div className="flex items-center gap-4">
-              <div 
+              <div
                 className="w-10 h-10 bg-[rgba(var(--color-accent-primary-rgb),0.08)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center shrink-0"
                 style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
               >
@@ -162,11 +188,11 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({ open, onClos
             </div>
 
             {error && (
-              <div 
+              <div
                 className="px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono text-xs"
                 style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
               >
-                {'> ERR:'} {t('dialog.create_error')}
+                {'> ERR:'} {error}
               </div>
             )}
           </div>
@@ -250,7 +276,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)]">
             <div className="flex items-center gap-4">
-              <div 
+              <div
                 className="w-10 h-10 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center shrink-0"
                 style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
               >
@@ -275,7 +301,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
           {/* Body */}
           <div className="px-6 py-6 space-y-6">
-            <div 
+            <div
               className="px-5 py-4 bg-[rgba(var(--color-accent-secondary-rgb),0.05)] border border-[rgba(var(--color-accent-secondary-rgb),0.2)]"
               style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
             >
@@ -304,12 +330,12 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                     {inviteUrl}
                   </span>
                 </div>
-                
+
                 <button
                   onClick={handleCopyCode}
                   className={`px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest transition-all border flex justify-center items-center gap-2 ${copiedCode
-                      ? 'bg-[rgba(var(--color-accent-primary-rgb),0.15)] border-accent-primary text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.2)]'
-                      : 'bg-[rgba(var(--color-accent-secondary-rgb),0.15)] border-[rgba(var(--color-accent-secondary-rgb),0.6)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)]'
+                    ? 'bg-[rgba(var(--color-accent-primary-rgb),0.15)] border-accent-primary text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.2)]'
+                    : 'bg-[rgba(var(--color-accent-secondary-rgb),0.15)] border-[rgba(var(--color-accent-secondary-rgb),0.6)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)]'
                     }`}
                   style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                 >
