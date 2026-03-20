@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth'
 import { useFilters, useItems } from '@/features/items'
@@ -12,6 +12,7 @@ import ListDiscoverSection from './ListDiscoverSection'
 import ItemDetailsModal from './ItemDetailsModal'
 import { useListSearchFlow } from '../hooks/useListSearchFlow'
 import { useListItemDetails } from '../hooks/useListItemDetails'
+import { useListContentView } from '../hooks/useListContentView'
 
 interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
@@ -23,8 +24,6 @@ interface ListaContenidoProps {
   loadingLists?: boolean
   createList?: (name: string, description?: string) => Promise<List | null>
 }
-
-const ITEMS_PER_PAGE = 9
 
 const ListaContenido: React.FC<ListaContenidoProps> = ({
   tipo,
@@ -99,49 +98,19 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     filters.sortOrder,
   ])
 
-  const searchedAndSortedItems = useMemo(() => {
-    return items
-      .filter((item) => {
-        if (!filters.searchQuery) return true
-        return item.titulo.toLowerCase().includes(filters.searchQuery.toLowerCase())
-      })
-      .sort((a, b) => {
-        let compareResult = 0
-
-        switch (filters.sortBy) {
-          case 'title':
-            compareResult = a.titulo.localeCompare(b.titulo)
-            break
-          case 'rating':
-            compareResult = (a.rating || 0) - (b.rating || 0)
-            break
-          case 'date':
-          default:
-            compareResult = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-            break
-        }
-
-        return filters.sortOrder === 'desc' ? -compareResult : compareResult
-      })
-  }, [filters.searchQuery, filters.sortBy, filters.sortOrder, items])
-
-  const pendingItems = useMemo(
-    () => searchedAndSortedItems.filter((item) => !item.visto),
-    [searchedAndSortedItems]
-  )
-  const watchedItems = useMemo(
-    () => searchedAndSortedItems.filter((item) => item.visto),
-    [searchedAndSortedItems]
-  )
-  const visiblePendingItems = filters.showUnwatched ? pendingItems : []
-  const visibleWatchedItems = filters.showWatched ? watchedItems : []
-  const totalVisibleItems = visiblePendingItems.length + visibleWatchedItems.length
-  const totalPages = Math.max(1, Math.ceil(visiblePendingItems.length / ITEMS_PER_PAGE))
-  const paginatedPendingItems = useMemo(
-    () =>
-      visiblePendingItems.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
-    [currentPage, visiblePendingItems]
-  )
+  const {
+    pendingItems,
+    watchedItems,
+    visiblePendingItems,
+    visibleWatchedItems,
+    totalVisibleItems,
+    totalPages,
+    paginatedPendingItems,
+  } = useListContentView({
+    items,
+    filters,
+    currentPage,
+  })
 
   const searchFlow = useListSearchFlow({
     tipo,
