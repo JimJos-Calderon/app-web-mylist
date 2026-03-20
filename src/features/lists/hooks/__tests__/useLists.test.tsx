@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
-import { useLists } from '@/features/lists/hooks/useLists'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
+import { useLists } from '@/features/lists/hooks/useLists'
 
 // Mock data
 const mockLists = [
@@ -16,9 +16,19 @@ const mockLists = [
     created_at: '2025-01-01T00:00:00Z',
     updated_at: '2025-01-01T00:00:00Z',
   },
+  {
+    id: 'list-2',
+    name: 'Series Pendientes',
+    description: 'Series para ver juntos',
+    owner_id: 'user-1',
+    invite_code: 'XYZ789',
+    is_private: false,
+    created_at: '2025-01-02T00:00:00Z',
+    updated_at: '2025-01-02T00:00:00Z',
+  },
 ]
 
-// Mockeamos el supabaseClient
+// Mock supabase
 vi.mock('@/supabaseClient', () => {
   return {
     supabase: {
@@ -41,7 +51,7 @@ vi.mock('@/supabaseClient', () => {
             select: vi.fn(() => ({
               eq: vi.fn(() =>
                 Promise.resolve({
-                  data: [{ list_id: 'list-1' }],
+                  data: [{ list_id: 'list-1' }, { list_id: 'list-2' }],
                   error: null,
                 })
               ),
@@ -53,7 +63,9 @@ vi.mock('@/supabaseClient', () => {
               })
             ),
           }
-        } else if (table === 'lists') {
+        }
+
+        if (table === 'lists') {
           return {
             select: vi.fn(() => ({
               in: vi.fn(() => ({
@@ -83,6 +95,7 @@ vi.mock('@/supabaseClient', () => {
             })),
           }
         }
+
         return {}
       }),
     },
@@ -92,21 +105,40 @@ vi.mock('@/supabaseClient', () => {
 describe('useLists', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
   })
 
   const createWrapper = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+        mutations: {
+          retry: false,
+        },
+      },
+    })
+
     return ({ children }: { children: React.ReactNode }) =>
-      React.createElement(QueryClientProvider, { client: new QueryClient() }, children)
+      React.createElement(QueryClientProvider, { client: queryClient }, children)
   }
 
-  it('debería retornar un estado inicial correcto', () => {
+  it('debería retornar un estado inicial utilizable', async () => {
     const { result } = renderHook(() => useLists('user-1'), {
       wrapper: createWrapper(),
     })
 
-    expect(result.current.lists).toBeDefined()
     expect(Array.isArray(result.current.lists)).toBe(true)
-    expect(result.current.currentList).toBeNull()
+    expect(result.current.error).toBeNull()
+
+    await waitFor(() => {
+      expect(result.current.lists.length).toBe(2)
+    })
+
+    await waitFor(() => {
+      expect(result.current.currentList?.id).toBe('list-1')
+    })
   })
 
   it('debería retornar un array vacío cuando userId es undefined', () => {
@@ -115,19 +147,53 @@ describe('useLists', () => {
     })
 
     expect(result.current.lists).toEqual([])
+    expect(result.current.currentList).toBeNull()
   })
 
-  it('debería permitir cambiar la lista actual', () => {
+  it('debería derivar currentList desde lists + activeList y persistirla al cambiar', async () => {
     const { result } = renderHook(() => useLists('user-1'), {
       wrapper: createWrapper(),
     })
 
-    const mockList = mockLists[0]
-    act(() => {
-      result.current.setCurrentList(mockList)
+    await waitFor(() => {
+      expect(result.current.lists.length).toBe(2)
     })
 
-    expect(result.current.currentList).toEqual(mockList)
+    await waitFor(() => {
+      expect(result.current.currentList?.id).toBe('list-1')
+    })
+
+    const targetList = mockLists[1]
+
+    act(() => {
+      result.current.setCurrentList(targetList)
+    })
+
+    await waitFor(() => {
+      expect(result.current.currentList?.id).toBe('list-2')
+    })
+
+    const stored = JSON.parse(localStorage.getItem('activeList') || 'null')
+    expect(stored).toEqual({
+      id: 'list-2',
+      name: 'Series Pendientes',
+    })
+  })
+
+  it('debería seleccionar automáticamente la primera lista si no hay activeList previa', async () => {
+    const { result } = renderHook(() => useLists('user-1'), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => {
+      expect(result.current.currentList?.id).toBe('list-1')
+    })
+
+    const stored = JSON.parse(localStorage.getItem('activeList') || 'null')
+    expect(stored).toEqual({
+      id: 'list-1',
+      name: 'Películas Favoritas',
+    })
   })
 
   it('debería exponer funciones de mutación', () => {
@@ -148,13 +214,5 @@ describe('useLists', () => {
 
     expect(result.current.isCreatingList).toBe(false)
     expect(result.current.isJoiningList).toBe(false)
-  })
-
-  it('debería retornar error null inicialmente', () => {
-    const { result } = renderHook(() => useLists('user-1'), {
-      wrapper: createWrapper(),
-    })
-
-    expect(result.current.error).toBeNull()
   })
 })

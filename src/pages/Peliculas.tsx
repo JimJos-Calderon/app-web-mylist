@@ -4,7 +4,14 @@ import { ListaContenido, useLists } from '@/features/lists'
 
 const Peliculas: React.FC = () => {
   const { user } = useAuth()
-  const { lists, currentList, setCurrentList, loading, createList } = useLists(user?.id)
+
+  const {
+    lists,
+    currentList,
+    setCurrentList,
+    loading: loadingLists,
+    createList,
+  } = useLists(user?.id)
 
   if (!user) return null
 
@@ -16,7 +23,7 @@ const Peliculas: React.FC = () => {
       lists={lists}
       currentList={currentList ?? undefined}
       setCurrentList={setCurrentList}
-      loadingLists={loading}
+      loadingLists={loadingLists}
       createList={createList}
     />
   )

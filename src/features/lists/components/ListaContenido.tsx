@@ -17,7 +17,6 @@ import { supabase } from '@/supabaseClient'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
 import ListSelector from './ListSelector'
 
-// ─── Lazy load heavy component (uses Swiper) ───────────────────────────────
 const RingSlider = lazy(() => import('@/features/items/components/RingSlider'))
 
 interface ListaContenidoProps {
@@ -31,17 +30,16 @@ interface ListaContenidoProps {
   createList?: (name: string, description?: string) => Promise<List | null>
 }
 
-// ─── RingSlider Loading Fallback ───────────────────────────────────────────
 const RingSliderSkeleton: React.FC<{ t: any }> = ({ t }) => (
   <div className="relative z-10 flex h-screen w-full items-center justify-center bg-transparent">
     <div className="space-y-6 text-center">
       <div className="relative inline-flex items-center justify-center">
-        <div className="h-24 w-24 animate-spin rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.1)] border-t-accent-primary border-r-[var(--color-accent-secondary)]"></div>
-        <div className="absolute inset-0 animate-[spin_3s_linear_infinite_reverse] rounded-full border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)]"></div>
-        <div className="absolute inset-2 animate-pulse rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)]"></div>
+        <div className="h-24 w-24 animate-spin rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.1)] border-t-accent-primary border-r-[var(--color-accent-secondary)]" />
+        <div className="absolute inset-0 animate-[spin_3s_linear_infinite_reverse] rounded-full border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)]" />
+        <div className="absolute inset-2 animate-pulse rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)]" />
       </div>
       <div className="space-y-2">
-        <p className="font-mono text-sm font-bold uppercase tracking-[0.3em] text-accent-primary animate-pulse">
+        <p className="animate-pulse font-mono text-sm font-bold uppercase tracking-[0.3em] text-accent-primary">
           TARGET: {t('view_modes.loading_3d')}
         </p>
         <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] opacity-70">
@@ -56,7 +54,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   tipo,
   icono,
   listId,
-  lists,
+  lists = [],
   currentList,
   setCurrentList,
   loadingLists,
@@ -80,12 +78,14 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   const [synopsisLoading, setSynopsisLoading] = useState(false)
   const [synopsisError, setSynopsisError] = useState<string | null>(null)
   const [synopsisCache, setSynopsisCache] = useState<Record<string, string>>({})
+  const [modalActionLoading, setModalActionLoading] = useState<'toggle' | 'delete' | null>(null)
 
   const sugerenciasRef = useRef<HTMLDivElement>(null)
   const closeTimeoutRef = useRef<number | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const searchSectionRef = useRef<HTMLDivElement>(null)
+  const discoverSectionRef = useRef<HTMLDivElement>(null)
 
   const ITEMS_PER_PAGE = 9
 
@@ -110,16 +110,24 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   }
 
   const focusSearch = () => {
+    searchSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     const input = document.getElementById('list-search-input') as HTMLInputElement | null
     input?.focus()
-    searchSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const focusDecisionBlock = () => {
+    discoverSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const handleListChange = (list: List) => {
+    setCurrentList?.(list)
+    requestAnimationFrame(() => {
+      focusSearch()
+    })
   }
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640)
-    }
-
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -146,7 +154,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [filters.searchQuery, filters.showWatched, filters.showUnwatched, filters.sortBy, filters.sortOrder])
+  }, [
+    filters.searchQuery,
+    filters.showWatched,
+    filters.showUnwatched,
+    filters.sortBy,
+    filters.sortOrder,
+  ])
 
   const fetchOmdbData = async (title: string) => {
     try {
@@ -197,6 +211,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
       setSearchInput('')
       setSuggestions([])
       setShowSuggestions(false)
+
+      requestAnimationFrame(() => {
+        focusDecisionBlock()
+      })
     } catch (err) {
       const details = err && typeof err === 'object' ? JSON.stringify(err) : String(err)
       console.error('Error adding item:', details, err)
@@ -231,6 +249,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
       setSearchInput('')
       setSuggestions([])
       setShowSuggestions(false)
+
+      requestAnimationFrame(() => {
+        focusDecisionBlock()
+      })
     } catch (err) {
       const details = err && typeof err === 'object' ? JSON.stringify(err) : String(err)
       console.error('Error adding item manually:', details, err)
@@ -247,6 +269,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     setSelectedItem(item)
     setIsModalOpen(true)
     setIsModalAnimating(false)
+    setModalActionLoading(null)
 
     requestAnimationFrame(() => {
       setIsModalAnimating(true)
@@ -288,9 +311,47 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
       setSelectedItem(null)
       setSynopsis(null)
       setSynopsisError(null)
+      setModalActionLoading(null)
       closeTimeoutRef.current = null
       previousFocusRef.current?.focus()
     }, 180)
+  }
+
+  const handleToggleFromModal = async () => {
+    if (!selectedItem || modalActionLoading) return
+
+    setModalActionLoading('toggle')
+
+    try {
+      await toggleVisto(selectedItem.id, selectedItem.visto)
+
+      setSelectedItem((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          visto: !prev.visto,
+        }
+      })
+    } catch (err) {
+      console.error('Toggle error:', err)
+    } finally {
+      setModalActionLoading(null)
+    }
+  }
+
+  const handleDeleteFromModal = async () => {
+    if (!selectedItem || modalActionLoading) return
+    if (!confirm(t('modal.delete_title', { title: selectedItem.titulo }))) return
+
+    setModalActionLoading('delete')
+
+    try {
+      await deleteItem(selectedItem.id)
+      handleCloseDetails()
+    } catch (err) {
+      console.error('Delete error:', err)
+      setModalActionLoading(null)
+    }
   }
 
   useEffect(() => {
@@ -325,12 +386,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     }
   }, [])
 
-  const filteredItems = items
-    .filter((item) => {
-      if (filters.showWatched && item.visto) return true
-      if (filters.showUnwatched && !item.visto) return true
-      return false
-    })
+  const searchedAndSortedItems = items
     .filter((item) => {
       if (!filters.searchQuery) return true
       return item.titulo.toLowerCase().includes(filters.searchQuery.toLowerCase())
@@ -354,10 +410,19 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
       return filters.sortOrder === 'desc' ? -compareResult : compareResult
     })
 
-  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE)
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const paginatedItems = filteredItems.slice(startIndex, endIndex)
+  const pendingItems = searchedAndSortedItems.filter((item) => !item.visto)
+  const watchedItems = searchedAndSortedItems.filter((item) => item.visto)
+
+  const visiblePendingItems = filters.showUnwatched ? pendingItems : []
+  const visibleWatchedItems = filters.showWatched ? watchedItems : []
+  const visibleItemsForRing = [...visiblePendingItems, ...visibleWatchedItems]
+
+  const totalVisibleItems = visiblePendingItems.length + visibleWatchedItems.length
+  const totalPages = Math.max(1, Math.ceil(visiblePendingItems.length / ITEMS_PER_PAGE))
+  const paginatedPendingItems = visiblePendingItems.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    (currentPage - 1) * ITEMS_PER_PAGE + ITEMS_PER_PAGE
+  )
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -376,6 +441,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           if (setCurrentList) {
             setCurrentList(newList)
           }
+
+          requestAnimationFrame(() => {
+            focusSearch()
+          })
         }}
         onCreate={createList}
       />
@@ -389,7 +458,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
       )}
 
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black" />
         <div
           className="absolute bottom-0 left-0 right-0 h-[40%] opacity-10"
           style={{
@@ -399,15 +468,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
             transform: 'perspective(500px) rotateX(60deg)',
             transformOrigin: 'bottom center',
           }}
-        ></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60"></div>
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
       </div>
 
-      {!loading && filteredItems.length > 0 && viewMode === 'ring' && (
+      {!loading && visibleItemsForRing.length > 0 && viewMode === 'ring' && (
         <Suspense fallback={<RingSliderSkeleton t={t} />}>
           <div className="relative z-10 w-full">
             <RingSlider
-              items={filteredItems}
+              items={visibleItemsForRing}
               allItems={items}
               onOpenDetails={handleOpenDetails}
               userOwnerId={user?.id}
@@ -419,7 +488,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
 
       {viewMode !== 'ring' && (
         <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-12">
-          <header className="mb-8 space-y-3 md:mb-8">
+          <header className="mb-8 space-y-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400/80">
               {tipo === 'pelicula' ? 'Películas' : 'Series'}
             </p>
@@ -432,14 +501,12 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
             </div>
 
             <p className="max-w-2xl text-sm text-slate-400">
-              Elige una lista, añade opciones y marca el progreso sin perder tiempo.
+              Entra, elige lista, añade opciones y decide sin perder tiempo.
             </p>
           </header>
 
-          <section
-            className="mb-8 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[rgba(0,0,0,0.45)] p-4 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] md:p-5"
-          >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <section className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[rgba(0,0,0,0.45)] p-4 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] md:p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">
                   Lista activa
@@ -448,19 +515,17 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                   {currentList?.name || 'Sin lista seleccionada'}
                 </h2>
                 <p className="text-sm text-slate-400">
-                  Elige la lista con la que quieres decidir qué ver hoy.
+                  Esta es la lista que manda ahora mismo para decidir qué ver.
                 </p>
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                {lists && currentList && setCurrentList && (
-                  <div className="min-w-[220px]">
+                {lists.length > 0 && setCurrentList && (
+                  <div className="min-w-[280px]">
                     <ListSelector
                       lists={lists}
                       currentList={currentList}
-                      onChange={(list) => {
-                        setCurrentList?.(list)
-                      }}
+                      onChange={handleListChange}
                       loading={loadingLists}
                     />
                   </div>
@@ -468,7 +533,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
 
                 <button
                   className="flex items-center gap-2 border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(var(--color-accent-primary-rgb),0.1)] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[#0ff] transition-all hover:border-[#0ff] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.4)]"
-                  style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                  style={{
+                    clipPath:
+                      'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+                  }}
                   onClick={() => setShowCreateDialog(true)}
                 >
                   <span className="opacity-70">+</span> [ {t('action.create_list')} ]
@@ -477,7 +545,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                 {currentList && (
                   <button
                     className="flex items-center gap-2 border border-[rgba(var(--color-accent-secondary-rgb),0.5)] bg-[rgba(var(--color-accent-secondary-rgb),0.1)] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-widest text-accent-secondary transition-all hover:border-[var(--color-accent-secondary)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)]"
-                    style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                    style={{
+                      clipPath:
+                        'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+                    }}
                     onClick={() => setShowInviteDialog(true)}
                   >
                     <span className="opacity-70">{'>'}</span> [ {t('action.invite')} ]
@@ -488,67 +559,106 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           </section>
 
           {!currentList && (
-            <section className="mb-8 rounded-2xl border border-slate-800 bg-slate-950/60 p-8 text-center">
-              <h3 className="mb-2 text-lg font-semibold text-white">Elige una lista para empezar</h3>
-              <p className="mx-auto max-w-xl text-sm text-slate-400">
-                Necesitas una lista activa para añadir títulos, decidir qué ver y seguir el progreso.
-              </p>
+            <section className="mb-8 rounded-2xl border border-slate-800 bg-slate-950/60 p-6 md:p-8">
+              <div className="mx-auto max-w-3xl">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500">
+                  Primer paso
+                </p>
+                <h3 className="mb-2 text-xl font-semibold text-white">Elige una lista para empezar</h3>
+                <p className="mb-6 max-w-2xl text-sm text-slate-400">
+                  Necesitas una lista activa para añadir títulos, decidir qué ver y seguir el progreso.
+                </p>
+
+                <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div className="w-full md:max-w-sm">
+                    {lists.length > 0 && setCurrentList ? (
+                      <ListSelector
+                        lists={lists}
+                        currentList={undefined}
+                        onChange={handleListChange}
+                        loading={loadingLists}
+                        label="Elegir lista"
+                      />
+                    ) : (
+                      <div className="rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-3 text-sm text-slate-500">
+                        {loadingLists ? 'Cargando listas...' : 'Todavía no tienes listas disponibles.'}
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateDialog(true)}
+                    className="flex items-center justify-center gap-2 border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(var(--color-accent-primary-rgb),0.1)] px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-[#0ff] transition-all hover:border-[#0ff] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.4)]"
+                    style={{
+                      clipPath:
+                        'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+                    }}
+                  >
+                    <span className="opacity-70">+</span> [ {t('action.create_list')} ]
+                  </button>
+                </div>
+              </div>
             </section>
           )}
 
           {currentList && (
             <>
-              {itemsError && <ErrorAlert message={itemsError} onClose={() => { }} />}
-              {suggestionsError && <ErrorAlert message={suggestionsError} onClose={() => { }} />}
-
-              <section className="mb-6 grid gap-3 md:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={focusSearch}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-left transition hover:border-cyan-500/40 hover:bg-slate-900"
-                >
-                  <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-cyan-400">
-                    Acción principal
-                  </p>
-                  <h3 className="text-sm font-semibold text-white">Buscar y añadir</h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Añade opciones rápido a la lista activa.
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => resetFilters()}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-left transition hover:border-purple-500/40 hover:bg-slate-900"
-                >
-                  <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-purple-400">
-                    Limpieza
-                  </p>
-                  <h3 className="text-sm font-semibold text-white">Quitar filtros</h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Recupera la vista completa si has filtrado demasiado.
-                  </p>
-                </button>
-              </section>
+              {itemsError && <ErrorAlert message={itemsError} onClose={() => {}} />}
+              {suggestionsError && <ErrorAlert message={suggestionsError} onClose={() => {}} />}
 
               <section
                 ref={searchSectionRef}
-                className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[rgba(0,0,0,0.28)] p-4"
+                className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[rgba(0,0,0,0.28)] p-4 md:p-5"
               >
-                <div className="mb-4">
-                  <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">
-                    Añadir opciones
-                  </p>
-                  <h3 className="text-base font-semibold text-white">
-                    Busca algo para esta lista
-                  </h3>
+                <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">
+                      Acción principal
+                    </p>
+                    <h3 className="text-base font-semibold text-white">Buscar y añadir opciones</h3>
+                    <p className="mt-1 text-sm text-slate-400">
+                      Mete candidatos rápido en la lista activa y vuelve a decidir.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl border border-cyan-500/20 bg-slate-950/40 px-4 py-3">
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400">
+                        Pendientes
+                      </p>
+                      <h4 className="text-xl font-semibold text-white">{pendingItems.length}</h4>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3">
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+                        Vistos
+                      </p>
+                      <h4 className="text-xl font-semibold text-white">{watchedItems.length}</h4>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => resetFilters()}
+                      className="rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3 text-left transition hover:border-purple-500/40 hover:bg-slate-900"
+                    >
+                      <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-purple-400">
+                        Secundario
+                      </p>
+                      <h4 className="text-sm font-semibold text-white">Quitar filtros</h4>
+                    </button>
+                  </div>
                 </div>
 
                 <SearchBar
                   value={searchInput}
                   onChange={setSearchInput}
                   onSubmit={handleAddManual}
-                  placeholder={t(tipo === 'pelicula' ? 'action.search_movie_placeholder' : 'action.search_series_placeholder')}
+                  placeholder={t(
+                    tipo === 'pelicula'
+                      ? 'action.search_movie_placeholder'
+                      : 'action.search_series_placeholder'
+                  )}
                   loading={suggestionsLoading}
                   showDropdown={showSuggestions && suggestions.length > 0}
                   suggestions={suggestions}
@@ -564,29 +674,37 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                     <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
                       Ajustes
                     </p>
-                    <h3 className="text-base font-semibold text-white">Filtrar y ordenar</h3>
+                    <h3 className="text-base font-semibold text-white">Filtros y vista</h3>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => setViewMode('grid')}
-                      className={`px-4 py-2 border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${viewMode === 'grid'
-                        ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
-                        : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-accent-primary hover:text-accent-primary'
-                        }`}
-                      style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                      className={`border px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${
+                        viewMode === 'grid'
+                          ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                          : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-accent-primary hover:text-accent-primary'
+                      }`}
+                      style={{
+                        clipPath:
+                          'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+                      }}
                     >
                       [ {t('action.grid_view')} ]
                     </button>
                     <button
                       type="button"
                       onClick={() => setViewMode('ring')}
-                      className={`px-4 py-2 border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${viewMode === 'ring'
-                        ? 'border-pink-500/70 bg-pink-500/10 text-pink-300'
-                        : 'border-slate-700 bg-[rgba(0,0,0,0.35)] text-slate-400 hover:border-pink-500/40 hover:text-pink-300'
-                        }`}
-                      style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                      className={`border px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${
+                        viewMode === 'ring'
+                          ? 'border-pink-500/70 bg-pink-500/10 text-pink-300'
+                          : 'border-slate-700 bg-[rgba(0,0,0,0.35)] text-slate-400 hover:border-pink-500/40 hover:text-pink-300'
+                      }`}
+                      style={{
+                        clipPath:
+                          'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+                      }}
                     >
                       [ {t('action.ring_view')} EXP ]
                     </button>
@@ -601,157 +719,267 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                 />
               </section>
 
-              <section id="discover-section">
+              <section ref={discoverSectionRef} id="discover-section">
                 {loading && (
                   <div className="py-12 text-center">
                     <div className="inline-flex flex-col items-center gap-4">
                       <div className="relative inline-flex items-center justify-center">
-                        <div className="h-12 w-12 animate-spin rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.2)] border-t-accent-primary border-r-[var(--color-accent-secondary)]"></div>
-                        <div className="absolute inset-0 animate-[spin_3s_linear_infinite_reverse] rounded-full border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)]"></div>
+                        <div className="h-12 w-12 animate-spin rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.2)] border-t-accent-primary border-r-[var(--color-accent-secondary)]" />
+                        <div className="absolute inset-0 animate-[spin_3s_linear_infinite_reverse] rounded-full border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)]" />
                       </div>
-                      <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary animate-pulse">
+                      <p className="animate-pulse font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">
                         SYS.{t('loading.items')}...
                       </p>
                     </div>
                   </div>
                 )}
 
-                {!loading && filteredItems.length === 0 && (
-                  <div className="flex flex-col items-center py-20 text-center">
+                {!loading && totalVisibleItems === 0 && (
+                  <div className="rounded-3xl border border-slate-800 bg-slate-950/35 px-6 py-16 text-center">
                     <div
-                      className="mb-6 flex h-16 w-16 items-center justify-center border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] text-2xl font-mono text-accent-primary"
-                      style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                      className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] text-2xl font-mono text-accent-primary"
+                      style={{
+                        clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                      }}
                     >
                       SYS
                     </div>
-                    <h3 className="mb-2 font-mono text-lg font-black uppercase tracking-widest text-accent-primary">
-                      {'>'}{' '}
+
+                    <h3 className="mb-2 text-xl font-semibold text-white">
                       {filters.searchQuery
-                        ? t('item.no_results')
-                        : t('item.add_first', { type: tipo })}
+                        ? 'No hay resultados para decidir'
+                        : tipo === 'pelicula'
+                          ? 'Tu lista de películas está vacía'
+                          : 'Tu lista de series está vacía'}
                     </h3>
-                    <p className="font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)] opacity-70">
+
+                    <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-400">
                       {filters.searchQuery
                         ? t('item.search_no_results', { type: tipo, query: filters.searchQuery })
-                        : t('item.add_first', { type: tipo })}
+                        : tipo === 'pelicula'
+                          ? 'Añade la primera película para empezar a decidir juntos desde pendientes.'
+                          : 'Añade la primera serie para empezar a decidir juntos desde pendientes.'}
                     </p>
+
+                    <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={focusSearch}
+                        className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:border-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-200"
+                      >
+                        Añadir una opción ahora
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={resetFilters}
+                        className="rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white"
+                      >
+                        Limpiar filtros
+                      </button>
+                    </div>
                   </div>
                 )}
 
-                {!loading && filteredItems.length > 0 && viewMode === 'grid' && (
+                {!loading && totalVisibleItems > 0 && viewMode === 'grid' && (
                   <>
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">
-                          Lista actual
-                        </p>
-                        <h3 className="text-lg font-semibold text-white">
-                          {filters.searchQuery ? 'Resultados filtrados' : 'Opciones para decidir'}
-                        </h3>
-                      </div>
+                    {filters.showUnwatched && (
+                      <section className="mb-8">
+                        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                          <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-400">
+                              Prioridad
+                            </p>
+                            <h3 className="text-lg font-semibold text-white">
+                              {filters.searchQuery ? 'Pendientes filtrados' : 'Pendientes para decidir'}
+                            </h3>
+                            <p className="mt-1 text-sm text-slate-400">
+                              Este es el bloque principal para responder a qué vemos hoy.
+                            </p>
+                          </div>
 
-                      <p className="text-xs text-slate-400">
-                        {filteredItems.length} {t(tipo === 'pelicula' ? 'movie_plural' : 'series_plural')}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
-                      {paginatedItems.map((item) => (
-                        <ItemCard
-                          key={item.id}
-                          item={item}
-                          isOwn={item.user_id === user.id}
-                          onDelete={deleteItem}
-                          onToggleVisto={toggleVisto}
-                          onOpenDetails={handleOpenDetails}
-                        />
-                      ))}
-                    </div>
-
-                    {totalPages > 1 && (
-                      <div className="mt-8 flex items-center justify-center gap-1 md:mt-10 md:gap-2">
-                        <button
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className={`flex flex-shrink-0 items-center px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest border transition-all md:px-4 md:py-2 md:text-sm ${currentPage === 1
-                            ? 'border-[rgba(var(--color-accent-primary-rgb),0.2)] text-[var(--color-text-muted)] opacity-50 cursor-not-allowed bg-[rgba(0,0,0,0.5)]'
-                            : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)]'
-                            }`}
-                          style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
-                        >
-                          <span className="hidden sm:inline">[ {t('pagination.previous')} ]</span>
-                          <span className="sm:hidden">{'<'}</span>
-                        </button>
-
-                        <div className="scrollbar-none flex max-w-[60vw] gap-1 overflow-x-auto md:max-w-none md:gap-2">
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                            const showPageMobile = page === currentPage || page === 1 || page === totalPages
-                            const showPageDesktop =
-                              page === 1 ||
-                              page === totalPages ||
-                              (page >= currentPage - 1 && page <= currentPage + 1)
-                            const showPage = isMobile ? showPageMobile : showPageDesktop
-
-                            if (!showPage) {
-                              if (!isMobile && (page === currentPage - 2 || page === currentPage + 2)) {
-                                return (
-                                  <span
-                                    key={page}
-                                    className="px-1 py-2 font-mono text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm"
-                                  >
-                                    ...
-                                  </span>
-                                )
-                              }
-                              return null
-                            }
-
-                            return (
-                              <button
-                                key={page}
-                                onClick={() => handlePageChange(page)}
-                                className={`flex min-w-[36px] flex-shrink-0 items-center justify-center px-3 py-2 font-mono text-xs font-bold uppercase border transition-all md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${currentPage === page
-                                  ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
-                                  : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-muted)] hover:border-[rgba(var(--color-accent-primary-rgb),0.8)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary bg-[rgba(0,0,0,0.5)]'
-                                  }`}
-                                style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
-                              >
-                                {page}
-                              </button>
-                            )
-                          })}
+                          <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+                            <span className="rounded-full border border-cyan-500/20 bg-cyan-500/5 px-3 py-1">
+                              {visiblePendingItems.length} pendientes visibles
+                            </span>
+                            {totalPages > 1 && (
+                              <span className="rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1">
+                                Página {currentPage} de {totalPages}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
-                        <button
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                          className={`flex flex-shrink-0 items-center px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest border transition-all md:px-4 md:py-2 md:text-sm ${currentPage === totalPages
-                            ? 'border-[rgba(var(--color-accent-primary-rgb),0.2)] text-[var(--color-text-muted)] opacity-50 cursor-not-allowed bg-[rgba(0,0,0,0.5)]'
-                            : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)]'
-                            }`}
-                          style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
-                        >
-                          <span className="hidden sm:inline">[ {t('pagination.next')} ]</span>
-                          <span className="sm:hidden">{'>'}</span>
-                        </button>
-                      </div>
+                        {visiblePendingItems.length === 0 ? (
+                          <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-6 text-center">
+                            <h4 className="mb-2 text-base font-semibold text-white">
+                              No hay pendientes visibles
+                            </h4>
+                            <p className="text-sm text-slate-400">
+                              Todo está marcado como visto o la búsqueda no devuelve pendientes.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
+                            {paginatedPendingItems.map((item) => (
+                              <ItemCard
+                                key={item.id}
+                                item={item}
+                                isOwn={item.user_id === user.id}
+                                onDelete={deleteItem}
+                                onToggleVisto={toggleVisto}
+                                onOpenDetails={handleOpenDetails}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </section>
                     )}
 
-                    {totalPages > 1 && (
-                      <div className="mt-3 px-4 text-center md:mt-4">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 md:text-xs md:tracking-widest">
-                          <span className="hidden sm:inline">
-                            {t('pagination.page', { current: currentPage, total: totalPages })} •{' '}
-                          </span>
-                          {filteredItems.length} {t(tipo === 'pelicula' ? 'movie_plural' : 'series_plural')}
-                          <span className="hidden sm:inline"> {t('stats.in_total')}</span>
-                        </p>
-                      </div>
+                    {filters.showUnwatched && visiblePendingItems.length > 0 && totalPages > 1 && (
+                      <>
+                        <div className="mt-8 flex items-center justify-center gap-1 md:mt-10 md:gap-2">
+                          <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`flex flex-shrink-0 items-center border px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${
+                              currentPage === 1
+                                ? 'cursor-not-allowed border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] opacity-50'
+                                : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                            }`}
+                            style={{
+                              clipPath:
+                                'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
+                            }}
+                          >
+                            <span className="hidden sm:inline">[ {t('pagination.previous')} ]</span>
+                            <span className="sm:hidden">{'<'}</span>
+                          </button>
+
+                          <div className="scrollbar-none flex max-w-[60vw] gap-1 overflow-x-auto md:max-w-none md:gap-2">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                              const showPageMobile =
+                                page === currentPage || page === 1 || page === totalPages
+                              const showPageDesktop =
+                                page === 1 ||
+                                page === totalPages ||
+                                (page >= currentPage - 1 && page <= currentPage + 1)
+                              const showPage = isMobile ? showPageMobile : showPageDesktop
+
+                              if (!showPage) {
+                                if (!isMobile && (page === currentPage - 2 || page === currentPage + 2)) {
+                                  return (
+                                    <span
+                                      key={page}
+                                      className="px-1 py-2 font-mono text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm"
+                                    >
+                                      ...
+                                    </span>
+                                  )
+                                }
+                                return null
+                              }
+
+                              return (
+                                <button
+                                  key={page}
+                                  onClick={() => handlePageChange(page)}
+                                  className={`flex min-w-[36px] flex-shrink-0 items-center justify-center border px-3 py-2 font-mono text-xs font-bold uppercase transition-all md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${
+                                    currentPage === page
+                                      ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                                      : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-[rgba(var(--color-accent-primary-rgb),0.8)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary'
+                                  }`}
+                                  style={{
+                                    clipPath:
+                                      'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+                                  }}
+                                >
+                                  {page}
+                                </button>
+                              )
+                            })}
+                          </div>
+
+                          <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className={`flex flex-shrink-0 items-center border px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${
+                              currentPage === totalPages
+                                ? 'cursor-not-allowed border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] opacity-50'
+                                : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                            }`}
+                            style={{
+                              clipPath:
+                                'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
+                            }}
+                          >
+                            <span className="hidden sm:inline">[ {t('pagination.next')} ]</span>
+                            <span className="sm:hidden">{'>'}</span>
+                          </button>
+                        </div>
+
+                        <div className="mt-3 px-4 text-center md:mt-4">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 md:text-xs md:tracking-widest">
+                            <span className="hidden sm:inline">
+                              {t('pagination.page', { current: currentPage, total: totalPages })} •{' '}
+                            </span>
+                            {visiblePendingItems.length} por decidir
+                          </p>
+                        </div>
+                      </>
+                    )}
+
+                    {filters.showWatched && (
+                      <section className={filters.showUnwatched ? 'mt-10' : 'mb-8'}>
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500">
+                              Historial
+                            </p>
+                            <h3 className="text-lg font-semibold text-white">Ya vistos</h3>
+                          </div>
+
+                          <p className="text-xs text-slate-400">{visibleWatchedItems.length} vistos</p>
+                        </div>
+
+                        {visibleWatchedItems.length === 0 ? (
+                          <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-6 text-center">
+                            <h4 className="mb-2 text-base font-semibold text-white">
+                              No hay vistos visibles
+                            </h4>
+                            <p className="text-sm text-slate-400">
+                              Todavía no habéis marcado títulos como vistos o la búsqueda no devuelve resultados.
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-1 gap-4 opacity-90 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
+                              {visibleWatchedItems.slice(0, 6).map((item) => (
+                                <ItemCard
+                                  key={item.id}
+                                  item={item}
+                                  isOwn={item.user_id === user.id}
+                                  onDelete={deleteItem}
+                                  onToggleVisto={toggleVisto}
+                                  onOpenDetails={handleOpenDetails}
+                                />
+                              ))}
+                            </div>
+
+                            {visibleWatchedItems.length > 6 && (
+                              <p className="mt-3 text-sm text-slate-500">
+                                Mostrando 6 de {visibleWatchedItems.length} vistos.
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </section>
                     )}
                   </>
                 )}
 
                 {!loading && items.length > 0 && viewMode === 'grid' && (
-                  <div className="mt-8 md:mt-12">
+                  <div className="mt-10 md:mt-12">
                     <StatsWidget items={items} userOwnerId={user.id} size="large" />
                   </div>
                 )}
@@ -763,8 +991,9 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
 
       {isModalOpen && selectedItem && (
         <div
-          className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity duration-200 ${isModalAnimating ? 'bg-black/70 opacity-100' : 'bg-black/0 opacity-0'
-            }`}
+          className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity duration-200 ${
+            isModalAnimating ? 'bg-black/70 opacity-100' : 'bg-black/0 opacity-0'
+          }`}
           role="dialog"
           aria-modal="true"
           aria-label={`${t('details_title')} ${selectedItem.titulo}`}
@@ -777,87 +1006,136 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           }}
         >
           <div
-            className={`w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl transition-all duration-200 ${isModalAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-              }`}
+            className={`w-full max-w-4xl overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl transition-all duration-200 ${
+              isModalAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4 border-b border-slate-800/60 p-5">
               <div>
-                <h3 className="text-lg font-black uppercase tracking-tight text-white md:text-xl">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+                  Detalle
+                </p>
+                <h3 className="text-lg font-black uppercase tracking-tight text-white md:text-2xl">
                   {selectedItem.titulo}
                 </h3>
-                <p className="text-xs text-slate-400">
-                  {selectedItem.tipo === 'pelicula' ? t('action.movie_type') : t('action.series_type')}
-                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-300">
+                    {selectedItem.tipo === 'pelicula'
+                      ? t('action.movie_type')
+                      : t('action.series_type')}
+                  </span>
+                  <span
+                    className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${
+                      selectedItem.visto
+                        ? 'border-cyan-400/35 bg-cyan-400/10 text-cyan-200'
+                        : 'border-amber-400/35 bg-amber-400/10 text-amber-200'
+                    }`}
+                  >
+                    {selectedItem.visto ? t('item.watched') : t('item.not_watched')}
+                  </span>
+                </div>
               </div>
+
               <button
                 ref={closeButtonRef}
                 type="button"
                 onClick={handleCloseDetails}
-                className="text-slate-400 transition hover:text-white"
+                className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white"
                 aria-label={t('modal.close')}
               >
                 ✕
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 p-5">
-              <div className="w-full">
+            <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
+              <div className="border-b border-slate-800/60 bg-slate-950/60 p-5 md:border-b-0 md:border-r">
                 {selectedItem.poster_url ? (
-                  <div className="flex max-h-80 w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900/60">
+                  <div className="flex max-h-[420px] w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900/60">
                     <img
                       src={selectedItem.poster_url}
                       alt={selectedItem.titulo}
-                      className="h-80 w-auto max-w-full object-contain"
+                      className="max-h-[420px] w-auto max-w-full object-contain"
                       loading="lazy"
                     />
                   </div>
                 ) : (
-                  <div className="flex h-48 w-full items-center justify-center rounded-xl bg-slate-900 text-slate-500">
+                  <div className="flex h-72 w-full items-center justify-center rounded-xl bg-slate-900 text-slate-500">
                     {t('no_image')}
+                  </div>
+                )}
+
+                {selectedItem.genero && (
+                  <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3">
+                    <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                      Género
+                    </p>
+                    <p className="text-sm text-slate-200">{selectedItem.genero}</p>
                   </div>
                 )}
               </div>
 
-              <div className="text-sm leading-relaxed text-slate-200">
-                {synopsisLoading && <p className="text-slate-400">{t('loading.synopsis')}</p>}
-                {synopsisError && <p className="text-red-400">{synopsisError}</p>}
-                {!synopsisLoading && !synopsisError && <p>{synopsis || t('item.no_synopsis')}</p>}
-              </div>
+              <div className="flex flex-col p-5">
+                <div className="mb-5 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-purple-300">
+                    Acción principal
+                  </p>
+                  <h4 className="mb-3 text-base font-semibold text-white">
+                    {selectedItem.visto ? 'Ya está marcado como visto' : 'Márcalo cuando lo hayáis visto'}
+                  </h4>
 
-              <div className="flex gap-3 border-t border-slate-800/60 pt-4">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      await toggleVisto(selectedItem.id, selectedItem.visto)
-                      handleCloseDetails()
-                    } catch (err) {
-                      console.error('Toggle error:', err)
-                    }
-                  }}
-                  className="flex-1 rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-cyan-300 transition-all hover:border-cyan-400 hover:bg-cyan-500/30 hover:text-cyan-200"
-                >
-                  {selectedItem.visto ? t('item.watched') : t('item.not_watched')}
-                </button>
-
-                {selectedItem.user_id === user?.id && (
                   <button
                     type="button"
-                    onClick={async () => {
-                      if (!confirm(t('modal.delete_title', { title: selectedItem.titulo }))) return
-                      try {
-                        await deleteItem(selectedItem.id)
-                        handleCloseDetails()
-                      } catch (err) {
-                        console.error('Delete error:', err)
-                      }
-                    }}
-                    className="rounded-lg border border-red-500/50 bg-red-500/20 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-red-300 transition-all hover:border-red-400 hover:bg-red-500/30 hover:text-red-200"
+                    onClick={handleToggleFromModal}
+                    disabled={modalActionLoading !== null}
+                    className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                      selectedItem.visto
+                        ? 'border-cyan-400/40 bg-cyan-400/12 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18'
+                        : 'border-purple-400/40 bg-purple-400/12 text-purple-200 hover:border-purple-300 hover:bg-purple-400/18'
+                    }`}
                   >
-                    🗑️ {t('action.delete')}
+                    <span>
+                      {modalActionLoading === 'toggle'
+                        ? 'Actualizando...'
+                        : selectedItem.visto
+                          ? t('item.mark_unwatched')
+                          : t('item.mark_watched')}
+                    </span>
                   </button>
-                )}
+                </div>
+
+                <div className="flex-1 rounded-2xl border border-slate-800 bg-slate-900/30 p-4">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                    Sinopsis
+                  </p>
+
+                  <div className="text-sm leading-relaxed text-slate-200">
+                    {synopsisLoading && <p className="text-slate-400">{t('loading.synopsis')}</p>}
+                    {synopsisError && <p className="text-red-400">{synopsisError}</p>}
+                    {!synopsisLoading && !synopsisError && <p>{synopsis || t('item.no_synopsis')}</p>}
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={handleCloseDetails}
+                    className="rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
+                  >
+                    Cerrar
+                  </button>
+
+                  {selectedItem.user_id === user?.id && (
+                    <button
+                      type="button"
+                      onClick={handleDeleteFromModal}
+                      disabled={modalActionLoading !== null}
+                      className="rounded-xl border border-red-500/40 bg-red-500/12 px-4 py-3 text-sm font-semibold text-red-300 transition hover:border-red-400 hover:bg-red-500/18 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {modalActionLoading === 'delete' ? 'Borrando...' : `🗑️ ${t('action.delete')}`}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

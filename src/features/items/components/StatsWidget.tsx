@@ -5,7 +5,7 @@ import { HudContainer, ListItem, TechLabel } from '@/features/shared'
 interface StatsWidgetProps {
   items: ListItem[]
   userOwnerId?: string
-  size?: 'small' | 'large' // small: text-lg, large: text-xl
+  size?: 'small' | 'large'
 }
 
 const StatsWidget: React.FC<StatsWidgetProps> = ({ items, userOwnerId, size = 'small' }) => {

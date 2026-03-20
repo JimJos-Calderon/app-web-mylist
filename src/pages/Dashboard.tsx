@@ -2,206 +2,454 @@ import React, { Suspense, lazy } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Film, Clock3, Users, ArrowRight, Sparkles } from 'lucide-react'
+import { Film, Tv, Users, Settings, ArrowRight, Sparkles, ListChecks, Plus } from 'lucide-react'
+import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
+import { useLists } from '@/features/lists'
 import { SectionErrorFallback } from '@/features/shared'
-import { useActiveList } from '@/features/lists/hooks/useActiveList'
 
 const ActivityFeedPanel = lazy(() => import('@/features/lists/components/ActivityFeed'))
+
 const ActivityFeedSkeleton: React.FC = () => {
+  const { t } = useTranslation()
 
-    const { t } = useTranslation()
-
-    return (
-        <div className="w-full">
-            <div className="flex items-center justify-between gap-3 mb-6">
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-accent-primary animate-pulse" />
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
-                        SYS.{t('activity_feed.title')}
-                    </h3>
-                </div>
-                <div className="w-24 h-2 bg-[rgba(var(--color-accent-primary-rgb),0.2)] animate-pulse" />
-            </div>
-
-            <div className="space-y-3">
-                {[1, 2, 3].map((line) => (
-                    <div
-                        key={line}
-                        className="h-10 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.1)] animate-pulse"
-                        style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
-                    />
-                ))}
-            </div>
-
-            <p className="mt-4 text-[10px] font-mono uppercase tracking-widest text-[var(--color-text-muted)] opacity-70">
-                {'>'} {t('activity_feed.loading')}
-            </p>
+  return (
+    <div className="w-full">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 animate-pulse bg-accent-primary" />
+          <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
+            SYS.{t('activity_feed.title')}
+          </h3>
         </div>
-    )
+        <div className="h-2 w-24 animate-pulse bg-[rgba(var(--color-accent-primary-rgb),0.2)]" />
+      </div>
+
+      <div className="space-y-3">
+        {[1, 2, 3].map((line) => (
+          <div
+            key={line}
+            className="h-10 animate-pulse border border-[rgba(var(--color-accent-primary-rgb),0.1)] bg-[rgba(var(--color-accent-primary-rgb),0.05)]"
+            style={{
+              clipPath:
+                'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+            }}
+          />
+        ))}
+      </div>
+
+      <p className="mt-4 text-[10px] font-mono uppercase tracking-widest text-[var(--color-text-muted)] opacity-70">
+        {'>'} {t('activity_feed.loading')}
+      </p>
+    </div>
+  )
 }
 
-type DashboardCardProps = {
-    title: string
-    description: string
-    icon: React.ReactNode
-    to: string
-    primary?: boolean
-    actionLabel?: string
+type QuickCardProps = {
+  title: string
+  description: string
+  icon: React.ReactNode
+  to?: string
+  actionLabel?: string
+  onClick?: () => void
+  accent?: 'cyan' | 'purple' | 'neutral'
 }
 
-const DashboardCard: React.FC<DashboardCardProps> = ({
-    title,
-    description,
-    icon,
-    to,
-    primary = false,
-    actionLabel = 'Abrir',
+const QuickCard: React.FC<QuickCardProps> = ({
+  title,
+  description,
+  icon,
+  to,
+  actionLabel = 'Abrir',
+  onClick,
+  accent = 'neutral',
 }) => {
-    return (
-        <Link
-            to={to}
-            className={`group block border bg-[rgba(0,0,0,0.6)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.15)]
-        ${primary
-                    ? 'border-[rgba(var(--color-accent-primary-rgb),0.45)] p-6 md:p-8'
-                    : 'border-[rgba(var(--color-accent-primary-rgb),0.25)] p-5'
-                }`}
-            style={{ clipPath: 'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)' }}
-        >
-            <div className="flex items-start justify-between gap-4">
-                <div className="space-y-3">
-                    <div className="inline-flex items-center gap-2 text-accent-primary font-mono text-[10px] uppercase tracking-[0.2em]">
-                        {icon}
-                        <span>SYS.NODE</span>
-                    </div>
+  const toneClass =
+    accent === 'cyan'
+      ? 'hover:border-cyan-400/40'
+      : accent === 'purple'
+        ? 'hover:border-purple-400/40'
+        : 'hover:border-[rgba(var(--color-accent-primary-rgb),0.35)]'
 
-                    <div>
-                        <h3 className={`${primary ? 'text-2xl md:text-3xl' : 'text-lg'} font-black tracking-tight text-[var(--color-text-primary)]`}>
-                            {title}
-                        </h3>
-                        <p className="mt-2 text-sm text-[var(--color-text-muted)] leading-relaxed max-w-xl">
-                            {description}
-                        </p>
-                    </div>
-                </div>
+  const content = (
+    <div
+      className={`group block border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.6)] p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_0_24px_rgba(var(--color-accent-primary-rgb),0.12)] ${toneClass}`}
+      style={{
+        clipPath:
+          'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)',
+      }}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-accent-primary">
+            {icon}
+            <span>SYS.NODE</span>
+          </div>
 
-                <ArrowRight className="w-5 h-5 text-accent-primary opacity-70 group-hover:translate-x-1 transition-transform shrink-0" />
-            </div>
+          <div>
+            <h3 className="text-lg font-black tracking-tight text-[var(--color-text-primary)]">
+              {title}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+              {description}
+            </p>
+          </div>
+        </div>
 
-            <div className="mt-6 inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-accent-primary">
-                <span>{actionLabel}</span>
-            </div>
-        </Link>
-    )
+        <ArrowRight className="h-5 w-5 shrink-0 text-accent-primary opacity-70 transition-transform group-hover:translate-x-1" />
+      </div>
+
+      <div className="mt-6 inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-accent-primary">
+        <span>{actionLabel}</span>
+      </div>
+    </div>
+  )
+
+  if (to) {
+    return <Link to={to}>{content}</Link>
+  }
+
+  return (
+    <button type="button" onClick={onClick} className="block w-full text-left">
+      {content}
+    </button>
+  )
 }
 
 const Dashboard: React.FC = () => {
-    const { t } = useTranslation()
-    const { profile } = useUserProfile()
-    const { activeList } = useActiveList()
+  const { t } = useTranslation()
+  const { user } = useAuth()
+  const { profile } = useUserProfile()
 
-    const displayName = profile?.username || t('navbar.myAccount')
+  const {
+    lists,
+    currentList,
+    setCurrentList,
+    loading: loadingLists,
+    createList,
+  } = useLists(user?.id)
 
-    return (
-        <div className="max-w-6xl mx-auto pb-24 px-4 md:px-6">
-            <section className="pt-10 md:pt-14 pb-10 space-y-6">
-                <div className="space-y-3 animate-in fade-in duration-500">
-                    <p className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-accent-primary font-mono opacity-80">
-                        {'>'} DECISION_DASHBOARD
-                    </p>
+  const displayName = profile?.username || t('navbar.myAccount')
+  const hasLists = lists.length > 0
+  const hasActiveList = Boolean(currentList)
 
-                    <h1
-                        className="text-4xl md:text-6xl font-black tracking-tighter"
-                        style={{
-                            background: 'linear-gradient(to right, var(--color-accent-primary), var(--color-accent-secondary))',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            filter: 'drop-shadow(0 0 18px rgba(var(--color-accent-primary-rgb), 0.35))',
-                        }}
-                    >
-                        Decide qué ver juntos, rápido.
-                    </h1>
+  const handleCreateList = async () => {
+    const name = window.prompt('Nombre de la nueva lista')
+    if (!name?.trim()) return
 
-                    <p className="max-w-2xl text-sm md:text-lg text-[var(--color-text-muted)] leading-relaxed">
-                        Bienvenido de nuevo, <span className="text-[var(--color-text-primary)] font-semibold">{displayName}</span>. Todo lo importante debería empezar aquí: elegir, revisar pendientes y seguir lo que habéis hecho.
-                    </p>
-                </div>
-            </section>
+    try {
+      const newList = await createList(name.trim())
+      if (newList) {
+        setCurrentList(newList)
+      }
+    } catch (error) {
+      console.error('Error creating list from dashboard:', error)
+    }
+  }
 
-            <section className="grid grid-cols-1 xl:grid-cols-[1.3fr_0.9fr] gap-6 items-stretch">
-                <DashboardCard
-                    title={activeList ? `¿Qué vemos hoy en ${activeList.name}?` : '¿Qué vemos hoy?'}
-                    description={
-                        activeList
-                            ? `Estás trabajando sobre "${activeList.name}". Entra y decide rápido.`
-                            : 'Empieza por aquí. Tu entrada principal para decidir rápido qué ver.'
-                    }
-                    icon={<Sparkles className="w-4 h-4" />}
-                    to="/peliculas"
-                    primary
-                    actionLabel="Ir a películas"
-                />
+  if (!user) return null
 
-                <div className="grid grid-cols-1 gap-6">
-                    <DashboardCard
-                        title="Tu lista"
-                        description="Abre tu espacio principal para revisar, añadir y organizar lo que queréis ver."
-                        icon={<Film className="w-4 h-4" />}
-                        to="/peliculas"
-                        actionLabel="Abrir lista"
-                    />
+  return (
+    <div className="mx-auto max-w-6xl px-4 pb-24 md:px-6">
+      <section className="space-y-6 pb-8 pt-10 md:space-y-8 md:pb-10 md:pt-14">
+        <div className="animate-in fade-in duration-500 space-y-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-accent-primary opacity-80 md:text-xs">
+            {'>'} DECISION_DASHBOARD
+          </p>
 
-                    <DashboardCard
-                        title="Series"
-                        description="Acceso rápido a vuestro espacio de series si queréis alternar entre formatos."
-                        icon={<Clock3 className="w-4 h-4" />}
-                        to="/series"
-                        actionLabel="Abrir series"
-                    />
-                </div>
-            </section>
+          <h1
+            className="text-4xl font-black tracking-tighter md:text-6xl"
+            style={{
+              background:
+                'linear-gradient(to right, var(--color-accent-primary), var(--color-accent-secondary))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              filter: 'drop-shadow(0 0 18px rgba(var(--color-accent-primary-rgb), 0.35))',
+            }}
+          >
+            Decide qué ver juntos, rápido.
+          </h1>
 
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                <DashboardCard
-                    title="Perfil y colaboración"
-                    description="Gestiona tu perfil y prepara mejor la experiencia compartida."
-                    icon={<Users className="w-4 h-4" />}
-                    to="/perfil"
-                    actionLabel="Ver perfil"
-                />
-
-                <DashboardCard
-                    title="Ajustes"
-                    description="Configura lo necesario, pero mantén el foco: decidir qué ver juntos debería seguir siendo lo primero."
-                    icon={<Clock3 className="w-4 h-4" />}
-                    to="/ajustes"
-                    actionLabel="Abrir ajustes"
-                />
-            </section>
-
-            <section className="mt-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 fill-mode-both">
-                <div
-                    className="border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.6)] p-5 md:p-8 shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.1)] border-l-4 border-l-accent-primary text-left"
-                    style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
-                >
-                    <div className="flex flex-col gap-1 mb-6">
-                        <h2 className="text-sm md:text-base font-black uppercase tracking-widest text-accent-primary font-mono flex items-center gap-2">
-                            SYS.{t('activity_feed.title')}
-                        </h2>
-                        <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] font-mono opacity-80">
-                            {'>'} GLOBAL_ACTIVITY_LOG
-                        </p>
-                    </div>
-
-                    <ErrorBoundary FallbackComponent={SectionErrorFallback}>
-                        <Suspense fallback={<ActivityFeedSkeleton />}>
-                            <ActivityFeedPanel limit={20} />
-                        </Suspense>
-                    </ErrorBoundary>
-                </div>
-            </section>
+          <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)] md:text-lg">
+            Bienvenido de nuevo,{' '}
+            <span className="font-semibold text-[var(--color-text-primary)]">{displayName}</span>.
+            El flujo principal debería empezar aquí: saber qué lista manda ahora mismo y entrar
+            directo a decidir.
+          </p>
         </div>
-    )
+      </section>
+
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+        <div
+          className="border border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[rgba(0,0,0,0.62)] p-6 shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.12)] md:p-8"
+          style={{
+            clipPath:
+              'polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px)',
+          }}
+        >
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-400/85">
+                Flujo principal
+              </p>
+              <h2 className="text-2xl font-black tracking-tight text-white md:text-3xl">
+                {hasActiveList
+                  ? `¿Qué vemos hoy en ${currentList?.name}?`
+                  : 'Empieza por elegir el contexto'}
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">
+                {loadingLists
+                  ? 'Cargando tus listas para dejarte entrar directo al punto de decisión.'
+                  : hasActiveList
+                    ? `La lista activa ahora mismo es "${currentList?.name}". El camino corto es abrir películas o series y decidir desde pendientes.`
+                    : hasLists
+                      ? 'Ya tienes listas creadas, pero falta marcar cuál manda ahora mismo.'
+                      : 'Aún no tienes una lista base. Crea una y empieza a añadir opciones.'}
+              </p>
+            </div>
+
+            <Sparkles className="mt-1 hidden h-6 w-6 shrink-0 text-accent-primary sm:block" />
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              to="/peliculas"
+              className="inline-flex items-center justify-center rounded-2xl border border-cyan-400/40 bg-cyan-400/12 px-5 py-3 text-sm font-semibold text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-400/18 hover:text-cyan-100"
+            >
+              {hasActiveList ? 'Seguir con películas' : 'Ir a películas'}
+            </Link>
+
+            <Link
+              to="/series"
+              className="inline-flex items-center justify-center rounded-2xl border border-purple-400/40 bg-purple-400/12 px-5 py-3 text-sm font-semibold text-purple-200 transition hover:border-purple-300 hover:bg-purple-400/18 hover:text-purple-100"
+            >
+              {hasActiveList ? 'Seguir con series' : 'Ir a series'}
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleCreateList}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/70 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
+            >
+              <Plus className="h-4 w-4" />
+              Crear nueva lista
+            </button>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              Siguiente paso recomendado
+            </p>
+            <h3 className="text-lg font-semibold text-white">
+              {loadingLists
+                ? 'Preparando tu contexto...'
+                : hasActiveList
+                  ? `Entrar con "${currentList?.name}"`
+                  : hasLists
+                    ? 'Seleccionar lista activa'
+                    : 'Crear la primera lista'}
+            </h3>
+            <p className="mt-2 text-sm text-slate-400">
+              {loadingLists
+                ? 'En cuanto estén cargadas, ya podrás seguir el camino corto.'
+                : hasActiveList
+                  ? 'El dashboard ya no debería entretenerte demasiado: lo útil está dentro de pendientes.'
+                  : hasLists
+                    ? 'Sin lista activa el flujo pierde claridad. Elige una y luego entra a decidir.'
+                    : 'Sin una lista base todavía no hay un lugar claro donde decidir juntos.'}
+            </p>
+          </div>
+        </div>
+
+        <div
+          className="border border-[rgba(var(--color-accent-primary-rgb),0.22)] bg-[rgba(0,0,0,0.62)] p-5"
+          style={{
+            clipPath:
+              'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)',
+          }}
+        >
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
+            Lista activa
+          </p>
+
+          <h2 className="text-2xl font-black tracking-tight text-white">
+            {loadingLists
+              ? 'Cargando listas...'
+              : currentList?.name || 'Sin lista seleccionada'}
+          </h2>
+
+          <p className="mt-3 text-sm leading-relaxed text-slate-400">
+            {hasActiveList
+              ? 'Esta es la lista que manda ahora mismo para decidir.'
+              : 'Selecciona una lista para que todo lo demás tenga un contexto claro.'}
+          </p>
+
+          {hasLists && (
+            <div className="mt-5">
+              <label
+                htmlFor="dashboard-active-list"
+                className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"
+              >
+                Cambiar lista
+              </label>
+
+              <select
+                id="dashboard-active-list"
+                value={currentList?.id || ''}
+                onChange={(e) => {
+                  const nextList = lists.find((list) => list.id === e.target.value)
+                  if (nextList) setCurrentList(nextList)
+                }}
+                className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+              >
+                {!currentList && <option value="">Selecciona una lista</option>}
+                {lists.map((list) => (
+                  <option key={list.id} value={list.id}>
+                    {list.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {!loadingLists && !hasLists && (
+            <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+              <p className="text-sm text-slate-400">
+                Todavía no tienes listas. Crea una para empezar el flujo principal.
+              </p>
+            </div>
+          )}
+
+          <div className="mt-6 grid gap-3">
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                Estado
+              </p>
+              <p className="text-lg font-semibold text-white">
+                {loadingLists
+                  ? 'Preparando listas'
+                  : `${lists.length} ${lists.length === 1 ? 'lista' : 'listas'}`}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                Camino corto
+              </p>
+              <p className="text-sm leading-relaxed text-slate-300">
+                {hasActiveList
+                  ? 'Abrir películas o series y decidir desde pendientes.'
+                  : 'Resolver primero la lista activa.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <QuickCard
+          title="Películas"
+          description={
+            hasActiveList
+              ? `Entrar con "${currentList?.name}" para añadir opciones y decidir.`
+              : 'Abrir el espacio principal de películas.'
+          }
+          icon={<Film className="h-4 w-4" />}
+          to="/peliculas"
+          actionLabel={hasActiveList ? 'Seguir flujo' : 'Abrir películas'}
+          accent="cyan"
+        />
+
+        <QuickCard
+          title="Series"
+          description={
+            hasActiveList
+              ? `Usar la misma lista activa para seguir decidiendo.`
+              : 'Abrir el espacio principal de series.'
+          }
+          icon={<Tv className="h-4 w-4" />}
+          to="/series"
+          actionLabel={hasActiveList ? 'Seguir flujo' : 'Abrir series'}
+          accent="purple"
+        />
+
+        <QuickCard
+          title="Perfil y colaboración"
+          description="Gestiona tu perfil y prepara mejor la experiencia compartida."
+          icon={<Users className="h-4 w-4" />}
+          to="/perfil"
+          actionLabel="Ver perfil"
+        />
+
+        <QuickCard
+          title="Ajustes"
+          description="Lo secundario sigue estando aquí, pero ya no compite con decidir."
+          icon={<Settings className="h-4 w-4" />}
+          to="/ajustes"
+          actionLabel="Abrir ajustes"
+        />
+      </section>
+
+      <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.1fr]">
+        <div
+          className="border border-[rgba(var(--color-accent-primary-rgb),0.22)] bg-[rgba(0,0,0,0.6)] p-5"
+          style={{
+            clipPath:
+              'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)',
+          }}
+        >
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+            Resumen rápido
+          </p>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+              <div className="mb-2 inline-flex items-center gap-2 text-slate-400">
+                <ListChecks className="h-4 w-4" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em]">Listas</span>
+              </div>
+              <p className="text-xl font-semibold text-white">{lists.length}</p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4">
+              <div className="mb-2 inline-flex items-center gap-2 text-slate-400">
+                <Sparkles className="h-4 w-4" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
+                  Contexto
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-white">
+                {hasActiveList ? 'Lista activa resuelta' : 'Falta contexto activo'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="animate-in fade-in slide-in-from-bottom-8 fill-mode-both border border-[rgba(var(--color-accent-primary-rgb),0.3)] border-l-4 border-l-accent-primary bg-[rgba(0,0,0,0.6)] p-5 text-left shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.1)] duration-700 delay-200 md:p-8"
+          style={{
+            clipPath:
+              'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)',
+          }}
+        >
+          <div className="mb-6 flex flex-col gap-1">
+            <h2 className="flex items-center gap-2 font-mono text-sm font-black uppercase tracking-widest text-accent-primary md:text-base">
+              SYS.{t('activity_feed.title')}
+            </h2>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-80 md:text-xs">
+              {'>'} GLOBAL_ACTIVITY_LOG
+            </p>
+          </div>
+
+          <ErrorBoundary FallbackComponent={SectionErrorFallback}>
+            <Suspense fallback={<ActivityFeedSkeleton />}>
+              <ActivityFeedPanel limit={20} />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </section>
+    </div>
+  )
 }
 
 export default Dashboard
