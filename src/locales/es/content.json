@@ -42,9 +42,7 @@
   "view_modes": {
     "grid": "Grid",
     "slider": "Slider",
-    "ring": "Ring",
-    "normal": "Normal",
-    "loading_3d": "Cargando vista 3D..."
+    "normal": "Normal"
   },
   "filters": {
     "all": "Todas",
@@ -213,8 +211,7 @@
     "series_type": "Serie",
     "search_movie_placeholder": "BUSCAR PELÍCULA...",
     "search_series_placeholder": "BUSCAR SERIE...",
-    "grid_view": "📋 Grilla",
-    "ring_view": "💎 Ring"
+    "grid_view": "📋 Grilla"
   },
   "movie_singular": "película",
   "movie_plural": "películas",
@@ -235,39 +232,21 @@
     "subtitle": "Movimientos recientes de esta lista colaborativa",
     "expand": "Mostrar historial",
     "collapse": "Ocultar historial",
+    "empty": "No hay actividad reciente.",
     "loading": "Cargando actividad...",
-    "error": "No se pudo cargar el historial de actividad.",
-    "empty": "Aún no hay actividad registrada en esta lista.",
-    "latest_count": "Últimos {{count}} eventos",
-    "in_list": "en",
+    "error": "No se pudo cargar la actividad.",
+    "count": "Eventos",
+    "actor_unknown": "Alguien",
     "actions": {
-      "insert": "añadió",
-      "update": "actualizó",
-      "delete": "eliminó",
-      "generic": "realizó una acción en"
+      "INSERT": "añadió",
+      "UPDATE": "actualizó",
+      "DELETE": "eliminó"
     },
-    "action_keys": {
-      "items_insert": "añadió",
-      "items_update": "actualizó",
-      "items_delete": "eliminó",
-      "lists_insert": "creó",
-      "lists_update": "actualizó",
-      "lists_delete": "eliminó",
-      "item_ratings_insert": "calificó",
-      "item_ratings_update": "actualizó su calificación de",
-      "item_ratings_delete": "eliminó su calificación de",
-      "list_members_insert": "agregó un miembro en",
-      "list_members_update": "actualizó permisos en",
-      "list_members_delete": "eliminó un miembro de"
-    },
-    "fallback": {
-      "item": "un elemento",
-      "list": "una lista"
-    },
-    "count": "CUENTA",
-    "executed": "ejecutó:",
-    "on_target": "sobre:",
-    "in_region": "en la lista:",
-    "initializing": "INICIALIZANDO BANCO DE MEMORIA..."
+    "targets": {
+      "items": "un elemento",
+      "lists": "la lista",
+      "profiles": "un perfil",
+      "members": "un miembro"
+    }
   }
 }
