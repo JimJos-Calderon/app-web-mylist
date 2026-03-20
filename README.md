@@ -36,7 +36,7 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 - 🎵 **Spotify integrado** — Cards de Spotify embebidas y arrastrables en el home (solo desktop)
 - 📱 **Responsive** — Diseño adaptable a todos los dispositivos
 - 🛡️ **Seguridad a nivel empresarial** — RLS en BD, Edge Functions con rate limiting, validaciones en cliente y servidor
-- ✅ **Testing completo** — Unit tests (18 tests) + E2E tests con Playwright + CI/CD con GitHub Actions
+- ✅ **Testing completo** — Unit tests + E2E tests con Playwright + CI/CD con GitHub Actions
 
 ---
 
@@ -336,8 +336,11 @@ Para habilitar auditoría, push y dispatch automático end-to-end, aplica tambi�
 - `supabase/migrations/05_soft_delete_and_join_rpc.sql`
 - `supabase/migrations/06_audit_logs_triggers.sql`
 - `supabase/migrations/07_0_push_subscriptions.sql`
-- `supabase/migrations/07_audit_logs_push_dispatch.sql`
 - `supabase/migrations/08_dispatch_push_record_id_text_match.sql`
+- `supabase/migrations/09_items_delete_own_or_admin.sql`
+- `supabase/migrations/10_activity_feed_and_member_deletion.sql`
+
+> Nota: en el repositorio actual existe `07_audit_logs_push_dispatch.sql.bak` como respaldo, no como migración activa.
 
 5. **Configura Supabase Edge Functions & Secrets**
 
@@ -398,6 +401,15 @@ npm run test:coverage    # Reporte de cobertura de tests
 npm run test:e2e         # Ejecuta tests E2E (Playwright)
 npm run test:e2e:ui      # UI de Playwright (modo debug)
 npm run test:e2e:debug   # Playwright inspector (debug paso a paso)
+```
+
+### Nota para Windows PowerShell
+
+Si PowerShell bloquea `npm.ps1` por Execution Policy, usa `npm.cmd`:
+
+```powershell
+npm.cmd install
+npm.cmd run dev
 ```
 
 ---
@@ -486,7 +498,7 @@ app-web-mylist/
 
 | Ruta | Página | Descripción |
 |------|--------|-------------|
-| `/` | Home | Bienvenida + Spotify widgets arrastrables |
+| `/` | Dashboard | Panel principal para elegir contexto y entrar al flujo de decisión |
 | `/peliculas` | Películas | Gestión completa de películas |
 | `/series` | Series | Gestión completa de series |
 | `/perfil` | Perfil | Estadísticas y calificaciones del usuario |
@@ -627,7 +639,7 @@ Interpretación rápida:
 - **Datos de otro usuario después de logout**: el cierre de sesión limpia caché en memoria y persistida; si no se refleja, fuerza recarga completa.
 
 ### Seguridad y RLS
-- **Error 500 con RLS**: Verifica que has ejecutado el archivo `04_security_rls_and_constraints.sql`
+- **Error 500 con RLS**: Verifica que aplicaste `04_security_rls_and_constraints.sql` y las migraciones posteriores requeridas por tu flujo
 - **No veo mis listas/items**: Confirma que ejecutaste las políticas RLS correctamente
 - **Rate limit excedido (429)**: Esperaré 1 hora o contacta al admin para reset manual
 
@@ -637,17 +649,18 @@ Interpretación rápida:
 - **Error de validación en búsqueda**: Asegúrate de escribir 2-100 caracteres, sin caracteres especiales
 - **Push devuelve 401**: Verifica que `PUSH_WEBHOOK_SECRET` coincida entre secrets y `public.push_dispatch_config`
 - **Push no llega pero hay 200**: Revisa permisos del navegador y que exista una fila activa en `push_subscriptions`
-- **Push no dispara en automático**: Confirma que estén aplicadas `07_audit_logs_push_dispatch.sql` y `08_dispatch_push_record_id_text_match.sql`
+- **Push no dispara en automático**: Confirma que estén aplicadas las migraciones de auditoría/push vigentes (`06`, `07_0`, `08`, `09`, `10`)
 
 ### API y Datos
 - **Las imágenes no cargan**: Verifica que `OMDB_API_KEY` sea válida. Algunas películas no tienen póster (placeholder automático)
 - **Error de autenticación / RLS**: Verifica tus credenciales de Supabase en el `.env`
-- **Datos inconsistentes**: Asegúrate de haber ejecutado ALL los archivos SQL de migración
+- **Datos inconsistentes**: Asegúrate de haber ejecutado las migraciones en orden (`04` a `10`)
 
 ### Build
 - **Build falla con "terser not found"**: Ejecuta `npm install && npm run build`
-- **Build falla por TypeScript**: Ejecuta `npm run lint` para ver errores de tipo
-- **Errores de módulos**: Limpia y reinstala: `rm -rf node_modules && npm install`
+- **Build falla por TypeScript**: Revisa errores de compilación y lint antes del build (`npm run lint`)
+- **Errores de módulos (Linux/macOS)**: `rm -rf node_modules package-lock.json && npm install`
+- **Errores de módulos (Windows PowerShell)**: `Remove-Item -Recurse -Force node_modules; Remove-Item -Force package-lock.json; npm.cmd install`
 
 ### Testing
 - **Tests fallan en CI/CD**: GitHub Actions usa Ubuntu. Si los tests pasan localmente pero fallan en CI, puede ser un tema de timeouts. Aumenta el timeout en `.github/workflows/ci.yml`
@@ -754,7 +767,7 @@ curl -X POST "https://<project-ref>.supabase.co/functions/v1/send-push" \
 ```
 
 **Automatización**:
-- Trigger SQL definido en `supabase/migrations/07_audit_logs_push_dispatch.sql`
+- Trigger SQL definido en migraciones de auditoría/push aplicadas en tu entorno Supabase
 - Fix de compatibilidad `record_id` (UUID y numérico) en `supabase/migrations/08_dispatch_push_record_id_text_match.sql`
 - Flujo: `audit_logs` -> `dispatch_push_from_audit_logs()` -> `net.http_post()` -> `send-push`
 
@@ -768,10 +781,10 @@ curl -X POST "https://<project-ref>.supabase.co/functions/v1/send-push" \
 src/
 ├── features/
 │   ├── items/hooks/__tests__/
-│   │   ├── useItems.test.tsx        # 5 tests
-│   │   └── useItemRating.test.tsx   # 7 tests
+│   │   ├── useItems.test.tsx
+│   │   └── useItemRating.test.tsx
 │   └── lists/hooks/__tests__/
-│       └── useLists.test.tsx        # 6 tests
+│       └── useLists.test.tsx
 └── test-utils.tsx              # Wrapper de React Query
 
 tests/

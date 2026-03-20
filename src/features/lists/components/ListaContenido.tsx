@@ -12,7 +12,7 @@ import {
   SORT_OPTIONS,
   ErrorAlert,
 } from '@/features/shared'
-import { ItemCard, SearchBar, FilterPanel, StatsWidget } from '@/features/items'
+import { ItemCard, SearchBar, FilterPanel } from '@/features/items'
 import { supabase } from '@/supabaseClient'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
 import ListSelector from './ListSelector'
@@ -408,7 +408,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   if (!user) return null
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden bg-black font-sans">
+    <div className="min-h-screen w-full bg-black text-white">
       <CreateListDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
@@ -433,22 +433,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
         />
       )}
 
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black" />
-        <div
-          className="absolute bottom-0 left-0 right-0 h-[40%] opacity-10"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, #ff00ff 1px, transparent 1px), linear-gradient(to bottom, #ff00ff 1px, transparent 1px)',
-            backgroundSize: '50px 50px',
-            transform: 'perspective(500px) rotateX(60deg)',
-            transformOrigin: 'bottom center',
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
-      </div>
-
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-12">
+      <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-10">
         <header className="mb-6 space-y-2 md:mb-8">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400/80">
             {tipo === 'pelicula' ? 'Películas' : 'Series'}
@@ -462,28 +447,30 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           </div>
 
           <p className="max-w-2xl text-sm text-slate-400">
-            Menos opciones secundarias, más foco en añadir y decidir desde pendientes.
+            Lista activa clara, añadir rápido y pendientes como bloque principal.
           </p>
         </header>
 
-        <section className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.22)] bg-[rgba(0,0,0,0.42)] p-4 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] md:p-5">
-          <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+        <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-950/50 p-4 md:p-5">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div className="space-y-4">
               <div>
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500">
                   Lista activa
                 </p>
-                <h2 className="text-xl font-bold text-white md:text-2xl">
+                <h2 className="text-xl font-semibold text-white md:text-2xl">
                   {currentList?.name || 'Sin lista seleccionada'}
                 </h2>
                 <p className="mt-1 text-sm text-slate-400">
-                  Este es el contexto que manda ahora mismo para añadir y decidir.
+                  {currentList
+                    ? 'Todo lo que hagas aquí se aplicará a esta lista.'
+                    : 'Elige o crea una lista para empezar.'}
                 </p>
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
                 {lists.length > 0 && setCurrentList && (
-                  <div className="min-w-[280px] flex-1">
+                  <div className="min-w-[260px] flex-1">
                     <ListSelector
                       lists={lists}
                       currentList={currentList}
@@ -495,43 +482,35 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
 
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(var(--color-accent-primary-rgb),0.1)] px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-[#0ff] transition-all hover:border-[#0ff] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.4)]"
-                  style={{
-                    clipPath:
-                      'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
-                  }}
                   onClick={() => setShowCreateDialog(true)}
+                  className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-200 transition hover:border-cyan-400 hover:bg-cyan-500/15 hover:text-cyan-100"
                 >
-                  <span className="opacity-70">+</span> [ {t('action.create_list')} ]
+                  {t('action.create_list')}
                 </button>
 
                 {currentList && (
                   <button
                     type="button"
-                    className="flex items-center justify-center gap-2 border border-[rgba(var(--color-accent-secondary-rgb),0.5)] bg-[rgba(var(--color-accent-secondary-rgb),0.1)] px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-accent-secondary transition-all hover:border-[var(--color-accent-secondary)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)]"
-                    style={{
-                      clipPath:
-                        'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
-                    }}
                     onClick={() => setShowInviteDialog(true)}
+                    className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
                   >
-                    <span className="opacity-70">{'>'}</span> [ {t('action.invite')} ]
+                    {t('action.invite')}
                   </button>
                 )}
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-              <div className="rounded-2xl border border-cyan-500/20 bg-slate-950/40 px-4 py-3">
+              <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
                 <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400">
                   Pendientes
                 </p>
                 <h3 className="text-xl font-semibold text-white">{pendingItems.length}</h3>
-                <p className="mt-1 text-xs text-slate-400">Bloque principal de decisión.</p>
+                <p className="mt-1 text-xs text-slate-400">Bloque principal para decidir.</p>
               </div>
 
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3">
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-3">
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
                   Vistos
                 </p>
                 <h3 className="text-xl font-semibold text-white">{watchedItems.length}</h3>
@@ -547,7 +526,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                   Camino corto
                 </p>
                 <h3 className="text-sm font-semibold text-white">Ir a pendientes</h3>
-                <p className="mt-1 text-xs text-slate-400">Saltar directo al bloque útil.</p>
+                <p className="mt-1 text-xs text-slate-400">Saltar al bloque útil.</p>
               </button>
             </div>
           </div>
@@ -584,13 +563,9 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCreateDialog(true)}
-                  className="flex items-center justify-center gap-2 border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(var(--color-accent-primary-rgb),0.1)] px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-[#0ff] transition-all hover:border-[#0ff] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.4)]"
-                  style={{
-                    clipPath:
-                      'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
-                  }}
+                  className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-200 transition hover:border-cyan-400 hover:bg-cyan-500/15 hover:text-cyan-100"
                 >
-                  <span className="opacity-70">+</span> [ {t('action.create_list')} ]
+                  {t('action.create_list')}
                 </button>
               </div>
             </div>
@@ -604,16 +579,16 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
 
             <section
               ref={searchSectionRef}
-              className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[rgba(0,0,0,0.28)] p-4 md:p-5"
+              className="mb-6 rounded-2xl border border-slate-800 bg-slate-950/40 p-4 md:p-5"
             >
               <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500">
                     Acción principal
                   </p>
                   <h3 className="text-base font-semibold text-white">Buscar y añadir opciones</h3>
                   <p className="mt-1 text-sm text-slate-400">
-                    Mete candidatos rápido en la lista activa y vuelve a decidir.
+                    Añade rápido y vuelve al bloque de pendientes.
                   </p>
                 </div>
 
@@ -643,15 +618,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
               />
             </section>
 
-            <section className="mb-6 rounded-2xl border border-slate-800/80 bg-slate-950/35 p-4">
+            <section className="mb-6 rounded-2xl border border-slate-800 bg-slate-950/35 p-4">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
-                    Controles secundarios
+                    Secundario
                   </p>
                   <h3 className="text-base font-semibold text-white">Filtros</h3>
                   <p className="mt-1 text-sm text-slate-400">
-                    Úsalos sólo cuando ayuden a decidir mejor, no como paso principal.
+                    Úsalos solo cuando ayuden a decidir mejor.
                   </p>
                 </div>
 
@@ -690,12 +665,9 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
               {loading && (
                 <div className="py-12 text-center">
                   <div className="inline-flex flex-col items-center gap-4">
-                    <div className="relative inline-flex items-center justify-center">
-                      <div className="h-12 w-12 animate-spin rounded-full border-2 border-[rgba(var(--color-accent-primary-rgb),0.2)] border-t-accent-primary border-r-[var(--color-accent-secondary)]" />
-                      <div className="absolute inset-0 animate-[spin_3s_linear_infinite_reverse] rounded-full border-2 border-[rgba(var(--color-accent-secondary-rgb),0.1)] border-b-[var(--color-accent-secondary)]" />
-                    </div>
-                    <p className="animate-pulse font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">
-                      SYS.{t('loading.items')}...
+                    <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-700 border-t-cyan-400" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
+                      {t('loading.items')}...
                     </p>
                   </div>
                 </div>
@@ -703,15 +675,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
 
               {!loading && totalVisibleItems === 0 && (
                 <div className="rounded-3xl border border-slate-800 bg-slate-950/35 px-6 py-16 text-center">
-                  <div
-                    className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] text-2xl font-mono text-accent-primary"
-                    style={{
-                      clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                    }}
-                  >
-                    SYS
-                  </div>
-
                   <h3 className="mb-2 text-xl font-semibold text-white">
                     {filters.searchQuery
                       ? 'No hay resultados para decidir'
@@ -755,13 +718,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-400">
-                            Prioridad
+                            Principal
                           </p>
                           <h3 className="text-lg font-semibold text-white">
                             {filters.searchQuery ? 'Pendientes filtrados' : 'Pendientes para decidir'}
                           </h3>
                           <p className="mt-1 text-sm text-slate-400">
-                            Este es el bloque principal para responder a qué vemos hoy.
+                            Este es el bloque principal para decidir qué ver hoy.
                           </p>
                         </div>
 
@@ -809,24 +772,19 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                         <button
                           onClick={() => handlePageChange(currentPage - 1)}
                           disabled={currentPage === 1}
-                          className={`flex flex-shrink-0 items-center border px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${
+                          className={`rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-widest transition-all md:px-4 md:text-sm ${
                             currentPage === 1
-                              ? 'cursor-not-allowed border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] opacity-50'
-                              : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                              ? 'cursor-not-allowed border-slate-800 bg-slate-950/50 text-slate-600'
+                              : 'border-slate-700 bg-slate-900/70 text-slate-200 hover:border-slate-500 hover:text-white'
                           }`}
-                          style={{
-                            clipPath:
-                              'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
-                          }}
                         >
-                          <span className="hidden sm:inline">[ {t('pagination.previous')} ]</span>
+                          <span className="hidden sm:inline">{t('pagination.previous')}</span>
                           <span className="sm:hidden">{'<'}</span>
                         </button>
 
                         <div className="scrollbar-none flex max-w-[60vw] gap-1 overflow-x-auto md:max-w-none md:gap-2">
                           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                            const showPageMobile =
-                              page === currentPage || page === 1 || page === totalPages
+                            const showPageMobile = page === currentPage || page === 1 || page === totalPages
                             const showPageDesktop =
                               page === 1 ||
                               page === totalPages ||
@@ -838,7 +796,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                                 return (
                                   <span
                                     key={page}
-                                    className="px-1 py-2 font-mono text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm"
+                                    className="px-1 py-2 text-xs text-slate-500 md:px-2 md:text-sm"
                                   >
                                     ...
                                   </span>
@@ -851,15 +809,11 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                               <button
                                 key={page}
                                 onClick={() => handlePageChange(page)}
-                                className={`flex min-w-[36px] flex-shrink-0 items-center justify-center border px-3 py-2 font-mono text-xs font-bold uppercase transition-all md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${
+                                className={`min-w-[36px] rounded-xl border px-3 py-2 text-xs font-semibold transition-all md:min-w-[40px] md:px-4 md:text-sm ${
                                   currentPage === page
-                                    ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
-                                    : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-[rgba(var(--color-accent-primary-rgb),0.8)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary'
+                                    ? 'border-cyan-400 bg-cyan-500/15 text-cyan-200'
+                                    : 'border-slate-700 bg-slate-900/70 text-slate-300 hover:border-slate-500 hover:text-white'
                                 }`}
-                                style={{
-                                  clipPath:
-                                    'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
-                                }}
                               >
                                 {page}
                               </button>
@@ -870,17 +824,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                         <button
                           onClick={() => handlePageChange(currentPage + 1)}
                           disabled={currentPage === totalPages}
-                          className={`flex flex-shrink-0 items-center border px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${
+                          className={`rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-widest transition-all md:px-4 md:text-sm ${
                             currentPage === totalPages
-                              ? 'cursor-not-allowed border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] opacity-50'
-                              : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+                              ? 'cursor-not-allowed border-slate-800 bg-slate-950/50 text-slate-600'
+                              : 'border-slate-700 bg-slate-900/70 text-slate-200 hover:border-slate-500 hover:text-white'
                           }`}
-                          style={{
-                            clipPath:
-                              'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
-                          }}
                         >
-                          <span className="hidden sm:inline">[ {t('pagination.next')} ]</span>
+                          <span className="hidden sm:inline">{t('pagination.next')}</span>
                           <span className="sm:hidden">{'>'}</span>
                         </button>
                       </div>
@@ -943,12 +893,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                     </section>
                   )}
                 </>
-              )}
-
-              {!loading && items.length > 0 && (
-                <div className="mt-10 md:mt-12">
-                  <StatsWidget items={items} userOwnerId={user.id} size="large" />
-                </div>
               )}
             </section>
           </>
@@ -1041,67 +985,51 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                 )}
               </div>
 
-              <div className="flex flex-col p-5">
-                <div className="mb-5 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-purple-300">
-                    Acción principal
+              <div className="space-y-5 p-5 md:p-6">
+                <section className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Sinopsis
                   </p>
-                  <h4 className="mb-3 text-base font-semibold text-white">
-                    {selectedItem.visto ? 'Ya está marcado como visto' : 'Márcalo cuando lo hayáis visto'}
-                  </h4>
+                  {synopsisLoading ? (
+                    <p className="text-sm text-slate-400">Cargando sinopsis...</p>
+                  ) : synopsisError ? (
+                    <p className="text-sm text-rose-300">{synopsisError}</p>
+                  ) : synopsis ? (
+                    <p className="text-sm leading-relaxed text-slate-300">{synopsis}</p>
+                  ) : (
+                    <p className="text-sm text-slate-500">No hay sinopsis disponible.</p>
+                  )}
+                </section>
 
+                <section className="flex flex-col gap-3 sm:flex-row">
                   <button
                     type="button"
                     onClick={handleToggleFromModal}
                     disabled={modalActionLoading !== null}
-                    className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                    className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
                       selectedItem.visto
-                        ? 'border-cyan-400/40 bg-cyan-400/12 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18'
-                        : 'border-purple-400/40 bg-purple-400/12 text-purple-200 hover:border-purple-300 hover:bg-purple-400/18'
-                    }`}
+                        ? 'border border-amber-400/35 bg-amber-400/10 text-amber-200 hover:bg-amber-400/15'
+                        : 'border border-cyan-400/35 bg-cyan-400/10 text-cyan-200 hover:bg-cyan-400/15'
+                    } ${modalActionLoading !== null ? 'cursor-not-allowed opacity-60' : ''}`}
                   >
-                    <span>
-                      {modalActionLoading === 'toggle'
-                        ? 'Actualizando...'
-                        : selectedItem.visto
-                          ? t('item.mark_unwatched')
-                          : t('item.mark_watched')}
-                    </span>
+                    {modalActionLoading === 'toggle'
+                      ? 'Guardando...'
+                      : selectedItem.visto
+                        ? 'Marcar como pendiente'
+                        : 'Marcar como visto'}
                   </button>
-                </div>
 
-                <div className="flex-1 rounded-2xl border border-slate-800 bg-slate-900/30 p-4">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
-                    Sinopsis
-                  </p>
-
-                  <div className="text-sm leading-relaxed text-slate-200">
-                    {synopsisLoading && <p className="text-slate-400">{t('loading.synopsis')}</p>}
-                    {synopsisError && <p className="text-red-400">{synopsisError}</p>}
-                    {!synopsisLoading && !synopsisError && <p>{synopsis || t('item.no_synopsis')}</p>}
-                  </div>
-                </div>
-
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <button
                     type="button"
-                    onClick={handleCloseDetails}
-                    className="rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
+                    onClick={handleDeleteFromModal}
+                    disabled={modalActionLoading !== null}
+                    className={`rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/15 ${
+                      modalActionLoading !== null ? 'cursor-not-allowed opacity-60' : ''
+                    }`}
                   >
-                    Cerrar
+                    {modalActionLoading === 'delete' ? 'Eliminando...' : t('action.delete')}
                   </button>
-
-                  {selectedItem.user_id === user?.id && (
-                    <button
-                      type="button"
-                      onClick={handleDeleteFromModal}
-                      disabled={modalActionLoading !== null}
-                      className="rounded-xl border border-red-500/40 bg-red-500/12 px-4 py-3 text-sm font-semibold text-red-300 transition hover:border-red-400 hover:bg-red-500/18 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {modalActionLoading === 'delete' ? 'Borrando...' : `🗑️ ${t('action.delete')}`}
-                    </button>
-                  )}
-                </div>
+                </section>
               </div>
             </div>
           </div>
