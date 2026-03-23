@@ -42,9 +42,7 @@
   "view_modes": {
     "grid": "Grid",
     "slider": "Slider",
-    "ring": "Ring",
-    "normal": "Normal",
-    "loading_3d": "Cargando vista 3D..."
+    "normal": "Normal"
   },
   "filters": {
     "all": "Todas",
@@ -213,8 +211,7 @@
     "series_type": "Serie",
     "search_movie_placeholder": "BUSCAR PELÍCULA...",
     "search_series_placeholder": "BUSCAR SERIE...",
-    "grid_view": "📋 Grilla",
-    "ring_view": "💎 Ring"
+    "grid_view": "📋 Grilla"
   },
   "movie_singular": "película",
   "movie_plural": "películas",
@@ -235,39 +232,34 @@
     "subtitle": "Movimientos recientes de esta lista colaborativa",
     "expand": "Mostrar historial",
     "collapse": "Ocultar historial",
-    "loading": "Cargando actividad...",
-    "error": "No se pudo cargar el historial de actividad.",
-    "empty": "Aún no hay actividad registrada en esta lista.",
-    "latest_count": "Últimos {{count}} eventos",
-    "in_list": "en",
+    "empty": "No hay actividad reciente en el registro.",
+    "initializing": "Sincronizando registros del servidor...",
+    "error": "Error al descifrar el registro de eventos.",
+    "count": "Eventos",
+    "actor_unknown": "Usuario Desconocido",
+    "executed": "ejecutó",
+    "on_target": "sobre el objetivo",
+    "in_region": "en el directorio",
+    "fallback": {
+      "item": "DATO_CORRUPTO",
+      "list": "SECTOR_CORRUPTO"
+    },
     "actions": {
-      "insert": "añadió",
-      "update": "actualizó",
-      "delete": "eliminó",
-      "generic": "realizó una acción en"
+      "generic": "ACCIÓN",
+      "insert": "agregó",
+      "update": "editó",
+      "delete": "eliminó"
     },
     "action_keys": {
-      "items_insert": "añadió",
-      "items_update": "actualizó",
-      "items_delete": "eliminó",
-      "lists_insert": "creó",
-      "lists_update": "actualizó",
-      "lists_delete": "eliminó",
-      "item_ratings_insert": "calificó",
-      "item_ratings_update": "actualizó su calificación de",
-      "item_ratings_delete": "eliminó su calificación de",
-      "list_members_insert": "agregó un miembro en",
-      "list_members_update": "actualizó permisos en",
-      "list_members_delete": "eliminó un miembro de"
+      "items_insert": "agregó",
+      "items_update": "marcó / desmarcó",
+      "items_delete": "eliminó"
     },
-    "fallback": {
-      "item": "un elemento",
-      "list": "una lista"
-    },
-    "count": "CUENTA",
-    "executed": "ejecutó:",
-    "on_target": "sobre:",
-    "in_region": "en la lista:",
-    "initializing": "INICIALIZANDO BANCO DE MEMORIA..."
+    "targets": {
+      "items": "un archivo",
+      "lists": "un directorio",
+      "profiles": "un perfil",
+      "members": "un miembro"
+    }
   }
 }

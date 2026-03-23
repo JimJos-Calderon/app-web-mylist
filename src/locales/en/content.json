@@ -42,9 +42,7 @@
   "view_modes": {
     "grid": "Grid",
     "slider": "Slider",
-    "ring": "Ring",
-    "normal": "Normal",
-    "loading_3d": "Loading 3D view..."
+    "normal": "Normal"
   },
   "filters": {
     "all": "All",
@@ -123,8 +121,8 @@
     "email_button": "Change Email",
     "email_updating": "Updating...",
     "email_error_empty": "Enter an email address",
-    "email_error_same": "Email is the same as current",
-    "email_success": "Confirmation email sent to your new address",
+    "email_error_same": "The email is the same as the current one",
+    "email_success": "A confirmation email has been sent to your new address",
     "email_error": "Error changing email",
     "password_change_title": "Change Password",
     "password_current_label": "Current Password",
@@ -135,19 +133,19 @@
     "password_button": "Change Password",
     "password_show_label": "Show password",
     "password_hide_label": "Hide password",
-    "password_error_empty": "Complete all fields",
+    "password_error_empty": "Fill in all fields",
     "password_error_short": "Password must be at least 6 characters",
     "password_error_mismatch": "Passwords do not match",
-    "password_error_same": "New password cannot be the same as current",
-    "password_error_wrong": "Current password is incorrect",
+    "password_error_same": "The new password cannot be the same as the current one",
+    "password_error_wrong": "The current password is incorrect",
     "password_success": "✓ Password updated successfully",
     "password_error": "Error changing password",
     "verify_email_title": "Confirm email change",
-    "verify_email_description": "Enter your password to confirm email change",
+    "verify_email_description": "Enter your password to confirm the email change",
     "verify_email_label": "Password",
     "verify_email_placeholder": "Enter your password",
     "push_title": "Push Notifications",
-    "push_description": "Enable notifications to get alerts when there is activity in your shared lists.",
+    "push_description": "Enable notifications to receive alerts when there is activity in your shared lists.",
     "push_support_label": "Browser support",
     "push_support_yes": "Available",
     "push_support_no": "Not available",
@@ -155,19 +153,19 @@
     "push_button": "Enable push notifications",
     "push_button_loading": "Enabling...",
     "push_success": "Push notifications enabled successfully",
-    "push_permission_denied": "Notifications are blocked by the browser. Enable them in site settings.",
+    "push_permission_denied": "The browser blocked notifications. Enable them in site settings.",
     "push_not_authenticated": "You must be signed in to enable notifications",
-    "theme_title": "Visual theme",
+    "theme_title": "Visual Theme",
     "theme_description": "Choose the app appearance. Your preference syncs across devices.",
     "theme_active": "Active",
     "theme_options": {
       "cyberpunk": {
         "title": "Cyberpunk",
-        "description": "Neon cyan/pink with strong contrast and vivid glow."
+        "description": "Neon cyan/pink with high contrast and vibrant glow."
       },
       "advanced": {
         "title": "2Advanced HUD",
-        "description": "Ice blue and steel tones with a clean tactical look."
+        "description": "Ice blues and steel with a clean tactical aesthetic."
       },
       "terminal": {
         "title": "Terminal",
@@ -186,7 +184,7 @@
   },
   "dialog": {
     "create_list_title": "New List",
-    "list_name_label": "List Name",
+    "list_name_label": "List name",
     "list_name_placeholder": "My favorite list...",
     "description_label": "Description",
     "description_optional": "(optional)",
@@ -197,7 +195,7 @@
     "create_button": "Create list",
     "invite_title": "Invite to list",
     "list_label": "List",
-    "invite_link_label": "Invite Link",
+    "invite_link_label": "Invite link",
     "invite_help_text": "Share this link. Anyone with the link can join the list.",
     "copy_button": "Copy",
     "copied_button": "Copied",
@@ -213,61 +211,55 @@
     "series_type": "Show",
     "search_movie_placeholder": "SEARCH MOVIE...",
     "search_series_placeholder": "SEARCH SHOW...",
-    "grid_view": "📋 Grid",
-    "ring_view": "💎 Ring"
+    "grid_view": "📋 Grid"
   },
   "movie_singular": "movie",
   "movie_plural": "movies",
-  "series_singular": "series",
+  "series_singular": "show",
   "series_plural": "shows",
   "join_list": {
-    "joined_title": "You've joined!",
+    "joined_title": "You joined!",
     "joined_description": "You are now part of",
     "redirecting": "Redirecting…",
-    "already_member_description": "You are already part of",
+    "already_member_description": "You already belong to",
     "go_to_list": "Go to list",
-    "invited_intro": "You've been invited to",
+    "invited_intro": "You have been invited to",
     "login_required_title": "Invitation received",
     "login_required_description": "Sign in to join this list."
   },
   "activity_feed": {
     "title": "Activity Feed",
-    "subtitle": "Recent events from this collaborative list",
-    "expand": "Show feed",
-    "collapse": "Hide feed",
-    "loading": "Loading activity...",
-    "error": "Could not load activity feed.",
-    "empty": "No activity recorded for this list yet.",
-    "latest_count": "Latest {{count}} events",
-    "in_list": "in",
+    "subtitle": "Recent moves in this collaborative list",
+    "expand": "Show history",
+    "collapse": "Hide history",
+    "empty": "No recent activity logged.",
+    "initializing": "Syncing server logs...",
+    "error": "Failed to decrypt event log.",
+    "count": "Events",
+    "actor_unknown": "Unknown User",
+    "executed": "executed",
+    "on_target": "on target",
+    "in_region": "in directory",
+    "fallback": {
+      "item": "CORRUPT_DATA",
+      "list": "CORRUPT_SECTOR"
+    },
     "actions": {
+      "generic": "ACTION",
       "insert": "added",
-      "update": "updated",
-      "delete": "deleted",
-      "generic": "performed an action on"
+      "update": "edited",
+      "delete": "deleted"
     },
     "action_keys": {
       "items_insert": "added",
-      "items_update": "updated",
-      "items_delete": "deleted",
-      "lists_insert": "created",
-      "lists_update": "updated",
-      "lists_delete": "deleted",
-      "item_ratings_insert": "rated",
-      "item_ratings_update": "updated rating for",
-      "item_ratings_delete": "removed rating for",
-      "list_members_insert": "added a member in",
-      "list_members_update": "updated permissions in",
-      "list_members_delete": "removed a member from"
+      "items_update": "marked / unmarked",
+      "items_delete": "deleted"
     },
-    "fallback": {
-      "item": "an item",
-      "list": "a list"
-    },
-    "count": "COUNT",
-    "executed": "executed:",
-    "on_target": "on:",
-    "in_region": "in list:",
-    "initializing": "INITIALIZING MEMORY BANK..."
+    "targets": {
+      "items": "a file",
+      "lists": "a directory",
+      "profiles": "a profile",
+      "members": "a member"
+    }
   }
 }

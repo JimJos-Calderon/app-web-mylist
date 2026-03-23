@@ -1,7 +1,6 @@
 export { default as FilterPanel } from './components/FilterPanel'
 export { default as ItemCard } from './components/ItemCard'
 export { default as RatingWidget } from './components/RatingWidget'
-export { default as RingSlider } from './components/RingSlider'
 export { default as SearchBar } from './components/SearchBar'
 export { default as StatsWidget } from './components/StatsWidget'
 

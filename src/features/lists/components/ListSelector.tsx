@@ -1,77 +1,84 @@
+import React from 'react'
+import { ChevronDown, ListChecks, Loader2 } from 'lucide-react'
 import { List } from '@/features/shared'
 
 interface ListSelectorProps {
-  lists: List[]
-  currentList: List | null
+  lists?: Array<List | null | undefined>
+  currentList?: List | null
   onChange: (list: List) => void
   loading?: boolean
+  label?: string
+  placeholder?: string
 }
 
-const ListSelector = ({
-  lists,
+const isValidList = (value: List | null | undefined): value is List => {
+  return Boolean(value && typeof value === 'object' && value.id && value.name)
+}
+
+const ListSelector: React.FC<ListSelectorProps> = ({
+  lists = [],
   currentList,
   onChange,
-  loading = false
-}: ListSelectorProps) => {
+  loading = false,
+  label = 'Cambiar lista activa',
+  placeholder = 'Selecciona una lista',
+}) => {
+  const safeLists = lists.filter(isValidList)
+  const hasLists = safeLists.length > 0
 
-  if (loading) {
-    return (
-      <div 
-        className="flex items-center gap-3 px-4 py-2 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] animate-pulse"
-        style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
-      >
-        <span className="text-[10px] uppercase font-mono tracking-widest text-accent-primary opacity-70">
-          SYS.LOADING_LNK...
-        </span>
-      </div>
-    )
-  }
+  const safeCurrentList =
+    currentList && isValidList(currentList)
+      ? currentList
+      : safeLists.find((list) => list.id === currentList?.id) || null
 
-  if (lists.length === 0) {
-    return (
-      <div 
-        className="flex items-center gap-3 px-4 py-2 bg-[rgba(var(--color-accent-secondary-rgb),0.05)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)]"
-        style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
-      >
-        <span className="text-[10px] uppercase font-mono tracking-widest text-[var(--color-accent-secondary)] opacity-70">
-          SYS.ERR_NO_LNK
-        </span>
-      </div>
-    )
-  }
+  const selectedValue = safeCurrentList?.id ?? ''
 
   return (
-    <div className="flex items-center gap-3 relative z-[60]">
+    <div className="w-full">
       <label
-        htmlFor="list-selector"
-        className="text-[10px] font-bold font-mono uppercase tracking-widest text-[var(--color-text-muted)] opacity-80"
+        htmlFor="active-list-selector"
+        className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"
       >
-        TARGET:
+        {label}
       </label>
+
       <div className="relative">
+        <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-400">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListChecks className="h-4 w-4" />}
+        </div>
+
         <select
-          id="list-selector"
-          value={currentList?.id || ''}
+          id="active-list-selector"
+          value={selectedValue}
           onChange={(e) => {
-            const selectedList = lists.find((list) => list.id === e.target.value)
-            if (selectedList) {
-              onChange(selectedList)
-            }
+            const nextList = safeLists.find((list) => list.id === e.target.value)
+            if (nextList) onChange(nextList)
           }}
-          className="appearance-none pl-4 pr-10 py-2 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] text-accent-primary font-mono text-xs uppercase tracking-wide
-                     hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.15)] focus:outline-none focus:border-accent-primary focus:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)] transition-all cursor-pointer"
-          style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+          disabled={loading || !hasLists}
+          className="w-full appearance-none rounded-2xl border border-slate-700 bg-slate-950/80 py-3 pl-10 pr-11 text-sm font-medium text-white outline-none transition hover:border-slate-500 focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {lists.map((list) => (
-            <option key={list.id} value={list.id} style={{ backgroundColor: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }} className="font-mono">
+          {!safeCurrentList && <option value="">{placeholder}</option>}
+          {safeLists.map((list) => (
+            <option key={list.id} value={list.id}>
               {list.name}
             </option>
           ))}
         </select>
-        <div className="absolute right-0 top-0 bottom-0 w-8 flex items-center justify-center pointer-events-none border-l border-[rgba(var(--color-accent-primary-rgb),0.2)]">
-          <div className="w-2 h-2 border-b-2 border-r-2 border-accent-primary transform rotate-45 -translate-y-1"></div>
+
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <ChevronDown className="h-4 w-4" />
         </div>
       </div>
+
+      <p className="mt-2 text-xs text-slate-500">
+        {loading
+          ? 'Cargando listas...'
+          : safeCurrentList
+            ? `Ahora mismo estás trabajando sobre "${safeCurrentList.name}".`
+            : hasLists
+              ? 'Selecciona qué lista quieres usar como contexto activo.'
+              : 'Todavía no hay listas disponibles.'}
+      </p>
     </div>
   )
 }

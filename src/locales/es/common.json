@@ -25,8 +25,7 @@
     "dislike": "No me gusta",
     "back_to_grid": "Volver a rejilla",
     "previous": "Anterior",
-    "next": "Siguiente",
-    "ring_navigation": "Usa las flechas izquierda y derecha para navegar"
+    "next": "Siguiente"
   },
   "status": {
     "loading": "Cargando...",
