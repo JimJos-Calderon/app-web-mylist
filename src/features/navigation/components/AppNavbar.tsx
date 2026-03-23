@@ -13,11 +13,20 @@ import {
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
 import HudContainer from '@/features/shared/components/HudContainer'
+import { useTheme } from '@/features/shared'
+import type { ThemePreference } from '@/features/shared'
 
 const AppNavbar: React.FC = () => {
   const { signOut, session } = useAuth()
   const { profile } = useUserProfile()
   const { t } = useTranslation()
+  const { theme, changeTheme } = useTheme()
+
+  const THEMES: { value: ThemePreference; label: string; color: string }[] = [
+    { value: 'cyberpunk', label: 'CYB', color: 'rgba(var(--color-accent-primary-rgb),1)' },
+    { value: '2advanced', label: '2ADV', color: '#38bdf8' },
+    { value: 'terminal', label: 'TERM', color: '#34d399' },
+  ]
 
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
@@ -44,9 +53,15 @@ const AppNavbar: React.FC = () => {
   const userInitials = displayName.substring(0, 2).toUpperCase()
 
   return (
-    <nav className="sticky top-0 z-40 backdrop-blur-md bg-black/60 border-b border-pink-500/20 px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
+    <nav className="sticky top-0 z-40 backdrop-blur-md bg-black/60 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
       <Link to="/" className="group flex items-center gap-2 sm:gap-3">
-        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-pink-600 rounded-lg flex items-center justify-center font-black text-white text-xs sm:text-base shadow-[0_0_15px_rgba(219,39,119,0.5)] group-hover:scale-110 transition-all">
+        <div
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-black text-white text-xs sm:text-base group-hover:scale-110 transition-all"
+          style={{
+            background: 'var(--color-accent-secondary)',
+            boxShadow: '0 0 15px rgba(var(--color-accent-secondary-rgb), 0.5)',
+          }}
+        >
           {t('appLogo')}
         </div>
         <span className="text-base sm:text-2xl font-black tracking-tighter text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
@@ -59,21 +74,21 @@ const AppNavbar: React.FC = () => {
         </span>
       </Link>
 
-      <div className="hidden md:flex bg-purple-900/20 p-1 rounded-xl border border-pink-500/10">
-        <Link to="/peliculas" className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm">
+      <div className="hidden md:flex bg-[rgba(var(--color-accent-primary-rgb),0.06)] p-1 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.12)]">
+        <Link to="/peliculas" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-muted)]">
           {t('navbar.movies')}
         </Link>
-        <Link to="/series" className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm">
+        <Link to="/series" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-muted)]">
           {t('navbar.series')}
         </Link>
-        <Link to="/perfil" className="px-6 py-2 rounded-lg hover:text-pink-400 transition-all font-bold text-sm">
+        <Link to="/perfil" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-muted)]">
           {t('navbar.profile')}
         </Link>
       </div>
 
       <button
         onClick={() => setShowMobileMenu(!showMobileMenu)}
-        className="md:hidden p-2 text-white hover:text-pink-400 transition-colors"
+        className="md:hidden p-2 text-[var(--color-text-muted)] hover:text-accent-primary transition-colors"
       >
         <Menu className="w-6 h-6" />
       </button>
@@ -132,6 +147,28 @@ const AppNavbar: React.FC = () => {
               {t('navbar.settings')}
             </Link>
 
+            <div className="px-5 py-3 border-t border-[rgba(var(--color-accent-primary-rgb),0.15)]">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--color-text-muted)] mb-2 opacity-70">Tema</p>
+              <div className="flex gap-1.5">
+                {THEMES.map(({ value, label, color }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => { changeTheme(value); setShowUserMenu(false) }}
+                    title={label}
+                    className="flex-1 py-1.5 font-mono text-[9px] font-bold uppercase tracking-widest rounded border transition-all"
+                    style={{
+                      borderColor: theme === value ? color : 'rgba(255,255,255,0.1)',
+                      color: theme === value ? color : 'var(--color-text-muted)',
+                      background: theme === value ? `color-mix(in srgb, ${color} 15%, transparent)` : 'transparent',
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={() => {
                 signOut()
@@ -146,10 +183,16 @@ const AppNavbar: React.FC = () => {
       </div>
 
       {showMobileMenu && (
-        <HudContainer
-          className="md:hidden !absolute top-full left-0 right-0 z-50 p-0 overflow-hidden shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.2)] animate-in slide-in-from-top-2 duration-200 block border-t-0 rounded-t-none"
+        <div
+          ref={mobileMenuRef}
+          className="md:hidden absolute top-full left-0 right-0 z-50 animate-in slide-in-from-top-2 duration-200 border-t-0 overflow-hidden"
+          style={{
+            background: 'rgba(5, 5, 10, 0.97)',
+            borderBottom: '1px solid rgba(var(--color-accent-primary-rgb), 0.25)',
+            backdropFilter: 'blur(16px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+          }}
         >
-          <div ref={mobileMenuRef} className="contents">
             <div className="px-4 py-3 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] flex items-center gap-3">
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center text-[var(--color-text-primary)] font-bold text-sm overflow-hidden border-2"
@@ -209,6 +252,28 @@ const AppNavbar: React.FC = () => {
               <Settings className="w-4 h-4 opacity-70" /> {t('navbar.settings')}
             </Link>
 
+            <div className="px-5 py-3 border-t border-[rgba(var(--color-accent-primary-rgb),0.15)]">
+              <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--color-text-muted)] mb-2 opacity-70">Tema</p>
+              <div className="flex gap-1.5">
+                {THEMES.map(({ value, label, color }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => { changeTheme(value); setShowMobileMenu(false) }}
+                    title={label}
+                    className="flex-1 py-1.5 font-mono text-[9px] font-bold uppercase tracking-widest rounded border transition-all"
+                    style={{
+                      borderColor: theme === value ? color : 'rgba(255,255,255,0.1)',
+                      color: theme === value ? color : 'var(--color-text-muted)',
+                      background: theme === value ? `color-mix(in srgb, ${color} 15%, transparent)` : 'transparent',
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={() => {
                 signOut()
@@ -218,8 +283,7 @@ const AppNavbar: React.FC = () => {
             >
               <LogOut className="w-4 h-4 opacity-70" /> {t('navbar.logout')}
             </button>
-          </div>
-        </HudContainer>
+        </div>
       )}
     </nav>
   )

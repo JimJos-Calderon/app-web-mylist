@@ -15,8 +15,12 @@ interface UseListsReturn {
   createList: (name: string, description?: string) => Promise<List | null>
   joinListByCode: (inviteCode: string) => Promise<void>
   getListMembers: (listId: string) => Promise<{ members: ListMember[]; error: string | null }>
+  deleteList: (listId: string) => Promise<void>
+  leaveList: (listId: string) => Promise<void>
   isCreatingList: boolean
   isJoiningList: boolean
+  isDeletingList: boolean
+  isLeavingList: boolean
 }
 
 type JoinListRpcResult = {
@@ -228,6 +232,47 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
     },
   })
 
+  const deleteListMutation = useMutation({
+    mutationFn: async (listId: string) => {
+      if (!userId) throw new Error('Usuario no autenticado')
+      const { error } = await supabase.from('lists').delete().eq('id', listId)
+      if (error) throw error
+    },
+    onSuccess: (_, deletedListId) => {
+      const queryKey = queryKeys.lists.byUser(userId || '')
+      queryClient.setQueryData<List[]>(queryKey, (previous = []) => 
+        previous.filter((list) => list.id !== deletedListId)
+      )
+      if (activeList?.id === deletedListId) {
+        clearActiveList()
+      }
+      queryClient.invalidateQueries({ queryKey })
+    },
+    onError: (err) => console.error('Error deleting list:', err),
+  })
+
+  const leaveListMutation = useMutation({
+    mutationFn: async (listId: string) => {
+      if (!userId) throw new Error('Usuario no autenticado')
+      const { error } = await supabase
+        .from('list_members')
+        .delete()
+        .match({ list_id: listId, user_id: userId })
+      if (error) throw error
+    },
+    onSuccess: (_, leftListId) => {
+      const queryKey = queryKeys.lists.byUser(userId || '')
+      queryClient.setQueryData<List[]>(queryKey, (previous = []) => 
+        previous.filter((list) => list.id !== leftListId)
+      )
+      if (activeList?.id === leftListId) {
+        clearActiveList()
+      }
+      queryClient.invalidateQueries({ queryKey })
+    },
+    onError: (err) => console.error('Error leaving list:', err),
+  })
+
   const getListMembers = useCallback(async (listId: string) => {
     try {
       const { data, error: membersError } = await supabase
@@ -264,7 +309,11 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
     },
     joinListByCode: (code) => joinListMutation.mutateAsync(code),
     getListMembers,
+    deleteList: async (id) => deleteListMutation.mutateAsync(id),
+    leaveList: async (id) => leaveListMutation.mutateAsync(id),
     isCreatingList: createListMutation.isPending,
     isJoiningList: joinListMutation.isPending,
+    isDeletingList: deleteListMutation.isPending,
+    isLeavingList: leaveListMutation.isPending,
   }
 }

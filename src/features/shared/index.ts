@@ -5,7 +5,7 @@ export { InstallPwaPrompt } from './components/InstallPwaPrompt'
 export { LanguageSwitcher } from './components/LanguageSwitcher'
 export { default as OptimizedImage } from './components/OptimizedImage'
 export { SectionErrorFallback } from './components/SectionErrorFallback'
-export { default as SpotifyGlassCard } from './components/SpotifyGlassCard'
+
 export { default as ThemeSwitcher } from './components/ThemeSwitcher'
 export { default as TechBackground } from './components/TechBackground'
 export { default as HudContainer } from './components/HudContainer'
