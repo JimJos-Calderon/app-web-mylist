@@ -26,18 +26,27 @@ const ListSearchSection: React.FC<ListSearchSectionProps> = ({
   searchPlaceholder,
 }) => {
   return (
-    <section className="relative z-30 mb-8 rounded-[2rem] border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-slate-950/95 p-5 shadow-2xl shadow-[rgba(var(--color-accent-primary-rgb),0.15)] backdrop-blur-xl md:sticky md:top-6 md:mb-12 md:p-8">
-      <SearchBar
-        value={searchInput}
-        onChange={setSearchInput}
-        onSubmit={onSubmit}
-        placeholder={searchPlaceholder}
-        loading={suggestionsLoading}
-        showDropdown={showSuggestions && suggestions.length > 0}
-        suggestions={suggestions}
-        onSuggestionSelect={onSuggestionSelect}
-        ref={sugerenciasRef}
-      />
+    <section className="relative z-30 mb-8 md:sticky md:top-6 md:mb-12">
+      <div
+        className="mx-auto max-w-2xl rounded-2xl border p-4 backdrop-blur-xl md:p-5"
+        style={{
+          borderColor: 'rgba(var(--color-accent-primary-rgb), 0.4)',
+          background: 'rgba(0, 0, 0, 0.88)',
+          boxShadow: '0 4px 24px rgba(var(--color-accent-primary-rgb), 0.1)',
+        }}
+      >
+        <SearchBar
+          value={searchInput}
+          onChange={setSearchInput}
+          onSubmit={onSubmit}
+          placeholder={searchPlaceholder}
+          loading={suggestionsLoading}
+          showDropdown={showSuggestions && suggestions.length > 0}
+          suggestions={suggestions}
+          onSuggestionSelect={onSuggestionSelect}
+          ref={sugerenciasRef}
+        />
+      </div>
     </section>
   )
 }
