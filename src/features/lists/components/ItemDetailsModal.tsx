@@ -25,6 +25,8 @@ interface ItemDetailsModalProps {
   onClose: () => void
   onToggle: () => void
   onDelete: () => void
+  onNext?: () => void
+  onPrevious?: () => void
   closeButtonRef: React.RefObject<HTMLButtonElement | null>
 }
 
@@ -52,6 +54,8 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   onClose,
   onToggle,
   onDelete,
+  onNext,
+  onPrevious,
   closeButtonRef,
 }) => {
   if (!isOpen || !selectedItem) return null
@@ -69,6 +73,12 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
         if (e.key === 'Escape') {
           e.stopPropagation()
           onClose()
+        } else if (e.key === 'ArrowRight' && onNext) {
+          e.stopPropagation()
+          onNext()
+        } else if (e.key === 'ArrowLeft' && onPrevious) {
+          e.stopPropagation()
+          onPrevious()
         }
       }}
     >
@@ -80,9 +90,6 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
       >
         <div className="flex items-start justify-between gap-4 border-b border-slate-800/60 p-5">
           <div>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">
-              Detalle
-            </p>
             <h3 className="text-lg font-black uppercase tracking-tight text-white md:text-2xl">
               {selectedItem.titulo}
             </h3>
@@ -102,15 +109,38 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
             </div>
           </div>
 
-          <button
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-400 transition hover:border-slate-500 hover:text-white"
-            aria-label={closeLabel}
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {onPrevious && (
+              <button
+                type="button"
+                onClick={onPrevious}
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 transition hover:border-slate-500 hover:text-white"
+                aria-label="Anterior"
+              >
+                ←
+              </button>
+            )}
+            {onNext && (
+              <button
+                type="button"
+                onClick={onNext}
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 transition hover:border-slate-500 hover:text-white"
+                aria-label="Siguiente"
+              >
+                →
+              </button>
+            )}
+            <div className="mx-1 h-6 w-px bg-slate-800/80"></div>
+            <button
+              ref={closeButtonRef}
+              type="button"
+              onClick={onClose}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 transition hover:border-slate-500 hover:text-white"
+              aria-label={closeLabel}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
@@ -141,22 +171,26 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
           </div>
 
           <div className="flex flex-col p-5">
-            <div className="mb-5 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-purple-300">
-                Acción principal
+            <div className="mb-8 flex-1">
+              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                Sinopsis
               </p>
-              <h4 className="mb-3 text-base font-semibold text-white">
-                {selectedItem.visto ? 'Ya está marcado como visto' : 'Márcalo cuando lo hayáis visto'}
-              </h4>
+              <div className="text-sm leading-relaxed text-slate-200">
+                {synopsisLoading && <p className="text-slate-400">{loadingSynopsisLabel}</p>}
+                {synopsisError && <p className="text-red-400">{synopsisError}</p>}
+                {!synopsisLoading && !synopsisError && <p>{synopsis || emptySynopsisLabel}</p>}
+              </div>
+            </div>
 
+            <div className="mb-6">
               <button
                 type="button"
                 onClick={onToggle}
                 disabled={modalActionLoading !== null}
-                className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
                   selectedItem.visto
-                    ? 'border-cyan-400/40 bg-cyan-400/12 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18'
-                    : 'border-purple-400/40 bg-purple-400/12 text-purple-200 hover:border-purple-300 hover:bg-purple-400/18'
+                    ? 'border-cyan-400/50 bg-cyan-400/15 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/25 shadow-cyan-400/10'
+                    : 'border-purple-400/50 bg-purple-400/15 text-purple-200 hover:border-purple-300 hover:bg-purple-400/25 shadow-purple-400/10'
                 }`}
               >
                 <span>
@@ -167,18 +201,6 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                       : markWatchedLabel}
                 </span>
               </button>
-            </div>
-
-            <div className="flex-1 rounded-2xl border border-slate-800 bg-slate-900/30 p-4">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
-                Sinopsis
-              </p>
-
-              <div className="text-sm leading-relaxed text-slate-200">
-                {synopsisLoading && <p className="text-slate-400">{loadingSynopsisLabel}</p>}
-                {synopsisError && <p className="text-red-400">{synopsisError}</p>}
-                {!synopsisLoading && !synopsisError && <p>{synopsis || emptySynopsisLabel}</p>}
-              </div>
             </div>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

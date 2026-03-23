@@ -14,7 +14,6 @@ interface UseListSearchFlowParams {
   listId?: string
   user: User
   onAddItem: (item: Omit<ListItem, 'id' | 'created_at'>) => Promise<void>
-  onFocusDecisionBlock: () => void
 }
 
 interface UseListSearchFlowReturn {
@@ -35,7 +34,6 @@ export const useListSearchFlow = ({
   listId,
   user,
   onAddItem,
-  onFocusDecisionBlock,
 }: UseListSearchFlowParams): UseListSearchFlowReturn => {
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -121,9 +119,6 @@ export const useListSearchFlow = ({
       })
 
       resetSearchUi()
-      requestAnimationFrame(() => {
-        onFocusDecisionBlock()
-      })
     } catch (error) {
       const details = error && typeof error === 'object' ? JSON.stringify(error) : String(error)
       console.error('Error adding item:', details, error)
@@ -154,9 +149,6 @@ export const useListSearchFlow = ({
       })
 
       resetSearchUi()
-      requestAnimationFrame(() => {
-        onFocusDecisionBlock()
-      })
     } catch (error) {
       const details = error && typeof error === 'object' ? JSON.stringify(error) : String(error)
       console.error('Error adding item manually:', details, error)

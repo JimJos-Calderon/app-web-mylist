@@ -56,21 +56,30 @@ const ItemCard: React.FC<ItemCardProps> = ({
   }
 
   const isRated = (item.rating ?? 0) > 0
-  const statusLabel = isRated ? 'STATUS: RATED' : 'STATUS: PENDING'
+
+  let statusText = ''
+  if (isRated) {
+    statusText = t('stats.rated', 'RATED')
+  } else if (item.visto) {
+    statusText = t('item.watched', 'WATCHED')
+  } else {
+    statusText = t('item.not_watched', 'PENDING')
+  }
+
+  const statusLabel = `STATUS: ${statusText}`.toUpperCase()
   const ownerLabel = isOwn ? t('own_item') : username || item.user_email?.split('@')[0] || 'Usuario'
-  const progressLabel = item.visto ? t('item.watched') : t('item.not_watched')
   const progressActionLabel = item.visto ? t('item.mark_unwatched') : t('item.mark_watched')
 
   return (
     <>
       <HudContainer
         role="article"
-        className={`group flex h-full flex-col transition-all duration-500 ${
+        className={`group flex h-full flex-col transition-all duration-300 hover:z-10 ${
           item.visto && !disableVistoEffect
-            ? 'opacity-55'
-            : isOwn
-              ? 'hud-item-card--owner'
-              : 'hud-item-card--shared'
+            ? 'opacity-[0.65] saturate-50 hover:opacity-100 hover:saturate-100'
+            : 'ring-1 ring-inset ring-white/5 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/50 hover:ring-white/10'
+        } ${
+          isOwn ? 'hud-item-card--owner' : 'hud-item-card--shared'
         }`}
         contentClassName="relative flex h-full flex-col"
       >
@@ -88,17 +97,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
               className="absolute left-3 top-3 z-10"
             />
 
-            <div className="absolute right-3 top-3 z-10">
-              <span
-                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${
-                  item.visto
-                    ? 'border-cyan-400/40 bg-cyan-400/15 text-cyan-200'
-                    : 'border-slate-400/30 bg-black/40 text-slate-200'
-                }`}
-              >
-                {item.visto ? 'VISTO' : 'PENDIENTE'}
-              </span>
-            </div>
+
 
             {item.poster_url ? (
               <OptimizedImage
@@ -117,7 +116,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
               </div>
             )}
 
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
           </div>
         </button>
 
@@ -148,60 +147,49 @@ const ItemCard: React.FC<ItemCardProps> = ({
               )}
             </div>
 
-            <div className="mt-3 flex items-center gap-2">
-              <span
-                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${
-                  item.visto
-                    ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200'
-                    : 'border-amber-400/30 bg-amber-400/10 text-amber-200'
-                }`}
-              >
-                {progressLabel}
-              </span>
-            </div>
+
 
             <div className="hud-item-rating-divider mt-4 pt-3">
               <RatingWidget itemId={item.id} onlyOwn={true} tone={isOwn ? 'owner' : 'shared'} />
             </div>
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 space-y-2">
             <button
               type="button"
               onClick={(event) => {
                 event.stopPropagation()
-                handleToggle()
+                onOpenDetails(item)
               }}
-              disabled={togglingWatched}
-              className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
-                item.visto
-                  ? 'border-cyan-400/40 bg-cyan-400/12 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18'
-                  : 'border-purple-400/40 bg-purple-400/12 text-purple-200 hover:border-purple-300 hover:bg-purple-400/18'
-              }`}
-              aria-label={progressActionLabel}
-              title={progressActionLabel}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:border-slate-500 hover:bg-slate-700/50"
             >
-              {togglingWatched ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : item.visto ? (
-                <EyeOff className="h-4 w-4" aria-hidden="true" />
-              ) : (
-                <Eye className="h-4 w-4" aria-hidden="true" />
-              )}
-
-              <span>{progressActionLabel}</span>
+              Ver detalle
             </button>
 
-            <div className="flex items-center justify-between gap-2">
+            <div className={`grid gap-2 ${isOwn ? 'grid-cols-[1fr_auto]' : 'grid-cols-1'}`}>
               <button
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation()
-                  onOpenDetails(item)
+                  handleToggle()
                 }}
-                className="rounded-lg border border-slate-700 bg-black/30 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300 transition hover:border-slate-500 hover:text-white"
+                disabled={togglingWatched}
+                className={`flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                  item.visto
+                    ? 'border-cyan-400/40 bg-cyan-400/12 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18'
+                    : 'border-purple-400/40 bg-purple-400/12 text-purple-200 hover:border-purple-300 hover:bg-purple-400/18'
+                }`}
+                aria-label={progressActionLabel}
+                title={progressActionLabel}
               >
-                Ver detalle
+                {togglingWatched ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : item.visto ? (
+                  <EyeOff className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Eye className="h-4 w-4" aria-hidden="true" />
+                )}
+                <span className="truncate">{progressActionLabel}</span>
               </button>
 
               {isOwn && (
@@ -212,7 +200,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
                     setShowConfirmDialog(true)
                   }}
                   disabled={deleting}
-                  className="inline-flex items-center gap-2 rounded-lg border border-red-500/35 bg-red-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-red-300 transition hover:border-red-400 hover:bg-red-500/15 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center justify-center rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-2 text-red-300 transition hover:border-red-400 hover:bg-red-500/15 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50"
                   title={t('buttons.delete')}
                   aria-label={`${t('buttons.delete')} ${item.titulo}`}
                 >
@@ -221,7 +209,6 @@ const ItemCard: React.FC<ItemCardProps> = ({
                   ) : (
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   )}
-                  <span>{t('buttons.delete')}</span>
                 </button>
               )}
             </div>

@@ -17,6 +17,7 @@ interface UseListContentViewReturn {
   totalVisibleItems: number
   totalPages: number
   paginatedPendingItems: ListItem[]
+  paginatedWatchedItems: ListItem[]
 }
 
 const DEFAULT_ITEMS_PER_PAGE = 9
@@ -74,12 +75,18 @@ export const useListContentView = ({
   )
 
   const totalVisibleItems = visiblePendingItems.length + visibleWatchedItems.length
-  const totalPages = Math.max(1, Math.ceil(visiblePendingItems.length / itemsPerPage))
+
+  const activePaginationList = filters.showUnwatched ? visiblePendingItems : visibleWatchedItems
+  const totalPages = Math.max(1, Math.ceil(activePaginationList.length / itemsPerPage))
 
   const paginatedPendingItems = useMemo(
-    () =>
-      visiblePendingItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
+    () => visiblePendingItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
     [currentPage, itemsPerPage, visiblePendingItems]
+  )
+
+  const paginatedWatchedItems = useMemo(
+    () => visibleWatchedItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
+    [currentPage, itemsPerPage, visibleWatchedItems]
   )
 
   return {
@@ -91,5 +98,6 @@ export const useListContentView = ({
     totalVisibleItems,
     totalPages,
     paginatedPendingItems,
+    paginatedWatchedItems,
   }
 }

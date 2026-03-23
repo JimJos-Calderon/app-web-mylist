@@ -37,18 +37,12 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
 }) => {
   return (
     <>
-      <section className="mb-8">
-        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <section className="mb-12 mt-10 md:mb-16 md:mt-16">
+        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-400">
-              Prioridad
-            </p>
-            <h3 className="text-lg font-semibold text-white">
-              {searchQuery ? 'Pendientes filtrados' : 'Pendientes para decidir'}
-            </h3>
-            <p className="mt-1 text-sm text-slate-400">
-              Este es el bloque principal para responder a qué vemos hoy.
-            </p>
+            <h2 className="text-xl font-bold tracking-tight text-white md:text-2xl">
+              {searchQuery ? 'Pendientes filtrados' : 'Para decidir hoy'}
+            </h2>
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs text-slate-400">

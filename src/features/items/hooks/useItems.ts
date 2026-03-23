@@ -127,24 +127,44 @@ export const useItems = (
     },
   })
 
-  // ─── MUTACIÓN: Toggle Visto ────────────────────────────────────
   const toggleVistoMutation = useMutation({
     mutationFn: async ({ id, currentState }: { id: string; currentState: boolean }) => {
-      const { error: updateError } = await supabase
+      const { data, error: updateError } = await supabase
         .from('items')
         .update({ visto: !currentState })
         .eq('id', id)
+        .select()
+        .single()
 
       if (updateError) throw updateError
+      if (!data) throw new Error('La base de datos devolvió 0 filas actualizadas.')
+      return data
     },
-    onSuccess: () => {
-      // Invalidar y re-fetchear items
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.items.byList(tipo, listId || ''),
-      })
+    onMutate: async ({ id, currentState }) => {
+      const key = queryKeys.items.byList(tipo, listId || '')
+      await queryClient.cancelQueries({ queryKey: key })
+      const previousItems = queryClient.getQueryData<ListItem[]>(key)
+
+      if (previousItems) {
+        queryClient.setQueryData<ListItem[]>(
+          key,
+          previousItems.map((item) =>
+            item.id === id ? { ...item, visto: !currentState } : item
+          )
+        )
+      }
+      return { previousItems, key }
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
       console.error('Error toggling visto:', error)
+      alert(`No se pudo marcar: ${error.message} (Podría ser un problema de permisos en la lista)`)
+      if (context?.previousItems) {
+        queryClient.setQueryData(context.key, context.previousItems)
+      }
+    },
+    onSettled: () => {
+      // NO invalidamos instantáneamente para evitar una Race Condition con la base de datos distribuida.
+      // El Realtime Webhook de Supabase se encargará de invalidar automáticamente al sincronizar.
     },
   })
 

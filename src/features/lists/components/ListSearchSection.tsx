@@ -11,7 +11,6 @@ interface ListSearchSectionProps {
   suggestions: OmdbSuggestion[]
   onSuggestionSelect: (suggestion: OmdbSuggestion) => void
   sugerenciasRef: React.RefObject<HTMLDivElement | null>
-  onFocusDecisionBlock: () => void
   searchPlaceholder: string
 }
 
@@ -24,31 +23,10 @@ const ListSearchSection: React.FC<ListSearchSectionProps> = ({
   suggestions,
   onSuggestionSelect,
   sugerenciasRef,
-  onFocusDecisionBlock,
   searchPlaceholder,
 }) => {
   return (
-    <section className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[rgba(0,0,0,0.28)] p-4 md:p-5">
-      <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400">
-            Acción principal
-          </p>
-          <h3 className="text-base font-semibold text-white">Buscar y añadir opciones</h3>
-          <p className="mt-1 text-sm text-slate-400">
-            Mete candidatos rápido en la lista activa y vuelve a decidir.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={onFocusDecisionBlock}
-          className="rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
-        >
-          Bajar a pendientes
-        </button>
-      </div>
-
+    <section className="relative z-30 mb-8 rounded-[2rem] border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-slate-950/95 p-5 shadow-2xl shadow-[rgba(var(--color-accent-primary-rgb),0.15)] backdrop-blur-xl md:sticky md:top-6 md:mb-12 md:p-8">
       <SearchBar
         value={searchInput}
         onChange={setSearchInput}

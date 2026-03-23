@@ -27,7 +27,6 @@ interface ListaContenidoProps {
 
 const ListaContenido: React.FC<ListaContenidoProps> = ({
   tipo,
-  icono,
   listId,
   lists = [],
   currentList,
@@ -106,6 +105,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     totalVisibleItems,
     totalPages,
     paginatedPendingItems,
+    paginatedWatchedItems,
   } = useListContentView({
     items,
     filters,
@@ -117,7 +117,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     listId,
     user: user || { id: '', email: '' },
     onAddItem: addItem,
-    onFocusDecisionBlock: focusDecisionBlock,
   })
 
   const itemDetails = useListItemDetails({
@@ -126,6 +125,24 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     onDeleteItem: deleteItem,
     getDeleteConfirmationMessage: (item) => t('modal.delete_title', { title: item.titulo }),
   })
+
+  const allVisibleItems = React.useMemo(() => {
+    return [...visiblePendingItems, ...visibleWatchedItems]
+  }, [visiblePendingItems, visibleWatchedItems])
+
+  const currentItemIndex = itemDetails.selectedItem
+    ? allVisibleItems.findIndex((i) => i.id === itemDetails.selectedItem!.id)
+    : -1
+
+  const handleNextItem =
+    currentItemIndex >= 0 && currentItemIndex < allVisibleItems.length - 1
+      ? () => itemDetails.handleOpenDetails(allVisibleItems[currentItemIndex + 1])
+      : undefined
+
+  const handlePrevItem =
+    currentItemIndex > 0
+      ? () => itemDetails.handleOpenDetails(allVisibleItems[currentItemIndex - 1])
+      : undefined
 
   if (!user) return null
 
@@ -155,38 +172,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
         />
       )}
 
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black" />
-        <div
-          className="absolute bottom-0 left-0 right-0 h-[40%] opacity-10"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, #ff00ff 1px, transparent 1px), linear-gradient(to bottom, #ff00ff 1px, transparent 1px)',
-            backgroundSize: '50px 50px',
-            transform: 'perspective(500px) rotateX(60deg)',
-            transformOrigin: 'bottom center',
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
-      </div>
-
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-12">
-        <header className="mb-6 space-y-2 md:mb-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-400/80">
-            {tipo === 'pelicula' ? 'Películas' : 'Series'}
-          </p>
-
-          <div className="flex items-center gap-3">
-            <span className="text-3xl md:text-4xl">{icono}</span>
-            <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
-              {tipo === 'pelicula' ? 'Decidir qué ver' : 'Decidir qué seguir'}
-            </h1>
-          </div>
-
-          <p className="max-w-2xl text-sm text-slate-400">
-            Menos opciones secundarias, más foco en añadir y decidir desde pendientes.
-          </p>
-        </header>
 
         <ListActiveHeader
           currentList={currentList}
@@ -231,7 +217,6 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                 suggestions={searchFlow.suggestions}
                 onSuggestionSelect={searchFlow.handleAddFromSuggestion}
                 sugerenciasRef={searchFlow.sugerenciasRef}
-                onFocusDecisionBlock={focusDecisionBlock}
                 searchPlaceholder={t(
                   tipo === 'pelicula'
                     ? 'action.search_movie_placeholder'
@@ -262,6 +247,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                 visiblePendingItems={visiblePendingItems}
                 paginatedPendingItems={paginatedPendingItems}
                 visibleWatchedItems={visibleWatchedItems}
+                paginatedWatchedItems={paginatedWatchedItems}
                 showPendingSection={filters.showUnwatched}
                 showWatchedSection={filters.showWatched}
                 onFocusSearch={focusSearch}
@@ -303,6 +289,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
         onClose={itemDetails.handleCloseDetails}
         onToggle={itemDetails.handleToggleFromModal}
         onDelete={itemDetails.handleDeleteFromModal}
+        onNext={handleNextItem}
+        onPrevious={handlePrevItem}
         closeButtonRef={itemDetails.closeButtonRef}
       />
     </div>

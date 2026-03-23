@@ -232,19 +232,32 @@
     "subtitle": "Recent moves in this collaborative list",
     "expand": "Show history",
     "collapse": "Hide history",
-    "empty": "No recent activity.",
-    "loading": "Loading activity...",
-    "error": "Could not load activity.",
+    "empty": "No recent activity logged.",
+    "initializing": "Syncing server logs...",
+    "error": "Failed to decrypt event log.",
     "count": "Events",
-    "actor_unknown": "Someone",
+    "actor_unknown": "Unknown User",
+    "executed": "executed",
+    "on_target": "on target",
+    "in_region": "in directory",
+    "fallback": {
+      "item": "CORRUPT_DATA",
+      "list": "CORRUPT_SECTOR"
+    },
     "actions": {
-      "INSERT": "added",
-      "UPDATE": "updated",
-      "DELETE": "deleted"
+      "generic": "ACTION",
+      "insert": "added",
+      "update": "edited",
+      "delete": "deleted"
+    },
+    "action_keys": {
+      "items_insert": "added",
+      "items_update": "marked / unmarked",
+      "items_delete": "deleted"
     },
     "targets": {
-      "items": "an item",
-      "lists": "the list",
+      "items": "a file",
+      "lists": "a directory",
       "profiles": "a profile",
       "members": "a member"
     }

@@ -18,6 +18,7 @@ interface ListDiscoverSectionProps {
   visiblePendingItems: ListItem[]
   paginatedPendingItems: ListItem[]
   visibleWatchedItems: ListItem[]
+  paginatedWatchedItems: ListItem[]
   showPendingSection: boolean
   showWatchedSection: boolean
   onFocusSearch: () => void
@@ -41,6 +42,7 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
   visiblePendingItems,
   paginatedPendingItems,
   visibleWatchedItems,
+  paginatedWatchedItems,
   showPendingSection,
   showWatchedSection,
   onFocusSearch,
@@ -70,14 +72,6 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
 
       {!loading && totalVisibleItems === 0 && (
         <div className="rounded-3xl border border-slate-800 bg-slate-950/35 px-6 py-16 text-center">
-          <div
-            className="mx-auto mb-6 flex h-16 w-16 items-center justify-center border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] text-2xl font-mono text-accent-primary"
-            style={{
-              clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-            }}
-          >
-            SYS
-          </div>
 
           <h3 className="mb-2 text-xl font-semibold text-white">
             {searchQuery
@@ -139,11 +133,19 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
           {showWatchedSection && (
             <WatchedItemsSection
               visibleWatchedItems={visibleWatchedItems}
+              paginatedWatchedItems={paginatedWatchedItems}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              isMobile={isMobile}
               currentUserId={currentUserId}
               onDelete={onDelete}
               onToggleVisto={onToggleVisto}
               onOpenDetails={onOpenDetails}
+              onPageChange={onPageChange}
               hasPendingSection={showPendingSection}
+              previousLabel={t('pagination.previous')}
+              nextLabel={t('pagination.next')}
+              pageLabel={t('pagination.page', { current: currentPage, total: totalPages })}
             />
           )}
         </>

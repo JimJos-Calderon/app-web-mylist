@@ -232,19 +232,32 @@
     "subtitle": "Movimientos recientes de esta lista colaborativa",
     "expand": "Mostrar historial",
     "collapse": "Ocultar historial",
-    "empty": "No hay actividad reciente.",
-    "loading": "Cargando actividad...",
-    "error": "No se pudo cargar la actividad.",
+    "empty": "No hay actividad reciente en el registro.",
+    "initializing": "Sincronizando registros del servidor...",
+    "error": "Error al descifrar el registro de eventos.",
     "count": "Eventos",
-    "actor_unknown": "Alguien",
+    "actor_unknown": "Usuario Desconocido",
+    "executed": "ejecutó",
+    "on_target": "sobre el objetivo",
+    "in_region": "en el directorio",
+    "fallback": {
+      "item": "DATO_CORRUPTO",
+      "list": "SECTOR_CORRUPTO"
+    },
     "actions": {
-      "INSERT": "añadió",
-      "UPDATE": "actualizó",
-      "DELETE": "eliminó"
+      "generic": "ACCIÓN",
+      "insert": "agregó",
+      "update": "editó",
+      "delete": "eliminó"
+    },
+    "action_keys": {
+      "items_insert": "agregó",
+      "items_update": "marcó / desmarcó",
+      "items_delete": "eliminó"
     },
     "targets": {
-      "items": "un elemento",
-      "lists": "la lista",
+      "items": "un archivo",
+      "lists": "un directorio",
       "profiles": "un perfil",
       "members": "un miembro"
     }
