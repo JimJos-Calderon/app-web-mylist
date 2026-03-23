@@ -16,6 +16,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "@radix-ui/react-dialog": "^1.1.2",
     "@sentry/react": "^10.42.0",
     "@sentry/vite-plugin": "^5.1.1",
     "@supabase/supabase-js": "^2.93.3",
@@ -33,10 +36,10 @@
     "react-router-dom": "^7.13.0",
     "swiper": "^12.1.2",
     "tailwindcss": "^4.1.18",
-    "@radix-ui/react-dialog": "^1.1.2",
     "vaul": "^1.1.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.2.0",
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.9.1",
