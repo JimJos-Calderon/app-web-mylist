@@ -35,7 +35,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     const ariaLabel = React.useMemo(() => t('placeholders.search_aria_label'), [t])
     
     return (
-      <div className="relative mb-8 md:mb-16 max-w-xl" ref={ref}>
+      <div className="relative" ref={ref}>
         <form onSubmit={onSubmit} className="flex gap-2 md:gap-3">
           <div className="relative flex-1">
             <TechLabel

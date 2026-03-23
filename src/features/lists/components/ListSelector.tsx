@@ -9,6 +9,8 @@ interface ListSelectorProps {
   loading?: boolean
   label?: string
   placeholder?: string
+  hideLabel?: boolean
+  hideDescription?: boolean
 }
 
 const isValidList = (value: List | null | undefined): value is List => {
@@ -22,6 +24,8 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   loading = false,
   label = 'Cambiar lista activa',
   placeholder = 'Selecciona una lista',
+  hideLabel = false,
+  hideDescription = false,
 }) => {
   const safeLists = lists.filter(isValidList)
   const hasLists = safeLists.length > 0
@@ -29,18 +33,22 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   const safeCurrentList =
     currentList && isValidList(currentList)
       ? currentList
-      : safeLists.find((list) => list.id === currentList?.id) || null
+      : currentList?.id 
+        ? safeLists.find((list) => list.id === currentList.id) || null
+        : null
 
   const selectedValue = safeCurrentList?.id ?? ''
 
   return (
     <div className="w-full">
-      <label
-        htmlFor="active-list-selector"
-        className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]"
-      >
-        {label}
-      </label>
+      {!hideLabel && (
+        <label
+          htmlFor="active-list-selector"
+          className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]"
+        >
+          {label}
+        </label>
+      )}
 
       <div className="relative">
         <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-400">
@@ -55,11 +63,12 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             if (nextList) onChange(nextList)
           }}
           disabled={loading || !hasLists}
-          className="w-full appearance-none rounded-2xl border py-3 pl-10 pr-11 text-sm font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full appearance-none rounded-xl border py-2.5 pl-10 pr-11 text-xs font-bold font-mono tracking-widest uppercase outline-none transition disabled:cursor-not-allowed disabled:opacity-60"
           style={{
-            borderColor: 'rgba(var(--color-accent-primary-rgb), 0.35)',
-            background: 'rgba(0, 0, 0, 0.5)',
-            color: 'var(--color-text-primary)',
+            borderColor: 'rgba(var(--color-accent-primary-rgb), 0.3)',
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: 'var(--color-accent-primary)',
+            boxShadow: 'inset 0 0 10px rgba(var(--color-accent-primary-rgb), 0.05)',
           }}
         >
           {!safeCurrentList && <option value="">{placeholder}</option>}
@@ -75,15 +84,17 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         </div>
       </div>
 
-      <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-        {loading
-          ? 'Cargando listas...'
-          : safeCurrentList
-            ? `Ahora mismo estás trabajando sobre "${safeCurrentList.name}".`
-            : hasLists
-              ? 'Selecciona qué lista quieres usar como contexto activo.'
-              : 'Todavía no hay listas disponibles.'}
-      </p>
+      {!hideDescription && (
+        <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+          {loading
+            ? 'Cargando listas...'
+            : safeCurrentList
+              ? `Ahora mismo estás trabajando sobre "${safeCurrentList.name}".`
+              : hasLists
+                ? 'Selecciona qué lista quieres usar como contexto activo.'
+                : 'Todavía no hay listas disponibles.'}
+        </p>
+      )}
     </div>
   )
 }

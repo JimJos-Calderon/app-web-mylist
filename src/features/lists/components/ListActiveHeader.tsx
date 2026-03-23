@@ -34,69 +34,107 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
   return (
     <section className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.22)] bg-[rgba(0,0,0,0.42)] p-4 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] md:p-5">
       <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl font-bold text-white md:text-2xl">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
+            <h2 className="text-xl font-black uppercase tracking-tighter text-white md:text-2xl">
               {currentList?.name || 'Sin lista seleccionada'}
             </h2>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-60">
+              {currentList ? 'ID_ACTIVE_CONTEXT' : 'SYSTEM_IDLE'}
+            </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <div className="flex flex-wrap items-center gap-3">
             {lists.length > 0 && setCurrentList && (
-              <div className="min-w-[280px] flex-1">
+              <div className="h-11 min-w-[200px] max-w-xs flex-1">
                 <ListSelector
                   lists={lists}
                   currentList={currentList}
                   onChange={onListChange}
                   loading={loadingLists}
+                  hideLabel
+                  hideDescription
                 />
               </div>
             )}
 
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(var(--color-accent-primary-rgb),0.1)] px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-[#0ff] transition-all hover:border-[#0ff] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.4)]"
-              onClick={onCreateList}
-            >
-              <span className="opacity-70">+</span> [ {createListLabel} ]
-            </button>
-
-            {currentList && (
+            <div className="flex gap-2">
               <button
                 type="button"
-                className="flex items-center justify-center gap-2 rounded-xl border border-[rgba(var(--color-accent-secondary-rgb),0.5)] bg-[rgba(var(--color-accent-secondary-rgb),0.1)] px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-accent-secondary transition-all hover:border-[var(--color-accent-secondary)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)]"
-                onClick={onInvite}
+                className="flex h-11 items-center justify-center gap-2 rounded-xl border px-5 font-mono text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110"
+                style={{
+                  borderColor: 'rgba(var(--color-accent-primary-rgb), 0.4)',
+                  background: 'rgba(var(--color-accent-primary-rgb), 0.08)',
+                  color: 'var(--color-accent-primary)',
+                  boxShadow: '0 0 15px rgba(var(--color-accent-primary-rgb), 0.05)',
+                }}
+                onClick={onCreateList}
               >
-                <span className="opacity-70">{'>'}</span> [ {inviteLabel} ]
+                <span className="opacity-70">+</span> [ {createListLabel} ]
               </button>
-            )}
+
+              {currentList && (
+                <button
+                  type="button"
+                  className="flex h-11 items-center justify-center gap-2 rounded-xl border px-5 font-mono text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110"
+                  style={{
+                    borderColor: 'rgba(var(--color-accent-secondary-rgb), 0.4)',
+                    background: 'rgba(var(--color-accent-secondary-rgb), 0.08)',
+                    color: 'var(--color-accent-secondary)',
+                    boxShadow: '0 0 15px rgba(var(--color-accent-secondary-rgb), 0.05)',
+                  }}
+                  onClick={onInvite}
+                >
+                  <span className="opacity-70">{'>'}</span> [ {inviteLabel} ]
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-          <div className="rounded-2xl border border-cyan-500/20 bg-slate-950/40 px-4 py-3">
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400">
+        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+          <div
+            className="rounded-xl border px-3 py-2 transition-all"
+            style={{ 
+              borderColor: 'rgba(var(--color-accent-primary-rgb), 0.3)', 
+              background: 'rgba(var(--color-accent-primary-rgb), 0.05)',
+              boxShadow: '0 0 10px rgba(var(--color-accent-primary-rgb), 0.05)'
+            }}
+          >
+            <p className="mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-accent-primary opacity-70">
               Pendientes
             </p>
-            <h3 className="text-xl font-semibold text-white">{pendingCount}</h3>
+            <h3 className="text-lg font-bold text-[var(--color-text-primary)]">{pendingCount}</h3>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/40 px-4 py-3">
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
+          <div
+            className="rounded-xl border px-3 py-2 transition-all"
+            style={{ 
+              borderColor: 'rgba(var(--color-accent-primary-rgb), 0.15)', 
+              background: 'rgba(0, 0, 0, 0.2)',
+              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1)'
+            }}
+          >
+            <p className="mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-70">
               Vistos
             </p>
-            <h3 className="text-xl font-semibold text-white">{watchedCount}</h3>
+            <h3 className="text-lg font-bold text-[var(--color-text-primary)]">{watchedCount}</h3>
           </div>
 
           <button
             type="button"
             onClick={onFocusDecisionBlock}
-            className="rounded-2xl border border-purple-500/30 bg-purple-500/8 px-4 py-3 text-left transition hover:border-purple-500/50 hover:bg-purple-500/12"
+            className="rounded-xl border px-3 py-2 text-left transition-all hover:brightness-110 active:scale-[0.98]"
+            style={{ 
+              borderColor: 'rgba(var(--color-accent-secondary-rgb), 0.3)', 
+              background: 'rgba(var(--color-accent-secondary-rgb), 0.08)',
+              boxShadow: '0 0 15px rgba(var(--color-accent-secondary-rgb), 0.1)'
+            }}
           >
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-purple-400">
+            <p className="mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-accent-secondary opacity-70">
               Ir a
             </p>
-            <h3 className="text-sm font-semibold text-white">Pendientes</h3>
+            <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Pendientes</h3>
           </button>
         </div>
       </div>
