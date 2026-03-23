@@ -37,7 +37,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     <div className="w-full">
       <label
         htmlFor="active-list-selector"
-        className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"
+        className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]"
       >
         {label}
       </label>
@@ -55,7 +55,12 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             if (nextList) onChange(nextList)
           }}
           disabled={loading || !hasLists}
-          className="w-full appearance-none rounded-2xl border border-slate-700 bg-slate-950/80 py-3 pl-10 pr-11 text-sm font-medium text-white outline-none transition hover:border-slate-500 focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full appearance-none rounded-2xl border py-3 pl-10 pr-11 text-sm font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60"
+          style={{
+            borderColor: 'rgba(var(--color-accent-primary-rgb), 0.35)',
+            background: 'rgba(0, 0, 0, 0.5)',
+            color: 'var(--color-text-primary)',
+          }}
         >
           {!safeCurrentList && <option value="">{placeholder}</option>}
           {safeLists.map((list) => (
@@ -70,7 +75,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         </div>
       </div>
 
-      <p className="mt-2 text-xs text-slate-500">
+      <p className="mt-2 text-xs text-[var(--color-text-muted)]">
         {loading
           ? 'Cargando listas...'
           : safeCurrentList
