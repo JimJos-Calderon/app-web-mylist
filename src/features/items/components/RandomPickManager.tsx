@@ -83,6 +83,7 @@ const RandomPickManager: React.FC<RandomPickManagerProps> = ({
               {selectedItem ? (
                 <RandomWinnerContent
                   item={selectedItem}
+                  pool={items}
                   onReRoll={handleReRoll}
                   onClose={() => handleViewDetails(selectedItem)}
                 />
@@ -126,6 +127,7 @@ const RandomPickManager: React.FC<RandomPickManagerProps> = ({
               {selectedItem ? (
                 <RandomWinnerContent
                   item={selectedItem}
+                  pool={items}
                   onReRoll={handleReRoll}
                   onClose={() => handleViewDetails(selectedItem)}
                 />
