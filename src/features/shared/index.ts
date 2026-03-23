@@ -12,6 +12,7 @@ export { default as HudContainer } from './components/HudContainer'
 export { default as TechLabel } from './components/TechLabel'
 
 export { useReducedMotion } from './hooks/useReducedMotion'
+export { useMediaQuery } from './hooks/useMediaQuery'
 export { usePushNotifications } from './hooks/usePushNotifications'
 export { useTheme } from './hooks/useTheme'
 export type { ThemePreference } from './hooks/useTheme'

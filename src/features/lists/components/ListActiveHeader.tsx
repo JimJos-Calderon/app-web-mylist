@@ -15,6 +15,7 @@ interface ListActiveHeaderProps {
   onFocusDecisionBlock: () => void
   createListLabel: string
   inviteLabel: string
+  onRandomPick?: () => void
 }
 
 const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
@@ -30,6 +31,7 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
   onFocusDecisionBlock,
   createListLabel,
   inviteLabel,
+  onRandomPick,
 }) => {
   return (
     <section className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.22)] bg-[rgba(0,0,0,0.42)] p-4 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] md:p-5">
@@ -74,19 +76,47 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
               </button>
 
               {currentList && (
-                <button
-                  type="button"
-                  className="flex h-11 items-center justify-center gap-2 rounded-xl border px-5 font-mono text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110"
-                  style={{
-                    borderColor: 'rgba(var(--color-accent-secondary-rgb), 0.4)',
-                    background: 'rgba(var(--color-accent-secondary-rgb), 0.08)',
-                    color: 'var(--color-accent-secondary)',
-                    boxShadow: '0 0 15px rgba(var(--color-accent-secondary-rgb), 0.05)',
-                  }}
-                  onClick={onInvite}
-                >
-                  <span className="opacity-70">{'>'}</span> [ {inviteLabel} ]
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl border px-5 font-mono text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110"
+                    style={{
+                      borderColor: 'rgba(var(--color-accent-secondary-rgb), 0.4)',
+                      background: 'rgba(var(--color-accent-secondary-rgb), 0.08)',
+                      color: 'var(--color-accent-secondary)',
+                      boxShadow: '0 0 15px rgba(var(--color-accent-secondary-rgb), 0.05)',
+                    }}
+                    onClick={onInvite}
+                  >
+                    <span className="opacity-70">{'>'}</span> [ {inviteLabel} ]
+                  </button>
+
+                  <button
+                    type="button"
+                    className="group flex h-11 w-11 items-center justify-center rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] text-[var(--color-accent-primary)] transition-all hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.1)]"
+                    onClick={onRandomPick}
+                    title="Selección Aleatoria"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform group-hover:rotate-12"
+                    >
+                      <rect width="18" height="18" x="3" y="3" rx="2" />
+                      <path d="M7 7h.01" />
+                      <path d="M17 7h.01" />
+                      <path d="M7 17h.01" />
+                      <path d="M17 17h.01" />
+                    </svg>
+                  </button>
+                </div>
               )}
             </div>
           </div>

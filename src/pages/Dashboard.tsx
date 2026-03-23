@@ -2,12 +2,15 @@ import React, { Suspense, lazy, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Film, Tv, Plus, ArrowRight, Trash2, LogOut } from 'lucide-react'
+import { Film, Tv, Plus, ArrowRight, Trash2, LogOut, Shuffle } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/supabaseClient'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
 import { CreateListDialog, ListSelector, useLists } from '@/features/lists'
+import { RandomPickManager } from '@/features/items'
 import { SectionErrorFallback, ConfirmDialog } from '@/features/shared'
-import type { List } from '@/features/shared'
+import type { List, ListItem } from '@/features/shared'
 
 const ActivityFeedPanel = lazy(() => import('@/features/lists/components/ActivityFeed'))
 
@@ -108,10 +111,25 @@ const Dashboard: React.FC = () => {
   const { profile } = useUserProfile()
   const [isCreateListOpen, setIsCreateListOpen] = useState(false)
 
-  const { lists, currentList, setCurrentList, loading: loadingLists, createList, deleteList, leaveList, isDeletingList, isLeavingList } = useLists(user?.id)
+  const { lists, currentList, setCurrentList, loading: loadingLists, createList, deleteList, leaveList } = useLists(user?.id)
 
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
   const [isConfirmLeaveOpen, setIsConfirmLeaveOpen] = useState(false)
+  const [isRandomPickerOpen, setIsRandomPickerOpen] = useState(false)
+
+  // Fetch all items from the active list for the random picker
+  const { data: allItems = [] } = useQuery({
+    queryKey: ['items', 'all-for-random', currentList?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('items')
+        .select('*')
+        .eq('list_id', currentList?.id)
+      if (error) throw error
+      return data as ListItem[]
+    },
+    enabled: !!currentList?.id && isRandomPickerOpen,
+  })
 
   const displayName = profile?.username || t('navbar.myAccount')
   const hasLists = lists.length > 0
@@ -194,40 +212,46 @@ const Dashboard: React.FC = () => {
             </div>
 
             {hasLists && (
-              <div className="mb-5 flex items-end gap-3">
-                <div className="flex-1">
-                  <ListSelector
-                    lists={lists}
-                    currentList={currentList}
-                    onChange={setCurrentList}
-                    loading={loadingLists}
-                    label="Cambiar lista"
-                    placeholder="Selecciona una lista"
-                  />
+              <div className="mb-5 flex flex-col gap-3">
+                {/* Selector de lista principal */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex-1 min-w-[240px]">
+                    <ListSelector
+                      lists={lists}
+                      currentList={currentList}
+                      onChange={setCurrentList}
+                      loading={loadingLists}
+                      hideLabel
+                      hideDescription
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsRandomPickerOpen(true)}
+                      disabled={!hasActiveList || loadingLists}
+                      className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] px-5 font-mono text-[11px] font-black uppercase tracking-widest text-[var(--color-accent-primary)] transition hover:bg-[rgba(var(--color-accent-primary-rgb),0.08)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.1)] disabled:opacity-50"
+                      title={t('random_picker.button_tooltip', 'Elegir algo al azar')}
+                    >
+                      <Shuffle className="h-4 w-4" />
+                      <span className="hidden sm:inline">Elegir por mí</span>
+                    </button>
+
+                    {currentList && (
+                      <div className="flex items-center gap-1 p-1 rounded-xl bg-black/20 border border-white/5">
+                        <button
+                          type="button"
+                          className="p-2 text-white/40 hover:text-red-500 transition-colors"
+                          onClick={() => (currentList.owner_id === user.id ? setIsConfirmDeleteOpen(true) : setIsConfirmLeaveOpen(true))}
+                          title={currentList.owner_id === user.id ? t('lists.delete') : t('lists.leave')}
+                        >
+                          {currentList.owner_id === user.id ? <Trash2 className="h-4 w-4" /> : <LogOut className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {currentList && (
-                  currentList.owner_id === user.id ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsConfirmDeleteOpen(true)}
-                      disabled={isDeletingList}
-                      title="Eliminar lista"
-                      className="mb-[1.35rem] flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400 transition hover:border-red-400/50 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setIsConfirmLeaveOpen(true)}
-                      disabled={isLeavingList}
-                      title="Abandonar lista"
-                      className="mb-[1.35rem] flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-orange-500/30 bg-orange-500/10 text-orange-400 transition hover:border-orange-400/50 hover:bg-orange-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <LogOut className="h-5 w-5" />
-                    </button>
-                  )
-                )}
               </div>
             )}
 
@@ -351,6 +375,7 @@ const Dashboard: React.FC = () => {
         </section>
       </div>
 
+      {/* Modales y Diálogos */}
       <CreateListDialog
         open={isCreateListOpen}
         onClose={() => setIsCreateListOpen(false)}
@@ -360,22 +385,29 @@ const Dashboard: React.FC = () => {
 
       <ConfirmDialog
         isOpen={isConfirmDeleteOpen}
-        title="Eliminar Lista"
-        message={`¿Estás seguro de que quieres eliminar la lista "${currentList?.name}"? Esta acción no se puede deshacer y borrará la lista para todos los miembros.`}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        title={t('confirm_delete_list.title')}
+        message={t('confirm_delete_list.description')}
+        confirmText={t('confirm_delete_list.confirm')}
+        cancelText={t('confirm_delete_list.cancel')}
         onConfirm={handleDeleteList}
         onCancel={() => setIsConfirmDeleteOpen(false)}
       />
 
       <ConfirmDialog
         isOpen={isConfirmLeaveOpen}
-        title="Abandonar Lista"
-        message={`¿Estás seguro de que quieres salir de la lista "${currentList?.name}"? Dejarás de tener acceso a ella.`}
-        confirmText="Abandonar"
-        cancelText="Cancelar"
+        title={t('confirm_leave_list.title')}
+        message={t('confirm_leave_list.description')}
+        confirmText={t('confirm_leave_list.confirm')}
+        cancelText={t('confirm_leave_list.cancel')}
         onConfirm={handleLeaveList}
         onCancel={() => setIsConfirmLeaveOpen(false)}
+      />
+
+      {/* Random Picker feature */}
+      <RandomPickManager
+        isOpen={isRandomPickerOpen}
+        onOpenChange={setIsRandomPickerOpen}
+        items={allItems}
       />
     </>
   )

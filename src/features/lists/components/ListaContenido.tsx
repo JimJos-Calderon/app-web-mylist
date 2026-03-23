@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth'
-import { useFilters, useItems } from '@/features/items'
+import { useFilters, useItems, RandomPickManager } from '@/features/items'
 import { FilterState, List, ErrorAlert } from '@/features/shared'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
 import ListActiveHeader from './ListActiveHeader'
@@ -42,6 +42,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   const [currentPage, setCurrentPage] = useState(1)
   const [isMobile, setIsMobile] = useState(false)
   const [showSecondaryControls, setShowSecondaryControls] = useState(false)
+  const [isRandomPickerOpen, setIsRandomPickerOpen] = useState(false)
 
   const searchSectionRef = useRef<HTMLDivElement>(null)
   const discoverSectionRef = useRef<HTMLDivElement>(null)
@@ -172,6 +173,13 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
         />
       )}
 
+      <RandomPickManager
+        isOpen={isRandomPickerOpen}
+        onOpenChange={setIsRandomPickerOpen}
+        items={items}
+        onViewDetails={itemDetails.handleOpenDetails}
+      />
+
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-12">
 
         <ListActiveHeader
@@ -187,6 +195,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           onFocusDecisionBlock={focusDecisionBlock}
           createListLabel={t('action.create_list')}
           inviteLabel={t('action.invite')}
+          onRandomPick={() => setIsRandomPickerOpen(true)}
         />
 
         {!currentList && (
