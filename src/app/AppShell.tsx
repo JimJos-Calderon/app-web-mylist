@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense, lazy } from 'react'
 import { useLocation } from 'react-router-dom'
 import { XCircle } from 'lucide-react'
 import { useAuth } from '@/features/auth'
@@ -7,16 +7,17 @@ import PendingInviteModal from '@/features/invites/components/PendingInviteModal
 import { usePendingInvite } from '@/features/invites/hooks/usePendingInvite'
 import AppRoutes from '@/app/AppRoutes'
 import AppNavbar from '@/features/navigation/components/AppNavbar'
-
-import Login from '@pages/Login'
-import JoinList from '@pages/JoinList'
 import AppBootScreen from '@/features/app/components/AppBootScreen'
+
+const Login = lazy(() => import('@pages/Login'))
+const JoinList = lazy(() => import('@pages/JoinList'))
 
 const AppShell: React.FC = () => {
     const { session, loading, error: authError, needsUsername } = useAuth()
     const location = useLocation()
 
     const [showError, setShowError] = useState(authError)
+    const [prevAuthError, setPrevAuthError] = useState(authError)
 
     const {
         pendingInvite,
@@ -28,24 +29,37 @@ const AppShell: React.FC = () => {
         userId: session?.user?.id,
     })
 
+    // Derived state during render, avoids cascading renders
+    if (authError !== prevAuthError) {
+        setPrevAuthError(authError)
+        setShowError(authError)
+    }
+
     useEffect(() => {
-        if (authError) {
-            setShowError(authError)
+        if (showError) {
             const timer = setTimeout(() => setShowError(null), 5000)
             return () => clearTimeout(timer)
         }
-    }, [authError])
+    }, [showError])
 
     if (loading) {
         return <AppBootScreen />
     }
 
     if (location.pathname.match(/^\/join\/[^/]+$/)) {
-        return <JoinList />
+        return (
+            <Suspense fallback={<AppBootScreen />}>
+                <JoinList />
+            </Suspense>
+        )
     }
 
     if (!session) {
-        return <Login />
+        return (
+            <Suspense fallback={<AppBootScreen />}>
+                <Login />
+            </Suspense>
+        )
     }
 
     return (

@@ -51,6 +51,7 @@ export default [
       ...reactHooks.configs.recommended.rules,
       ...reactRefresh.configs.vite.rules,
       'react-hooks/rules-of-hooks': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/set-state-in-effect': 'warn',
       'react-refresh/only-export-components': 'warn',
       'no-unused-vars': 'off',

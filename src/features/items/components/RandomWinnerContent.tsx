@@ -21,21 +21,26 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
   // Detectar si el usuario prefiere movimiento reducido
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+  const [shuffledPool, setShuffledPool] = useState<ListItem[]>([])
+
+  useEffect(() => {
+    setShuffledPool([...pool].sort(() => Math.random() - 0.5))
+  }, [pool])
+
   // Crear un pool visual para el efecto de scroll vertical
   const visualPool = useMemo(() => {
-    // Mezclamos el pool para que no se vea igual siempre
-    const shuffled = [...pool].sort(() => Math.random() - 0.5)
+    if (shuffledPool.length === 0) return [item]
     
     // Necesitamos suficientes elementos para que el scroll sea largo y rápido
     const itemsNeeded = 40
     const repeated = []
     while (repeated.length < itemsNeeded) {
-      repeated.push(...shuffled)
+      repeated.push(...shuffledPool)
     }
     
     // El pool final: empezamos en idle (item 0), giramos por el medio, terminamos en el 'item' real al final.
     return [...repeated.slice(0, itemsNeeded), item]
-  }, [pool, item])
+  }, [shuffledPool, item])
 
   useEffect(() => {
     if (prefersReducedMotion) {
@@ -49,22 +54,22 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
     setShowCleanCard(false)
 
     // Iniciamos la secuencia de animación con un pequeño respiro para que el navegador registre el 'idle'
-    const startTimer = setTimeout(() => {
+    const startTimer = window.setTimeout(() => {
       setPhase('spinning')
     }, 50)
 
     const spinDuration = 1800 // Un poco más largo para que se note
     const stabilizeDuration = 800
 
-    const spinningTimer = setTimeout(() => {
+    const spinningTimer = window.setTimeout(() => {
       setPhase('stabilizing')
-    }, startTimer + spinDuration)
+    }, 50 + spinDuration)
 
-    const finishedTimer = setTimeout(() => {
+    const finishedTimer = window.setTimeout(() => {
       setPhase('finished')
       // El flash ocurre justo cuando se detiene
-      setTimeout(() => setShowCleanCard(true), 150)
-    }, startTimer + spinDuration + stabilizeDuration)
+      window.setTimeout(() => setShowCleanCard(true), 150)
+    }, 50 + spinDuration + stabilizeDuration)
 
     return () => {
       clearTimeout(startTimer)

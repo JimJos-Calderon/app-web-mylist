@@ -57,16 +57,19 @@ export const useListSearchFlow = ({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  useEffect(() => {
+  const [prevSearchInput, setPrevSearchInput] = useState(searchInput)
+  const [prevSuggestionsState, setPrevSuggestionsState] = useState(suggestions)
+
+  if (searchInput !== prevSearchInput || suggestions !== prevSuggestionsState) {
+    setPrevSearchInput(searchInput)
+    setPrevSuggestionsState(suggestions)
+    
     if (searchInput.length >= 3 && suggestions.length > 0) {
       setShowSuggestions(true)
-      return
-    }
-
-    if (searchInput.length < 3) {
+    } else if (searchInput.length < 3) {
       setShowSuggestions(false)
     }
-  }, [searchInput, suggestions])
+  }
 
   const fetchOmdbData = async (title: string) => {
     try {
@@ -87,8 +90,8 @@ export const useListSearchFlow = ({
       const result = omdbData.Search?.[0]
 
       return {
-        Genre: result?.Genre && result.Genre !== 'N/A' ? result.Genre : undefined,
-        Poster: result?.Poster !== 'N/A' ? result.Poster : undefined,
+        Genre: result?.Genre && result?.Genre !== 'N/A' ? result?.Genre : undefined,
+        Poster: result?.Poster !== 'N/A' ? result?.Poster : undefined,
       }
     } catch (error) {
       console.error('Error fetching OMDB data:', error)

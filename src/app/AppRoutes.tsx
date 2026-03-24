@@ -4,8 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 import * as Sentry from '@sentry/react'
 import { useTranslation } from 'react-i18next'
 import { SectionErrorFallback } from '@/features/shared'
-import Dashboard from '@pages/Dashboard'
-
+const Dashboard = lazy(() => import('@pages/Dashboard'))
 const Peliculas = lazy(() => import('@pages/Peliculas'))
 const Series = lazy(() => import('@pages/Series'))
 const Perfil = lazy(() => import('@pages/Perfil'))
