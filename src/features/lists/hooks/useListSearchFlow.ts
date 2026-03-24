@@ -58,11 +58,11 @@ export const useListSearchFlow = ({
   }, [])
 
   const [prevSearchInput, setPrevSearchInput] = useState(searchInput)
-  const [prevSuggestionsState, setPrevSuggestionsState] = useState(suggestions)
+  const [prevSuggestionsLength, setPrevSuggestionsLength] = useState(suggestions.length)
 
-  if (searchInput !== prevSearchInput || suggestions !== prevSuggestionsState) {
+  if (searchInput !== prevSearchInput || suggestions.length !== prevSuggestionsLength) {
     setPrevSearchInput(searchInput)
-    setPrevSuggestionsState(suggestions)
+    setPrevSuggestionsLength(suggestions.length)
     
     if (searchInput.length >= 3 && suggestions.length > 0) {
       setShowSuggestions(true)
