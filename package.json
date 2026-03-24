@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
+    "@capacitor/app": "^8.0.1",
     "@capacitor/core": "^8.2.0",
     "@radix-ui/react-dialog": "^1.1.2",
     "@sentry/react": "^10.42.0",

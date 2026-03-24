@@ -88,15 +88,18 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  useEffect(() => {
+  const [prevFilters, setPrevFilters] = useState(filters)
+
+  if (
+    filters.searchQuery !== prevFilters.searchQuery ||
+    filters.showWatched !== prevFilters.showWatched ||
+    filters.showUnwatched !== prevFilters.showUnwatched ||
+    filters.sortBy !== prevFilters.sortBy ||
+    filters.sortOrder !== prevFilters.sortOrder
+  ) {
+    setPrevFilters(filters)
     setCurrentPage(1)
-  }, [
-    filters.searchQuery,
-    filters.showWatched,
-    filters.showUnwatched,
-    filters.sortBy,
-    filters.sortOrder,
-  ])
+  }
 
   const {
     pendingItems,

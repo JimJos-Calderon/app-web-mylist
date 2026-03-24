@@ -1,23 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useSyncExternalStore, useCallback } from 'react'
 
 /**
  * Hook para detectar media queries de CSS en JS.
  * Útil para renderizado condicional basado en el viewport (ej. Modal vs Drawer).
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false)
+  const subscribe = useCallback(
+    (callback: () => void) => {
+      const matchMedia = window.matchMedia(query)
+      matchMedia.addEventListener('change', callback)
+      return () => matchMedia.removeEventListener('change', callback)
+    },
+    [query]
+  )
 
-  useEffect(() => {
-    const media = window.matchMedia(query)
-    if (media.matches !== matches) {
-      setMatches(media.matches)
-    }
+  const getSnapshot = () => window.matchMedia(query).matches
+  const getServerSnapshot = () => false
 
-    const listener = () => setMatches(media.matches)
-    media.addEventListener('change', listener)
-
-    return () => media.removeEventListener('change', listener)
-  }, [matches, query])
-
-  return matches
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
