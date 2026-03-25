@@ -14,6 +14,54 @@ export interface OracleResponse {
   recomendaciones: Recommendation[];
 }
 
+const extractFirstJsonObject = (input: string): string | null => {
+  const start = input.indexOf('{');
+  if (start === -1) return null;
+  let depth = 0;
+  let inString = false;
+  let escaping = false;
+
+  for (let i = start; i < input.length; i += 1) {
+    const ch = input[i];
+    if (inString) {
+      if (escaping) escaping = false;
+      else if (ch === '\\') escaping = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+    if (ch === '{') {
+      depth += 1;
+      continue;
+    }
+    if (ch === '}') {
+      depth -= 1;
+      if (depth === 0) return input.slice(start, i + 1);
+    }
+  }
+  return null;
+};
+
+const tryParseOracleResponse = (raw: string): OracleResponse => {
+  const attempts = [
+    raw,
+    raw.replace(/,\s*([}\]])/g, '$1'),
+    raw.replace(/}\s*{/g, '},{'),
+  ];
+  let lastError: unknown = null;
+  for (const candidate of attempts) {
+    try {
+      return JSON.parse(candidate) as OracleResponse;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new SyntaxError('JSON inválido');
+};
+
 interface UseOracleRecommendationsReturn {
   isLoading: boolean;
   error: string | null;
@@ -87,7 +135,8 @@ La estructura estricta e innegociable del JSON que vas a retornar debe ser exact
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ],
-          temperature: 0.7,
+          response_format: { type: 'json_object' },
+          temperature: 0.2,
         })
       });
 
@@ -104,10 +153,14 @@ La estructura estricta e innegociable del JSON que vas a retornar debe ser exact
         throw new Error('El Oráculo procesó la solicitud pero devolvió estática vacía.');
       }
 
-      // Parche de seguridad por si el modelo desobedece la restricción de markdown
-      content = content.replace(/```json\s*/gi, '').replace(/```\s*$/gi, '').trim();
-
-      const parsedData = JSON.parse(content) as OracleResponse;
+      // Extracción robusta: buscamos el primer { y el último } para aislar el JSON puro
+      // independientemente de texto introductorio, bloques ```json, o texto de cierre
+      const normalizedContent = content.trim();
+      const jsonString = extractFirstJsonObject(normalizedContent);
+      if (!jsonString) {
+        throw new Error('El Oráculo respondió sin incluir un JSON reconocible.')
+      }
+      const parsedData = tryParseOracleResponse(jsonString);
 
       if (!parsedData.recomendaciones || !Array.isArray(parsedData.recomendaciones)) {
         throw new Error('Fragmentación de datos detectada: El JSON no posee la estructura exigida.');
