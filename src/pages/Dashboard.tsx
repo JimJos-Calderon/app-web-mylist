@@ -11,6 +11,7 @@ import { CreateListDialog, ListSelector, useLists } from '@/features/lists'
 import { RandomPickManager } from '@/features/items'
 import { SectionErrorFallback, ConfirmDialog } from '@/features/shared'
 import type { List, ListItem } from '@/features/shared'
+import { OracleSection } from '@/features/oracle/components/OracleSection'
 
 const ActivityFeedPanel = lazy(() => import('@/features/lists/components/ActivityFeed'))
 
@@ -117,9 +118,9 @@ const Dashboard: React.FC = () => {
   const [isConfirmLeaveOpen, setIsConfirmLeaveOpen] = useState(false)
   const [isRandomPickerOpen, setIsRandomPickerOpen] = useState(false)
 
-  // Fetch all items from the active list for the random picker
+  // Fetch all items from the active list for the random picker and Oracle
   const { data: allItems = [] } = useQuery({
-    queryKey: ['items', 'all-for-random', currentList?.id],
+    queryKey: ['items', 'all', currentList?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('items')
@@ -128,7 +129,7 @@ const Dashboard: React.FC = () => {
       if (error) throw error
       return data as ListItem[]
     },
-    enabled: !!currentList?.id && isRandomPickerOpen,
+    enabled: !!currentList?.id,
   })
 
   const displayName = profile?.username || t('navbar.myAccount')
@@ -356,6 +357,12 @@ const Dashboard: React.FC = () => {
             icon={<Tv className="h-4 w-4" />}
           />
         </section>
+
+        {hasActiveList && (
+          <section className="mt-8">
+            <OracleSection items={allItems} />
+          </section>
+        )}
 
         <section className="mt-8 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[rgba(0,0,0,0.56)] p-5 md:p-6">
           <div className="mb-5">

@@ -13,12 +13,14 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sincronizar": "npm run build && npx cap sync"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
     "@capacitor/app": "^8.0.1",
     "@capacitor/core": "^8.2.0",
+    "@capacitor/splash-screen": "^8.0.1",
     "@radix-ui/react-dialog": "^1.1.2",
     "@sentry/react": "^10.42.0",
     "@sentry/vite-plugin": "^5.1.1",
