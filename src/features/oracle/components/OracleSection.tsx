@@ -59,8 +59,16 @@ export const OracleSection: React.FC<OracleSectionProps> = () => {
       .slice(0, 10)
   }, [ratedItems])
 
+  const ratedTitles = useMemo(
+    () =>
+      ratedItems
+        .filter((r) => r.item?.titulo)
+        .map((r) => r.item!.titulo),
+    [ratedItems]
+  )
+
   const handleConsult = () => {
-    fetchRecommendations(topItems)
+    fetchRecommendations(topItems, ratedTitles)
   }
 
   const hasTopItems = topItems.length > 0
@@ -109,6 +117,13 @@ export const OracleSection: React.FC<OracleSectionProps> = () => {
 
         {recomendaciones && (
           <div className="mb-8 w-full grid grid-cols-1 gap-4 animate-in slide-in-from-bottom-4 fade-in duration-500">
+            {recomendaciones.length === 0 && (
+              <div className="p-4 border border-cyan-500/15 bg-cyan-500/5 rounded-xl w-full">
+                <p className="font-mono text-sm text-[var(--color-text-muted)] leading-relaxed">
+                  {'>'} No hay recomendaciones nuevas fuera de tus calificaciones actuales. Prueba con mÃ¡s valoraciones para ampliar el espectro.
+                </p>
+              </div>
+            )}
             {recomendaciones.map((rec, idx) => (
               <div key={idx} className="border-l-2 border-cyan-500 pl-4 py-2 hover:bg-cyan-500/5 transition-colors duration-300">
                 <h3 className="font-mono font-bold text-cyan-400 text-lg md:text-xl drop-shadow-[0_0_5px_rgba(6,182,212,0.3)]">{rec.titulo}</h3>
