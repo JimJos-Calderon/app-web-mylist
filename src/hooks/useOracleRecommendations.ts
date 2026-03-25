@@ -66,9 +66,17 @@ interface UseOracleRecommendationsReturn {
   isLoading: boolean;
   error: string | null;
   recomendaciones: Recommendation[] | null;
-  fetchRecommendations: (favoritos: FavoriteItem[]) => Promise<void>;
+  fetchRecommendations: (favoritos: FavoriteItem[], excludedTitles?: string[]) => Promise<void>;
   resetOracle: () => void;
 }
+
+const normalizeTitle = (value: string): string =>
+  (value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 
 export const useOracleRecommendations = (): UseOracleRecommendationsReturn => {
   const [isLoading, setIsLoading] = useState(false);
@@ -81,7 +89,7 @@ export const useOracleRecommendations = (): UseOracleRecommendationsReturn => {
     setIsLoading(false);
   }, []);
 
-  const fetchRecommendations = useCallback(async (favoritos: FavoriteItem[]) => {
+  const fetchRecommendations = useCallback(async (favoritos: FavoriteItem[], excludedTitles: string[] = []) => {
     if (!favoritos || favoritos.length === 0) {
       setError('Aviso del Sistema: No hay suficientes datos en caché para un análisis del Oráculo.');
       return;
@@ -106,6 +114,7 @@ REGLAS DE ANÁLISIS:
 - Las obras con 1-2 estrellas o reacción "no me gustó" son señales NEGATIVAS: EVITA recomendar contenido similar a ellas.
 - Las obras con 3 estrellas o sin reacción son neutras: úsalas solo como contexto secundario.
 - Busca patrones cruzados: si le gustan los thrillers psicológicos y odia las comedias románticas, usa ese perfil.
+- PROHIBIDO recomendar títulos que ya estén en el historial de calificaciones del usuario.
 
 DEBES RESPONDER ÚNICA Y EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO.
 NO incluyas bloques de código Markdown (como \`\`\`json).
@@ -120,7 +129,7 @@ La estructura estricta e innegociable del JSON que vas a retornar debe ser exact
   ]
 }`;
 
-    const userPrompt = `[INICIANDO INTERFAZ DE RED...] Analizando datos de calificación extraídos del usuario:\n${JSON.stringify(favoritos, null, 2)}\n[ESPERANDO JSON DEL ORÁCULO...]`;
+    const userPrompt = `[INICIANDO INTERFAZ DE RED...] Analizando datos de calificación extraídos del usuario:\n${JSON.stringify(favoritos, null, 2)}\n\n[TÍTULOS YA CALIFICADOS QUE DEBES EXCLUIR]:\n${JSON.stringify(excludedTitles, null, 2)}\n[ESPERANDO JSON DEL ORÁCULO...]`;
 
     try {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -166,7 +175,18 @@ La estructura estricta e innegociable del JSON que vas a retornar debe ser exact
         throw new Error('Fragmentación de datos detectada: El JSON no posee la estructura exigida.');
       }
 
-      setRecomendaciones(parsedData.recomendaciones);
+      const excludedSet = new Set(excludedTitles.map(normalizeTitle).filter(Boolean));
+      const seen = new Set<string>();
+      const filtered = parsedData.recomendaciones.filter((rec) => {
+        const normalized = normalizeTitle(rec.titulo);
+        if (!normalized) return false;
+        if (excludedSet.has(normalized)) return false;
+        if (seen.has(normalized)) return false;
+        seen.add(normalized);
+        return true;
+      });
+
+      setRecomendaciones(filtered);
     } catch (err: any) {
       console.error('[Oracle Core Error]:', err);
       // Extraemos errores comunes de JSON para un manejo más inmersivo
