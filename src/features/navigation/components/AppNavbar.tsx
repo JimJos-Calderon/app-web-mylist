@@ -26,6 +26,7 @@ const AppNavbar: React.FC = () => {
     { value: 'cyberpunk', label: 'CYB', color: 'rgba(var(--color-accent-primary-rgb),1)' },
     { value: '2advanced', label: '2ADV', color: '#38bdf8' },
     { value: 'terminal', label: 'TERM', color: '#34d399' },
+    { value: 'retro-cartoon', label: 'RETRO', color: '#111111' },
   ]
 
   const [showUserMenu, setShowUserMenu] = useState(false)

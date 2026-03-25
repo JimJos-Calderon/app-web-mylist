@@ -4,12 +4,12 @@ import { supabase } from '@/supabaseClient'
 import { useAuth } from '@/features/auth'
 import { queryKeys } from '@config/queryKeys'
 
-export type ThemePreference = 'cyberpunk' | '2advanced' | 'terminal'
+export type ThemePreference = 'cyberpunk' | '2advanced' | 'terminal' | 'retro-cartoon'
 
 const DEFAULT_THEME: ThemePreference = 'cyberpunk'
 
 const isThemePreference = (value: string | null | undefined): value is ThemePreference => {
-  return value === 'cyberpunk' || value === '2advanced' || value === 'terminal'
+  return value === 'cyberpunk' || value === '2advanced' || value === 'terminal' || value === 'retro-cartoon'
 }
 
 const normalizeThemePreference = (value: string | null | undefined): ThemePreference => {

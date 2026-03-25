@@ -34,6 +34,13 @@ const THEME_OPTIONS: ThemeOption[] = [
     Icon: Monitor,
     previewClassName: 'from-emerald-500 via-emerald-400 to-black',
   },
+  {
+    value: 'retro-cartoon',
+    titleKey: 'settings.theme_options.retro_cartoon.title',
+    descriptionKey: 'settings.theme_options.retro_cartoon.description',
+    Icon: Palette,
+    previewClassName: 'from-stone-100 via-stone-400 to-black',
+  },
 ]
 
 const ThemeSwitcher: React.FC = () => {
