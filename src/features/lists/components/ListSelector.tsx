@@ -51,7 +51,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
       )}
 
       <div className="relative">
-        <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-400">
+        <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--color-text-muted)]">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListChecks className="h-4 w-4" />}
         </div>
 
@@ -63,11 +63,11 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             if (nextList) onChange(nextList)
           }}
           disabled={loading || !hasLists}
-          className="w-full appearance-none rounded-xl border py-2.5 pl-10 pr-11 text-xs font-bold font-mono tracking-widest uppercase outline-none transition disabled:cursor-not-allowed disabled:opacity-60"
+          className="list-selector-select w-full appearance-none rounded-xl border py-2.5 pl-10 pr-11 text-xs font-bold font-mono tracking-widest uppercase outline-none transition disabled:cursor-not-allowed disabled:opacity-60"
           style={{
             borderColor: 'rgba(var(--color-accent-primary-rgb), 0.3)',
-            background: 'rgba(0, 0, 0, 0.7)',
-            color: 'var(--color-accent-primary)',
+            background: 'var(--color-bg-secondary)',
+            color: 'var(--color-text-primary)',
             boxShadow: 'inset 0 0 10px rgba(var(--color-accent-primary-rgb), 0.05)',
           }}
         >
@@ -79,7 +79,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
           ))}
         </select>
 
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]">
           <ChevronDown className="h-4 w-4" />
         </div>
       </div>

@@ -93,6 +93,55 @@
   --color-glow: rgba(0, 0, 0, 0.25);
 }
 
+/* Retro cartoon: neutralizar contenedores oscuros heredados de cyberpunk */
+[data-theme="retro-cartoon"] div[class*="border-cyan-500/30"][class*="bg-black"],
+[data-theme="retro-cartoon"] section[class*="bg-[rgba(0,0,0,0.56)]"],
+[data-theme="retro-cartoon"] .hud-container {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  border-radius: 8px !important;
+}
+
+/* Retro cartoon: textos secundarios dentro de Oráculo + terminal de actividad */
+[data-theme="retro-cartoon"] div[class*="border-cyan-500/30"][class*="bg-black"] [class*="text-[var(--color-text-muted)]"],
+[data-theme="retro-cartoon"] .hud-container [class*="text-[var(--color-text-muted)]"],
+[data-theme="retro-cartoon"] .hud-container [class*="text-accent-primary"],
+[data-theme="retro-cartoon"] .hud-container [class*="text-accent-secondary"],
+[data-theme="retro-cartoon"] .hud-container [class*="opacity-40"],
+[data-theme="retro-cartoon"] .hud-container [class*="opacity-60"],
+[data-theme="retro-cartoon"] .hud-container [class*="opacity-70"],
+[data-theme="retro-cartoon"] .hud-container [class*="opacity-80"] {
+  color: #1a1a1a !important;
+  opacity: 1 !important;
+}
+
+/* Retro cartoon: tarjetas grandes del dashboard y navbar */
+[data-theme="retro-cartoon"] .dashboard-main-card,
+[data-theme="retro-cartoon"] .dashboard-next-step-card {
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  border-radius: 8px !important;
+}
+
+[data-theme="retro-cartoon"] .app-navbar {
+  border-bottom-width: 3px !important;
+  border-bottom-color: #000000 !important;
+}
+
+/* Retro cartoon: controles anidados (selector/lista con chevron) */
+[data-theme="retro-cartoon"] .list-selector-select {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+[data-theme="retro-cartoon"] .list-selector-select option {
+  background-color: #ffffff;
+  color: #000000;
+}
+
 .retro-fx {
   position: relative;
   isolation: isolate;

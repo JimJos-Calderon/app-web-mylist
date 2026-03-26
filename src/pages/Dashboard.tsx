@@ -191,13 +191,13 @@ const Dashboard: React.FC = () => {
         </section>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.28)] bg-[rgba(0,0,0,0.6)] p-6 md:p-8">
+          <div className="dashboard-main-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.28)] bg-[var(--color-bg-elevated)] p-6 md:p-8">
             <div className="mb-6">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-accent-primary opacity-85">
                 Lista activa
               </p>
 
-              <h2 className="text-2xl font-semibold text-white md:text-3xl">
+              <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] md:text-3xl">
                 {loadingLists ? 'Cargando listas...' : currentList?.name || 'Sin lista seleccionada'}
               </h2>
 
@@ -240,10 +240,10 @@ const Dashboard: React.FC = () => {
                     </button>
 
                     {currentList && (
-                      <div className="flex items-center gap-1 p-1 rounded-xl bg-black/20 border border-white/5">
+                      <div className="flex items-center gap-1 p-1 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)]">
                         <button
                           type="button"
-                          className="p-2 text-white/40 hover:text-red-500 transition-colors"
+                          className="p-2 text-[var(--color-text-muted)] hover:text-red-500 transition-colors"
                           onClick={() => (currentList.owner_id === user.id ? setIsConfirmDeleteOpen(true) : setIsConfirmLeaveOpen(true))}
                           title={currentList.owner_id === user.id ? t('lists.delete') : t('lists.leave')}
                         >
@@ -257,8 +257,8 @@ const Dashboard: React.FC = () => {
             )}
 
             {!loadingLists && !hasLists && (
-              <div className="mb-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-                <p className="text-sm text-slate-400">
+              <div className="mb-5 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] p-4">
+                <p className="text-sm text-[var(--color-text-muted)]">
                   No hay ninguna lista todavía. Crear una es el primer paso para poder añadir y decidir.
                 </p>
               </div>
@@ -297,7 +297,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[rgba(0,0,0,0.56)] p-6">
+          <div className="dashboard-next-step-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[var(--color-bg-elevated)] p-6">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--color-text-muted)]">
               Siguiente paso
             </p>
@@ -307,7 +307,7 @@ const Dashboard: React.FC = () => {
             <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)]">{nextStepDescription}</p>
 
             <div className="mt-6 grid gap-3">
-              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.4)] p-4">
+              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[var(--color-bg-secondary)] p-4">
                 <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   Estado
                 </p>
@@ -318,7 +318,7 @@ const Dashboard: React.FC = () => {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.4)] p-4">
+              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[var(--color-bg-secondary)] p-4">
                 <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   Contexto
                 </p>
