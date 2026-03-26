@@ -7,6 +7,7 @@ import { queryKeys } from '@config/queryKeys'
 export type ThemePreference = 'cyberpunk' | '2advanced' | 'terminal' | 'retro-cartoon'
 
 const DEFAULT_THEME: ThemePreference = 'cyberpunk'
+const THEME_STORAGE_KEY = 'theme'
 
 const isThemePreference = (value: string | null | undefined): value is ThemePreference => {
   return value === 'cyberpunk' || value === '2advanced' || value === 'terminal' || value === 'retro-cartoon'
@@ -16,9 +17,17 @@ const normalizeThemePreference = (value: string | null | undefined): ThemePrefer
   return isThemePreference(value) ? value : DEFAULT_THEME
 }
 
-const applyThemeToDom = (theme: ThemePreference) => {
+const readPersistedTheme = (): ThemePreference => {
+  if (typeof window === 'undefined') return DEFAULT_THEME
+  return normalizeThemePreference(window.localStorage.getItem(THEME_STORAGE_KEY))
+}
+
+const syncThemeToDom = (theme: ThemePreference) => {
   if (typeof document === 'undefined') return
   document.documentElement.setAttribute('data-theme', theme)
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
+  }
 }
 
 interface UseThemeReturn {
@@ -33,17 +42,18 @@ export const useTheme = (): UseThemeReturn => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  const queryKey = queryKeys.userProfile.themePreferenceByUser(user?.id || '')
+  const queryKey = queryKeys.userProfile.themePreferenceByUser(user?.id || 'anonymous')
+  const initialTheme = readPersistedTheme()
 
   const {
-    data: theme = DEFAULT_THEME,
+    data: theme = initialTheme,
     isLoading: loading,
     error,
   } = useQuery({
     queryKey,
     queryFn: async () => {
       if (!user?.id) {
-        return DEFAULT_THEME
+        return readPersistedTheme()
       }
 
       const { data, error: fetchError } = await supabase
@@ -58,11 +68,12 @@ export const useTheme = (): UseThemeReturn => {
 
       return normalizeThemePreference(data?.theme_preference)
     },
-    enabled: !!user?.id,
+    enabled: true,
+    initialData: initialTheme,
   })
 
   useEffect(() => {
-    applyThemeToDom(theme)
+    syncThemeToDom(theme)
   }, [theme])
 
   const changeThemeMutation = useMutation({
@@ -100,18 +111,18 @@ export const useTheme = (): UseThemeReturn => {
       const previousTheme = queryClient.getQueryData<ThemePreference>(queryKey)
 
       queryClient.setQueryData(queryKey, optimisticTheme)
-      applyThemeToDom(optimisticTheme)
+      syncThemeToDom(optimisticTheme)
 
       return { previousTheme }
     },
     onError: (_error, _newTheme, context) => {
       const rollbackTheme = context?.previousTheme ?? DEFAULT_THEME
       queryClient.setQueryData(queryKey, rollbackTheme)
-      applyThemeToDom(rollbackTheme)
+      syncThemeToDom(rollbackTheme)
     },
     onSuccess: (savedTheme) => {
       queryClient.setQueryData(queryKey, savedTheme)
-      applyThemeToDom(savedTheme)
+      syncThemeToDom(savedTheme)
     },
   })
 
