@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { validateEmail, validatePassword, validateUsername, ERROR_MESSAGES, LanguageSwitcher } from '@/features/shared'
+import { validateEmail, validatePassword, validateUsername, ERROR_MESSAGES, LanguageSwitcher, useTheme } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
 import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, AtSign, Check, AlertCircle } from 'lucide-react'
 
@@ -414,6 +414,14 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
 const Login: React.FC = () => {
   const { t } = useTranslation()
+  const { theme: authTheme } = useTheme()
+  // Inicialización segura
+  const [activeTheme, setActiveTheme] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.getAttribute('data-theme') || authTheme
+    }
+    return authTheme
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -421,6 +429,84 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
+
+  useEffect(() => {
+    // Sincronización extra por si cambió entre el render y el mount
+    const currentDomTheme = document.documentElement.getAttribute('data-theme')
+    if (currentDomTheme && currentDomTheme !== activeTheme) {
+      setActiveTheme(currentDomTheme)
+    }
+
+    // Vigilar cambios en el DOM en tiempo real (ej. al usar un theme switcher)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          setActiveTheme(document.documentElement.getAttribute('data-theme') || authTheme)
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, { attributes: true })
+
+    return () => observer.disconnect()
+  }, []) // Array vacío para que solo se monte una vez
+
+  const isRetroCartoon = activeTheme === 'retro-cartoon'
+
+  const rootClassName = isRetroCartoon
+    ? 'bg-[var(--color-bg-primary)] retro-fx min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden'
+    : 'min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden'
+
+const rootStyle = isRetroCartoon
+  ? {
+      backgroundImage: 'url(/retro-login-bg.png)', // AsegÃºrate de que este nombre coincida con el archivo en /public 
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    }
+  : {
+      backgroundImage: 'url(/login-bg.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    }
+
+  const cardClassName = isRetroCartoon
+    ? 'bg-white border-[4px] border-black shadow-[10px_10px_0px_0px_#000000] rounded-xl overflow-hidden relative z-10 p-6 sm:p-8'
+    : 'relative rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-black/70 backdrop-blur-xl shadow-[0_0_60px_rgba(var(--color-accent-primary-rgb),0.15)] overflow-hidden'
+
+  const cardInnerClassName = isRetroCartoon ? 'space-y-4' : 'px-8 py-8 space-y-4'
+
+  const labelClassName = isRetroCartoon
+    ? 'block text-xs font-bold uppercase tracking-widest text-black mb-1.5'
+    : 'block text-xs font-bold uppercase tracking-widest text-accent-primary mb-1.5'
+
+  const inputClassName = isRetroCartoon
+    ? 'w-full px-4 py-3 bg-white text-black border-[3px] border-black shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.1)] focus-visible:shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-none rounded-md transition-all font-bold placeholder-gray-500'
+    : 'w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30 focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.3)] transition-all disabled:opacity-50 outline-none'
+
+  const passwordToggleClassName = isRetroCartoon
+    ? 'absolute right-3 top-1/2 -translate-y-1/2 text-black/60 hover:text-black transition-colors'
+    : 'absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors'
+
+  const submitButtonClassName = isRetroCartoon
+    ? 'w-full py-3 mt-4 bg-black text-white border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl font-black text-lg uppercase tracking-widest hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all flex items-center justify-center gap-2'
+    : 'w-full py-3 text-white font-bold rounded-xl text-base tracking-wide mt-2 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+
+  const submitButtonStyle = isRetroCartoon
+    ? undefined
+    : { background: 'linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary))' }
+
+  const dividerLineClassName = isRetroCartoon ? 'flex-1 h-px bg-black/10' : 'flex-1 h-px bg-white/10'
+  const dividerTextClassName = isRetroCartoon ? 'text-black/60 text-xs uppercase tracking-widest' : 'text-white/40 text-xs uppercase tracking-widest'
+
+  const secondaryButtonClassName = isRetroCartoon
+    ? 'w-full py-3 bg-white text-black border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-xl font-bold text-sm hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed'
+    : 'w-full py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl text-sm hover:bg-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed'
+
+  const registerButtonClassName = isRetroCartoon
+    ? 'w-full py-3 bg-white text-black border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-xl font-bold text-sm hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] transition-all flex items-center justify-center gap-2'
+    : 'w-full py-3 border border-[rgba(var(--color-accent-primary-rgb),0.35)] text-accent-primary font-semibold rounded-xl text-sm hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:border-accent-primary transition-all flex items-center justify-center gap-2'
 
   const handleGoogleLogin = async () => {
     setError(null)
@@ -482,32 +568,33 @@ const Login: React.FC = () => {
       <RegisterModal open={showRegister} onClose={() => setShowRegister(false)} />
 
       <div
-        className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden"
-        style={{
-          backgroundImage: 'url(/login-bg.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
+        className={rootClassName}
+        style={rootStyle}
       >
-        {/* Dark overlay + accent tint so card is readable */}
-        <div className="absolute inset-0 bg-black/60" />
-        {/* Subtle accent glow on top of the overlay */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[rgba(var(--color-accent-primary-rgb),0.06)] rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[rgba(var(--color-accent-secondary-rgb),0.06)] rounded-full blur-3xl" />
-        </div>
+        {!isRetroCartoon && (
+          <>
+            {/* Dark overlay + accent tint so card is readable */}
+            <div className="absolute inset-0 bg-black/60" />
+            {/* Subtle accent glow on top of the overlay */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[rgba(var(--color-accent-primary-rgb),0.06)] rounded-full blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[rgba(var(--color-accent-secondary-rgb),0.06)] rounded-full blur-3xl" />
+            </div>
+          </>
+        )}
 
         <div className="w-full max-w-md relative">
           {/* Card */}
           <div
-            className="relative rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-black/70 backdrop-blur-xl shadow-[0_0_60px_rgba(var(--color-accent-primary-rgb),0.15)] overflow-hidden"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            className={cardClassName}
+            style={isRetroCartoon ? undefined : { fontFamily: "'Inter', sans-serif" }}
           >
-            {/* Top glow line */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-primary to-transparent" />
+            {!isRetroCartoon && (
+              /* Top glow line */
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-primary to-transparent" />
+            )}
 
-            <div className="px-8 py-8 space-y-4">
+            <div className={cardInnerClassName}>
               {/* Error */}
               {error && (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-3">
@@ -519,7 +606,7 @@ const Login: React.FC = () => {
               {/* Login Form */}
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <label htmlFor="login-email" className="block text-xs font-bold uppercase tracking-widest text-accent-primary mb-1.5">
+                  <label htmlFor="login-email" className={labelClassName}>
                     {t('login.email_label')}
                   </label>
                   <input
@@ -529,15 +616,13 @@ const Login: React.FC = () => {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30
-                               focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.3)]
-                               transition-all disabled:opacity-50 outline-none"
+                    className={inputClassName}
                     required
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="login-password" className="block text-xs font-bold uppercase tracking-widest text-accent-primary mb-1.5">
+                  <label htmlFor="login-password" className={labelClassName}>
                     {t('login.password_label')}
                   </label>
                   <div className="relative">
@@ -548,9 +633,7 @@ const Login: React.FC = () => {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       disabled={loading}
-                      className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30
-                                 focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.3)]
-                                 transition-all disabled:opacity-50 outline-none"
+                      className={`${inputClassName} pr-12`}
                       required
                     />
                     <button
@@ -558,7 +641,7 @@ const Login: React.FC = () => {
                       onClick={() => setShowPassword(v => !v)}
                       disabled={loading}
                       aria-label={showPassword ? t('hide_password') : t('show_password')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                      className={passwordToggleClassName}
                     >
                       {showPassword ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                     </button>
@@ -568,11 +651,8 @@ const Login: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 text-white font-bold rounded-xl text-base tracking-wide mt-2
-                             active:scale-[0.99] transition-all
-                             disabled:opacity-50 disabled:cursor-not-allowed
-                             flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary))' }}
+                  className={submitButtonClassName}
+                  style={submitButtonStyle}
                 >
                   {loading ? (
                     <><Loader2 className="w-4 h-4 animate-spin" />{t('login.loading')}</>
@@ -584,9 +664,9 @@ const Login: React.FC = () => {
 
               {/* Divider */}
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-white/40 text-xs uppercase tracking-widest">{t('login.divider')}</span>
-                <div className="flex-1 h-px bg-white/10" />
+                <div className={dividerLineClassName} />
+                <span className={dividerTextClassName}>{t('login.divider')}</span>
+                <div className={dividerLineClassName} />
               </div>
 
               {/* Google Login */}
@@ -594,10 +674,7 @@ const Login: React.FC = () => {
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={googleLoading || loading}
-                className="w-full py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl text-sm
-                           hover:bg-white/10 hover:border-white/20
-                           transition-all flex items-center justify-center gap-3
-                           disabled:opacity-50 disabled:cursor-not-allowed"
+                className={secondaryButtonClassName}
               >
                 {googleLoading ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> {t('login.loading_google')}</>
@@ -609,18 +686,18 @@ const Login: React.FC = () => {
               {/* Register */}
               <button
                 onClick={() => setShowRegister(true)}
-                className="w-full py-3 border border-[rgba(var(--color-accent-primary-rgb),0.35)] text-accent-primary font-semibold rounded-xl text-sm
-                           hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:border-accent-primary
-                           transition-all flex items-center justify-center gap-2"
+                className={registerButtonClassName}
               >
                 <UserPlus className="w-4 h-4" />
                 {t('signup.button_signup')}
               </button>
-              <p className="text-center text-white/25 text-xs">{t('footer.by')}</p>
+              <p className={isRetroCartoon ? 'text-center text-black/40 text-xs' : 'text-center text-white/25 text-xs'}>{t('footer.by')}</p>
             </div>
 
             {/* Bottom glow */}
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary to-transparent opacity-30" />
+            {!isRetroCartoon && (
+              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary to-transparent opacity-30" />
+            )}
           </div>
 
           <div className="fixed bottom-6 right-6">
@@ -633,3 +710,4 @@ const Login: React.FC = () => {
 }
 
 export default Login
+

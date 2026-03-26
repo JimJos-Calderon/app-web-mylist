@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import i18n from '@/i18n'
+import { useTheme } from '@/features/shared'
 
 export const LanguageSwitcher: React.FC = () => {
   const { i18n: i18nInstance } = useTranslation()
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
   const [currentLang, setCurrentLang] = useState<'es' | 'en'>(
     (i18nInstance.language as 'es' | 'en') || 'es'
   )
@@ -42,15 +45,15 @@ export const LanguageSwitcher: React.FC = () => {
       disabled={isTransitioning}
       className={`
         relative overflow-hidden flex items-center justify-center gap-2 px-4 py-2.5 rounded
-        bg-[rgba(var(--color-bg-base-rgb),0.6)]
-        border border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] backdrop-blur-md
-        hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]
-        hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]
+        ${isRetroCartoon
+          ? 'bg-white text-black border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-md font-bold hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-x-1 active:translate-y-1 active:shadow-none'
+          : 'bg-[rgba(var(--color-bg-base-rgb),0.6)] border border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] backdrop-blur-md hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
+        }
         transition-all duration-300 ease-out
         disabled:opacity-70 cursor-pointer group
         font-bold text-xs uppercase tracking-widest font-mono
       `}
-      style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+      style={isRetroCartoon ? undefined : { clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
       title={`Cambiar idioma (${currentLang === 'es' ? 'Change language' : 'Cambiar idioma'})`}
       aria-label={`Language switcher: currently ${currentLang}`}
     >
@@ -58,7 +61,7 @@ export const LanguageSwitcher: React.FC = () => {
         size={16}
         className={`
           transition-all duration-300 
-          text-[var(--color-text-muted)] group-hover:text-accent-primary
+          ${isRetroCartoon ? 'text-black' : 'text-[var(--color-text-muted)] group-hover:text-accent-primary'}
           ${isTransitioning ? 'animate-spin' : ''}
         `}
       />
@@ -66,8 +69,7 @@ export const LanguageSwitcher: React.FC = () => {
       <span
         className={`
           transition-all duration-300
-          text-[var(--color-text-primary)]
-          group-hover:text-accent-primary
+          ${isRetroCartoon ? 'text-black' : 'text-[var(--color-text-primary)] group-hover:text-accent-primary'}
         `}
       >
         {currentLang.toUpperCase()}
@@ -78,8 +80,7 @@ export const LanguageSwitcher: React.FC = () => {
         className={`
           w-1.5 h-1.5 rounded-full ml-1
           transition-all duration-300
-          bg-accent-secondary
-          group-hover:shadow-[0_0_8px_var(--color-accent-secondary)]
+          ${isRetroCartoon ? 'bg-black' : 'bg-accent-secondary group-hover:shadow-[0_0_8px_var(--color-accent-secondary)]'}
         `}
       />
     </button>

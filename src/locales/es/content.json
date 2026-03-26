@@ -170,6 +170,10 @@
       "terminal": {
         "title": "Terminal",
         "description": "Verde fósforo sobre negro puro, estilo consola retro."
+      },
+      "retro_cartoon": {
+        "title": "Retro Cartoon",
+        "description": "Escala de grises vintage tipo animación clásica, con look de película antigua."
       }
     }
   },

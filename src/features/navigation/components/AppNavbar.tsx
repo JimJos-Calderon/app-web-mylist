@@ -26,6 +26,7 @@ const AppNavbar: React.FC = () => {
     { value: 'cyberpunk', label: 'CYB', color: 'rgba(var(--color-accent-primary-rgb),1)' },
     { value: '2advanced', label: '2ADV', color: '#38bdf8' },
     { value: 'terminal', label: 'TERM', color: '#34d399' },
+    { value: 'retro-cartoon', label: 'RETRO', color: '#111111' },
   ]
 
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -53,10 +54,10 @@ const AppNavbar: React.FC = () => {
   const userInitials = displayName.substring(0, 2).toUpperCase()
 
   return (
-    <nav className="sticky top-0 z-40 backdrop-blur-md bg-black/60 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
+    <nav className="app-navbar sticky top-0 z-40 backdrop-blur-md bg-[var(--color-bg-primary)] border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
       <Link to="/" className="group flex items-center gap-2 sm:gap-3">
         <div
-          className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-black text-white text-xs sm:text-base group-hover:scale-110 transition-all"
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-black text-[var(--color-text-primary)] text-xs sm:text-base group-hover:scale-110 transition-all"
           style={{
             background: 'var(--color-accent-secondary)',
             boxShadow: '0 0 15px rgba(var(--color-accent-secondary-rgb), 0.5)',
@@ -64,7 +65,7 @@ const AppNavbar: React.FC = () => {
         >
           {t('appLogo')}
         </div>
-        <span className="text-base sm:text-2xl font-black tracking-tighter text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+        <span className="text-base sm:text-2xl font-black tracking-tighter text-[var(--color-text-primary)]">
           <span className="hidden sm:inline">
             {t('appTitle')} <Heart className="inline w-5 h-5 text-red-500 fill-red-500" />
           </span>
@@ -75,20 +76,20 @@ const AppNavbar: React.FC = () => {
       </Link>
 
       <div className="hidden md:flex bg-[rgba(var(--color-accent-primary-rgb),0.06)] p-1 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.12)]">
-        <Link to="/peliculas" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-muted)]">
+        <Link to="/peliculas" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)]">
           {t('navbar.movies')}
         </Link>
-        <Link to="/series" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-muted)]">
+        <Link to="/series" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)]">
           {t('navbar.series')}
         </Link>
-        <Link to="/perfil" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-muted)]">
+        <Link to="/perfil" className="px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)]">
           {t('navbar.profile')}
         </Link>
       </div>
 
       <button
         onClick={() => setShowMobileMenu(!showMobileMenu)}
-        className="md:hidden p-2 text-[var(--color-text-muted)] hover:text-accent-primary transition-colors"
+        className="md:hidden p-2 text-[var(--color-text-primary)] hover:text-accent-primary transition-colors"
       >
         <Menu className="w-6 h-6" />
       </button>
@@ -121,13 +122,13 @@ const AppNavbar: React.FC = () => {
           <span className="text-xs font-bold font-mono tracking-widest uppercase hidden sm:inline text-[var(--color-text-primary)]">
             {displayName}
           </span>
-          <Menu className={`w-4 h-4 text-[var(--color-text-muted)] transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+          <Menu className={`w-4 h-4 text-[var(--color-text-primary)] transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
         </button>
 
         {showUserMenu && (
           <HudContainer className="!absolute right-0 mt-2 w-56 z-50 p-0 overflow-hidden shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.2)] animate-in slide-in-from-top-2 duration-200 block">
             <div className="px-5 py-4 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)]">
-              <p className="font-mono text-sm font-bold text-[var(--color-accent-primary)] truncate">{displayName}</p>
+              <p className="font-mono text-sm font-bold text-[var(--color-text-primary)] truncate">{displayName}</p>
               <p className="font-mono text-xs text-[var(--color-text-muted)] truncate opacity-80">{userEmail}</p>
             </div>
 
@@ -174,7 +175,7 @@ const AppNavbar: React.FC = () => {
                 signOut()
                 setShowUserMenu(false)
               }}
-              className="w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold border-t border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-bg-base-rgb),0.6)] flex items-center gap-2"
+              className="w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold border-t border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] flex items-center gap-2"
             >
               <LogOut className="w-4 h-4 opacity-70" /> {t('navbar.logout')}
             </button>
@@ -187,10 +188,10 @@ const AppNavbar: React.FC = () => {
           ref={mobileMenuRef}
           className="md:hidden absolute top-full left-0 right-0 z-50 animate-in slide-in-from-top-2 duration-200 border-t-0 overflow-hidden"
           style={{
-            background: 'rgba(5, 5, 10, 0.97)',
+            background: 'var(--color-bg-primary)',
             borderBottom: '1px solid rgba(var(--color-accent-primary-rgb), 0.25)',
             backdropFilter: 'blur(16px)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+            boxShadow: '0 8px 24px rgba(var(--color-accent-primary-rgb),0.12)',
           }}
         >
             <div className="px-4 py-3 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] flex items-center gap-3">
@@ -215,7 +216,7 @@ const AppNavbar: React.FC = () => {
                 )}
               </div>
               <div className="overflow-hidden">
-                <p className="font-mono text-sm font-bold text-[var(--color-accent-primary)] truncate">{displayName}</p>
+                <p className="font-mono text-sm font-bold text-[var(--color-text-primary)] truncate">{displayName}</p>
                 <p className="font-mono text-xs text-[var(--color-text-muted)] truncate">{userEmail}</p>
               </div>
             </div>
@@ -279,7 +280,7 @@ const AppNavbar: React.FC = () => {
                 signOut()
                 setShowMobileMenu(false)
               }}
-              className="w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold flex items-center gap-3 bg-[rgba(var(--color-bg-base-rgb),0.6)]"
+              className="w-full text-left px-5 py-4 font-mono text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold flex items-center gap-3 bg-[var(--color-bg-secondary)]"
             >
               <LogOut className="w-4 h-4 opacity-70" /> {t('navbar.logout')}
             </button>

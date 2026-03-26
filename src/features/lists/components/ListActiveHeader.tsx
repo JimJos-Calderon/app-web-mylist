@@ -34,11 +34,11 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
   onRandomPick,
 }) => {
   return (
-    <section className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.22)] bg-[rgba(0,0,0,0.42)] p-4 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] md:p-5">
+    <section className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.22)] bg-[var(--color-bg-elevated)] p-4 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] md:p-5">
       <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
-            <h2 className="text-xl font-black uppercase tracking-tighter text-white md:text-2xl">
+            <h2 className="text-xl font-black uppercase tracking-tighter text-[var(--color-text-primary)] md:text-2xl">
               {currentList?.name || 'Sin lista seleccionada'}
             </h2>
             <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-60">

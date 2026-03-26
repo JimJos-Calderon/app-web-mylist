@@ -24,7 +24,7 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
           <button
             type="button"
             onClick={onResetFilters}
-            className="text-sm font-medium text-slate-500 transition hover:text-slate-300"
+            className="text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text-primary)]"
           >
             Quitar filtros
           </button>
@@ -32,14 +32,14 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
         <button
           type="button"
           onClick={onToggleSecondaryControls}
-          className="text-sm font-medium text-slate-500 transition hover:text-slate-300"
+          className="text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text-primary)]"
         >
           {showSecondaryControls ? 'Ocultar filtros' : 'Filtros'}
         </button>
       </div>
 
       {showSecondaryControls && (
-        <div className="mt-4 rounded-2xl border border-slate-800/50 bg-slate-950/30 p-4">
+        <div className="list-filters-shell mt-4 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] p-4">
           <FilterPanel
             filters={filters}
             onFilterChange={onFilterChange}

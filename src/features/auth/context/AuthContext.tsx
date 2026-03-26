@@ -68,14 +68,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     try {
+      const persistedTheme = typeof window !== 'undefined'
+        ? window.localStorage.getItem('theme') || 'cyberpunk'
+        : 'cyberpunk'
+
       const { error } = await supabase.auth.signOut()
       if (error) throw error
+
       queryClient.clear()
       clearPersistedQueryCache()
       setSession(null)
       setUser(null)
       setError(null)
       setNeedsUsername(false)
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('theme', persistedTheme)
+        document.documentElement.setAttribute('data-theme', persistedTheme)
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cerrar sesión'
       setError(message)

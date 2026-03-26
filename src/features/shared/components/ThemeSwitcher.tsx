@@ -34,11 +34,19 @@ const THEME_OPTIONS: ThemeOption[] = [
     Icon: Monitor,
     previewClassName: 'from-emerald-500 via-emerald-400 to-black',
   },
+  {
+    value: 'retro-cartoon',
+    titleKey: 'settings.theme_options.retro_cartoon.title',
+    descriptionKey: 'settings.theme_options.retro_cartoon.description',
+    Icon: Palette,
+    previewClassName: 'from-stone-100 via-stone-400 to-black',
+  },
 ]
 
 const ThemeSwitcher: React.FC = () => {
   const { t } = useTranslation()
   const { theme, changeTheme, isChangingTheme, error } = useTheme()
+  const isRetroCartoonTheme = theme === 'retro-cartoon'
 
   return (
     <HudContainer className="p-6 sm:p-8">
@@ -62,22 +70,36 @@ const ThemeSwitcher: React.FC = () => {
               disabled={isChangingTheme}
               aria-pressed={isActive}
               className={`text-left rounded-lg border p-4 transition-all duration-300 group disabled:opacity-60 disabled:cursor-not-allowed ${
-                isActive
-                  ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.1)] shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.25)]'
-                  : 'border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] bg-black/40 hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.05)]'
+                isRetroCartoonTheme
+                  ? isActive
+                    ? 'bg-black text-white border-[3px] border-black shadow-[6px_6px_0px_0px_#000000] rounded-xl'
+                    : 'bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#000000]'
+                  : isActive
+                    ? 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.1)] shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.25)]'
+                    : 'border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] bg-black/40 hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.05)]'
               }`}
-              style={isActive ? { clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' } : {}}
+              style={isActive && !isRetroCartoonTheme ? { clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' } : undefined}
             >
               <div className="flex items-start justify-between gap-3 mb-3">
-                <div className={`w-9 h-9 rounded bg-black/80 border flex items-center justify-center transition-colors ${
-                  isActive 
-                    ? 'border-accent-primary' 
-                    : 'border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] group-hover:border-accent-primary'
+                <div className={`w-9 h-9 rounded border flex items-center justify-center transition-colors ${
+                  isRetroCartoonTheme
+                    ? 'bg-white border-2 border-black'
+                    : isActive
+                      ? 'bg-black/80 border-accent-primary'
+                      : 'bg-black/80 border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] group-hover:border-accent-primary'
                 }`}>
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-accent-primary' : 'text-[var(--color-text-muted)] group-hover:text-accent-primary'}`} />
+                  <Icon className={`w-4 h-4 ${
+                    isRetroCartoonTheme
+                      ? 'text-black'
+                      : isActive
+                        ? 'text-accent-primary'
+                        : 'text-[var(--color-text-muted)] group-hover:text-accent-primary'
+                  }`} />
                 </div>
                 {isActive && (
-                  <span className="text-[10px] uppercase tracking-widest font-bold font-mono text-accent-primary">
+                  <span className={`text-[10px] uppercase tracking-widest font-bold font-mono ${
+                    isRetroCartoonTheme ? 'text-white' : 'text-accent-primary'
+                  }`}>
                     {t('settings.theme_active')}
                   </span>
                 )}
@@ -85,10 +107,22 @@ const ThemeSwitcher: React.FC = () => {
 
               <div className={`h-2 rounded bg-gradient-to-r ${previewClassName} mb-3`} />
 
-              <h3 className={`text-sm font-black uppercase tracking-widest font-mono mb-1 ${isActive ? 'text-accent-primary' : 'text-[var(--color-text-primary)]'}`}>
+              <h3 className={`text-sm font-black uppercase tracking-widest font-mono mb-1 ${
+                isRetroCartoonTheme
+                  ? isActive
+                    ? 'text-white'
+                    : 'text-black'
+                  : isActive
+                    ? 'text-accent-primary'
+                    : 'text-[var(--color-text-primary)]'
+              }`}>
                 {t(titleKey)}
               </h3>
-              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed font-mono">
+              <p className={`text-xs leading-relaxed font-mono ${
+                isRetroCartoonTheme
+                  ? isActive ? 'text-white/90' : 'text-black/80'
+                  : 'text-[var(--color-text-muted)]'
+              }`}>
                 {t(descriptionKey)}
               </p>
             </button>

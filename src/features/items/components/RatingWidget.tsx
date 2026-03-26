@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, HeartOff, Star } from 'lucide-react'
+import { useTheme } from '@/features/shared'
 import { useItemRating } from '../hooks/useItemRating'
 
 interface RatingWidgetProps {
@@ -11,6 +12,8 @@ interface RatingWidgetProps {
 
 const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true, tone = 'owner' }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
   const { rating, loading, error, updateRating, updateLike } = useItemRating(itemId)
   const [showRatingMenu, setShowRatingMenu] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -72,7 +75,11 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true, ton
 
         {/* Rating Menu */}
         {showRatingMenu && (
-          <div className={`absolute bottom-full left-0 mb-2 rounded-lg p-3 z-50 hud-rating-menu hud-rating-menu--${toneClass}`}>
+          <div className={`absolute bottom-full left-0 mb-2 rounded-lg p-3 z-50 ${
+            isRetroCartoon
+              ? 'bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] rounded-xl text-black'
+              : `hud-rating-menu hud-rating-menu--${toneClass}`
+          }`}>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -82,7 +89,11 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true, ton
                     handleStarClick(star)
                   }}
                   disabled={isUpdating}
-                  className={`hud-star-button hud-star-button--${toneClass} transition-transform disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`transition-transform disabled:opacity-50 disabled:cursor-not-allowed ${
+                    isRetroCartoon
+                      ? 'text-black hover:scale-110'
+                      : `hud-star-button hud-star-button--${toneClass}`
+                  }`}
                   title={`${star} estrella${star > 1 ? 's' : ''}`}
                   aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
                 >
@@ -96,7 +107,11 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true, ton
                 handleStarClick(0)
               }}
               disabled={isUpdating}
-              className={`text-xs mt-2 w-full px-2 py-1 transition-colors hud-clear-button hud-clear-button--${toneClass} disabled:opacity-50`}
+              className={`mt-2 w-full px-2 py-1 transition-colors disabled:opacity-50 ${
+                isRetroCartoon
+                  ? 'text-black font-bold uppercase text-xs hover:underline'
+                  : `text-xs hud-clear-button hud-clear-button--${toneClass}`
+              }`}
             >
               Limpiar
             </button>

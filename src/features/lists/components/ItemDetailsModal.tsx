@@ -1,5 +1,6 @@
 import React from 'react'
-import { ListItem } from '@/features/shared'
+import { createPortal } from 'react-dom'
+import { ListItem, useTheme } from '@/features/shared'
 
 interface ItemDetailsModalProps {
   isOpen: boolean
@@ -58,13 +59,19 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   onPrevious,
   closeButtonRef,
 }) => {
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
+
   if (!isOpen || !selectedItem) return null
 
-  return (
+  const retroFloatingButton =
+    'border-[3px] border-black bg-[var(--color-bg-primary)] text-black shadow-[4px_4px_0px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none'
+
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity duration-200 ${
-        isAnimating ? 'bg-black/70 opacity-100' : 'bg-black/0 opacity-0'
-      }`}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={`${titlePrefix} ${selectedItem.titulo}`}
@@ -83,25 +90,31 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
       }}
     >
       <div
-        className={`w-full max-w-4xl overflow-hidden rounded-2xl border border-slate-700/40 bg-slate-950/95 shadow-2xl transition-all duration-200 ${
+        className={`${isRetroCartoon ? 'retro-fx ' : ''}w-full max-w-4xl max-h-[90vh] overflow-y-auto border bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] transition-all duration-200 ${
           isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        } ${
+          isRetroCartoon
+            ? 'rounded-xl border-[4px] border-black shadow-[10px_10px_0px_0px_#000000]'
+            : 'rounded-2xl border-[rgba(var(--color-accent-primary-rgb),0.25)] shadow-2xl'
         }`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-slate-800/60 p-5">
+        <div className="flex items-start justify-between gap-4 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] p-5">
           <div>
-            <h3 className="text-lg font-black uppercase tracking-tight text-white md:text-2xl">
+            <h3 className="text-2xl md:text-3xl font-black tracking-wide uppercase text-[var(--color-text-primary)]">
               {selectedItem.titulo}
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-slate-700 bg-slate-900/80 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-300">
+              <span className="rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.4)] bg-transparent px-3 py-1 text-sm font-bold uppercase tracking-[0.16em] text-[var(--color-text-primary)]">
                 {selectedItem.tipo === 'pelicula' ? movieTypeLabel : seriesTypeLabel}
               </span>
               <span
-                className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${
-                  selectedItem.visto
-                    ? 'border-cyan-400/35 bg-cyan-400/10 text-cyan-200'
-                    : 'border-amber-400/35 bg-amber-400/10 text-amber-200'
+                className={`rounded-full border px-3 py-1 text-sm font-bold uppercase tracking-[0.16em] ${
+                  isRetroCartoon
+                    ? 'border-black bg-transparent text-black'
+                    : selectedItem.visto
+                      ? 'border-[rgba(var(--color-accent-primary-rgb),0.45)] bg-transparent text-[var(--color-accent-primary)]'
+                      : 'border-[rgba(var(--color-accent-secondary-rgb),0.45)] bg-transparent text-[var(--color-accent-secondary)]'
                 }`}
               >
                 {selectedItem.visto ? watchedLabel : notWatchedLabel}
@@ -114,39 +127,51 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               <button
                 type="button"
                 onClick={onPrevious}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 transition hover:border-slate-500 hover:text-white"
+                className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                  isRetroCartoon
+                    ? retroFloatingButton
+                    : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
+                }`}
                 aria-label="Anterior"
               >
-                ←
+                {'<'}
               </button>
             )}
             {onNext && (
               <button
                 type="button"
                 onClick={onNext}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 transition hover:border-slate-500 hover:text-white"
+                className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                  isRetroCartoon
+                    ? retroFloatingButton
+                    : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
+                }`}
                 aria-label="Siguiente"
               >
-                →
+                {'>'}
               </button>
             )}
-            <div className="mx-1 h-6 w-px bg-slate-800/80"></div>
+            <div className="mx-1 h-6 w-px bg-[rgba(var(--color-accent-primary-rgb),0.25)]"></div>
             <button
               ref={closeButtonRef}
               type="button"
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 transition hover:border-slate-500 hover:text-white"
+              className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                isRetroCartoon
+                  ? retroFloatingButton
+                  : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
+              }`}
               aria-label={closeLabel}
             >
-              ✕
+              X
             </button>
           </div>
         </div>
 
         <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="border-b border-slate-800/60 bg-slate-950/60 p-5 md:border-b-0 md:border-r">
+          <div className="border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-primary)] p-5 md:border-b-0 md:border-r">
             {selectedItem.poster_url ? (
-              <div className="flex max-h-[420px] w-full items-center justify-center overflow-hidden rounded-xl bg-slate-900/60">
+              <div className="flex max-h-[420px] w-full items-center justify-center overflow-hidden rounded-xl bg-[var(--color-bg-secondary)]">
                 <img
                   src={selectedItem.poster_url}
                   alt={selectedItem.titulo}
@@ -155,29 +180,29 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                 />
               </div>
             ) : (
-              <div className="flex h-72 w-full items-center justify-center rounded-xl bg-slate-900 text-slate-500">
+              <div className="flex h-72 w-full items-center justify-center rounded-xl bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)]">
                 {noImageLabel}
               </div>
             )}
 
             {selectedItem.genero && (
-              <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3">
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
-                  Género
+              <div className="mt-4 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] px-4 py-3">
+                <p className="mb-1 text-sm font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
+                  Genero
                 </p>
-                <p className="text-sm text-slate-200">{selectedItem.genero}</p>
+                <p className="text-sm font-bold uppercase text-[var(--color-text-primary)]">{selectedItem.genero}</p>
               </div>
             )}
           </div>
 
           <div className="flex flex-col p-5">
             <div className="mb-8 flex-1">
-              <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
+              <p className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
                 Sinopsis
               </p>
-              <div className="text-sm leading-relaxed text-slate-200">
-                {synopsisLoading && <p className="text-slate-400">{loadingSynopsisLabel}</p>}
-                {synopsisError && <p className="text-red-400">{synopsisError}</p>}
+              <div className="text-base md:text-lg leading-relaxed text-[var(--color-text-primary)]">
+                {synopsisLoading && <p className="text-[var(--color-text-muted)]">{loadingSynopsisLabel}</p>}
+                {synopsisError && <p className="text-[var(--color-accent-secondary)]">{synopsisError}</p>}
                 {!synopsisLoading && !synopsisError && <p>{synopsis || emptySynopsisLabel}</p>}
               </div>
             </div>
@@ -187,10 +212,12 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                 type="button"
                 onClick={onToggle}
                 disabled={modalActionLoading !== null}
-                className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
-                  selectedItem.visto
-                    ? 'border-cyan-400/50 bg-cyan-400/15 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/25 shadow-cyan-400/10'
-                    : 'border-purple-400/50 bg-purple-400/15 text-purple-200 hover:border-purple-300 hover:bg-purple-400/25 shadow-purple-400/10'
+                className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-base md:text-lg font-bold uppercase tracking-[0.14em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                  isRetroCartoon
+                    ? 'border-[3px] border-black bg-[var(--color-bg-primary)] text-black shadow-[5px_5px_0px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[4px_4px_0px_0px_#000000] active:translate-x-[5px] active:translate-y-[5px] active:shadow-none'
+                    : selectedItem.visto
+                      ? 'border-[rgba(var(--color-accent-primary-rgb),0.45)] bg-[rgba(var(--color-accent-primary-rgb),0.12)] text-[var(--color-accent-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.18)] shadow-lg'
+                      : 'border-[rgba(var(--color-accent-secondary-rgb),0.45)] bg-[rgba(var(--color-accent-secondary-rgb),0.12)] text-[var(--color-accent-secondary)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.18)] shadow-lg'
                 }`}
               >
                 <span>
@@ -207,7 +234,11 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:text-white"
+                className={`rounded-xl border px-4 py-3 text-base font-bold transition ${
+                  isRetroCartoon
+                    ? retroFloatingButton
+                    : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
+                }`}
               >
                 Cerrar
               </button>
@@ -217,16 +248,21 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                   type="button"
                   onClick={onDelete}
                   disabled={modalActionLoading !== null}
-                  className="rounded-xl border border-red-500/40 bg-red-500/12 px-4 py-3 text-sm font-semibold text-red-300 transition hover:border-red-400 hover:bg-red-500/18 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  className={`rounded-xl border px-4 py-3 text-base font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                    isRetroCartoon
+                      ? retroFloatingButton
+                      : 'border-red-500/40 bg-red-500/12 text-red-300 hover:border-red-400 hover:bg-red-500/18 hover:text-red-200'
+                  }`}
                 >
-                  {modalActionLoading === 'delete' ? 'Borrando...' : `🗑️ ${deleteLabel}`}
+                  {modalActionLoading === 'delete' ? 'Borrando...' : `DELETE ${deleteLabel}`}
                 </button>
               )}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

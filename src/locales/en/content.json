@@ -170,6 +170,10 @@
       "terminal": {
         "title": "Terminal",
         "description": "Phosphor green on pure black, retro console style."
+      },
+      "retro_cartoon": {
+        "title": "Retro Cartoon",
+        "description": "Vintage grayscale inspired by classic rubber-hose cartoons and old film stock."
       }
     }
   },

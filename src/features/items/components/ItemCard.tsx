@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Trash2, Loader2, Film } from 'lucide-react'
-import { ConfirmDialog, HudContainer, ListItem, OptimizedImage, TechLabel } from '@/features/shared'
+import { ConfirmDialog, HudContainer, ListItem, OptimizedImage, TechLabel, useTheme } from '@/features/shared'
 import { useUsername } from '@/features/profile'
 import RatingWidget from './RatingWidget'
 
@@ -27,6 +27,8 @@ const ItemCard: React.FC<ItemCardProps> = ({
   const [togglingWatched, setTogglingWatched] = React.useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false)
   const { username } = useUsername(item.user_id)
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -80,6 +82,8 @@ const ItemCard: React.FC<ItemCardProps> = ({
             : 'ring-1 ring-inset ring-white/5 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/50 hover:ring-white/10'
         } ${
           isOwn ? 'hud-item-card--owner' : 'hud-item-card--shared'
+        } ${
+          isRetroCartoon ? 'item-card-retro-ink border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl' : ''
         }`}
         contentClassName="relative flex h-full flex-col"
       >

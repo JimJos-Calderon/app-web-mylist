@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { AlertTriangle } from 'lucide-react'
-import HudContainer from './HudContainer'
 import TechLabel from './TechLabel'
+import { useTheme } from '../hooks/useTheme'
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -22,6 +23,9 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -36,36 +40,58 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   if (!isOpen) return null
 
-  return (
+  const panelClass = isRetroCartoon
+    ? 'retro-fx w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border-[4px] border-black bg-white text-black shadow-[10px_10px_0px_0px_#000000]'
+    : 'w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] shadow-2xl'
+
+  const titleClass = isRetroCartoon
+    ? 'mt-2 text-center uppercase tracking-[0.15em] font-black text-black'
+    : 'mt-2 text-center uppercase tracking-[0.15em] font-mono text-xl font-black text-[var(--color-text-primary)]'
+
+  const messageClass = isRetroCartoon
+    ? 'mx-auto mb-8 max-w-[90%] text-center text-sm leading-relaxed font-medium text-black'
+    : 'mx-auto mb-8 max-w-[90%] text-center text-sm leading-relaxed font-mono text-[var(--color-text-muted)] opacity-90'
+
+  const cancelButtonClass = isRetroCartoon
+    ? 'flex-1 px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
+    : 'flex-1 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] transition hover:border-[rgba(var(--color-accent-primary-rgb),0.5)] hover:bg-[var(--color-bg-primary)]'
+
+  const confirmButtonClass = isRetroCartoon
+    ? 'flex-1 px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
+    : 'flex-1 rounded-xl border border-[rgba(var(--color-accent-secondary-rgb),0.45)] bg-[rgba(var(--color-accent-secondary-rgb),0.12)] px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest text-[var(--color-accent-secondary)] transition hover:border-[rgba(var(--color-accent-secondary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.18)]'
+
+  const iconClass = isRetroCartoon
+    ? 'h-8 w-8 text-black'
+    : 'h-8 w-8 text-[var(--color-accent-primary)]'
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={onCancel}
     >
-      <div 
-        className="max-w-md w-full mx-4 animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <HudContainer
-          className="p-8 border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]"
-        >
+      <div className={panelClass} onClick={(e) => e.stopPropagation()}>
+        <div className="p-8">
           {/* Header */}
-          <div className="flex flex-col items-center justify-center mb-6 relative">
+          <div className="relative mb-6 flex flex-col items-center justify-center">
             <TechLabel text="SYS.ALERT" tone="secondary" blink className="absolute -top-4" />
-            
-            <div 
-              className="mt-6 w-16 h-16 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center mb-5"
-              style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+
+            <div
+              className={`mt-6 mb-5 flex h-16 w-16 items-center justify-center border-[3px] ${
+                isRetroCartoon
+                  ? 'border-black bg-white'
+                  : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-primary)]'
+              }`}
             >
-              <AlertTriangle className="w-8 h-8 text-accent-secondary drop-shadow-[0_0_8px_rgba(var(--color-accent-secondary-rgb),0.6)]" />
+              <AlertTriangle className={iconClass} />
             </div>
-            
-            <h3 className="text-xl font-black text-[var(--color-text-primary)] text-center tracking-[0.15em] uppercase font-mono mt-2">
+
+            <h3 className={titleClass}>
               {title}
             </h3>
           </div>
 
           {/* Message */}
-          <p className="text-[var(--color-text-muted)] text-center mb-8 text-sm font-mono opacity-90 leading-relaxed max-w-[90%] mx-auto">
+          <p className={messageClass}>
             {message}
           </p>
 
@@ -73,22 +99,21 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <div className="flex gap-4">
             <button
               onClick={onCancel}
-              className="flex-1 px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-primary-rgb),0.4)] hover:border-[rgba(var(--color-accent-primary-rgb),0.8)] hover:text-[var(--color-accent-primary)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.2)]"
-              style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+              className={cancelButtonClass}
             >
               {cancelText}
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.15)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] text-accent-secondary font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.6)] hover:border-[rgba(var(--color-accent-secondary-rgb),1)] hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)]"
-              style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+              className={confirmButtonClass}
             >
               {confirmText}
             </button>
           </div>
-        </HudContainer>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

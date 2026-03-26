@@ -8,12 +8,14 @@ import { usePendingInvite } from '@/features/invites/hooks/usePendingInvite'
 import AppRoutes from '@/app/AppRoutes'
 import AppNavbar from '@/features/navigation/components/AppNavbar'
 import AppBootScreen from '@/features/app/components/AppBootScreen'
+import { useTheme } from '@/features/shared/hooks/useTheme'
 
 const Login = lazy(() => import('@pages/Login'))
 const JoinList = lazy(() => import('@pages/JoinList'))
 
 const AppShell: React.FC = () => {
     const { session, loading, error: authError, needsUsername } = useAuth()
+    const { theme } = useTheme()
     const location = useLocation()
 
     const [showError, setShowError] = useState(authError)
@@ -63,7 +65,7 @@ const AppShell: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen text-white font-sans selection:bg-orange-500/30 bg-black">
+        <div className={`min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-sans selection:bg-orange-500/30 ${theme === 'retro-cartoon' ? 'retro-fx' : ''}`}>
             {needsUsername && <UsernameSetupModal />}
 
             <PendingInviteModal

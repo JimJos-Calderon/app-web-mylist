@@ -54,38 +54,13 @@ type FlowCardProps = {
 
 const FlowCard: React.FC<FlowCardProps> = ({ title, description, to, accent, cta, icon }) => {
   const isPrimary = accent === 'cyan'
+  const toneClasses = isPrimary
+    ? 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-accent-primary-rgb),0.06)] hover:border-[rgba(var(--color-accent-primary-rgb),0.55)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]'
+    : 'border-[rgba(var(--color-accent-secondary-rgb),0.3)] bg-[rgba(var(--color-accent-secondary-rgb),0.06)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.55)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)]'
 
   return (
     <Link to={to} className="block">
-      <div
-        className="rounded-2xl border p-5 transition"
-        style={{
-          borderColor: isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.3)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.3)',
-          background: isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.06)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.06)',
-        }}
-        onMouseEnter={(e) => {
-          const el = e.currentTarget
-          el.style.borderColor = isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.55)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.55)'
-          el.style.background = isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.1)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.1)'
-        }}
-        onMouseLeave={(e) => {
-          const el = e.currentTarget
-          el.style.borderColor = isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.3)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.3)'
-          el.style.background = isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.06)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.06)'
-        }}
-      >
+      <div className={`dashboard-flow-card rounded-2xl border p-5 transition-all duration-200 ${toneClasses}`}>
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
@@ -179,7 +154,7 @@ const Dashboard: React.FC = () => {
             {'>'} DECISION_DASHBOARD
           </p>
 
-          <h1 className="text-4xl font-black tracking-tighter text-white md:text-6xl">
+          <h1 className="text-4xl font-black tracking-tighter text-[var(--color-text-primary)] md:text-6xl">
             Decide qué ver juntos, rápido.
           </h1>
 
@@ -191,13 +166,13 @@ const Dashboard: React.FC = () => {
         </section>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.28)] bg-[rgba(0,0,0,0.6)] p-6 md:p-8">
+          <div className="dashboard-main-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.28)] bg-[var(--color-bg-elevated)] p-6 md:p-8">
             <div className="mb-6">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-accent-primary opacity-85">
                 Lista activa
               </p>
 
-              <h2 className="text-2xl font-semibold text-white md:text-3xl">
+              <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] md:text-3xl">
                 {loadingLists ? 'Cargando listas...' : currentList?.name || 'Sin lista seleccionada'}
               </h2>
 
@@ -240,10 +215,10 @@ const Dashboard: React.FC = () => {
                     </button>
 
                     {currentList && (
-                      <div className="flex items-center gap-1 p-1 rounded-xl bg-black/20 border border-white/5">
+                      <div className="flex items-center gap-1 p-1 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)]">
                         <button
                           type="button"
-                          className="p-2 text-white/40 hover:text-red-500 transition-colors"
+                          className="p-2 text-[var(--color-text-muted)] hover:text-red-500 transition-colors"
                           onClick={() => (currentList.owner_id === user.id ? setIsConfirmDeleteOpen(true) : setIsConfirmLeaveOpen(true))}
                           title={currentList.owner_id === user.id ? t('lists.delete') : t('lists.leave')}
                         >
@@ -257,8 +232,8 @@ const Dashboard: React.FC = () => {
             )}
 
             {!loadingLists && !hasLists && (
-              <div className="mb-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-                <p className="text-sm text-slate-400">
+              <div className="mb-5 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] p-4">
+                <p className="text-sm text-[var(--color-text-muted)]">
                   No hay ninguna lista todavía. Crear una es el primer paso para poder añadir y decidir.
                 </p>
               </div>
@@ -297,7 +272,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[rgba(0,0,0,0.56)] p-6">
+          <div className="dashboard-next-step-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[var(--color-bg-elevated)] p-6">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--color-text-muted)]">
               Siguiente paso
             </p>
@@ -307,7 +282,7 @@ const Dashboard: React.FC = () => {
             <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)]">{nextStepDescription}</p>
 
             <div className="mt-6 grid gap-3">
-              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.4)] p-4">
+              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[var(--color-bg-secondary)] p-4">
                 <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   Estado
                 </p>
@@ -318,7 +293,7 @@ const Dashboard: React.FC = () => {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.4)] p-4">
+              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[var(--color-bg-secondary)] p-4">
                 <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   Contexto
                 </p>
@@ -341,7 +316,7 @@ const Dashboard: React.FC = () => {
             to="/peliculas"
             cta={hasActiveList ? 'Seguir con películas' : 'Abrir películas'}
             accent="cyan"
-            icon={<Film className="h-4 w-4" />}
+            icon={<Film className="h-4 w-4" strokeWidth={2.5} />}
           />
 
           <FlowCard
@@ -354,7 +329,7 @@ const Dashboard: React.FC = () => {
             to="/series"
             cta={hasActiveList ? 'Seguir con series' : 'Abrir series'}
             accent="purple"
-            icon={<Tv className="h-4 w-4" />}
+            icon={<Tv className="h-4 w-4" strokeWidth={2.5} />}
           />
         </section>
 
@@ -421,3 +396,4 @@ const Dashboard: React.FC = () => {
 }
 
 export default Dashboard
+
