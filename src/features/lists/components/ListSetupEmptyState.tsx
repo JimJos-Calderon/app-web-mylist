@@ -20,13 +20,13 @@ const ListSetupEmptyState: React.FC<ListSetupEmptyStateProps> = ({
   createListLabel,
 }) => {
   return (
-    <section className="mb-8 rounded-2xl border border-slate-800 bg-slate-950/60 p-6 md:p-8">
+    <section className="mb-8 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] p-6 md:p-8">
       <div className="mx-auto max-w-3xl">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--color-text-muted)]">
           Primer paso
         </p>
-        <h3 className="mb-2 text-xl font-semibold text-white">Elige una lista para empezar</h3>
-        <p className="mb-6 max-w-2xl text-sm text-slate-400">
+        <h3 className="mb-2 text-xl font-semibold text-[var(--color-text-primary)]">Elige una lista para empezar</h3>
+        <p className="mb-6 max-w-2xl text-sm text-[var(--color-text-muted)]">
           Necesitas una lista activa para añadir títulos, decidir qué ver y seguir el progreso.
         </p>
 
@@ -41,7 +41,7 @@ const ListSetupEmptyState: React.FC<ListSetupEmptyStateProps> = ({
                 label="Elegir lista"
               />
             ) : (
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-3 text-sm text-slate-500">
+              <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] px-4 py-3 text-sm text-[var(--color-text-muted)]">
                 {loadingLists ? 'Cargando listas...' : 'Todavía no tienes listas disponibles.'}
               </div>
             )}

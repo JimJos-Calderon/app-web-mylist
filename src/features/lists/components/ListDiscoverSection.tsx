@@ -71,9 +71,9 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
       )}
 
       {!loading && totalVisibleItems === 0 && (
-        <div className="rounded-3xl border border-slate-800 bg-slate-950/35 px-6 py-16 text-center">
+        <div className="rounded-3xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] px-6 py-16 text-center">
 
-          <h3 className="mb-2 text-xl font-semibold text-white">
+          <h3 className="mb-2 text-xl font-semibold text-[var(--color-text-primary)]">
             {searchQuery
               ? 'No hay resultados para decidir'
               : tipo === 'pelicula'
@@ -81,7 +81,7 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
                 : 'Tu lista de series está vacía'}
           </h3>
 
-          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-400">
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-[var(--color-text-muted)]">
             {searchQuery
               ? t('item.search_no_results', { type: tipo, query: searchQuery })
               : tipo === 'pelicula'
@@ -101,7 +101,7 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
             <button
               type="button"
               onClick={onResetDiscovery}
-              className="rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white"
+              className="rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[var(--color-bg-secondary)] px-4 py-2 text-sm font-semibold text-[var(--color-text-primary)] transition hover:border-[rgba(var(--color-accent-primary-rgb),0.45)] hover:text-[var(--color-text-primary)]"
             >
               Limpiar filtros
             </button>

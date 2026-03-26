@@ -142,6 +142,98 @@
   color: #000000;
 }
 
+/* Retro cartoon: tarjetas navegables Películas/Series (neobrutalismo retro) */
+[data-theme="retro-cartoon"] .dashboard-flow-card {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px 0px #000000 !important;
+  border-radius: 0.75rem !important;
+  transition: transform 180ms ease, box-shadow 180ms ease !important;
+}
+
+[data-theme="retro-cartoon"] .dashboard-flow-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 7px 7px 0px 0px #000000 !important;
+}
+
+[data-theme="retro-cartoon"] .dashboard-flow-card:active {
+  transform: translate(5px, 5px);
+  box-shadow: none !important;
+}
+
+[data-theme="retro-cartoon"] .dashboard-flow-card * {
+  color: #000000 !important;
+}
+
+[data-theme="retro-cartoon"] .dashboard-flow-card svg {
+  stroke-width: 2.5 !important;
+}
+
+/* Retro cartoon: quitar biseles/chamfers del HUD/terminal */
+[data-theme="retro-cartoon"] .hud-container,
+[data-theme="retro-cartoon"] .hud-metric-card,
+[data-theme="retro-cartoon"] .hud-search-input,
+[data-theme="retro-cartoon"] .hud-search-submit,
+[data-theme="retro-cartoon"] .hud-filter-switch,
+[data-theme="retro-cartoon"] .hud-filter-field,
+[data-theme="retro-cartoon"] .hud-filter-order,
+[data-theme="retro-cartoon"] .hud-filter-reset {
+  clip-path: none !important;
+  border-radius: 8px !important;
+}
+
+/* Retro cartoon: limpiar decoraciones futuristas del log interno */
+[data-theme="retro-cartoon"] .hud-container::before,
+[data-theme="retro-cartoon"] .hud-corner,
+[data-theme="retro-cartoon"] .hud-cross {
+  display: none !important;
+}
+
+[data-theme="retro-cartoon"] .hud-container [class*="bg-[rgba(var(--color-accent"],
+[data-theme="retro-cartoon"] .hud-container [class*="bg-[rgba(0,0,0"],
+[data-theme="retro-cartoon"] .hud-container [class*="hover:bg-[rgba(var(--color-accent"] {
+  background: transparent !important;
+}
+
+[data-theme="retro-cartoon"] .hud-container [class*="border-[rgba(var(--color-accent"] {
+  border: none !important;
+}
+
+[data-theme="retro-cartoon"] .hud-container .custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+[data-theme="retro-cartoon"] .hud-container .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Retro cartoon: buscador y filtros en modo tinta/papel */
+[data-theme="retro-cartoon"] .list-search-shell,
+[data-theme="retro-cartoon"] .list-filters-shell {
+  background: #ffffff !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+}
+
+[data-theme="retro-cartoon"] .hud-search-input,
+[data-theme="retro-cartoon"] .hud-search-submit,
+[data-theme="retro-cartoon"] .hud-filter-switch,
+[data-theme="retro-cartoon"] .hud-filter-field,
+[data-theme="retro-cartoon"] .hud-filter-order,
+[data-theme="retro-cartoon"] .hud-filter-reset {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="retro-cartoon"] .hud-search-input::placeholder,
+[data-theme="retro-cartoon"] .hud-filter-search::placeholder {
+  color: #1a1a1a !important;
+  opacity: 0.9;
+}
+
 .retro-fx {
   position: relative;
   isolation: isolate;

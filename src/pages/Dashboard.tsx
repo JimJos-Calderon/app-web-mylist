@@ -54,38 +54,13 @@ type FlowCardProps = {
 
 const FlowCard: React.FC<FlowCardProps> = ({ title, description, to, accent, cta, icon }) => {
   const isPrimary = accent === 'cyan'
+  const toneClasses = isPrimary
+    ? 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-accent-primary-rgb),0.06)] hover:border-[rgba(var(--color-accent-primary-rgb),0.55)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]'
+    : 'border-[rgba(var(--color-accent-secondary-rgb),0.3)] bg-[rgba(var(--color-accent-secondary-rgb),0.06)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.55)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)]'
 
   return (
     <Link to={to} className="block">
-      <div
-        className="rounded-2xl border p-5 transition"
-        style={{
-          borderColor: isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.3)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.3)',
-          background: isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.06)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.06)',
-        }}
-        onMouseEnter={(e) => {
-          const el = e.currentTarget
-          el.style.borderColor = isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.55)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.55)'
-          el.style.background = isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.1)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.1)'
-        }}
-        onMouseLeave={(e) => {
-          const el = e.currentTarget
-          el.style.borderColor = isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.3)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.3)'
-          el.style.background = isPrimary
-            ? 'rgba(var(--color-accent-primary-rgb), 0.06)'
-            : 'rgba(var(--color-accent-secondary-rgb), 0.06)'
-        }}
-      >
+      <div className={`dashboard-flow-card rounded-2xl border p-5 transition-all duration-200 ${toneClasses}`}>
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
@@ -341,7 +316,7 @@ const Dashboard: React.FC = () => {
             to="/peliculas"
             cta={hasActiveList ? 'Seguir con películas' : 'Abrir películas'}
             accent="cyan"
-            icon={<Film className="h-4 w-4" />}
+            icon={<Film className="h-4 w-4" strokeWidth={2.5} />}
           />
 
           <FlowCard
@@ -354,7 +329,7 @@ const Dashboard: React.FC = () => {
             to="/series"
             cta={hasActiveList ? 'Seguir con series' : 'Abrir series'}
             accent="purple"
-            icon={<Tv className="h-4 w-4" />}
+            icon={<Tv className="h-4 w-4" strokeWidth={2.5} />}
           />
         </section>
 
