@@ -179,7 +179,7 @@ const Dashboard: React.FC = () => {
             {'>'} DECISION_DASHBOARD
           </p>
 
-          <h1 className="text-4xl font-black tracking-tighter text-white md:text-6xl">
+          <h1 className="text-4xl font-black tracking-tighter text-[var(--color-text-primary)] md:text-6xl">
             Decide qué ver juntos, rápido.
           </h1>
 
@@ -421,3 +421,4 @@ const Dashboard: React.FC = () => {
 }
 
 export default Dashboard
+
