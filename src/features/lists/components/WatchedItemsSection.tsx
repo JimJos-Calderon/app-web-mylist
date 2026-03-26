@@ -39,10 +39,10 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
   const isRetroCartoon = theme === 'retro-cartoon'
 
   const retroPageButtonBase =
-    'bg-white text-black border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-md font-bold hover:-translate-y-1 hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all'
-  const retroPageButtonDisabled = 'bg-white text-black border-[3px] border-black rounded-md font-bold opacity-50 cursor-not-allowed'
+    'relative z-10 m-1 hover:z-20 bg-white text-black border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-md font-bold hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all'
+  const retroPageButtonDisabled = 'relative z-10 m-1 bg-white text-black border-[3px] border-black rounded-md font-bold opacity-50 cursor-not-allowed'
   const retroPageButtonActive =
-    'bg-black text-white border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-md font-bold transition-all'
+    'relative z-10 m-1 hover:z-20 bg-black text-white border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-md font-bold transition-all'
 
   const itemsToShow = hasPendingSection ? visibleWatchedItems.slice(0, 6) : paginatedWatchedItems
 
@@ -98,7 +98,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
 
       {!hasPendingSection && visibleWatchedItems.length > 0 && totalPages > 1 && (
         <>
-          <div className="mt-8 flex items-center justify-center gap-1 md:mt-10 md:gap-2">
+          <div className="mt-8 py-2 overflow-visible flex items-center justify-center gap-1 md:mt-10 md:gap-2">
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -120,7 +120,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
             <span className="sm:hidden">{'<'}</span>
           </button>
 
-          <div className="scrollbar-none flex max-w-[60vw] gap-1 overflow-x-auto md:max-w-none md:gap-2">
+          <div className="scrollbar-none flex max-w-[60vw] gap-1 overflow-x-auto overflow-y-visible md:max-w-none md:gap-2">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
               const showPageMobile = page === currentPage || page === 1 || page === totalPages
               const showPageDesktop =
