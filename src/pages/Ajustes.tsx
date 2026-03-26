@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
-import { LanguageSwitcher, ThemeSwitcher, usePushNotifications } from '@/features/shared'
+import { ConfirmDialog, LanguageSwitcher, ThemeSwitcher, usePushNotifications, useTheme } from '@/features/shared'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
@@ -32,10 +32,33 @@ const Ajustes: React.FC = () => {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [showVerifyEmailModal, setShowVerifyEmailModal] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [verifyEmailPassword, setVerifyEmailPassword] = useState('')
   const [showVerifyEmailPassword, setShowVerifyEmailPassword] = useState(false)
   const [securityMessage, setSecurityMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [pushMessage, setPushMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
+
+  const navButtonClasses = (section: Section) => {
+    const isActive = activeSection === section
+    const base =
+      'w-full text-left px-4 py-3 rounded font-mono uppercase tracking-widest text-xs transition-all flex items-center gap-2'
+
+    if (isRetroCartoon) {
+      return `${base} ${
+        isActive
+          ? 'bg-black text-white border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] font-bold'
+          : 'bg-transparent text-[var(--color-text-primary)] border-[3px] border-transparent hover:border-black hover:shadow-[3px_3px_0px_0px_#000000] hover:-translate-y-[1px]'
+      }`
+    }
+
+    return `${base} ${
+      isActive
+        ? 'bg-[var(--color-accent-primary)] text-black shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.5)]'
+        : 'text-[var(--color-text-muted)] hover:text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]'
+    }`
+  }
 
   const {
     isSupported: isPushSupported,
@@ -110,10 +133,13 @@ const Ajustes: React.FC = () => {
   }
 
   const handleLogout = async () => {
-    if (confirm(t('settings.logout_confirm'))) {
-      await signOut()
-      navigate('/')
-    }
+    setShowLogoutConfirm(true)
+  }
+
+  const handleConfirmLogout = async () => {
+    setShowLogoutConfirm(false)
+    await signOut()
+    navigate('/')
   }
 
   const handleChangeEmail = async (e: React.FormEvent) => {
@@ -283,38 +309,30 @@ const Ajustes: React.FC = () => {
               <nav className="space-y-2">
                 <button
                   onClick={() => setActiveSection('perfil')}
-                  className={`w-full text-left px-4 py-3 rounded font-mono uppercase tracking-widest text-xs transition-all flex items-center gap-2 ${
-                    activeSection === 'perfil'
-                      ? 'bg-[var(--color-accent-primary)] text-black shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.5)]'
-                      : 'text-[var(--color-text-muted)] hover:text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]'
-                  }`}
+                  className={navButtonClasses('perfil')}
                 >
                   <User className="w-4 h-4" /> {t('settings.profile_section')}
                 </button>
                 <button
                   onClick={() => setActiveSection('seguridad')}
-                  className={`w-full text-left px-4 py-3 rounded font-mono uppercase tracking-widest text-xs transition-all flex items-center gap-2 ${
-                    activeSection === 'seguridad'
-                      ? 'bg-[var(--color-accent-primary)] text-black shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.5)]'
-                      : 'text-[var(--color-text-muted)] hover:text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]'
-                  }`}
+                  className={navButtonClasses('seguridad')}
                 >
                   <LockKeyhole className="w-4 h-4" /> {t('settings.security_section')}
                 </button>
                 <button
                   onClick={() => setActiveSection('notificaciones')}
-                  className={`w-full text-left px-4 py-3 rounded font-mono uppercase tracking-widest text-xs transition-all flex items-center gap-2 ${
-                    activeSection === 'notificaciones'
-                      ? 'bg-[var(--color-accent-primary)] text-black shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.5)]'
-                      : 'text-[var(--color-text-muted)] hover:text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]'
-                  }`}
+                  className={navButtonClasses('notificaciones')}
                 >
                   <Bell className="w-4 h-4" /> {t('settings.notifications_section')}
                 </button>
               </nav>
               
               {/* Language Switcher */}
-              <div className="flex justify-center mt-6 mb-6 p-3 bg-black/40 rounded border border-[rgba(var(--color-accent-primary-rgb),0.2)]">
+              <div className={`flex justify-center mt-6 mb-6 p-3 border ${
+                isRetroCartoon
+                  ? 'border-[2px] border-black bg-white rounded-md p-2'
+                  : 'bg-black/40 rounded border-[rgba(var(--color-accent-primary-rgb),0.2)]'
+              }`}>
                 <LanguageSwitcher />
               </div>
               
@@ -339,10 +357,14 @@ const Ajustes: React.FC = () => {
                   {/* Avatar Preview */}
                   <div className="flex justify-center mb-8">
                     <div 
-                      className="relative w-32 h-32 rounded-full overflow-hidden border-4 flex items-center justify-center"
+                      className={`relative w-32 h-32 aspect-square overflow-hidden flex items-center justify-center ${
+                        isRetroCartoon
+                          ? 'rounded-md border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] bg-white p-1'
+                          : 'rounded-full border-4'
+                      }`}
                       style={{ 
-                        borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)',
-                        background: 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)'
+                        borderColor: isRetroCartoon ? undefined : 'rgba(var(--color-accent-primary-rgb), 0.5)',
+                        background: isRetroCartoon ? undefined : 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)'
                       }}
                     >
                       {isUploading ? (
@@ -360,7 +382,7 @@ const Ajustes: React.FC = () => {
                         <img
                           src={avatarUrl}
                           alt="Avatar"
-                          className="w-full h-full object-cover"
+                          className={`w-full h-full object-cover ${isRetroCartoon ? 'rounded-none' : ''}`}
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none'
                           }}
@@ -452,8 +474,12 @@ const Ajustes: React.FC = () => {
                   <button
                     onClick={handleSaveChanges}
                     disabled={isSaving || !username.trim()}
-                    className="w-full px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-mono tracking-widest text-xs uppercase hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded"
-                    style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
+                    className={`${
+                      isRetroCartoon
+                        ? 'w-full px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
+                        : 'w-full px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-mono tracking-widest text-xs uppercase hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all rounded'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    style={isRetroCartoon ? undefined : { clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
                   >
                     {isSaving ? t('settings.saving_button') : t('settings.save_button')}
                   </button>
@@ -754,6 +780,16 @@ const Ajustes: React.FC = () => {
             </HudContainer>
           </div>
         )}
+
+        <ConfirmDialog
+          isOpen={showLogoutConfirm}
+          title={t('settings.logout_button')}
+          message={t('settings.logout_confirm')}
+          confirmText={t('settings.logout_button')}
+          cancelText={t('account.cancel')}
+          onConfirm={handleConfirmLogout}
+          onCancel={() => setShowLogoutConfirm(false)}
+        />
       </div>
     </div>
   )

@@ -27,6 +27,8 @@ const Perfil: React.FC = () => {
   const [totalRatings, setTotalRatings] = useState(0)
   const [favoriteCount, setFavoriteCount] = useState(0)
   const [likedCount, setLikedCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   const fetchRatedItems = useCallback(async () => {
     try {
@@ -80,6 +82,7 @@ const Perfil: React.FC = () => {
       setTotalRatings(formatted.length)
       setFavoriteCount(formatted.filter((r: any) => r.rating.rating >= 4).length)
       setLikedCount(formatted.filter((r: any) => r.rating.liked).length)
+      setCurrentPage(1)
     } catch (error) {
       console.error('Error fetching rated items:', error)
     } finally {
@@ -105,6 +108,12 @@ const Perfil: React.FC = () => {
     // Navigate a detalles si es necesario
     navigate(`/item/${item.id}`)
   }
+
+  const totalPages = Math.max(1, Math.ceil(ratedItems.length / itemsPerPage))
+  const paginatedRatedItems = ratedItems.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
 
   if (loading || isLoadingItems) {
     return (
@@ -191,6 +200,7 @@ const Perfil: React.FC = () => {
                   ? 'border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl bg-white text-black hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none'
                   : 'bg-[rgba(var(--color-accent-primary-rgb),0.05)] backdrop-blur-md border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:border-accent-primary hover:shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.3)]'
               }`}
+              style={isRetroCartoon ? { clipPath: 'none' } : undefined}
             >
               <Cog className="w-5 h-5" />
               <span>{t('profile.settings_button')}</span>
@@ -206,7 +216,7 @@ const Perfil: React.FC = () => {
               <h2 className="text-xl font-black uppercase tracking-widest text-[var(--color-text-primary)] font-mono">{t('profile.my_ratings')}</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {ratedItems.map(({ item }) => (
+              {paginatedRatedItems.map(({ item }) => (
                 <ItemCard
                   key={item.id}
                   item={item}
@@ -218,6 +228,57 @@ const Perfil: React.FC = () => {
                 />
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-8 py-2 overflow-visible flex items-center justify-center gap-1 md:mt-10 md:gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-2 md:px-4 text-xs md:text-sm font-mono font-bold uppercase tracking-widest border transition-all ${
+                    isRetroCartoon
+                      ? 'relative z-10 m-1 bg-white text-black border-[3px] border-black rounded-md shadow-[3px_3px_0px_0px_#000000] hover:z-20 hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed'
+                      : 'rounded-lg border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.7)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.12)] disabled:opacity-50 disabled:cursor-not-allowed'
+                  }`}
+                >
+                  Anterior
+                </button>
+
+                <div className="scrollbar-none flex max-w-[60vw] gap-1 overflow-x-auto overflow-y-visible md:max-w-none md:gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-[36px] md:min-w-[40px] px-3 py-2 md:px-4 text-xs md:text-sm font-mono font-bold border transition-all ${
+                        isRetroCartoon
+                          ? currentPage === page
+                            ? 'relative z-10 m-1 hover:z-20 bg-black text-white border-[3px] border-black rounded-md shadow-[3px_3px_0px_0px_#000000]'
+                            : 'relative z-10 m-1 hover:z-20 bg-white text-black border-[3px] border-black rounded-md shadow-[3px_3px_0px_0px_#000000] hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-x-1 active:translate-y-1 active:shadow-none'
+                          : currentPage === page
+                            ? 'rounded-lg border-[rgba(var(--color-accent-primary-rgb),0.7)] bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-[var(--color-accent-primary)]'
+                            : 'rounded-lg border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] text-[var(--color-text-muted)] hover:border-[rgba(var(--color-accent-primary-rgb),0.7)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.12)] hover:text-[var(--color-accent-primary)]'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-2 md:px-4 text-xs md:text-sm font-mono font-bold uppercase tracking-widest border transition-all ${
+                    isRetroCartoon
+                      ? 'relative z-10 m-1 bg-white text-black border-[3px] border-black rounded-md shadow-[3px_3px_0px_0px_#000000] hover:z-20 hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed'
+                      : 'rounded-lg border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.7)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.12)] disabled:opacity-50 disabled:cursor-not-allowed'
+                  }`}
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <HudContainer className="text-center py-20 px-4 border-[rgba(var(--color-accent-primary-rgb),0.2)]">
