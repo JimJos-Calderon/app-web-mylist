@@ -116,6 +116,12 @@ REGLAS DE ANÁLISIS:
 - Busca patrones cruzados: si le gustan los thrillers psicológicos y odia las comedias románticas, usa ese perfil.
 - PROHIBIDO recomendar títulos que ya estén en el historial de calificaciones del usuario.
 
+REGLAS DE VARIABILIDAD OBLIGATORIAS:
+- Varía tus recomendaciones en cada consulta, aunque el perfil del usuario sea similar.
+- No te limites a los blockbusters más obvios: prioriza joyas ocultas, películas de culto y títulos internacionales cuando encajen con el perfil.
+- Si el usuario pulsa recalcular, evita repetir exactamente los mismos títulos de la última respuesta.
+- Busca diversidad razonable entre géneros, países y niveles de popularidad sin perder afinidad.
+
 DEBES RESPONDER ÚNICA Y EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO.
 NO incluyas bloques de código Markdown (como \`\`\`json).
 NO agregues prefijos, saludos, despedidas ni texto de cortesía.
@@ -129,7 +135,8 @@ La estructura estricta e innegociable del JSON que vas a retornar debe ser exact
   ]
 }`;
 
-    const userPrompt = `[INICIANDO INTERFAZ DE RED...] Analizando datos de calificación extraídos del usuario:\n${JSON.stringify(favoritos, null, 2)}\n\n[TÍTULOS YA CALIFICADOS QUE DEBES EXCLUIR]:\n${JSON.stringify(excludedTitles, null, 2)}\n[ESPERANDO JSON DEL ORÁCULO...]`;
+    const entropySeed = new Date().toISOString();
+    const userPrompt = `[INICIANDO INTERFAZ DE RED...] Analizando datos de calificación extraídos del usuario:\n${JSON.stringify(favoritos, null, 2)}\n\n[TÍTULOS YA CALIFICADOS QUE DEBES EXCLUIR]:\n${JSON.stringify(excludedTitles, null, 2)}\n\n[SEMILLA DE ENTROPÍA PARA ESTA PETICIÓN]: ${entropySeed}\n[ESPERANDO JSON DEL ORÁCULO...]`;
 
     try {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -145,7 +152,9 @@ La estructura estricta e innegociable del JSON que vas a retornar debe ser exact
             { role: 'user', content: userPrompt }
           ],
           response_format: { type: 'json_object' },
-          temperature: 0.2,
+          temperature: 0.8,
+          presence_penalty: 0.3,
+          frequency_penalty: 0.3,
         })
       });
 

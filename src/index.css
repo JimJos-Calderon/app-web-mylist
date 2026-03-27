@@ -209,6 +209,19 @@
 }
 
 /* Retro cartoon: buscador y filtros en modo tinta/papel */
+/* Cursor personalizado para el tema retro */
+[data-theme='retro-cartoon'],
+[data-theme='retro-cartoon'] body {
+  cursor: url('/retro-cursor.png'), auto;
+}
+
+/* Opcional: Cursor para enlaces y botones en el tema retro */
+[data-theme='retro-cartoon'] a,
+[data-theme='retro-cartoon'] button,
+[data-theme='retro-cartoon'] [role="button"],
+[data-theme='retro-cartoon'] .cursor-pointer {
+  cursor: url('/retro-pointer.png'), pointer !important; 
+}
 [data-theme="retro-cartoon"] .list-search-shell,
 [data-theme="retro-cartoon"] .list-filters-shell {
   background: #ffffff !important;
@@ -1250,3 +1263,5 @@ input, textarea {
   min-height: 100vh;
   min-height: -webkit-fill-available;
 }
+
+
