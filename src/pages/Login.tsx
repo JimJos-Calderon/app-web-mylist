@@ -20,9 +20,10 @@ const GoogleIcon = () => (
 interface RegisterModalProps {
   open: boolean
   onClose: () => void
+  isRetroCartoon: boolean
 }
 
-const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
+const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, isRetroCartoon }) => {
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
@@ -35,6 +36,66 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
   const [success, setSuccess] = useState(false)
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
   const [usernameMessage, setUsernameMessage] = useState<string>('')
+
+  const overlayClassName = isRetroCartoon
+    ? 'absolute inset-0 bg-black/60'
+    : 'absolute inset-0 bg-black/75 backdrop-blur-sm'
+
+  const panelClassName = isRetroCartoon
+    ? 'relative w-full max-w-md bg-white border-[4px] border-black shadow-[10px_10px_0px_0px_#000000] rounded-xl overflow-hidden relative z-10 p-6 sm:p-8 text-black'
+    : 'relative w-full max-w-md border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-bg-base-rgb),0.95)] backdrop-blur-xl rounded-2xl shadow-[0_0_80px_rgba(var(--color-accent-primary-rgb),0.2)] overflow-hidden'
+
+  const headerClassName = isRetroCartoon
+    ? 'flex items-center justify-between gap-4 mb-5 pb-4 border-b-4 border-black'
+    : 'flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]'
+
+  const headerIconClassName = isRetroCartoon
+    ? 'w-10 h-10 rounded-lg bg-white border-[3px] border-black flex items-center justify-center shadow-[3px_3px_0px_0px_#000000]'
+    : 'w-8 h-8 rounded-lg bg-[rgba(var(--color-accent-primary-rgb),0.2)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center'
+
+  const titleClassName = isRetroCartoon
+    ? 'text-2xl font-black uppercase tracking-widest text-black'
+    : 'text-xl font-black uppercase tracking-wider text-[var(--color-text-primary)]'
+
+  const closeButtonClassName = isRetroCartoon
+    ? 'w-9 h-9 bg-white border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-lg flex items-center justify-center text-black hover:-translate-y-[1px] hover:shadow-[4px_4px_0px_0px_#000000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all'
+    : 'w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] transition-all'
+
+  const bodyClassName = isRetroCartoon ? 'px-6 pb-6 pt-0 text-black' : 'px-6 py-6'
+  const sectionTitleClassName = isRetroCartoon
+    ? 'block text-sm sm:text-base font-black uppercase tracking-widest text-black mb-2'
+    : 'block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2'
+
+  const retroInputClassName = 'w-full px-4 py-3 bg-white text-black border-[3px] border-black shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.1)] focus-visible:shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-none rounded-md transition-all font-bold placeholder-gray-500'
+  const inputClassName = isRetroCartoon
+    ? retroInputClassName
+    : 'w-full px-4 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)] transition-all font-medium disabled:opacity-50'
+
+  const usernameInputClassName = isRetroCartoon
+    ? `${retroInputClassName} pl-9 pr-10`
+    : `${inputClassName} pl-9 pr-10`
+
+  const passwordToggleClassName = isRetroCartoon
+    ? 'absolute right-3 top-1/2 -translate-y-1/2 text-black/60 hover:text-black transition-colors'
+    : 'absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors'
+
+  const successIconWrapperClassName = isRetroCartoon
+    ? 'w-16 h-16 rounded-2xl bg-white border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] flex items-center justify-center'
+    : 'w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/40 flex items-center justify-center'
+
+  const successTitleClassName = isRetroCartoon ? 'text-2xl font-black text-black mb-2' : 'text-xl font-black text-[var(--color-text-primary)] mb-2'
+  const successTextClassName = isRetroCartoon ? 'text-black text-base sm:text-lg leading-relaxed' : 'text-[var(--color-text-muted)] text-xl leading-relaxed'
+  const doneButtonClassName = isRetroCartoon
+    ? 'w-full px-4 py-3 bg-black text-white border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl font-black text-lg uppercase tracking-widest hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all'
+    : 'w-full px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all'
+
+  const cancelButtonClassName = isRetroCartoon
+    ? 'flex-1 px-4 py-3 bg-transparent text-black border-[3px] border-transparent hover:border-black hover:shadow-[4px_4px_0px_0px_#000000] rounded-xl font-bold uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+    : 'flex-1 px-4 py-3 border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-muted)] rounded-xl font-bold text-xl hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-[var(--color-text-primary)] transition-all disabled:opacity-50'
+
+  const submitButtonClassName = isRetroCartoon
+    ? 'flex-1 px-4 py-3 bg-black text-white border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl font-black text-lg uppercase tracking-widest hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
+    : 'flex-1 px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2'
 
   // Close on Escape
   useEffect(() => {
@@ -168,71 +229,70 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
     <div className="fixed inset-0 z-[300] flex items-center justify-center px-4">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+        className={overlayClassName}
         onClick={onClose}
       />
 
       {/* Card */}
       <div
-        className="relative w-full max-w-md border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-bg-base-rgb),0.95)] backdrop-blur-xl rounded-2xl shadow-[0_0_80px_rgba(var(--color-accent-primary-rgb),0.2)] overflow-hidden"
+        className={panelClassName}
         onClick={e => e.stopPropagation()}
       >
-        {/* Top glow line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-primary to-transparent" />
+        {!isRetroCartoon && <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-primary to-transparent" />}
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
+        <div className={headerClassName}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[rgba(var(--color-accent-primary-rgb),0.2)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center">
-              <UserPlus className="w-4 h-4 text-accent-primary" />
+            <div className={headerIconClassName}>
+              <UserPlus className={isRetroCartoon ? 'w-5 h-5 text-black' : 'w-4 h-4 text-accent-primary'} />
             </div>
-            <h2 className="text-xl font-black uppercase tracking-wider text-[var(--color-text-primary)]">
+            <h2 className={titleClassName}>
               {t('signup.title')}
             </h2>
           </div>
           <button
             onClick={onClose}
             aria-label={t('buttons.close_signup_window')}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] transition-all"
+            className={closeButtonClassName}
           >
-            <X className="w-4 h-4" aria-hidden="true" />
+            <X className={isRetroCartoon ? 'w-5 h-5' : 'w-4 h-4'} aria-hidden="true" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-6">
+        <div className={bodyClassName}>
           {success ? (
-            /* ── Success state ── */
+            /* Success state */
             <div className="flex flex-col items-center gap-5 py-4 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/40 flex items-center justify-center">
-                <CheckCircle2 className="w-8 h-8 text-green-400" />
+              <div className={successIconWrapperClassName}>
+                <CheckCircle2 className={isRetroCartoon ? 'w-8 h-8 text-black' : 'w-8 h-8 text-green-400'} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-[var(--color-text-primary)] mb-2">{t('signup.account_created')}</h3>
-                <p className="text-[var(--color-text-muted)] text-xl leading-relaxed">
+                <h3 className={successTitleClassName}>{t('signup.account_created')}</h3>
+                <p className={successTextClassName}>
                   {t('signup.confirmation_email')}{' '}
-                  <span className="text-accent-primary font-semibold">{email}</span>.
+                  <span className={isRetroCartoon ? 'text-black font-black' : 'text-accent-primary font-semibold'}>{email}</span>.
                   <br />
                   {t('signup.confirmation_instruction')}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="w-full px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all"
+                className={doneButtonClassName}
               >
                 {t('signup.button_done')}
               </button>
             </div>
           ) : (
-            /* ── Form ── */
+            /* Form */
             <form onSubmit={handleRegister} className="space-y-4">
               {/* Username */}
               <div>
-                <label className="block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2">
+                <label className={sectionTitleClassName}>
                   {t('signup.username_label')}
                 </label>
                 <div className="relative">
-                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
+                  <AtSign className={isRetroCartoon ? 'absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/60' : 'absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]'} />
                   <input
                     type="text"
                     placeholder={t('placeholders.username')}
@@ -241,34 +301,28 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     disabled={loading}
                     autoFocus
                     maxLength={20}
-                    className={`w-full pl-9 pr-10 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)]
-                               focus-visible:ring-2 transition-all font-medium disabled:opacity-50
-                               ${usernameStatus === 'available' ? 'border-green-500 focus-visible:border-green-500 focus-visible:ring-green-500/20' :
-                        usernameStatus === 'taken' || usernameStatus === 'invalid' ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/20' :
-                          'border-[rgba(var(--color-accent-primary-rgb),0.3)] focus-visible:border-accent-primary focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)]'
-                      }`}
+                    className={usernameInputClassName}
                     required
                   />
                   {/* Status icon */}
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-[var(--color-text-muted)] animate-spin" />}
-                    {usernameStatus === 'available' && <Check className="w-4 h-4 text-green-400" />}
+                    {usernameStatus === 'checking' && <Loader2 className={isRetroCartoon ? 'w-4 h-4 text-black/60 animate-spin' : 'w-4 h-4 text-[var(--color-text-muted)] animate-spin'} />}
+                    {usernameStatus === 'available' && <Check className={isRetroCartoon ? 'w-4 h-4 text-black' : 'w-4 h-4 text-green-400'} />}
                     {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle className="w-4 h-4 text-red-400" />}
                   </div>
                 </div>
                 {/* Status message */}
                 {usernameMessage && (
-                  <p className={`text-xl mt-1.5 font-medium ${usernameStatus === 'available' ? 'text-green-400' : 'text-red-400'
-                    }`}>
+                  <p className={`text-sm mt-1.5 font-bold ${isRetroCartoon ? 'text-black' : usernameStatus === 'available' ? 'text-green-400' : 'text-red-400'}`}>
                     {usernameMessage}
                   </p>
                 )}
-                <p className="text-xl text-[var(--color-text-muted)] mt-1">{t('signup.username_hint')}</p>
+                <p className={isRetroCartoon ? 'text-sm text-black mt-1 font-medium' : 'text-xl text-[var(--color-text-muted)] mt-1'}>{t('signup.username_hint')}</p>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2">
+                <label className={sectionTitleClassName}>
                   {t('signup.email_label')}
                 </label>
                 <input
@@ -277,16 +331,14 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   disabled={loading}
-                  className="w-full px-4 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)]
-                             focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)]
-                             transition-all font-medium disabled:opacity-50"
+                  className={inputClassName}
                   required
                 />
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2">
+                <label className={sectionTitleClassName}>
                   {t('signup.password_label')}
                 </label>
                 <div className="relative">
@@ -296,16 +348,14 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 pr-12 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)]
-                               focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)]
-                               transition-all font-medium disabled:opacity-50"
+                    className={`${inputClassName} pr-12`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+                    aria-label={showPassword ? t('hide_password') : t('show_password')}
+                    className={passwordToggleClassName}
                   >
                     {showPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                   </button>
@@ -314,7 +364,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
               {/* Confirm password */}
               <div>
-                <label className="block text-xl font-bold uppercase tracking-widest text-accent-primary mb-2">
+                <label className={sectionTitleClassName}>
                   {t('signup.confirm_password_label')}
                 </label>
                 <div className="relative">
@@ -324,16 +374,14 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     disabled={loading}
-                    className="w-full px-4 py-3 pr-12 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)]
-                               focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)]
-                               transition-all font-medium disabled:opacity-50"
+                    className={`${inputClassName} pr-12`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(v => !v)}
                     aria-label={showConfirm ? t('hide_password') : t('show_password')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+                    className={passwordToggleClassName}
                   >
                     {showConfirm ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                   </button>
@@ -342,9 +390,9 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 
               {/* Error */}
               {error && (
-                <div className="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3">
+                <div className={isRetroCartoon ? 'px-4 py-3 bg-red-500/10 border-[3px] border-red-500 rounded-xl flex items-start gap-3' : 'px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3'}>
                   <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <span className="text-red-400 text-xl">{error}</span>
+                  <span className={isRetroCartoon ? 'text-red-400 text-sm font-bold' : 'text-red-400 text-xl'}>{error}</span>
                 </div>
               )}
 
@@ -360,7 +408,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                         }`}
                     />
                   ))}
-                  <span className="text-xl text-[var(--color-text-muted)] whitespace-nowrap">
+                  <span className={isRetroCartoon ? 'text-sm text-black font-medium whitespace-nowrap' : 'text-xl text-[var(--color-text-muted)] whitespace-nowrap'}>
                     {password.length < 4 ? t('signup.password_strength_veryWeak') : password.length < 7 ? t('signup.password_strength_weak') : password.length < 10 ? t('signup.password_strength_good') : t('signup.password_strength_strong')}
                   </span>
                 </div>
@@ -372,18 +420,14 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
                   type="button"
                   onClick={onClose}
                   disabled={loading}
-                  className="flex-1 px-4 py-3 border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-muted)] rounded-xl font-bold text-xl
-                             hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-[var(--color-text-primary)] transition-all disabled:opacity-50"
+                  className={cancelButtonClassName}
                 >
                   {t('signup.button_cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !email || !password || !confirmPassword || !username || usernameStatus === 'taken' || usernameStatus === 'invalid' || usernameStatus === 'checking'}
-                  className="flex-1 px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl
-                             hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all
-                             disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none
-                             flex items-center justify-center gap-2"
+                  className={submitButtonClassName}
                 >
                   {loading ? (
                     <>
@@ -402,8 +446,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
           )}
         </div>
 
-        {/* Bottom glow line */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary to-transparent opacity-30" />
+        {!isRetroCartoon && <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary to-transparent opacity-30" />}
       </div>
     </div>,
     document.body
@@ -415,7 +458,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose }) => {
 const Login: React.FC = () => {
   const { t } = useTranslation()
   const { theme: authTheme } = useTheme()
-  // Inicializaci�n segura
+  // Inicializaci�n segura
   const [activeTheme, setActiveTheme] = useState(() => {
     if (typeof document !== 'undefined') {
       return document.documentElement.getAttribute('data-theme') || authTheme
@@ -431,7 +474,7 @@ const Login: React.FC = () => {
   const [showRegister, setShowRegister] = useState(false)
 
   useEffect(() => {
-    // Sincronizaci�n extra por si cambi� entre el render y el mount
+    // Sincronizaci�n extra por si cambi� entre el render y el mount
     const currentDomTheme = document.documentElement.getAttribute('data-theme')
     if (currentDomTheme && currentDomTheme !== activeTheme) {
       setActiveTheme(currentDomTheme)
@@ -449,7 +492,7 @@ const Login: React.FC = () => {
     observer.observe(document.documentElement, { attributes: true })
 
     return () => observer.disconnect()
-  }, []) // Array vac�o para que solo se monte una vez
+  }, []) // Array vac�o para que solo se monte una vez
 
   const isRetroCartoon = activeTheme === 'retro-cartoon'
 
@@ -565,7 +608,7 @@ const rootStyle = isRetroCartoon
 
   return (
     <>
-      <RegisterModal open={showRegister} onClose={() => setShowRegister(false)} />
+      <RegisterModal open={showRegister} onClose={() => setShowRegister(false)} isRetroCartoon={isRetroCartoon} />
 
       <div
         className={rootClassName}
