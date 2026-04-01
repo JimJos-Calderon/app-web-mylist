@@ -7,9 +7,20 @@ import { useItemComments } from '../hooks/useItemComments'
 interface ItemCommentBoxProps {
   itemId: string
   itemContext?: EnhanceCommentContext
+  requireCommentForWatch?: boolean
+  watchConfirmationLoading?: boolean
+  onConfirmWatch?: (content: string) => Promise<void>
+  onCancelWatchPrompt?: () => void
 }
 
-const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({ itemId, itemContext }) => {
+const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({
+  itemId,
+  itemContext,
+  requireCommentForWatch = false,
+  watchConfirmationLoading = false,
+  onConfirmWatch,
+  onCancelWatchPrompt,
+}) => {
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
   const [content, setContent] = useState('')
@@ -38,7 +49,7 @@ const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({ itemId, itemContext }) 
     setOriginalDraft(null)
   }, [comment?.content, itemId])
 
-  const isSaving = isCreatingComment || isUpdatingComment
+  const isSaving = isCreatingComment || isUpdatingComment || watchConfirmationLoading
   const isBusy = loading || isSaving || isDeletingComment || isEnhancing
   const hasExistingComment = !!comment
   const isDirty = content.trim() !== (comment?.content || '').trim()
@@ -64,6 +75,26 @@ const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({ itemId, itemContext }) 
     } catch (saveError) {
       setErrorMessage(
         saveError instanceof Error ? saveError.message : 'No se pudo guardar el comentario.'
+      )
+    }
+  }
+
+  const handleConfirmWatch = async () => {
+    if (!onConfirmWatch) return
+
+    setFeedback(null)
+    setErrorMessage(null)
+    resetEnhanceError()
+
+    try {
+      await onConfirmWatch(content)
+      setOriginalDraft(null)
+      setFeedback('Reseña guardada y item marcado como visto.')
+    } catch (confirmError) {
+      setErrorMessage(
+        confirmError instanceof Error
+          ? confirmError.message
+          : 'No se pudo guardar la reseña y marcar el item como visto.'
       )
     }
   }
@@ -120,10 +151,12 @@ const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({ itemId, itemContext }) 
         <MessageSquare className="h-4 w-4" aria-hidden="true" />
         <div>
           <p className="theme-heading-font text-[11px] font-black uppercase tracking-[0.16em] text-[var(--color-text-primary)]">
-            Comentario personal
+            {requireCommentForWatch ? 'Reseña obligatoria' : 'Comentario personal'}
           </p>
           <p className={`${isRetroCartoon ? 'theme-heading-font ' : ''}text-[10px] text-[var(--color-text-muted)]`}>
-            Esta nota queda asociada al item y luego puede aprovecharse para recomendaciones.
+            {requireCommentForWatch
+              ? 'Para marcar este item como visto primero debes dejar una reseña.'
+              : 'Esta nota queda asociada al item y luego puede aprovecharse para recomendaciones.'}
           </p>
         </div>
       </div>
@@ -137,7 +170,11 @@ const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({ itemId, itemContext }) 
           if (errorMessage) setErrorMessage(null)
           if (enhanceError) resetEnhanceError()
         }}
-        placeholder="Escribe que te parecio, si la recomendarias o cualquier contexto para futuras sugerencias."
+        placeholder={
+          requireCommentForWatch
+            ? 'Escribe tu reseña antes de marcar este item como visto.'
+            : 'Escribe que te parecio, si la recomendarias o cualquier contexto para futuras sugerencias.'
+        }
         className={`min-h-[140px] w-full resize-y rounded-xl border px-4 py-3 text-xs transition focus:outline-none ${isRetroCartoon ? 'theme-heading-font ' : ''}${
           isRetroCartoon
             ? 'border-[3px] border-black bg-white text-black'
@@ -145,6 +182,7 @@ const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({ itemId, itemContext }) 
         }`}
         maxLength={2000}
         disabled={isBusy}
+        autoFocus={requireCommentForWatch}
       />
 
       <div className={`mt-2 flex items-center justify-between gap-3 text-[10px] text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
@@ -199,6 +237,7 @@ const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({ itemId, itemContext }) 
         )}
 
         {hasExistingComment && (
+          !requireCommentForWatch && (
           <button
             type="button"
             onClick={handleDelete}
@@ -216,25 +255,61 @@ const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({ itemId, itemContext }) 
             )}
             Eliminar comentario
           </button>
+          )
         )}
 
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={isBusy || isEmpty || !isDirty}
-          className={`theme-heading-font flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-            isRetroCartoon
-              ? 'border-[3px] border-black bg-[var(--color-bg-secondary)] text-black shadow-[4px_4px_0px_0px_#000000]'
-              : 'border-[rgba(var(--color-accent-primary-rgb),0.4)] bg-[rgba(var(--color-accent-primary-rgb),0.14)] text-[var(--color-accent-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)]'
-          }`}
-        >
-          {isSaving ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          ) : (
-            <Save className="h-4 w-4" aria-hidden="true" />
-          )}
-          {hasExistingComment ? 'Guardar cambios' : 'Guardar comentario'}
-        </button>
+        {requireCommentForWatch && onCancelWatchPrompt && (
+          <button
+            type="button"
+            onClick={onCancelWatchPrompt}
+            disabled={isBusy}
+            className={`theme-heading-font flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+              isRetroCartoon
+                ? 'border-[3px] border-black bg-white text-black'
+                : 'border-white/15 bg-transparent text-[var(--color-text-muted)] hover:border-[rgba(var(--color-accent-primary-rgb),0.45)] hover:text-[var(--color-text-primary)]'
+            }`}
+          >
+            Cancelar
+          </button>
+        )}
+
+        {requireCommentForWatch && onConfirmWatch ? (
+          <button
+            type="button"
+            onClick={handleConfirmWatch}
+            disabled={isBusy || isEmpty}
+            className={`theme-heading-font flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+              isRetroCartoon
+                ? 'border-[3px] border-black bg-[var(--color-bg-secondary)] text-black shadow-[4px_4px_0px_0px_#000000]'
+                : 'border-[rgba(var(--color-accent-primary-rgb),0.4)] bg-[rgba(var(--color-accent-primary-rgb),0.14)] text-[var(--color-accent-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)]'
+            }`}
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Save className="h-4 w-4" aria-hidden="true" />
+            )}
+            Guardar reseña y marcar como visto
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isBusy || isEmpty || !isDirty}
+            className={`theme-heading-font flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-[11px] font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+              isRetroCartoon
+                ? 'border-[3px] border-black bg-[var(--color-bg-secondary)] text-black shadow-[4px_4px_0px_0px_#000000]'
+                : 'border-[rgba(var(--color-accent-primary-rgb),0.4)] bg-[rgba(var(--color-accent-primary-rgb),0.14)] text-[var(--color-accent-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)]'
+            }`}
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Save className="h-4 w-4" aria-hidden="true" />
+            )}
+            {hasExistingComment ? 'Guardar cambios' : 'Guardar comentario'}
+          </button>
+        )}
       </div>
     </section>
   )

@@ -125,8 +125,8 @@ const Perfil: React.FC = () => {
     )
   }
 
-  const handleOpenDetails = async (item: ListItem) => {
-    await itemDetails.handleOpenDetails(item)
+  const handleOpenDetails = async (item: ListItem, options?: { promptComment?: boolean }) => {
+    await itemDetails.handleOpenDetails(item, options)
   }
 
   const itemDetails = useListItemDetails({
@@ -335,6 +335,7 @@ const Perfil: React.FC = () => {
         synopsisError={itemDetails.synopsisError}
         modalActionLoading={itemDetails.modalActionLoading}
         canDelete={false}
+        promptCommentOnOpen={itemDetails.shouldPromptComment}
         titlePrefix={t('details_title')}
         closeLabel={t('modal.close')}
         noImageLabel={t('no_image')}

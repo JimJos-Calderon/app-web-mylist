@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Film, Tv, Plus, ArrowRight, Trash2, LogOut, Shuffle } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
@@ -12,6 +12,8 @@ import { RandomPickManager } from '@/features/items'
 import { SectionErrorFallback, ConfirmDialog, useTheme } from '@/features/shared'
 import type { List, ListItem } from '@/features/shared'
 import { OracleSection } from '@/features/oracle/components/OracleSection'
+import ItemDetailsModal from '@/features/lists/components/ItemDetailsModal'
+import { useListItemDetails } from '@/features/lists/hooks/useListItemDetails'
 
 const ActivityFeedPanel = lazy(() => import('@/features/lists/components/ActivityFeed'))
 
@@ -101,6 +103,7 @@ const Dashboard: React.FC = () => {
   const { theme } = useTheme()
   const { user } = useAuth()
   const { profile } = useUserProfile()
+  const queryClient = useQueryClient()
   const isRetroCartoon = theme === 'retro-cartoon'
   const [isCreateListOpen, setIsCreateListOpen] = useState(false)
 
@@ -127,6 +130,35 @@ const Dashboard: React.FC = () => {
   const displayName = profile?.username || t('navbar.myAccount')
   const hasLists = lists.length > 0
   const hasActiveList = Boolean(currentList)
+
+  const handleToggleVisto = async (id: string, currentState: boolean) => {
+    const { error } = await supabase
+      .from('items')
+      .update({ visto: !currentState })
+      .eq('id', id)
+
+    if (error) throw error
+
+    await queryClient.invalidateQueries({ queryKey: ['items'] })
+  }
+
+  const handleDeleteItem = async (id: string) => {
+    const { error } = await supabase
+      .from('items')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    await queryClient.invalidateQueries({ queryKey: ['items'] })
+  }
+
+  const itemDetails = useListItemDetails({
+    currentUserId: user?.id || '',
+    onToggleVisto: handleToggleVisto,
+    onDeleteItem: handleDeleteItem,
+    getDeleteConfirmationMessage: (item) => t('modal.delete_title', { title: item.titulo }),
+  })
 
   const handleListCreated = (newList: List) => {
     setCurrentList(newList)
@@ -435,6 +467,37 @@ const Dashboard: React.FC = () => {
         isOpen={isRandomPickerOpen}
         onOpenChange={setIsRandomPickerOpen}
         items={allItems}
+        onViewDetails={(item) => {
+          void itemDetails.handleOpenDetails(item)
+        }}
+      />
+
+      <ItemDetailsModal
+        isOpen={itemDetails.isModalOpen}
+        isAnimating={itemDetails.isModalAnimating}
+        selectedItem={itemDetails.selectedItem}
+        synopsis={itemDetails.synopsis}
+        synopsisLoading={itemDetails.synopsisLoading}
+        synopsisError={itemDetails.synopsisError}
+        modalActionLoading={itemDetails.modalActionLoading}
+        canDelete={itemDetails.canDeleteSelectedItem}
+        promptCommentOnOpen={itemDetails.shouldPromptComment}
+        titlePrefix={t('details_title')}
+        closeLabel={t('modal.close')}
+        noImageLabel={t('no_image')}
+        loadingSynopsisLabel={t('loading.synopsis')}
+        emptySynopsisLabel={t('item.no_synopsis')}
+        movieTypeLabel={t('action.movie_type')}
+        seriesTypeLabel={t('action.series_type')}
+        watchedLabel={t('item.watched')}
+        notWatchedLabel={t('item.not_watched')}
+        markWatchedLabel={t('item.mark_watched')}
+        markUnwatchedLabel={t('item.mark_unwatched')}
+        deleteLabel={t('action.delete')}
+        onClose={itemDetails.handleCloseDetails}
+        onToggle={itemDetails.handleToggleFromModal}
+        onDelete={itemDetails.handleDeleteFromModal}
+        closeButtonRef={itemDetails.closeButtonRef}
       />
     </>
   )

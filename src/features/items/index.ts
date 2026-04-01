@@ -14,6 +14,7 @@ export { useItems } from './hooks/useItems'
 export { useOmdb } from './hooks/useOmdb'
 export { useSuggestions } from './hooks/useSuggestions'
 export { useRandomSelection } from './hooks/useRandomSelection'
+export { useTranslateSynopsis, TRANSLATE_SYNOPSIS_SYSTEM_PROMPT } from './hooks/useTranslateSynopsis'
 
 export type { ItemComment } from './hooks/useItemComments'
 export type { ItemRating } from './hooks/useItemRating'

@@ -53,6 +53,16 @@ export const queryKeys = {
     themePreferenceByUser: (userId: string) => [...queryKeys.userProfile.all, 'themePreference', userId] as const,
   },
 
+  translations: {
+    all: ['translations'] as const,
+    byText: (source: string, targetLanguage: string, text: string) => [
+      ...queryKeys.translations.all,
+      source,
+      targetLanguage,
+      text,
+    ] as const,
+  },
+
   // ─── Suggestions ─────────────────────────────────────────────────
   suggestions: {
     all: ['suggestions'] as const,

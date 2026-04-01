@@ -3,31 +3,29 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { useAuth } from '@/features/auth'
 import { queryKeys } from '@config/queryKeys'
+import { DEFAULT_THEME, applyThemeToDocument, persistTheme } from '@config/appPreferences'
 
-export type ThemePreference = 'cyberpunk' | '2advanced' | 'terminal' | 'retro-cartoon'
-
-const DEFAULT_THEME: ThemePreference = 'cyberpunk'
-const THEME_STORAGE_KEY = 'theme'
+export type ThemePreference = 'cyberpunk' | 'terminal' | 'retro-cartoon'
 
 const isThemePreference = (value: string | null | undefined): value is ThemePreference => {
-  return value === 'cyberpunk' || value === '2advanced' || value === 'terminal' || value === 'retro-cartoon'
+  return value === 'cyberpunk' || value === 'terminal' || value === 'retro-cartoon'
 }
 
 const normalizeThemePreference = (value: string | null | undefined): ThemePreference => {
-  return isThemePreference(value) ? value : DEFAULT_THEME
+  return isThemePreference(value) ? value : (DEFAULT_THEME as ThemePreference)
 }
 
 const readPersistedTheme = (): ThemePreference => {
-  if (typeof window === 'undefined') return DEFAULT_THEME
-  return normalizeThemePreference(window.localStorage.getItem(THEME_STORAGE_KEY))
+  if (typeof document !== 'undefined') {
+    return normalizeThemePreference(document.documentElement.getAttribute('data-theme'))
+  }
+
+  return normalizeThemePreference(DEFAULT_THEME)
 }
 
 const syncThemeToDom = (theme: ThemePreference) => {
-  if (typeof document === 'undefined') return
-  document.documentElement.setAttribute('data-theme', theme)
-  if (typeof window !== 'undefined') {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
-  }
+  applyThemeToDocument(theme)
+  void persistTheme(theme)
 }
 
 interface UseThemeReturn {
@@ -116,7 +114,7 @@ export const useTheme = (): UseThemeReturn => {
       return { previousTheme }
     },
     onError: (_error, _newTheme, context) => {
-      const rollbackTheme = context?.previousTheme ?? DEFAULT_THEME
+      const rollbackTheme = context?.previousTheme ?? (DEFAULT_THEME as ThemePreference)
       queryClient.setQueryData(queryKey, rollbackTheme)
       syncThemeToDom(rollbackTheme)
     },

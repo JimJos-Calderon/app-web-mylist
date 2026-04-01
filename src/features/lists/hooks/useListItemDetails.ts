@@ -9,6 +9,10 @@ interface UseListItemDetailsParams {
   getDeleteConfirmationMessage: (item: ListItem) => string
 }
 
+interface OpenDetailsOptions {
+  promptComment?: boolean
+}
+
 interface UseListItemDetailsReturn {
   selectedItem: ListItem | null
   isModalOpen: boolean
@@ -18,8 +22,9 @@ interface UseListItemDetailsReturn {
   synopsisError: string | null
   modalActionLoading: 'toggle' | 'delete' | null
   canDeleteSelectedItem: boolean
+  shouldPromptComment: boolean
   closeButtonRef: RefObject<HTMLButtonElement | null>
-  handleOpenDetails: (item: ListItem) => Promise<void>
+  handleOpenDetails: (item: ListItem, options?: OpenDetailsOptions) => Promise<void>
   handleCloseDetails: () => void
   handleToggleFromModal: () => Promise<void>
   handleDeleteFromModal: () => Promise<void>
@@ -41,6 +46,7 @@ export const useListItemDetails = ({
   const [synopsisError, setSynopsisError] = useState<string | null>(null)
   const [synopsisCache, setSynopsisCache] = useState<Record<string, string>>({})
   const [modalActionLoading, setModalActionLoading] = useState<'toggle' | 'delete' | null>(null)
+  const [shouldPromptComment, setShouldPromptComment] = useState(false)
 
   const closeTimeoutRef = useRef<number | null>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -78,7 +84,7 @@ export const useListItemDetails = ({
     }
   }, [])
 
-  const handleOpenDetails = async (item: ListItem) => {
+  const handleOpenDetails = async (item: ListItem, options?: OpenDetailsOptions) => {
     if (closeTimeoutRef.current !== null) {
       window.clearTimeout(closeTimeoutRef.current)
       closeTimeoutRef.current = null
@@ -90,6 +96,7 @@ export const useListItemDetails = ({
     setIsModalAnimating(false)
     setModalActionLoading(null)
     setSynopsisError(null)
+    setShouldPromptComment(Boolean(options?.promptComment) && !item.visto)
 
     requestAnimationFrame(() => {
       setIsModalAnimating(true)
@@ -131,6 +138,7 @@ export const useListItemDetails = ({
       setSynopsis(null)
       setSynopsisError(null)
       setModalActionLoading(null)
+      setShouldPromptComment(false)
       closeTimeoutRef.current = null
       previousFocusRef.current?.focus()
     }, 180)
@@ -177,6 +185,7 @@ export const useListItemDetails = ({
     synopsisError,
     modalActionLoading,
     canDeleteSelectedItem: selectedItem?.user_id === currentUserId,
+    shouldPromptComment,
     closeButtonRef,
     handleOpenDetails,
     handleCloseDetails,

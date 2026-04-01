@@ -73,6 +73,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     minify: 'terser',
+    chunkSizeWarningLimit: 1500,
   },
   test: {
     environment: 'jsdom',

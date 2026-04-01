@@ -5,6 +5,7 @@ import { useAuth } from '@/features/auth'
 import { supabase } from '@/supabaseClient'
 import HudContainer from '@/features/shared/components/HudContainer'
 import TechLabel from '@/features/shared/components/TechLabel'
+import { useTheme } from '@/features/shared'
 
 const validateUsername = (value: string): { valid: boolean; message?: string } => {
   const username = value.trim()
@@ -22,6 +23,8 @@ const validateUsername = (value: string): { valid: boolean; message?: string } =
 const UsernameSetupModal: React.FC = () => {
   const { completeGoogleProfile } = useAuth()
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const isTerminal = theme === 'terminal'
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -88,20 +91,30 @@ const UsernameSetupModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200" />
-      <div className="relative w-full max-w-md animate-in zoom-in-95 duration-200">
-        <HudContainer className="p-0 border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]">
+      <div className={`absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in ${isTerminal ? 'duration-75' : 'duration-200'}`} />
+      <div className={`relative w-full max-w-md animate-in zoom-in-95 ${isTerminal ? 'duration-75' : 'duration-200'}`}>
+        <HudContainer
+          className={`p-0 ${
+            isTerminal
+              ? 'terminal-surface border-[rgba(var(--color-accent-primary-rgb),0.8)] bg-[rgba(0,0,0,0.92)] shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.14)]'
+              : 'border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]'
+          }`}
+        >
           <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)]">
             <div className="flex items-center gap-4">
               <div
-                className="w-10 h-10 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center shrink-0"
-                style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                className={`w-10 h-10 border flex items-center justify-center shrink-0 ${
+                  isTerminal
+                    ? 'bg-[rgba(var(--color-accent-primary-rgb),0.08)] border-[rgba(var(--color-accent-primary-rgb),0.55)] rounded-none'
+                    : 'bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border-[rgba(var(--color-accent-secondary-rgb),0.4)]'
+                }`}
+                style={isTerminal ? undefined : { clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
               >
-                <AtSign className="w-5 h-5 text-accent-secondary drop-shadow-[0_0_8px_rgba(var(--color-accent-secondary-rgb),0.6)]" />
+                <AtSign className={`w-5 h-5 ${isTerminal ? 'text-accent-primary drop-shadow-[0_0_6px_rgba(var(--color-accent-primary-rgb),0.4)]' : 'text-accent-secondary drop-shadow-[0_0_8px_rgba(var(--color-accent-secondary-rgb),0.6)]'}`} />
               </div>
               <div className="flex flex-col gap-1">
-                <TechLabel text="SYS.USER_INIT" tone="secondary" blink />
-                <h2 className="text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] font-mono leading-none">
+                <TechLabel text="SYS.USER_INIT" tone={isTerminal ? 'primary' : 'secondary'} blink />
+                <h2 className={`text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] leading-none ${isTerminal ? 'theme-heading-font' : 'font-mono'}`}>
                   {t('needs_username.title')}
                 </h2>
               </div>
@@ -109,13 +122,13 @@ const UsernameSetupModal: React.FC = () => {
           </div>
 
           <div className="px-6 py-6 space-y-6">
-            <p className="text-[var(--color-text-muted)] text-sm font-mono opacity-80 leading-relaxed">
+            <p className={`text-[var(--color-text-muted)] text-sm opacity-80 leading-relaxed ${isTerminal ? 'theme-body-font' : 'font-mono'}`}>
               {'>'} {t('needs_username.subtitle')}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-mono">
+                <label className={`block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 ${isTerminal ? 'theme-heading-font' : 'font-mono'}`}>
                   {'>'} {t('signup.username_label')}
                 </label>
                 <div className="relative">
@@ -128,8 +141,9 @@ const UsernameSetupModal: React.FC = () => {
                     disabled={loading}
                     autoFocus
                     maxLength={20}
-                    className={`w-full pl-9 pr-10 py-3 bg-[rgba(0,0,0,0.5)] border text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] opacity-80
-                      focus-visible:outline-none focus:opacity-100 transition-all font-mono text-sm disabled:opacity-50
+                    className={`w-full pl-9 pr-10 py-3 border text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] opacity-80
+                      focus-visible:outline-none focus:opacity-100 transition-all text-sm disabled:opacity-50
+                      ${isTerminal ? 'rounded-none bg-black theme-body-font shadow-[inset_0_0_0_1px_rgba(var(--color-accent-primary-rgb),0.06)]' : 'bg-[rgba(0,0,0,0.5)] font-mono'}
                       ${
                         usernameStatus === 'available'
                           ? 'border-accent-primary focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.5)]'
@@ -137,7 +151,7 @@ const UsernameSetupModal: React.FC = () => {
                             ? 'border-[rgba(var(--color-accent-secondary-rgb),0.6)] focus-visible:border-accent-secondary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-secondary-rgb),0.5)] text-accent-secondary'
                             : 'border-[rgba(var(--color-accent-secondary-rgb),0.3)] focus-visible:border-accent-secondary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-secondary-rgb),0.5)]'
                       }`}
-                    style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                    style={isTerminal ? undefined : { clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                     required
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -151,7 +165,7 @@ const UsernameSetupModal: React.FC = () => {
 
                 {usernameMessage && (
                   <p
-                    className={`text-[10px] uppercase font-mono tracking-widest mt-2 ${
+                    className={`text-[10px] uppercase tracking-widest mt-2 ${isTerminal ? 'theme-heading-font' : 'font-mono'} ${
                       usernameStatus === 'available' ? 'text-accent-primary' : 'text-accent-secondary'
                     }`}
                   >
@@ -159,15 +173,19 @@ const UsernameSetupModal: React.FC = () => {
                   </p>
                 )}
 
-                <p className="text-[10px] text-[var(--color-text-muted)] font-mono mt-2 opacity-60 uppercase">
+                <p className={`text-[10px] text-[var(--color-text-muted)] mt-2 opacity-60 uppercase ${isTerminal ? 'theme-heading-font' : 'font-mono'}`}>
                   {t('signup.username_hint')}
                 </p>
               </div>
 
               {error && (
                 <div
-                  className="px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono text-xs flex items-start gap-3"
-                  style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                  className={`px-4 py-3 border text-xs flex items-start gap-3 ${
+                    isTerminal
+                      ? 'rounded-none bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border-[rgba(var(--color-accent-secondary-rgb),0.5)] text-accent-secondary theme-body-font'
+                      : 'bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border-[rgba(var(--color-accent-secondary-rgb),0.4)] text-accent-secondary font-mono'
+                  }`}
+                  style={isTerminal ? undefined : { clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                 >
                   <XCircle className="w-4 h-4 text-accent-secondary shrink-0 mt-0.5" />
                   <span>{'> ERR:'} {error}</span>
@@ -178,8 +196,12 @@ const UsernameSetupModal: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!canSubmit}
-                  className="w-full py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.15)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] text-accent-secondary font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.6)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
-                  style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+                  className={`w-full py-3 text-xs font-bold uppercase tracking-widest disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                    isTerminal
+                      ? 'terminal-button theme-heading-font rounded-none'
+                      : 'bg-[rgba(var(--color-accent-secondary-rgb),0.15)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] text-accent-secondary font-mono transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.6)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)] disabled:opacity-40 disabled:shadow-none'
+                  }`}
+                  style={isTerminal ? undefined : { clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                 >
                   {loading ? (
                     <>

@@ -5,6 +5,7 @@ import { useActivityFeed } from '../hooks/useActivityFeed'
 import HudContainer from '../../shared/components/HudContainer'
 import TechLabel from '../../shared/components/TechLabel'
 import { useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { getHumanizedFeedMessage, type FeedThemeMode } from '../utils/activityFeedUtils'
 
 interface ActivityFeedProps {
@@ -57,6 +58,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   const emptyMessage = t(`activityFeed.${themeMode}.states.empty`)
   const loadingMessage = t(`activityFeed.${themeMode}.states.loading`)
   const errorMessage = t(`activityFeed.${themeMode}.states.error`)
+  const formattedHeaderTitle = formatRetroHeading(headerTitle, theme)
 
   if (loading) {
     return (
@@ -117,7 +119,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
               <TechLabel text={headerLabel} />
             </div>
             <h3 className={`mt-1 text-base font-semibold text-[var(--color-text-primary)] ${retroMode ? 'theme-heading-font uppercase' : ''}`}>
-              {headerTitle}
+              {formattedHeaderTitle}
             </h3>
             <p className={`mt-1 text-xs text-[var(--color-text-muted)] ${retroMode ? 'theme-heading-font' : ''}`}>
               {headerSubtitle}
