@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { validateEmail, validatePassword, validateUsername, ERROR_MESSAGES, useTheme } from '@/features/shared'
 import { LanguageSwitcher } from '@/features/shared/components/LanguageSwitcher'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { supabase } from '@/supabaseClient'
 import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, AtSign, Check, AlertCircle } from 'lucide-react'
 
@@ -21,11 +22,14 @@ const GoogleIcon = () => (
 interface RegisterModalProps {
   open: boolean
   onClose: () => void
-  isRetroCartoon: boolean
+  theme: string
 }
 
-const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, isRetroCartoon }) => {
+const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) => {
   const { t } = useTranslation()
+  const isRetroCartoon = theme === 'retro-cartoon'
+  const isTerminal = theme === 'terminal'
+  const isCyberpunk = theme === 'cyberpunk'
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -40,11 +44,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, isRetroCar
 
   const overlayClassName = isRetroCartoon
     ? 'absolute inset-0 bg-black/60'
-    : 'absolute inset-0 bg-black/75 backdrop-blur-sm'
+    : isCyberpunk
+      ? 'absolute inset-0 bg-[rgba(2,2,10,0.82)] backdrop-blur-[10px]'
+      : 'absolute inset-0 bg-black/75'
 
   const panelClassName = isRetroCartoon
     ? 'relative w-full max-w-md bg-white border-[4px] border-black shadow-[10px_10px_0px_0px_#000000] rounded-xl overflow-hidden relative z-10 p-6 sm:p-8 text-black'
-    : 'relative w-full max-w-md border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-bg-base-rgb),0.95)] backdrop-blur-xl rounded-2xl shadow-[0_0_80px_rgba(var(--color-accent-primary-rgb),0.2)] overflow-hidden'
+    : isTerminal
+      ? 'relative w-full max-w-md terminal-panel rounded-none overflow-hidden z-10 p-6 sm:p-8 text-[var(--color-text-primary)] bg-[var(--color-bg-base)]'
+      : isCyberpunk
+        ? 'relative w-full max-w-md cyberpunk-surface overflow-hidden z-10 p-6 sm:p-8 text-[var(--color-text-primary)] backdrop-blur-[10px] border-[rgba(255,0,255,0.65)]'
+        : 'relative w-full max-w-md border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-bg-base-rgb),0.95)] backdrop-blur-xl rounded-2xl shadow-[0_0_80px_rgba(var(--color-accent-primary-rgb),0.2)] overflow-hidden'
 
   const headerClassName = isRetroCartoon
     ? 'flex items-center justify-between gap-4 mb-5 pb-4 border-b-4 border-black'
@@ -55,8 +65,10 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, isRetroCar
     : 'w-8 h-8 rounded-lg bg-[rgba(var(--color-accent-primary-rgb),0.2)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center'
 
   const titleClassName = isRetroCartoon
-    ? 'text-2xl font-black uppercase tracking-widest text-black'
-    : 'text-xl font-black uppercase tracking-wider text-[var(--color-text-primary)]'
+    ? 'text-2xl font-black uppercase tracking-widest text-black theme-heading-font'
+    : isTerminal || isCyberpunk
+      ? 'text-xl font-black uppercase tracking-wider text-[var(--color-text-primary)] theme-heading-font'
+      : 'text-xl font-black uppercase tracking-wider text-[var(--color-text-primary)]'
 
   const closeButtonClassName = isRetroCartoon
     ? 'w-9 h-9 bg-white border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-lg flex items-center justify-center text-black hover:-translate-y-[1px] hover:shadow-[4px_4px_0px_0px_#000000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all'
@@ -70,7 +82,11 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, isRetroCar
   const retroInputClassName = 'w-full px-4 py-3 bg-white text-black border-[3px] border-black shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.1)] focus-visible:shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-none rounded-md transition-all font-bold placeholder-gray-500'
   const inputClassName = isRetroCartoon
     ? retroInputClassName
-    : 'w-full px-4 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)] transition-all font-medium disabled:opacity-50'
+    : isTerminal
+      ? 'terminal-control theme-body-font w-full px-4 py-3 rounded-none text-[var(--color-text-primary)] text-xl transition-all font-medium disabled:opacity-50'
+      : isCyberpunk
+        ? 'w-full px-4 py-3 bg-[rgba(2,2,10,0.72)] border border-[rgba(255,0,255,0.45)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)] focus-visible:border-[rgba(0,255,255,0.9)] focus-visible:ring-2 focus-visible:ring-[rgba(0,255,255,0.22)] transition-all font-medium disabled:opacity-50 theme-body-font backdrop-blur-[10px]'
+        : 'w-full px-4 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)] transition-all font-medium disabled:opacity-50'
 
   const usernameInputClassName = isRetroCartoon
     ? `${retroInputClassName} pl-9 pr-10`
@@ -88,15 +104,27 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, isRetroCar
   const successTextClassName = isRetroCartoon ? 'text-black text-base sm:text-lg leading-relaxed' : 'text-[var(--color-text-muted)] text-xl leading-relaxed'
   const doneButtonClassName = isRetroCartoon
     ? 'w-full px-4 py-3 bg-black text-white border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl font-black text-lg uppercase tracking-widest hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all'
-    : 'w-full px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all'
+    : isTerminal
+      ? 'w-full terminal-button theme-heading-font rounded-none px-4 py-3 text-xl'
+      : isCyberpunk
+        ? 'w-full cyberpunk-button theme-heading-font rounded-xl px-4 py-3 text-xl'
+        : 'w-full px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all'
 
   const cancelButtonClassName = isRetroCartoon
     ? 'flex-1 px-4 py-3 bg-transparent text-black border-[3px] border-transparent hover:border-black hover:shadow-[4px_4px_0px_0px_#000000] rounded-xl font-bold uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
-    : 'flex-1 px-4 py-3 border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-muted)] rounded-xl font-bold text-xl hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-[var(--color-text-primary)] transition-all disabled:opacity-50'
+    : isTerminal
+      ? 'flex-1 terminal-button theme-heading-font rounded-none px-4 py-3 text-xl disabled:opacity-50'
+      : isCyberpunk
+        ? 'flex-1 cyberpunk-button cyberpunk-button--ghost theme-heading-font rounded-xl px-4 py-3 text-xl disabled:opacity-50'
+        : 'flex-1 px-4 py-3 border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-[var(--color-text-muted)] rounded-xl font-bold text-xl hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-[var(--color-text-primary)] transition-all disabled:opacity-50'
 
   const submitButtonClassName = isRetroCartoon
     ? 'flex-1 px-4 py-3 bg-black text-white border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl font-black text-lg uppercase tracking-widest hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'
-    : 'flex-1 px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2'
+    : isTerminal
+      ? 'flex-1 terminal-button theme-heading-font rounded-none px-4 py-3 text-xl disabled:opacity-40'
+      : isCyberpunk
+        ? 'flex-1 cyberpunk-button theme-heading-font rounded-xl px-4 py-3 text-xl disabled:opacity-40 disabled:shadow-none'
+        : 'flex-1 px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2'
 
   // Close on Escape
   useEffect(() => {
@@ -248,7 +276,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, isRetroCar
               <UserPlus className={isRetroCartoon ? 'w-5 h-5 text-black' : 'w-4 h-4 text-accent-primary'} />
             </div>
             <h2 className={titleClassName}>
-              {t('signup.title')}
+              {formatRetroHeading(t('signup.title'), theme)}
             </h2>
           </div>
           <button
@@ -496,10 +524,12 @@ const Login: React.FC = () => {
   }, []) // Array vac�o para que solo se monte una vez
 
   const isRetroCartoon = activeTheme === 'retro-cartoon'
+  const isTerminal = activeTheme === 'terminal'
+  const isCyberpunk = activeTheme === 'cyberpunk'
 
   const rootClassName = isRetroCartoon
     ? 'bg-[var(--color-bg-primary)] retro-fx min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden'
-    : 'min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden'
+    : 'min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden bg-[var(--color-bg-base)] text-[var(--color-text-primary)]'
 
 const rootStyle = isRetroCartoon
   ? {
@@ -517,17 +547,27 @@ const rootStyle = isRetroCartoon
 
   const cardClassName = isRetroCartoon
     ? 'bg-white border-[4px] border-black shadow-[10px_10px_0px_0px_#000000] rounded-xl overflow-hidden relative z-10 p-6 sm:p-8'
-    : 'relative rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-black/70 backdrop-blur-xl shadow-[0_0_60px_rgba(var(--color-accent-primary-rgb),0.15)] overflow-hidden'
+    : isTerminal
+      ? 'relative terminal-panel rounded-none overflow-hidden z-10 p-6 sm:p-8 bg-[var(--color-bg-base)]'
+      : isCyberpunk
+        ? 'relative cyberpunk-surface overflow-hidden z-10 p-6 sm:p-8 border-[rgba(255,0,255,0.65)] bg-[rgba(2,2,10,0.74)] backdrop-blur-[10px]'
+        : 'relative rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-black/70 backdrop-blur-xl shadow-[0_0_60px_rgba(var(--color-accent-primary-rgb),0.15)] overflow-hidden'
 
   const cardInnerClassName = isRetroCartoon ? 'space-y-4' : 'px-8 py-8 space-y-4'
 
   const labelClassName = isRetroCartoon
-    ? 'block text-xs font-bold uppercase tracking-widest text-black mb-1.5'
-    : 'block text-xs font-bold uppercase tracking-widest text-accent-primary mb-1.5'
+    ? 'block text-xs font-bold uppercase tracking-widest text-black mb-1.5 theme-heading-font'
+    : isTerminal || isCyberpunk
+      ? 'block text-xs font-bold uppercase tracking-widest text-accent-primary mb-1.5 theme-heading-font'
+      : 'block text-xs font-bold uppercase tracking-widest text-accent-primary mb-1.5'
 
   const inputClassName = isRetroCartoon
     ? 'w-full px-4 py-3 bg-white text-black border-[3px] border-black shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.1)] focus-visible:shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-none rounded-md transition-all font-bold placeholder-gray-500'
-    : 'w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30 focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.3)] transition-all disabled:opacity-50 outline-none'
+    : isTerminal
+      ? 'terminal-control theme-body-font w-full px-4 py-3 rounded-none text-sm disabled:opacity-50 outline-none'
+      : isCyberpunk
+        ? 'w-full px-4 py-3 bg-[rgba(2,2,10,0.72)] border border-[rgba(255,0,255,0.45)] rounded-xl text-[var(--color-text-primary)] text-sm placeholder-[rgba(0,255,255,0.45)] focus-visible:border-[rgba(0,255,255,0.9)] focus-visible:ring-1 focus-visible:ring-[rgba(0,255,255,0.3)] transition-all disabled:opacity-50 outline-none theme-body-font'
+        : 'w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30 focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.3)] transition-all disabled:opacity-50 outline-none'
 
   const passwordToggleClassName = isRetroCartoon
     ? 'absolute right-3 top-1/2 -translate-y-1/2 text-black/60 hover:text-black transition-colors'
@@ -535,7 +575,11 @@ const rootStyle = isRetroCartoon
 
   const submitButtonClassName = isRetroCartoon
     ? 'w-full py-3 mt-4 bg-black text-white border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl font-black text-lg uppercase tracking-widest hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all flex items-center justify-center gap-2'
-    : 'w-full py-3 text-white font-bold rounded-xl text-base tracking-wide mt-2 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+    : isTerminal
+      ? 'w-full terminal-button theme-heading-font rounded-none py-3 mt-4 text-base tracking-wide active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+      : isCyberpunk
+        ? 'w-full cyberpunk-button theme-heading-font rounded-xl py-3 mt-4 text-base tracking-wide active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+        : 'w-full py-3 text-white font-bold rounded-xl text-base tracking-wide mt-2 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
 
   const submitButtonStyle = isRetroCartoon
     ? undefined
@@ -546,11 +590,19 @@ const rootStyle = isRetroCartoon
 
   const secondaryButtonClassName = isRetroCartoon
     ? 'w-full py-3 bg-white text-black border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-xl font-bold text-sm hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed'
-    : 'w-full py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl text-sm hover:bg-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed'
+    : isTerminal
+      ? 'w-full terminal-button theme-heading-font rounded-none py-3 text-sm transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed'
+      : isCyberpunk
+        ? 'w-full cyberpunk-button cyberpunk-button--ghost theme-heading-font rounded-xl py-3 text-sm transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed'
+        : 'w-full py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl text-sm hover:bg-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed'
 
   const registerButtonClassName = isRetroCartoon
     ? 'w-full py-3 bg-white text-black border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-xl font-bold text-sm hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] transition-all flex items-center justify-center gap-2'
-    : 'w-full py-3 border border-[rgba(var(--color-accent-primary-rgb),0.35)] text-accent-primary font-semibold rounded-xl text-sm hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:border-accent-primary transition-all flex items-center justify-center gap-2'
+    : isTerminal
+      ? 'w-full terminal-button theme-heading-font rounded-none py-3 text-sm transition-all flex items-center justify-center gap-2'
+      : isCyberpunk
+        ? 'w-full cyberpunk-button cyberpunk-button--ghost theme-heading-font rounded-xl py-3 text-sm transition-all flex items-center justify-center gap-2'
+        : 'w-full py-3 border border-[rgba(var(--color-accent-primary-rgb),0.35)] text-accent-primary font-semibold rounded-xl text-sm hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:border-accent-primary transition-all flex items-center justify-center gap-2'
 
   const handleGoogleLogin = async () => {
     setError(null)
@@ -609,7 +661,7 @@ const rootStyle = isRetroCartoon
 
   return (
     <>
-      <RegisterModal open={showRegister} onClose={() => setShowRegister(false)} isRetroCartoon={isRetroCartoon} />
+      <RegisterModal open={showRegister} onClose={() => setShowRegister(false)} theme={activeTheme} />
 
       <div
         className={rootClassName}
@@ -617,12 +669,10 @@ const rootStyle = isRetroCartoon
       >
         {!isRetroCartoon && (
           <>
-            {/* Dark overlay + accent tint so card is readable */}
-            <div className="absolute inset-0 bg-black/60" />
-            {/* Subtle accent glow on top of the overlay */}
+            <div className={isCyberpunk ? 'absolute inset-0 bg-[rgba(2,2,10,0.74)] backdrop-blur-[10px]' : 'absolute inset-0 bg-black/60'} />
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[rgba(var(--color-accent-primary-rgb),0.06)] rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[rgba(var(--color-accent-secondary-rgb),0.06)] rounded-full blur-3xl" />
+              <div className={`absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-3xl ${isCyberpunk ? 'bg-[rgba(255,0,255,0.1)]' : 'bg-[rgba(var(--color-accent-primary-rgb),0.06)]'}`} />
+              <div className={`absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-3xl ${isCyberpunk ? 'bg-[rgba(0,255,255,0.08)]' : 'bg-[rgba(var(--color-accent-secondary-rgb),0.06)]'}`} />
             </div>
           </>
         )}
@@ -634,11 +684,15 @@ const rootStyle = isRetroCartoon
             style={isRetroCartoon ? undefined : { fontFamily: "'Inter', sans-serif" }}
           >
             {!isRetroCartoon && (
-              /* Top glow line */
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-primary to-transparent" />
+              <div className={`absolute top-0 left-0 right-0 h-[2px] ${isCyberpunk ? 'bg-gradient-to-r from-transparent via-fuchsia-500 to-cyan-400' : 'bg-gradient-to-r from-transparent via-accent-primary to-transparent'}`} />
             )}
 
             <div className={cardInnerClassName}>
+              <div className="mb-2 text-center">
+                <h1 className={`text-3xl font-black tracking-tight ${isRetroCartoon ? 'theme-heading-font text-black uppercase' : isTerminal || isCyberpunk ? 'theme-heading-font text-[var(--color-text-primary)] uppercase' : 'text-white'}`}>
+                  {formatRetroHeading(t('login.button_login'), activeTheme)}
+                </h1>
+              </div>
               {/* Error */}
               {error && (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-3">
@@ -740,7 +794,7 @@ const rootStyle = isRetroCartoon
 
             {/* Bottom glow */}
             {!isRetroCartoon && (
-              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary to-transparent opacity-30" />
+              <div className={`absolute bottom-0 left-0 right-0 h-[1px] opacity-30 ${isCyberpunk ? 'bg-gradient-to-r from-transparent via-fuchsia-500 to-cyan-400' : 'bg-gradient-to-r from-transparent via-accent-primary to-transparent'}`} />
             )}
           </div>
 

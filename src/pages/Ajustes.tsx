@@ -9,6 +9,7 @@ import { supabase } from '@/supabaseClient'
 import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key, Bell } from 'lucide-react'
 import HudContainer from '@/features/shared/components/HudContainer'
 import TechLabel from '@/features/shared/components/TechLabel'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 
 type Section = 'perfil' | 'seguridad' | 'notificaciones'
 
@@ -40,6 +41,8 @@ const Ajustes: React.FC = () => {
   const [pushMessage, setPushMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
+  const isTerminal = theme === 'terminal'
+  const isCyberpunk = theme === 'cyberpunk'
 
   const navButtonClasses = (section: Section) => {
     const isActive = activeSection === section
@@ -289,7 +292,7 @@ const Ajustes: React.FC = () => {
           <TechLabel text="SYS.CONFIG" blink={false} />
           <div>
             <h1 
-              className="text-3xl sm:text-4xl font-black font-mono tracking-tighter"
+              className={`text-3xl sm:text-4xl font-black tracking-tighter ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}
               style={{
                 background: 'linear-gradient(to right, var(--color-accent-primary), var(--color-accent-secondary))',
                 WebkitBackgroundClip: 'text',
@@ -297,7 +300,7 @@ const Ajustes: React.FC = () => {
                 filter: 'drop-shadow(0 0 10px rgba(var(--color-accent-primary-rgb), 0.3))'
               }}
             >
-              {t('settings.title')}
+              {formatRetroHeading(t('settings.title'), theme)}
             </h1>
             <p className={`mt-1 text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('settings.description')}</p>
           </div>
@@ -340,7 +343,15 @@ const Ajustes: React.FC = () => {
               {/* Logout Button */}
               <button
                 onClick={handleLogout}
-                className="w-full mt-6 px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-accent-secondary text-accent-secondary font-mono tracking-widest text-xs uppercase rounded hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)] transition-all"
+                className={`w-full mt-6 px-4 py-3 tracking-widest text-xs uppercase transition-all ${
+                  isRetroCartoon
+                    ? 'theme-heading-font bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_#000] rounded-xl'
+                    : isTerminal
+                      ? 'terminal-button theme-heading-font rounded-none'
+                      : isCyberpunk
+                        ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font rounded-xl'
+                        : 'bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-accent-secondary text-accent-secondary font-mono rounded hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)]'
+                }`}
               >
                 {t('settings.logout_button')}
               </button>
@@ -488,7 +499,7 @@ const Ajustes: React.FC = () => {
 
                 {/* Account Info */}
                 <HudContainer className="p-6">
-                  <h2 className="text-lg font-black font-mono tracking-widest uppercase mb-4 text-accent-primary">{t('account.info_title')}</h2>
+                  <h2 className={`text-lg font-black tracking-widest uppercase mb-4 text-accent-primary ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>{formatRetroHeading(t('account.info_title'), theme)}</h2>
                   <div className="space-y-3 font-mono text-xs">
                     <div>
                       <span className="text-[var(--color-text-muted)]">{t('account.email')}:</span>
@@ -513,9 +524,9 @@ const Ajustes: React.FC = () => {
               <div className="space-y-6">
                 {/* Change Email */}
                 <HudContainer className="p-4 sm:p-8">
-                  <h2 className="text-xl font-black font-mono tracking-widest uppercase mb-6 flex items-center gap-3 text-[var(--color-text-primary)]">
+                  <h2 className={`text-xl font-black tracking-widest uppercase mb-6 flex items-center gap-3 text-[var(--color-text-primary)] ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>
                     <Mail className="w-5 h-5 text-accent-primary" />
-                    {t('settings.email_change_title')}
+                    {formatRetroHeading(t('settings.email_change_title'), theme)}
                   </h2>
                   
                   <form onSubmit={handleChangeEmail} className="space-y-4">
@@ -558,9 +569,9 @@ const Ajustes: React.FC = () => {
 
                 {/* Change Password */}
                 <HudContainer className="p-4 sm:p-8">
-                  <h2 className="text-xl font-black font-mono tracking-widest uppercase mb-6 flex items-center gap-3 text-[var(--color-text-primary)]">
+                  <h2 className={`text-xl font-black tracking-widest uppercase mb-6 flex items-center gap-3 text-[var(--color-text-primary)] ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>
                     <Key className="w-5 h-5 text-accent-primary" />
-                    {t('settings.password_change_title')}
+                    {formatRetroHeading(t('settings.password_change_title'), theme)}
                   </h2>
                   
                   <form onSubmit={handleChangePassword} className="space-y-4">
@@ -666,9 +677,9 @@ const Ajustes: React.FC = () => {
             {activeSection === 'notificaciones' && (
               <div className="space-y-6">
                 <HudContainer className="p-4 sm:p-8">
-                  <h2 className="text-xl font-black font-mono tracking-widest uppercase mb-3 flex items-center gap-3 text-[var(--color-text-primary)]">
+                  <h2 className={`text-xl font-black tracking-widest uppercase mb-3 flex items-center gap-3 text-[var(--color-text-primary)] ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>
                     <Bell className="w-5 h-5 text-accent-primary" />
-                    {t('settings.push_title')}
+                    {formatRetroHeading(t('settings.push_title'), theme)}
                   </h2>
                   <p className="text-[var(--color-text-muted)] mb-6 font-mono text-sm">{t('settings.push_description')}</p>
 
