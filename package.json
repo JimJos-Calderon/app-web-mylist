@@ -14,6 +14,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "preview": "vite preview",
+    "android": "npx cap open android",
     "sincronizar": "npm run build && npx cap sync"
   },
   "dependencies": {

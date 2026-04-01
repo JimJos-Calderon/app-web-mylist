@@ -40,6 +40,14 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 
 ---
 
+## 🆕 Últimos cambios
+
+- 🎨 **Tema `retro-cartoon` refinado** — se ajustaron Login, modal de registro, modales de listas y diálogos de creación/invitación para que el estilo retro se vea sólido, legible y neobrutalista.
+- 🔐 **Persistencia de tema al cerrar sesión** — el tema activo ahora sobrevive al logout y se reaplica correctamente para usuarios no autenticados.
+- 🌓 **Login reactivo al tema** — la pantalla de acceso responde a cambios reales de `data-theme` sin parpadeos al escribir en los inputs.
+- 🤖 **Oráculo AI menos repetitivo** — se aumentó la varianza de recomendaciones ajustando `temperature` y penalizaciones, además de reforzar el system prompt con reglas anti-repetición.
+- 🖱️ **Cursor retro personalizado** — se agregaron cursores exclusivos para `retro-cartoon`, incluyendo cobertura para enlaces, botones y elementos clickeables con `.cursor-pointer`.
+
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
