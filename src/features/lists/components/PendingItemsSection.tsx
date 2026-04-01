@@ -49,18 +49,18 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
       <section className="mb-12 mt-10 md:mb-16 md:mt-16">
         <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-2xl">
+            <h2 className={`text-xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-2xl ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
               {searchQuery ? 'Pendientes filtrados' : 'Para decidir hoy'}
             </h2>
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs text-[var(--color-text-muted)]">
-            <span className="rounded-full border border-cyan-500/20 bg-[rgba(var(--color-accent-primary-rgb),0.08)] px-3 py-1">
+            <span className={`rounded-full border border-cyan-500/20 bg-[rgba(var(--color-accent-primary-rgb),0.08)] px-3 py-1 ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
               {visiblePendingItems.length} pendientes visibles
             </span>
             {totalPages > 1 && (
-              <span className="rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] px-3 py-1">
-                Página {currentPage} de {totalPages}
+              <span className={`rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] px-3 py-1 ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+                PAGINA {currentPage} DE {totalPages}
               </span>
             )}
           </div>
@@ -95,7 +95,7 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`flex flex-shrink-0 items-center border px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${
+              className={`flex flex-shrink-0 items-center border px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
                 isRetroCartoon
                   ? currentPage === 1
                     ? retroPageButtonDisabled
@@ -127,7 +127,7 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
                     return (
                       <span
                         key={page}
-                        className="px-1 py-2 font-mono text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm"
+                        className={`px-1 py-2 text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
                       >
                         ...
                       </span>
@@ -140,7 +140,7 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
                   <button
                     key={page}
                     onClick={() => onPageChange(page)}
-                    className={`flex min-w-[36px] flex-shrink-0 items-center justify-center border px-3 py-2 font-mono text-xs font-bold uppercase transition-all md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${
+                    className={`flex min-w-[36px] flex-shrink-0 items-center justify-center border px-3 py-2 text-xs font-bold uppercase transition-all md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
                       isRetroCartoon
                         ? currentPage === page
                           ? retroPageButtonActive
@@ -163,7 +163,7 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`flex flex-shrink-0 items-center border px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${
+              className={`flex flex-shrink-0 items-center border px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
                 isRetroCartoon
                   ? currentPage === totalPages
                     ? retroPageButtonDisabled
@@ -183,7 +183,7 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
           </div>
 
           <div className="mt-3 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] md:text-xs md:tracking-widest">
+            <p className={`text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] md:text-xs md:tracking-widest ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
               <span className="hidden sm:inline">{pageLabel} • </span>
               {visiblePendingItems.length} por decidir
             </p>

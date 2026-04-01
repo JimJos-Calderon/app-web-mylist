@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { StatsWidget } from '@/features/items'
-import { ListItem } from '@/features/shared'
+import { ListItem, useTheme } from '@/features/shared'
 import PendingItemsSection from './PendingItemsSection'
 import WatchedItemsSection from './WatchedItemsSection'
 
@@ -53,6 +53,11 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
   onPageChange,
 }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
+  const pageLabel = isRetroCartoon
+    ? `PAGINA ${currentPage} DE ${totalPages}`
+    : t('pagination.page', { current: currentPage, total: totalPages })
 
   return (
     <section id="discover-section">
@@ -126,7 +131,7 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
               onPageChange={onPageChange}
               previousLabel={t('pagination.previous')}
               nextLabel={t('pagination.next')}
-              pageLabel={t('pagination.page', { current: currentPage, total: totalPages })}
+              pageLabel={pageLabel}
             />
           )}
 
@@ -145,7 +150,7 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
               hasPendingSection={showPendingSection}
               previousLabel={t('pagination.previous')}
               nextLabel={t('pagination.next')}
-              pageLabel={t('pagination.page', { current: currentPage, total: totalPages })}
+              pageLabel={pageLabel}
             />
           )}
         </>

@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 export interface FavoriteItem {
   titulo: string;
   nota: string | number;
+  comment?: string;
 }
 
 export interface Recommendation {
@@ -78,6 +79,43 @@ const normalizeTitle = (value: string): string =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
+const MAX_COMMENT_LENGTH = 300;
+
+const truncateComment = (comment?: string): string | undefined => {
+  if (!comment) return undefined;
+  const normalized = comment.trim().replace(/\s+/g, ' ');
+  if (!normalized) return undefined;
+  if (normalized.length <= MAX_COMMENT_LENGTH) return normalized;
+  return `${normalized.slice(0, MAX_COMMENT_LENGTH - 1).trimEnd()}…`;
+};
+
+const formatFavoritesForPrompt = (favoritos: FavoriteItem[]) =>
+  favoritos.map((favorito) => {
+    const formatted: FavoriteItem = {
+      titulo: favorito.titulo,
+      nota: favorito.nota,
+    };
+
+    const truncatedComment = truncateComment(favorito.comment);
+    if (truncatedComment) {
+      formatted.comment = truncatedComment;
+    }
+
+    return formatted;
+  });
+
+const formatFavoriteLines = (favoritos: FavoriteItem[]) =>
+  favoritos
+    .map((favorito) => {
+      const parts = [`${favorito.titulo} - Rating: ${favorito.nota}`];
+      const truncatedComment = truncateComment(favorito.comment);
+      if (truncatedComment) {
+        parts.push(`Comentario del usuario: "${truncatedComment}"`);
+      }
+      return parts.join(' - ');
+    })
+    .join('\n');
+
 export const useOracleRecommendations = (): UseOracleRecommendationsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,6 +152,8 @@ REGLAS DE ANÁLISIS:
 - Las obras con 1-2 estrellas o reacción "no me gustó" son señales NEGATIVAS: EVITA recomendar contenido similar a ellas.
 - Las obras con 3 estrellas o sin reacción son neutras: úsalas solo como contexto secundario.
 - Busca patrones cruzados: si le gustan los thrillers psicológicos y odia las comedias románticas, usa ese perfil.
+- Analiza también los comentarios escritos por el usuario para detectar preferencias sutiles: ritmo, directores, tropos, cinematografía, tono, actuaciones, complejidad narrativa, estilo visual y motivos concretos por los que una obra le gustó o disgustó.
+- Cuando exista comentario, priorízalo como evidencia cualitativa de alto valor y úsalo para justificar por qué una recomendación encaja o por qué debes evitar ciertos rasgos.
 - PROHIBIDO recomendar títulos que ya estén en el historial de calificaciones del usuario.
 
 REGLAS DE VARIABILIDAD OBLIGATORIAS:
@@ -130,13 +170,29 @@ La estructura estricta e innegociable del JSON que vas a retornar debe ser exact
   "recomendaciones": [
     {
       "titulo": "Nombre de la obra exacta",
-      "justificacion": "Por qué es altamente afín, citando específicamente las obras bien valoradas del usuario y contrastando con las mal valoradas. Tono sombrío y ciberpunk obligatorio."
+      "justificacion": "Por qué es altamente afín, citando específicamente las obras bien valoradas del usuario, sus comentarios cuando existan y contrastando con las mal valoradas. Tono sombrío y ciberpunk obligatorio."
     }
   ]
 }`;
 
     const entropySeed = new Date().toISOString();
-    const userPrompt = `[INICIANDO INTERFAZ DE RED...] Analizando datos de calificación extraídos del usuario:\n${JSON.stringify(favoritos, null, 2)}\n\n[TÍTULOS YA CALIFICADOS QUE DEBES EXCLUIR]:\n${JSON.stringify(excludedTitles, null, 2)}\n\n[SEMILLA DE ENTROPÍA PARA ESTA PETICIÓN]: ${entropySeed}\n[ESPERANDO JSON DEL ORÁCULO...]`;
+    const promptReadyFavorites = formatFavoritesForPrompt(favoritos);
+    const formattedHistory = formatFavoriteLines(promptReadyFavorites);
+    const userPrompt = `[INICIANDO INTERFAZ DE RED...] Analizando datos de calificación extraídos del usuario:
+
+[HISTORIAL LEGIBLE]
+${formattedHistory}
+
+[HISTORIAL ESTRUCTURADO JSON]
+${JSON.stringify(promptReadyFavorites, null, 2)}
+
+[FORMATO INTERPRETABLE]: cada elemento puede incluir titulo, nota y comment. Si comment existe, interprétalo como "Comentario del usuario" y úsalo como contexto cualitativo principal.
+
+[TÍTULOS YA CALIFICADOS QUE DEBES EXCLUIR]:
+${JSON.stringify(excludedTitles, null, 2)}
+
+[SEMILLA DE ENTROPÍA PARA ESTA PETICIÓN]: ${entropySeed}
+[ESPERANDO JSON DEL ORÁCULO...]`;
 
     try {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {

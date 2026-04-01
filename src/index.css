@@ -3,7 +3,22 @@
 @import "swiper/css/effect-coverflow";
 @import "swiper/css/pagination";
 
+@font-face {
+  font-family: 'Space Meatball';
+  src: url('/fonts/space-meatball.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: var(--app-font-body);
+  --font-heading: var(--app-font-heading);
+}
+
 :root {
+  --app-font-body: 'Pramukh Rounded', sans-serif;
+  --app-font-heading: var(--app-font-body);
   --color-bg-base: #050505;
   --color-bg-elevated: #0b0b12;
   --color-bg-gradient-start: #701a75;
@@ -74,6 +89,7 @@
 }
 
 [data-theme="retro-cartoon"] {
+  --app-font-heading: 'Space Meatball', sans-serif;
   --color-bg-primary: #f1ede2;
   --color-bg-secondary: #b3ada2;
   --color-text-primary: #1f1d1a;
@@ -282,9 +298,47 @@ html, body, #root {
 }
 
 body {
-  font-family: 'Pramukh Rounded', sans-serif;
+  font-family: var(--app-font-body);
   background-color: var(--color-bg-base);
   color: var(--color-text-primary);
+}
+
+h1,
+h2,
+h3,
+.font-heading {
+  font-family: var(--app-font-heading);
+}
+
+.theme-heading-font {
+  font-family: var(--app-font-heading) !important;
+}
+
+.theme-body-font {
+  font-family: var(--app-font-body) !important;
+}
+
+[data-theme="retro-cartoon"] .hud-container h3,
+[data-theme="retro-cartoon"] .dashboard-flow-card h3,
+[data-theme="retro-cartoon"] .hud-item-poster-text,
+[data-theme="retro-cartoon"] .item-card-retro-ink h3,
+[data-theme="retro-cartoon"] .hud-item-meta {
+  font-family: var(--app-font-heading);
+}
+
+[data-theme="retro-cartoon"] [role="dialog"] h1,
+[data-theme="retro-cartoon"] [role="dialog"] h2,
+[data-theme="retro-cartoon"] [role="dialog"] h3,
+[data-theme="retro-cartoon"] [role="dialog"] .font-black.uppercase,
+[data-theme="retro-cartoon"] [role="dialog"] button,
+[data-theme="retro-cartoon"] [role="dialog"] label {
+  font-family: var(--app-font-heading) !important;
+}
+
+[data-theme="retro-cartoon"] [role="dialog"] p:not(.theme-heading-font):not(.theme-body-font),
+[data-theme="retro-cartoon"] [role="dialog"] textarea,
+[data-theme="retro-cartoon"] [role="dialog"] input {
+  font-family: var(--app-font-body);
 }
 
 /* Navbar with Nippo font */
@@ -793,7 +847,12 @@ nav {
 }
 
 .hud-item-meta {
-  display: inline-block;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   border-radius: 0.5rem;
   border: 1px solid rgba(var(--color-accent-primary-rgb), 0.26);
   padding: 0.25rem 0.75rem;

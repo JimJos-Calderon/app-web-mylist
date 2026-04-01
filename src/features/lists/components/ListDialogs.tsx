@@ -61,7 +61,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
     'rounded-md border-[3px] border-black bg-[#f6eddc] text-black shadow-[4px_4px_0px_0px_#000000] transition-all'
 
   const inputClassName = isRetroCartoon
-    ? 'w-full px-4 py-3 bg-white text-black border-[3px] border-black shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.1)] focus-visible:shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-none rounded-md transition-all font-bold placeholder-gray-500'
+    ? 'theme-heading-font w-full px-4 py-3 bg-white text-black border-[3px] border-black shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.1)] focus-visible:shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-none rounded-md transition-all font-bold placeholder-gray-500'
     : 'w-full px-4 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)] transition-all font-medium disabled:opacity-50'
 
   const primaryButtonClassName = isRetroCartoon
@@ -111,13 +111,12 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
                   <Plus className="h-6 w-6 text-black" strokeWidth={2.5} />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                  <span className="theme-heading-font text-[10px] font-black uppercase tracking-[0.2em] text-black">
                     {'>'} SYS.NEW_LIST
                   </span>
                   <h2
                     id="create-list-dialog-title"
-                    className="text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
-                    style={{ fontFamily: "'Pramukh Rounded', sans-serif" }}
+                    className="theme-heading-font text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
                   >
                     {t('dialog.create_list_title', { defaultValue: 'Crear Nueva Lista' })}
                   </h2>
@@ -136,16 +135,16 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
 
             <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 sm:px-8">
               <div className={`${retroPaperCardClassName} px-5 py-4`}>
-                <p className="mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                <p className="theme-heading-font mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
                   {'>'} {t('dialog.create_list_hint', { defaultValue: 'Define tu nueva lista' })}
                 </p>
-                <p className="text-sm font-medium leading-relaxed text-black opacity-90" style={{ fontFamily: "'Pramukh Rounded', sans-serif" }}>
+                <p className="theme-heading-font text-sm font-medium leading-relaxed text-black opacity-90">
                   {t('dialog.create_list_description', { defaultValue: 'Ponle un nombre y una descripción opcional.' })}
                 </p>
               </div>
 
               <div>
-                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                <label className="theme-heading-font mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
                   {'>'} {t('dialog.list_name_label', { defaultValue: 'Nombre de la lista' })}
                 </label>
                 <input
@@ -159,7 +158,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
               </div>
 
               <div>
-                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                <label className="theme-heading-font mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
                   {'>'} {t('dialog.list_description_label', { defaultValue: 'Descripción' })}
                 </label>
                 <textarea
@@ -172,7 +171,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
               </div>
 
               {error && (
-                <div className="rounded-md border-[3px] border-black bg-white px-4 py-3 text-sm font-bold text-black shadow-[4px_4px_0px_0px_#000000]">
+                <div className="theme-heading-font rounded-md border-[3px] border-black bg-white px-4 py-3 text-sm font-bold text-black shadow-[4px_4px_0px_0px_#000000]">
                   {error}
                 </div>
               )}
@@ -349,8 +348,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                   </span>
                   <h2
                     id="invite-dialog-title"
-                    className="text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
-                    style={{ fontFamily: "'Pramukh Rounded', sans-serif" }}
+                    className="theme-heading-font text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
                   >
                     {t('dialog.invite_title')}
                   </h2>
@@ -371,8 +369,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                   {'>'} TARGET: {t('dialog.list_label')}
                 </p>
                 <p
-                  className="text-sm font-black leading-tight text-black"
-                  style={{ fontFamily: "'Pramukh Rounded', sans-serif" }}
+                  className="theme-heading-font text-sm font-black leading-tight text-black"
                 >
                   {list.name}
                 </p>

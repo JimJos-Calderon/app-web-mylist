@@ -19,6 +19,15 @@ export const queryKeys = {
     detail: (id: string) => ['items', id] as const,
   },
 
+  itemComments: {
+    all: ['itemComments'] as const,
+    byItem: (itemId: string) => [...queryKeys.itemComments.all, itemId] as const,
+    byItemAndUser: (itemId: string, userId: string) => [
+      ...queryKeys.itemComments.byItem(itemId),
+      userId,
+    ] as const,
+  },
+
   // ─── Lists ───────────────────────────────────────────────────────
   lists: {
     all: ['lists'] as const,

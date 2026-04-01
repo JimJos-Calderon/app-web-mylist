@@ -1,5 +1,5 @@
 import React from 'react'
-import { FilterState, SORT_OPTIONS } from '@/features/shared'
+import { FilterState, SORT_OPTIONS, useTheme } from '@/features/shared'
 import { FilterPanel } from '@/features/items'
 
 interface ListFiltersSectionProps {
@@ -17,6 +17,9 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
   onResetFilters,
   onFilterChange,
 }) => {
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
+
   return (
     <section className="mb-8">
       <div className="flex justify-end gap-6 px-2">
@@ -24,7 +27,7 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
           <button
             type="button"
             onClick={onResetFilters}
-            className="text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text-primary)]"
+            className={`text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
           >
             Quitar filtros
           </button>
@@ -32,7 +35,7 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
         <button
           type="button"
           onClick={onToggleSecondaryControls}
-          className="text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text-primary)]"
+          className={`text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
         >
           {showSecondaryControls ? 'Ocultar filtros' : 'Filtros'}
         </button>

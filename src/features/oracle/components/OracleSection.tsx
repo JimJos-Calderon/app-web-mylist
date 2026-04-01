@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { useAuth } from '@/features/auth'
 import { useTheme } from '@/features/shared'
-import { useOracleRecommendations } from '@/hooks/useOracleRecommendations'
+import { FavoriteItem, useOracleRecommendations } from '@/hooks/useOracleRecommendations'
 
 interface OracleSectionProps {
   items?: unknown // kept for API compatibility, no longer used
@@ -21,7 +21,7 @@ export const OracleSection: React.FC<OracleSectionProps> = () => {
   const { data: ratedItems = [], isLoading: ratingsLoading } = useQuery({
     queryKey: ['itemRatings', 'oracle', 'all', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: ratingsData, error } = await supabase
         .from('item_ratings')
         .select(`
           rating,
@@ -33,19 +33,51 @@ export const OracleSection: React.FC<OracleSectionProps> = () => {
         `)
         .eq('user_id', user!.id)
         .or('rating.not.is.null,liked.not.is.null')
+
       if (error) throw error
-      // Supabase retorna la relación como array (one-to-many), tomamos el primer elemento
-      return (data ?? []).map((r: any) => ({
+
+      const normalizedRatings = (ratingsData ?? []).map((r: any) => ({
         rating: r.rating as number | null,
         liked: r.liked as boolean | null,
-        item: Array.isArray(r.items) ? (r.items[0] as { id: string; titulo: string } | undefined) : (r.items as { id: string; titulo: string } | null),
+        item: Array.isArray(r.items)
+          ? (r.items[0] as { id: string; titulo: string } | undefined)
+          : (r.items as { id: string; titulo: string } | null),
+      }))
+
+      const itemIds = normalizedRatings
+        .map((rating) => rating.item?.id)
+        .filter((id): id is string => Boolean(id))
+
+      if (itemIds.length === 0) {
+        return normalizedRatings.map((rating) => ({
+          ...rating,
+          comment: undefined as string | undefined,
+        }))
+      }
+
+      const { data: commentsData, error: commentsError } = await supabase
+        .from('item_comments')
+        .select('item_id, content')
+        .eq('user_id', user!.id)
+        .in('item_id', itemIds)
+
+      if (commentsError) throw commentsError
+
+      const commentsByItemId = new Map<string, string>()
+      for (const row of commentsData ?? []) {
+        commentsByItemId.set(String(row.item_id), row.content)
+      }
+
+      return normalizedRatings.map((rating) => ({
+        ...rating,
+        comment: rating.item?.id ? commentsByItemId.get(String(rating.item.id)) : undefined,
       }))
     },
     enabled: !!user?.id,
   })
 
   // Construimos el array con etiquetas descriptivas para el prompt
-  const topItems = useMemo(() => {
+  const topItems = useMemo<FavoriteItem[]>(() => {
     return ratedItems
       .filter((r) => r.item != null)
       .map((r) => {
@@ -57,7 +89,11 @@ export const OracleSection: React.FC<OracleSectionProps> = () => {
         } else {
           nota = r.liked ? 'me gustó' : 'no me gustó'
         }
-        return { titulo: r.item!.titulo, nota }
+        return {
+          titulo: r.item!.titulo,
+          nota,
+          comment: r.comment || undefined,
+        }
       })
       .slice(0, 10)
   }, [ratedItems])
@@ -77,22 +113,22 @@ export const OracleSection: React.FC<OracleSectionProps> = () => {
   const hasTopItems = topItems.length > 0
 
   const headerTitleClass = isRetroCartoon
-    ? 'flex items-center gap-3 font-black text-2xl uppercase tracking-[0.12em] text-black md:text-3xl'
+    ? 'theme-heading-font flex items-center gap-3 font-black text-2xl uppercase tracking-[0.12em] text-black md:text-3xl'
     : 'flex items-center gap-3 font-mono text-xl font-black uppercase tracking-[0.15em] text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)] md:text-2xl'
   const headerSubtitleClass = isRetroCartoon
-    ? 'mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-black opacity-90 md:text-xs'
+    ? 'theme-heading-font mt-2 text-[10px] uppercase tracking-[0.2em] text-black opacity-90 md:text-xs'
     : 'mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-70 md:text-xs'
   const recommendationItemClass = isRetroCartoon
     ? 'border-l-[4px] border-black pl-4 py-2 transition-colors duration-300 hover:bg-black/[0.04]'
     : 'border-l-2 border-cyan-500 pl-4 py-2 transition-colors duration-300 hover:bg-cyan-500/5'
   const recommendationTitleClass = isRetroCartoon
-    ? 'font-mono text-lg font-bold text-black'
+    ? 'theme-heading-font text-lg font-bold text-black'
     : 'font-mono text-lg font-bold text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.3)] md:text-xl'
   const recommendationDescriptionClass = isRetroCartoon
-    ? 'mt-2 font-mono text-sm font-medium leading-relaxed text-black md:text-base'
+    ? 'theme-heading-font mt-2 text-sm font-medium leading-relaxed text-black md:text-base'
     : 'mt-2 font-mono text-sm leading-relaxed text-slate-300 opacity-90 md:text-base'
   const recalcularButtonClass = isRetroCartoon
-    ? 'w-full px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#000000] active:translate-y-0 active:translate-x-0 active:shadow-none'
+    ? 'theme-heading-font w-full px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#000000] active:translate-y-0 active:translate-x-0 active:shadow-none'
     : 'group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-xl border border-cyan-500 bg-cyan-500/10 px-8 py-4 font-mono text-sm font-black uppercase tracking-[0.15em] text-cyan-400 transition-all hover:bg-cyan-500 hover:text-black hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-cyan-500/10 disabled:hover:text-cyan-400 disabled:hover:shadow-none md:w-auto md:text-base'
 
   return (

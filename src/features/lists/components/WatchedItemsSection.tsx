@@ -51,17 +51,17 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
       <section className={hasPendingSection ? 'mt-10' : 'mb-8'}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--color-text-muted)]">
+            <p className={`text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
               Historial
             </p>
-            <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">Ya vistos</h3>
+            <h3 className={`text-lg font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>Ya vistos</h3>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)]">
-            <span>{visibleWatchedItems.length} vistos</span>
+            <span className={isRetroCartoon ? 'theme-heading-font' : ''}>{visibleWatchedItems.length} vistos</span>
             {!hasPendingSection && totalPages > 1 && (
-              <span className="rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] px-3 py-1">
-                Página {currentPage} de {totalPages}
+              <span className={`rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] px-3 py-1 ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+                PAGINA {currentPage} DE {totalPages}
               </span>
             )}
           </div>
@@ -90,7 +90,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
         )}
 
         {hasPendingSection && visibleWatchedItems.length > 6 && (
-          <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+          <p className={`mt-3 text-sm text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
             Mostrando 6 de {visibleWatchedItems.length} vistos.
           </p>
         )}
@@ -102,7 +102,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`flex flex-shrink-0 items-center border px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${
+            className={`flex flex-shrink-0 items-center border px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
               isRetroCartoon
                 ? currentPage === 1
                   ? retroPageButtonDisabled
@@ -134,7 +134,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
                   return (
                     <span
                       key={page}
-                      className="px-1 py-2 font-mono text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm"
+                      className={`px-1 py-2 text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
                     >
                       ...
                     </span>
@@ -147,7 +147,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
                 <button
                   key={page}
                   onClick={() => onPageChange(page)}
-                  className={`flex min-w-[36px] flex-shrink-0 items-center justify-center border px-3 py-2 font-mono text-xs font-bold uppercase transition-all md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${
+                  className={`flex min-w-[36px] flex-shrink-0 items-center justify-center border px-3 py-2 text-xs font-bold uppercase transition-all md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
                     isRetroCartoon
                       ? currentPage === page
                         ? retroPageButtonActive
@@ -170,7 +170,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`flex flex-shrink-0 items-center border px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${
+            className={`flex flex-shrink-0 items-center border px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
               isRetroCartoon
                 ? currentPage === totalPages
                   ? retroPageButtonDisabled
@@ -190,7 +190,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
         </div>
 
         <div className="mt-3 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] md:text-xs md:tracking-widest">
+          <p className={`text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] md:text-xs md:tracking-widest ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
             <span className="hidden sm:inline">{pageLabel} • </span>
             {visibleWatchedItems.length} vistos
           </p>

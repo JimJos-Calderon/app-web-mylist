@@ -69,7 +69,7 @@ const RandomPickManager: React.FC<RandomPickManagerProps> = ({
             <div className="flex items-center justify-between border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-4">
               <div className="flex items-center gap-3">
                 <Shuffle className={`h-5 w-5 ${isRetroCartoon ? 'text-black' : 'text-[var(--color-accent-primary)]'}`} />
-                <h2 className={`text-xl font-black uppercase tracking-tight ${isRetroCartoon ? 'text-black' : 'text-white'}`}>{titleText}</h2>
+                <h2 className={`text-xl font-black uppercase tracking-tight ${isRetroCartoon ? 'theme-heading-font text-black' : 'text-white'}`}>{titleText}</h2>
               </div>
               <Dialog.Close className={`rounded-full p-2 transition ${isRetroCartoon ? 'text-black/70 hover:bg-black/10 hover:text-black' : 'text-white/50 hover:bg-white/10 hover:text-white'}`}>
                 <X className="h-5 w-5" />
@@ -119,7 +119,7 @@ const RandomPickManager: React.FC<RandomPickManagerProps> = ({
           <div className="px-6 pt-6">
             <div className="mb-6 flex items-center gap-3">
               <Shuffle className={`h-5 w-5 ${isRetroCartoon ? 'text-black' : 'text-[var(--color-accent-primary)]'}`} />
-              <Drawer.Title className={`text-xl font-black uppercase tracking-tight ${isRetroCartoon ? 'text-black' : 'text-white'}`}>
+              <Drawer.Title className={`text-xl font-black uppercase tracking-tight ${isRetroCartoon ? 'theme-heading-font text-black' : 'text-white'}`}>
                 {titleText}
               </Drawer.Title>
             </div>

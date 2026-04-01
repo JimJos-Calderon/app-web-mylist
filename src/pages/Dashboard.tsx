@@ -9,21 +9,30 @@ import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
 import { CreateListDialog, ListSelector, useLists } from '@/features/lists'
 import { RandomPickManager } from '@/features/items'
-import { SectionErrorFallback, ConfirmDialog } from '@/features/shared'
+import { SectionErrorFallback, ConfirmDialog, useTheme } from '@/features/shared'
 import type { List, ListItem } from '@/features/shared'
 import { OracleSection } from '@/features/oracle/components/OracleSection'
 
 const ActivityFeedPanel = lazy(() => import('@/features/lists/components/ActivityFeed'))
 
+const formatRetroLabel = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+
 const ActivityFeedSkeleton: React.FC = () => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
+  const activityTitle = isRetroCartoon ? formatRetroLabel(t('activity_feed.title')) : t('activity_feed.title')
 
   return (
     <div className="w-full">
       <div className="mb-4 flex items-center gap-2">
         <div className="h-2 w-2 animate-pulse bg-accent-primary" />
-        <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-accent-primary">
-          SYS.{t('activity_feed.title')}
+        <h3 className={`text-xs font-bold uppercase tracking-widest text-accent-primary ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}>
+          SYS.{activityTitle}
         </h3>
       </div>
 
@@ -53,6 +62,8 @@ type FlowCardProps = {
 }
 
 const FlowCard: React.FC<FlowCardProps> = ({ title, description, to, accent, cta, icon }) => {
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
   const isPrimary = accent === 'cyan'
   const toneClasses = isPrimary
     ? 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-accent-primary-rgb),0.06)] hover:border-[rgba(var(--color-accent-primary-rgb),0.55)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)]'
@@ -65,17 +76,21 @@ const FlowCard: React.FC<FlowCardProps> = ({ title, description, to, accent, cta
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
               {icon}
-              <span>{title}</span>
+              <span className={isRetroCartoon ? 'theme-heading-font' : ''}>{isRetroCartoon ? formatRetroLabel(title) : title}</span>
             </div>
 
-            <h3 className="text-xl font-semibold text-[var(--color-text-primary)]">{title}</h3>
-            <p className="text-sm leading-relaxed text-[var(--color-text-muted)]">{description}</p>
+            <h3 className={`text-xl font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+              {isRetroCartoon ? formatRetroLabel(title) : title}
+            </h3>
+            <p className={`text-sm leading-relaxed text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{description}</p>
           </div>
 
           <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-[var(--color-text-muted)]" />
         </div>
 
-        <div className="text-sm font-semibold text-[var(--color-text-primary)]">{cta}</div>
+        <div className={`text-sm font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+          {isRetroCartoon ? formatRetroLabel(cta) : cta}
+        </div>
       </div>
     </Link>
   )
@@ -83,8 +98,10 @@ const FlowCard: React.FC<FlowCardProps> = ({ title, description, to, accent, cta
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
   const { user } = useAuth()
   const { profile } = useUserProfile()
+  const isRetroCartoon = theme === 'retro-cartoon'
   const [isCreateListOpen, setIsCreateListOpen] = useState(false)
 
   const { lists, currentList, setCurrentList, loading: loadingLists, createList, deleteList, leaveList } = useLists(user?.id)
@@ -145,45 +162,69 @@ const Dashboard: React.FC = () => {
       : hasLists
         ? 'Ya tienes listas. Solo falta marcar cuál manda ahora mismo.'
         : 'Primero necesitas una lista para añadir opciones y empezar a decidir juntos.'
+  const retroText = (value: string) => (isRetroCartoon ? formatRetroLabel(value) : value)
+
+  const heroTitle = isRetroCartoon
+    ? formatRetroLabel('Decide que ver juntos rapido')
+    : 'Decide qué ver juntos, rápido.'
+  const activeListLabel = isRetroCartoon ? formatRetroLabel('Lista activa') : 'Lista activa'
+  const nextStepLabel = isRetroCartoon ? formatRetroLabel('Siguiente paso') : 'Siguiente paso'
+  const stateLabel = isRetroCartoon ? formatRetroLabel('Estado') : 'Estado'
+  const contextLabel = isRetroCartoon ? formatRetroLabel('Contexto') : 'Contexto'
+  const chooseForMeLabel = isRetroCartoon ? formatRetroLabel('Elegir por mi') : 'Elegir por mí'
+  const createListLabel = isRetroCartoon ? formatRetroLabel('Crear lista') : 'Crear lista'
+  const goMoviesLabel = isRetroCartoon ? formatRetroLabel('Ir a peliculas') : 'Ir a películas'
+  const goSeriesLabel = isRetroCartoon ? formatRetroLabel('Ir a series') : 'Ir a series'
+  const noListsLabel = isRetroCartoon
+    ? 'NO HAY NINGUNA LISTA TODAVIA. CREAR UNA ES EL PRIMER PASO PARA PODER ANADIR Y DECIDIR.'
+    : 'No hay ninguna lista todavía. Crear una es el primer paso para poder añadir y decidir.'
+  const globalActivityLabel = isRetroCartoon ? formatRetroLabel('Global activity log') : 'GLOBAL_ACTIVITY_LOG'
 
   return (
     <>
       <div className="mx-auto max-w-6xl px-4 pb-24 md:px-6">
         <section className="space-y-4 pb-8 pt-10 md:pb-10 md:pt-14">
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-accent-primary opacity-80 md:text-xs">
+          <p className={`text-[10px] uppercase tracking-[0.25em] text-accent-primary opacity-80 md:text-xs ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}>
             {'>'} DECISION_DASHBOARD
           </p>
 
-          <h1 className="text-4xl font-black tracking-tighter text-[var(--color-text-primary)] md:text-6xl">
-            Decide qué ver juntos, rápido.
+          <h1 className={`text-4xl font-black tracking-tighter text-[var(--color-text-primary)] md:text-6xl ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+            {heroTitle}
           </h1>
 
-          <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)] md:text-lg">
-            Bienvenido de nuevo,{' '}
-            <span className="font-semibold text-[var(--color-text-primary)]">{displayName}</span>.
-            Aquí solo debería quedar claro qué lista está activa y por dónde seguir.
+          <p className={`max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)] md:text-lg ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+            {retroText('Bienvenido de nuevo')},{' '}
+            <span className={`font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+              {isRetroCartoon ? formatRetroLabel(displayName) : displayName}
+            </span>.
+            {' '}
+            {retroText('Aqui solo deberia quedar claro que lista esta activa y por donde seguir.')}
           </p>
         </section>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="dashboard-main-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.28)] bg-[var(--color-bg-elevated)] p-6 md:p-8">
             <div className="mb-6">
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-accent-primary opacity-85">
-                Lista activa
+              <p className={`mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-accent-primary opacity-85 ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+                {activeListLabel}
               </p>
 
-              <h2 className="text-2xl font-semibold text-[var(--color-text-primary)] md:text-3xl">
-                {loadingLists ? 'Cargando listas...' : currentList?.name || 'Sin lista seleccionada'}
+              <h2 className={`text-2xl font-semibold text-[var(--color-text-primary)] md:text-3xl ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+                {loadingLists
+                  ? (isRetroCartoon ? formatRetroLabel('Cargando listas') : 'Cargando listas...')
+                  : currentList?.name
+                    ? (isRetroCartoon ? formatRetroLabel(currentList.name) : currentList.name)
+                    : (isRetroCartoon ? formatRetroLabel('Sin lista seleccionada') : 'Sin lista seleccionada')}
               </h2>
 
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-text-muted)]">
+              <p className={`mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
                 {loadingLists
-                  ? 'Estamos preparando tu contexto.'
+                  ? retroText('Estamos preparando tu contexto.')
                   : hasActiveList
-                    ? 'Todo lo que hagas al entrar en películas o series se aplicará a esta lista.'
+                    ? retroText('Todo lo que hagas al entrar en peliculas o series se aplicara a esta lista.')
                     : hasLists
-                      ? 'Elige cuál quieres usar ahora para que el flujo quede claro.'
-                      : 'Todavía no tienes listas. Crea una para empezar.'}
+                      ? retroText('Elige cual quieres usar ahora para que el flujo quede claro.')
+                      : retroText('Todavia no tienes listas. Crea una para empezar.')}
               </p>
             </div>
 
@@ -207,11 +248,11 @@ const Dashboard: React.FC = () => {
                       type="button"
                       onClick={() => setIsRandomPickerOpen(true)}
                       disabled={!hasActiveList || loadingLists}
-                      className="flex h-11 items-center justify-center gap-2 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] px-5 font-mono text-[11px] font-black uppercase tracking-widest text-[var(--color-accent-primary)] transition hover:bg-[rgba(var(--color-accent-primary-rgb),0.08)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.1)] disabled:opacity-50"
+                      className={`flex h-11 items-center justify-center gap-2 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] px-5 text-[11px] font-black uppercase tracking-widest text-[var(--color-accent-primary)] transition hover:bg-[rgba(var(--color-accent-primary-rgb),0.08)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.1)] disabled:opacity-50 ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
                       title={t('random_picker.button_tooltip', 'Elegir algo al azar')}
                     >
                       <Shuffle className="h-4 w-4" />
-                      <span className="hidden sm:inline">Elegir por mí</span>
+                      <span className="hidden sm:inline">{chooseForMeLabel}</span>
                     </button>
 
                     {currentList && (
@@ -233,8 +274,8 @@ const Dashboard: React.FC = () => {
 
             {!loadingLists && !hasLists && (
               <div className="mb-5 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] p-4">
-                <p className="text-sm text-[var(--color-text-muted)]">
-                  No hay ninguna lista todavía. Crear una es el primer paso para poder añadir y decidir.
+                <p className={`text-sm text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+                  {noListsLabel}
                 </p>
               </div>
             )}
@@ -243,7 +284,7 @@ const Dashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCreateListOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-3 text-sm font-semibold transition"
+                className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-3 text-sm font-semibold transition ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
                 style={{
                   borderColor: 'rgba(var(--color-accent-primary-rgb), 0.25)',
                   background: 'rgba(var(--color-accent-primary-rgb), 0.06)',
@@ -251,54 +292,58 @@ const Dashboard: React.FC = () => {
                 }}
               >
                 <Plus className="h-4 w-4" />
-                Crear lista
+                {createListLabel}
               </button>
 
               <Link
                 to="/peliculas"
-                className="inline-flex items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold transition"
+                className={`inline-flex items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold transition ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
                 style={{ borderColor: 'rgba(var(--color-accent-primary-rgb),0.4)', background: 'rgba(var(--color-accent-primary-rgb),0.1)', color: 'var(--color-accent-primary)' }}
               >
-                Ir a películas
+                {goMoviesLabel}
               </Link>
 
               <Link
                 to="/series"
-                className="inline-flex items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold transition"
+                className={`inline-flex items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold transition ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
                 style={{ borderColor: 'rgba(var(--color-accent-secondary-rgb),0.4)', background: 'rgba(var(--color-accent-secondary-rgb),0.1)', color: 'var(--color-accent-secondary)' }}
               >
-                Ir a series
+                {goSeriesLabel}
               </Link>
             </div>
           </div>
 
           <div className="dashboard-next-step-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[var(--color-bg-elevated)] p-6">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--color-text-muted)]">
-              Siguiente paso
+            <p className={`mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+              {nextStepLabel}
             </p>
 
-            <h2 className="text-2xl font-semibold text-[var(--color-text-primary)]">{nextStepTitle}</h2>
+            <h2 className={`text-2xl font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+              {isRetroCartoon ? formatRetroLabel(nextStepTitle) : nextStepTitle}
+            </h2>
 
-            <p className="mt-3 text-sm leading-relaxed text-[var(--color-text-muted)]">{nextStepDescription}</p>
+            <p className={`mt-3 text-sm leading-relaxed text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{retroText(nextStepDescription)}</p>
 
             <div className="mt-6 grid gap-3">
               <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[var(--color-bg-secondary)] p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                  Estado
+                <p className={`mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+                  {stateLabel}
                 </p>
-                <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+                <p className={`text-lg font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
                   {loadingLists
-                    ? 'Preparando listas'
-                    : `${lists.length} ${lists.length === 1 ? 'lista' : 'listas'}`}
+                    ? (isRetroCartoon ? formatRetroLabel('Preparando listas') : 'Preparando listas')
+                    : `${lists.length} ${isRetroCartoon ? formatRetroLabel(lists.length === 1 ? 'lista' : 'listas') : lists.length === 1 ? 'lista' : 'listas'}`}
                 </p>
               </div>
 
               <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[var(--color-bg-secondary)] p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                  Contexto
+                <p className={`mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+                  {contextLabel}
                 </p>
-                <p className="text-sm font-semibold text-[var(--color-text-primary)]">
-                  {hasActiveList ? 'Lista activa resuelta' : 'Falta lista activa'}
+                <p className={`text-sm font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+                  {hasActiveList
+                    ? (isRetroCartoon ? formatRetroLabel('Lista activa resuelta') : 'Lista activa resuelta')
+                    : (isRetroCartoon ? formatRetroLabel('Falta lista activa') : 'Falta lista activa')}
                 </p>
               </div>
             </div>
@@ -307,14 +352,14 @@ const Dashboard: React.FC = () => {
 
         <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           <FlowCard
-            title="Películas"
+            title={isRetroCartoon ? formatRetroLabel('Peliculas') : 'Películas'}
             description={
               hasActiveList
-                ? `Entrar con "${currentList?.name}" para añadir opciones y decidir desde pendientes.`
-                : 'Abrir películas y continuar el flujo principal.'
+                ? retroText(`Entrar con "${currentList?.name}" para anadir opciones y decidir desde pendientes.`)
+                : retroText('Abrir peliculas y continuar el flujo principal.')
             }
             to="/peliculas"
-            cta={hasActiveList ? 'Seguir con películas' : 'Abrir películas'}
+            cta={hasActiveList ? (isRetroCartoon ? 'SEGUIR CON PELICULAS' : 'Seguir con películas') : (isRetroCartoon ? 'ABRIR PELICULAS' : 'Abrir películas')}
             accent="cyan"
             icon={<Film className="h-4 w-4" strokeWidth={2.5} />}
           />
@@ -323,11 +368,11 @@ const Dashboard: React.FC = () => {
             title="Series"
             description={
               hasActiveList
-                ? `Usar "${currentList?.name}" para seguir el mismo flujo en series.`
-                : 'Abrir series y continuar el flujo principal.'
+                ? retroText(`Usar "${currentList?.name}" para seguir el mismo flujo en series.`)
+                : retroText('Abrir series y continuar el flujo principal.')
             }
             to="/series"
-            cta={hasActiveList ? 'Seguir con series' : 'Abrir series'}
+            cta={hasActiveList ? (isRetroCartoon ? 'SEGUIR CON SERIES' : 'Seguir con series') : (isRetroCartoon ? 'ABRIR SERIES' : 'Abrir series')}
             accent="purple"
             icon={<Tv className="h-4 w-4" strokeWidth={2.5} />}
           />
@@ -341,11 +386,11 @@ const Dashboard: React.FC = () => {
 
         <section className="mt-8 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[rgba(0,0,0,0.56)] p-5 md:p-6">
           <div className="mb-5">
-            <h2 className="font-mono text-sm font-black uppercase tracking-widest text-accent-primary md:text-base">
-              SYS.{t('activity_feed.title')}
+            <h2 className={`text-sm font-black uppercase tracking-widest text-accent-primary md:text-base ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}>
+              SYS.{isRetroCartoon ? formatRetroLabel(t('activity_feed.title')) : t('activity_feed.title')}
             </h2>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-80 md:text-xs">
-              {'>'} GLOBAL_ACTIVITY_LOG
+            <p className={`mt-1 text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-80 md:text-xs ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}>
+              {'>'} {globalActivityLabel}
             </p>
           </div>
 

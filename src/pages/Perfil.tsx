@@ -4,6 +4,8 @@ import { Cog, UserCircle, Film } from 'lucide-react'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
 import { ItemCard } from '@/features/items'
+import ItemDetailsModal from '@/features/lists/components/ItemDetailsModal'
+import { useListItemDetails } from '@/features/lists/hooks/useListItemDetails'
 import { ListItem, useTheme } from '@/features/shared'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/supabaseClient'
@@ -100,14 +102,39 @@ const Perfil: React.FC = () => {
     // No eliminar desde perfil - solo ver
   }
 
-  const handleToggleVisto = async (_id: string, _currentState: boolean) => {
-    // No cambiar estado desde perfil - solo ver
+  const handleToggleVisto = async (id: string, currentState: boolean) => {
+    const { error } = await supabase
+      .from('items')
+      .update({ visto: !currentState })
+      .eq('id', id)
+
+    if (error) throw error
+
+    setRatedItems((previous) =>
+      previous.map((entry) =>
+        entry.item.id === id
+          ? {
+              ...entry,
+              item: {
+                ...entry.item,
+                visto: !currentState,
+              },
+            }
+          : entry
+      )
+    )
   }
 
   const handleOpenDetails = async (item: ListItem) => {
-    // Navigate a detalles si es necesario
-    navigate(`/item/${item.id}`)
+    await itemDetails.handleOpenDetails(item)
   }
+
+  const itemDetails = useListItemDetails({
+    currentUserId: user?.id || '',
+    onToggleVisto: handleToggleVisto,
+    onDeleteItem: async () => {},
+    getDeleteConfirmationMessage: (item) => `Eliminar ${item.titulo}?`,
+  })
 
   const totalPages = Math.max(1, Math.ceil(ratedItems.length / itemsPerPage))
   const paginatedRatedItems = ratedItems.slice(
@@ -175,18 +202,18 @@ const Perfil: React.FC = () => {
             </div>
 
             {/* Stats */}
-            <div className="flex-1 grid grid-cols-3 gap-4 w-full sm:w-auto">
-              <HudContainer className={`p-4 text-center ${isRetroCartoon ? 'border-[3px] border-black bg-white shadow-[5px_5px_0px_0px_#000000] rounded-lg' : ''}`}>
+            <div className="flex-1 grid grid-cols-3 gap-3 w-full sm:w-auto sm:gap-4">
+              <HudContainer className={`flex min-h-[96px] flex-col items-center justify-center p-3 text-center sm:min-h-0 sm:p-4 ${isRetroCartoon ? 'border-[3px] border-black bg-white shadow-[5px_5px_0px_0px_#000000] rounded-lg' : ''}`}>
                 <div className={`text-2xl font-black ${isRetroCartoon ? 'text-black' : 'text-[var(--color-text-primary)]'}`}>{totalRatings}</div>
-                <div className="text-xs text-[var(--color-text-muted)] mt-1 font-mono uppercase tracking-widest">{t('stats.rated')}</div>
+                <div className="mt-1 w-full text-center text-[10px] font-mono uppercase tracking-[0.14em] text-[var(--color-text-muted)] sm:text-xs sm:tracking-widest">{t('stats.rated')}</div>
               </HudContainer>
-              <HudContainer className={`p-4 text-center ${isRetroCartoon ? 'border-[3px] border-black bg-white shadow-[5px_5px_0px_0px_#000000] rounded-lg' : ''}`} style={isRetroCartoon ? undefined : { borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)' }}>
+              <HudContainer className={`flex min-h-[96px] flex-col items-center justify-center p-3 text-center sm:min-h-0 sm:p-4 ${isRetroCartoon ? 'border-[3px] border-black bg-white shadow-[5px_5px_0px_0px_#000000] rounded-lg' : ''}`} style={isRetroCartoon ? undefined : { borderColor: 'rgba(var(--color-accent-primary-rgb), 0.5)' }}>
                 <div className={`text-2xl font-black ${isRetroCartoon ? 'text-black' : 'text-accent-primary drop-shadow-[0_0_8px_rgba(var(--color-accent-primary-rgb),0.5)]'}`}>{favoriteCount}</div>
-                <div className="text-xs text-[var(--color-text-muted)] mt-1 font-mono uppercase tracking-widest">{t('stats.favorites')}</div>
+                <div className="mt-1 w-full text-center text-[10px] font-mono uppercase tracking-[0.14em] text-[var(--color-text-muted)] sm:text-xs sm:tracking-widest">{t('stats.favorites')}</div>
               </HudContainer>
-              <HudContainer className={`p-4 text-center ${isRetroCartoon ? 'border-[3px] border-black bg-white shadow-[5px_5px_0px_0px_#000000] rounded-lg' : ''}`} style={isRetroCartoon ? undefined : { borderColor: 'rgba(var(--color-accent-secondary-rgb), 0.5)' }}>
+              <HudContainer className={`flex min-h-[96px] flex-col items-center justify-center p-3 text-center sm:min-h-0 sm:p-4 ${isRetroCartoon ? 'border-[3px] border-black bg-white shadow-[5px_5px_0px_0px_#000000] rounded-lg' : ''}`} style={isRetroCartoon ? undefined : { borderColor: 'rgba(var(--color-accent-secondary-rgb), 0.5)' }}>
                 <div className={`text-2xl font-black ${isRetroCartoon ? 'text-black' : 'text-accent-secondary drop-shadow-[0_0_8px_rgba(var(--color-accent-secondary-rgb),0.5)]'}`}>{likedCount}</div>
-                <div className="text-xs text-[var(--color-text-muted)] mt-1 font-mono uppercase tracking-widest">{t('stats.liked')}</div>
+                <div className="mt-1 w-full text-center text-[10px] font-mono uppercase tracking-[0.14em] text-[var(--color-text-muted)] sm:text-xs sm:tracking-widest">{t('stats.liked')}</div>
               </HudContainer>
             </div>
           </div>
@@ -225,6 +252,7 @@ const Perfil: React.FC = () => {
                   onToggleVisto={handleToggleVisto}
                   onOpenDetails={handleOpenDetails}
                   disableVistoEffect={true}
+                  compactWatchedToggle={true}
                 />
               ))}
             </div>
@@ -297,6 +325,33 @@ const Perfil: React.FC = () => {
           </HudContainer>
         )}
       </div>
+
+      <ItemDetailsModal
+        isOpen={itemDetails.isModalOpen}
+        isAnimating={itemDetails.isModalAnimating}
+        selectedItem={itemDetails.selectedItem}
+        synopsis={itemDetails.synopsis}
+        synopsisLoading={itemDetails.synopsisLoading}
+        synopsisError={itemDetails.synopsisError}
+        modalActionLoading={itemDetails.modalActionLoading}
+        canDelete={false}
+        titlePrefix={t('details_title')}
+        closeLabel={t('modal.close')}
+        noImageLabel={t('no_image')}
+        loadingSynopsisLabel={t('loading.synopsis')}
+        emptySynopsisLabel={t('item.no_synopsis')}
+        movieTypeLabel={t('action.movie_type')}
+        seriesTypeLabel={t('action.series_type')}
+        watchedLabel={t('item.watched')}
+        notWatchedLabel={t('item.not_watched')}
+        markWatchedLabel={t('item.mark_watched')}
+        markUnwatchedLabel={t('item.mark_unwatched')}
+        deleteLabel={t('action.delete')}
+        onClose={itemDetails.handleCloseDetails}
+        onToggle={itemDetails.handleToggleFromModal}
+        onDelete={itemDetails.handleDeleteFromModal}
+        closeButtonRef={itemDetails.closeButtonRef}
+      />
     </div>
   )
 }

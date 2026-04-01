@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { HudContainer, ListItem, TechLabel } from '@/features/shared'
+import { HudContainer, ListItem, TechLabel, useTheme } from '@/features/shared'
 
 interface StatsWidgetProps {
   items: ListItem[]
@@ -10,6 +10,8 @@ interface StatsWidgetProps {
 
 const StatsWidget: React.FC<StatsWidgetProps> = ({ items, userOwnerId, size = 'small' }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
   const textSize = size === 'large' ? 'md:text-2xl' : 'md:text-xl'
 
   const watchedCount = items.filter((i) => i.visto).length
@@ -27,31 +29,31 @@ const StatsWidget: React.FC<StatsWidgetProps> = ({ items, userOwnerId, size = 's
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-center">
         <div className="hud-metric-card hud-metric-card--primary p-3 md:p-4">
-          <div className={`text-lg ${textSize} font-black hud-metric-value hud-metric-value--primary`}>
+          <div className={`text-lg ${textSize} font-black hud-metric-value hud-metric-value--primary ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
             {items.length}
           </div>
-          <div className="text-[10px] md:text-xs uppercase font-bold hud-metric-label">{t('stats.total')}</div>
+          <div className={`text-[10px] md:text-xs uppercase font-bold hud-metric-label ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('stats.total')}</div>
         </div>
 
         <div className="hud-metric-card hud-metric-card--secondary p-3 md:p-4">
-          <div className={`text-lg ${textSize} font-black hud-metric-value hud-metric-value--secondary`}>
+          <div className={`text-lg ${textSize} font-black hud-metric-value hud-metric-value--secondary ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
             {watchedCount}
           </div>
-          <div className="text-[10px] md:text-xs uppercase font-bold hud-metric-label">{t('stats.watched')}</div>
+          <div className={`text-[10px] md:text-xs uppercase font-bold hud-metric-label ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('stats.watched')}</div>
         </div>
 
         <div className="hud-metric-card hud-metric-card--primary p-3 md:p-4">
-          <div className={`text-lg ${textSize} font-black hud-metric-value hud-metric-value--primary`}>
+          <div className={`text-lg ${textSize} font-black hud-metric-value hud-metric-value--primary ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
             {pendingCount}
           </div>
-          <div className="text-[10px] md:text-xs uppercase font-bold hud-metric-label">{t('stats.pending')}</div>
+          <div className={`text-[10px] md:text-xs uppercase font-bold hud-metric-label ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('stats.pending')}</div>
         </div>
 
         <div className="hud-metric-card hud-metric-card--secondary p-3 md:p-4">
-          <div className={`text-lg ${textSize} font-black hud-metric-value hud-metric-value--secondary`}>
+          <div className={`text-lg ${textSize} font-black hud-metric-value hud-metric-value--secondary ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
             {ownCount}
           </div>
-          <div className="text-[10px] md:text-xs uppercase font-bold hud-metric-label">{t('stats.own')}</div>
+          <div className={`text-[10px] md:text-xs uppercase font-bold hud-metric-label ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('stats.own')}</div>
         </div>
       </div>
     </HudContainer>

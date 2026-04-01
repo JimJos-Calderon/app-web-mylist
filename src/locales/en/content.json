@@ -265,5 +265,67 @@
       "profiles": "a profile",
       "members": "a member"
     }
+  },
+  "activityFeed": {
+    "common": {
+      "actorUnknown": "Unknown user",
+      "fallbackItem": "untitled item",
+      "fallbackList": "unnamed list",
+      "countBadge": "{{count}} moves"
+    },
+    "default": {
+      "header": {
+        "label": "ACTIVITY",
+        "errorLabel": "ERROR",
+        "title": "Activity feed",
+        "subtitle": "Recent moves in this collaborative list"
+      },
+      "states": {
+        "loading": "Syncing recent activity...",
+        "error": "Could not load the activity feed.",
+        "empty": "There is no recent activity in this list yet."
+      },
+      "events": {
+        "item_added": "{{user}} added \"{{item}}\" to the {{list}} list.",
+        "item_updated": "{{user}} updated \"{{item}}\" in the {{list}} list.",
+        "item_deleted": "{{user}} removed \"{{item}}\" from the {{list}} list.",
+        "rating_added": "{{user}} rated \"{{item}}\".",
+        "rating_updated": "{{user}} changed the rating for \"{{item}}\".",
+        "comment_added": "{{user}} added a comment about \"{{item}}\".",
+        "comment_updated": "{{user}} edited their comment about \"{{item}}\".",
+        "comment_deleted": "{{user}} deleted their comment about \"{{item}}\".",
+        "list_created": "{{user}} created the list \"{{list}}\".",
+        "list_updated": "{{user}} updated the list \"{{list}}\".",
+        "list_deleted": "{{user}} deleted the list \"{{list}}\".",
+        "fallback": "{{user}} made an update in {{list}}."
+      }
+    },
+    "retro": {
+      "header": {
+        "label": "RETRO.CLUB",
+        "errorLabel": "RETRO.OOPS",
+        "title": "Latest moves from the video club",
+        "subtitle": "Fresh gossip from the shared list."
+      },
+      "states": {
+        "loading": "Rewinding the video club tape...",
+        "error": "The activity tape got jammed.",
+        "empty": "Nothing headline-worthy has happened yet."
+      },
+      "events": {
+        "item_added": "Pow! {{user}} plugged \"{{item}}\" into the {{list}} video shelf.",
+        "item_updated": "{{user}} gave \"{{item}}\" another spin in {{list}}.",
+        "item_deleted": "Zap! {{user}} pulled \"{{item}}\" off the {{list}} shelf.",
+        "rating_added": "{{user}} just scored \"{{item}}\". Feels like cult-classic territory.",
+        "rating_updated": "{{user}} reworked the score for \"{{item}}\". Fresh arcade verdict.",
+        "comment_added": "{{user}} just dropped a review on \"{{item}}\".",
+        "comment_updated": "{{user}} tweaked their review of \"{{item}}\".",
+        "comment_deleted": "{{user}} erased their review of \"{{item}}\" from the club notebook.",
+        "list_created": "New level! {{user}} built the list \"{{list}}\".",
+        "list_updated": "{{user}} tuned up the list \"{{list}}\".",
+        "list_deleted": "Game over: {{user}} pulled the plug on \"{{list}}\".",
+        "fallback": "{{user}} moved a few pieces around \"{{item}}\" inside {{list}}."
+      }
+    }
   }
 }
