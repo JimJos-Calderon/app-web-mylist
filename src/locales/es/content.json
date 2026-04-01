@@ -201,6 +201,30 @@
     "copied_button": "Copiado",
     "close_button": "Cerrar"
   },
+  "buttons": {
+    "delete": "Borrar",
+    "cancel": "Cancelar"
+  },
+  "confirm_delete_list": {
+    "title": "¡BORRAR LISTA!",
+    "description": "¿ESTAS SEGURO DE BORRAR TODO?",
+    "cancel": "ATRAS",
+    "confirm": "¡BORRAR!"
+  },
+  "confirm_leave_list": {
+    "title": "Salir de la lista",
+    "description": "¿Seguro que quieres salir de esta lista compartida?",
+    "cancel": "Cancelar",
+    "confirm": "Salir"
+  },
+  "empty_state": {
+    "title": "LISTA VACIA",
+    "subtitle_movies": "AÑADE ALGO PARA EMPEZAR",
+    "subtitle_series": "AÑADE ALGO PARA EMPEZAR",
+    "no_results_title": "SIN RESULTADOS",
+    "add_action": "AÑADIR UNA OPCION AHORA",
+    "reset_action": "LIMPIAR FILTROS"
+  },
   "action": {
     "create_list": "Crear lista",
     "invite": "Invitar",

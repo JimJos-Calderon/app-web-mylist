@@ -201,6 +201,30 @@
     "copied_button": "Copied",
     "close_button": "Close"
   },
+  "buttons": {
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "confirm_delete_list": {
+    "title": "DELETE LIST!",
+    "description": "ARE YOU SURE YOU WANT TO DELETE EVERYTHING?",
+    "cancel": "BACK",
+    "confirm": "DELETE!"
+  },
+  "confirm_leave_list": {
+    "title": "Leave list",
+    "description": "Are you sure you want to leave this shared list?",
+    "cancel": "Cancel",
+    "confirm": "Leave"
+  },
+  "empty_state": {
+    "title": "EMPTY LIST",
+    "subtitle_movies": "ADD SOMETHING TO START",
+    "subtitle_series": "ADD SOMETHING TO START",
+    "no_results_title": "NO RESULTS",
+    "add_action": "ADD AN OPTION NOW",
+    "reset_action": "CLEAR FILTERS"
+  },
   "action": {
     "create_list": "Create list",
     "invite": "Invite",
