@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState, useCallback, ReactNode } fro
 import { Session, User } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
 import { queryClient } from '@config/queryClient'
+import { queryKeys } from '@config/queryKeys'
 import { clearPersistedQueryCache } from '@config/queryPersistence'
 import { DEFAULT_THEME, applyThemeToDocument, getPersistedTheme, persistTheme } from '@config/appPreferences'
 
@@ -92,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const completeGoogleProfile = async (username: string) => {
     if (!user) throw new Error('No user')
-    await supabase.from('user_profiles').insert([{
+    const { error: profileError } = await supabase.from('user_profiles').insert([{
       user_id: user.id,
       username: username.trim().toLowerCase(),
       avatar_url: user.user_metadata?.avatar_url || null,
@@ -100,6 +101,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }])
+
+    if (profileError) {
+      throw profileError
+    }
+
+    const pendingInviteCode = localStorage.getItem('pendingInviteCode')
+
+    if (pendingInviteCode) {
+      const { data, error: joinError } = await supabase.rpc('join_list_with_code', {
+        p_user_id: user.id,
+        p_invite_code: pendingInviteCode.toUpperCase(),
+      })
+
+      if (joinError) {
+        throw joinError
+      }
+
+      const result = Array.isArray(data) ? data[0] : data
+
+      if (result?.status === 'LIST_NOT_FOUND' || result?.status === 'INVALID_CODE') {
+        throw new Error('El codigo de invitacion ya no es valido')
+      }
+
+      if (result?.status !== 'JOINED' && result?.status !== 'ALREADY_MEMBER') {
+        throw new Error('No se pudo unir a la lista invitada')
+      }
+
+      localStorage.removeItem('pendingInviteCode')
+      await queryClient.invalidateQueries({ queryKey: queryKeys.lists.byUser(user.id) })
+    }
+
     setNeedsUsername(false)
   }
 

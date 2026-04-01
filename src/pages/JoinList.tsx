@@ -56,10 +56,15 @@ const JoinList: React.FC = () => {
                     .from('lists')
                     .select('*')
                     .eq('invite_code', code.toUpperCase())
-                    .single()
+                    .maybeSingle()
 
-                if (error || !data) {
-                    setStatus('not_found')
+                if (error) {
+                    console.warn('No se pudo leer metadata de la lista por invite_code:', error)
+                }
+
+                if (!data) {
+                    setList(null)
+                    setStatus('found')
                     return
                 }
 
@@ -83,13 +88,13 @@ const JoinList: React.FC = () => {
     }, [code, session, loading, navigate])
 
     const handleJoin = async () => {
-        if (!list || !session?.user?.id) return
+        if (!session?.user?.id || !code) return
 
         setStatus('joining')
         try {
             const { data, error } = await supabase.rpc('join_list_with_code', {
                 p_user_id: session.user.id,
-                p_invite_code: code?.toUpperCase() ?? list.invite_code,
+                p_invite_code: code.toUpperCase(),
             })
 
             if (error) throw error
@@ -103,6 +108,17 @@ const JoinList: React.FC = () => {
             }
 
             if (result.status === 'ALREADY_MEMBER') {
+                if (!list && result.list_id) {
+                    const { data: joinedList } = await supabase
+                        .from('lists')
+                        .select('*')
+                        .eq('id', result.list_id)
+                        .maybeSingle()
+
+                    if (joinedList) {
+                        setList(joinedList as List)
+                    }
+                }
                 setStatus('already_member')
                 return
             }
@@ -114,6 +130,18 @@ const JoinList: React.FC = () => {
 
             if (result.status !== 'JOINED') {
                 throw new Error('Estado inesperado al unirse a la lista')
+            }
+
+            if (!list && result.list_id) {
+                const { data: joinedList } = await supabase
+                    .from('lists')
+                    .select('*')
+                    .eq('id', result.list_id)
+                    .maybeSingle()
+
+                if (joinedList) {
+                    setList(joinedList as List)
+                }
             }
 
             setStatus('success')
@@ -163,9 +191,14 @@ const JoinList: React.FC = () => {
                                     <p className={`text-sm font-bold uppercase tracking-widest mb-3 ${isRetroCartoon ? 'theme-heading-font text-black' : isTerminal ? 'theme-heading-font text-[var(--color-accent-primary)]' : isCyberpunk ? 'theme-heading-font text-fuchsia-400' : 'text-cyan-500/70'}`}>
                                         {t('join_list.invited_intro')}
                                     </p>
-                                    <h1 className={`text-4xl font-black mb-3 ${isRetroCartoon ? 'theme-heading-font text-black' : isTerminal || isCyberpunk ? 'theme-heading-font text-[var(--color-text-primary)]' : 'text-white'}`}>{formatRetroHeading(list.name, theme)}</h1>
-                                    {list.description && (
+                                    <h1 className={`text-4xl font-black mb-3 ${isRetroCartoon ? 'theme-heading-font text-black' : isTerminal || isCyberpunk ? 'theme-heading-font text-[var(--color-text-primary)]' : 'text-white'}`}>{formatRetroHeading(list?.name || t('join_list.invited_intro', 'Te han invitado a una lista'), theme)}</h1>
+                                    {list?.description && (
                                         <p className={`text-base ${isRetroCartoon ? 'theme-heading-font text-black/70' : isTerminal || isCyberpunk ? 'theme-body-font text-[var(--color-text-muted)]' : 'text-zinc-400'}`}>{list.description}</p>
+                                    )}
+                                    {!list && (
+                                        <p className={`text-base ${isRetroCartoon ? 'theme-heading-font text-black/70' : isTerminal || isCyberpunk ? 'theme-body-font text-[var(--color-text-muted)]' : 'text-zinc-400'}`}>
+                                            {t('join_list.login_required_description', 'El enlace es valido. Pulsa el boton para unirte a la lista.')}
+                                        </p>
                                     )}
                                 </div>
                                 <button

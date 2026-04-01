@@ -68,9 +68,22 @@ export const usePendingInvite = ({
               invite_code: data.invite_code,
             })
           }
+        } else {
+          setPendingInvite({
+            list_id: '',
+            list_name: 'Invitacion pendiente',
+            list_description: 'Se validara al confirmar la union a la lista.',
+            invite_code: code,
+          })
         }
       } catch (err) {
         console.error('Error resolving pending invite:', err)
+        setPendingInvite({
+          list_id: '',
+          list_name: 'Invitacion pendiente',
+          list_description: 'Se validara al confirmar la union a la lista.',
+          invite_code: code,
+        })
       } finally {
         localStorage.removeItem('pendingInviteCode')
       }
