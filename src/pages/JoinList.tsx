@@ -182,7 +182,7 @@ const JoinList: React.FC = () => {
                             </div>
                         )}
 
-                        {(status === 'found' || status === 'joining') && list && (
+                        {(status === 'found' || status === 'joining') && (
                             <div className="flex flex-col items-center gap-8 text-center">
                                 <div className={`w-20 h-20 border flex items-center justify-center ${isRetroCartoon ? 'bg-white border-[3px] border-black shadow-[4px_4px_0px_#000] rounded-xl' : isTerminal ? 'terminal-panel rounded-none' : isCyberpunk ? 'rounded-2xl bg-[rgba(255,0,255,0.08)] border-[rgba(255,0,255,0.45)]' : 'rounded-2xl bg-cyan-500/10 border-cyan-500/40'}`}>
                                     <Users className={`w-10 h-10 ${isRetroCartoon ? 'text-black' : isTerminal ? 'text-[var(--color-accent-primary)]' : isCyberpunk ? 'text-fuchsia-400' : 'text-cyan-400'}`} />
@@ -191,13 +191,15 @@ const JoinList: React.FC = () => {
                                     <p className={`text-sm font-bold uppercase tracking-widest mb-3 ${isRetroCartoon ? 'theme-heading-font text-black' : isTerminal ? 'theme-heading-font text-[var(--color-accent-primary)]' : isCyberpunk ? 'theme-heading-font text-fuchsia-400' : 'text-cyan-500/70'}`}>
                                         {t('join_list.invited_intro')}
                                     </p>
-                                    <h1 className={`text-4xl font-black mb-3 ${isRetroCartoon ? 'theme-heading-font text-black' : isTerminal || isCyberpunk ? 'theme-heading-font text-[var(--color-text-primary)]' : 'text-white'}`}>{formatRetroHeading(list?.name || t('join_list.invited_intro', 'Te han invitado a una lista'), theme)}</h1>
+                                    <h1 className={`text-4xl font-black mb-3 ${isRetroCartoon ? 'theme-heading-font text-black' : isTerminal || isCyberpunk ? 'theme-heading-font text-[var(--color-text-primary)]' : 'text-white'}`}>
+                                        {formatRetroHeading(list?.name || 'Invitacion pendiente', theme)}
+                                    </h1>
                                     {list?.description && (
                                         <p className={`text-base ${isRetroCartoon ? 'theme-heading-font text-black/70' : isTerminal || isCyberpunk ? 'theme-body-font text-[var(--color-text-muted)]' : 'text-zinc-400'}`}>{list.description}</p>
                                     )}
                                     {!list && (
                                         <p className={`text-base ${isRetroCartoon ? 'theme-heading-font text-black/70' : isTerminal || isCyberpunk ? 'theme-body-font text-[var(--color-text-muted)]' : 'text-zinc-400'}`}>
-                                            {t('join_list.login_required_description', 'El enlace es valido. Pulsa el boton para unirte a la lista.')}
+                                            El enlace es valido. No podemos mostrar los detalles de la lista todavia, pero puedes unirte con seguridad usando el boton de abajo.
                                         </p>
                                     )}
                                 </div>
