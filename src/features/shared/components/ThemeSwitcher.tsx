@@ -71,8 +71,8 @@ const ThemeSwitcher: React.FC = () => {
                     : 'bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#000000]'
                   : isCyberpunkTheme
                     ? isActive
-                      ? 'cyberpunk-pill border-[rgba(0,255,255,0.95)] shadow-[0_0_20px_rgba(255,0,255,0.25)]'
-                      : 'cyberpunk-pill border-[rgba(0,255,255,0.38)] bg-[rgba(2,2,10,0.65)] hover:border-[rgba(0,255,255,0.85)]'
+                      ? 'cyberpunk-surface rounded-md border-[rgba(0,255,255,0.95)] bg-[rgba(2,2,10,0.78)] shadow-[0_0_20px_rgba(255,0,255,0.25)]'
+                      : 'cyberpunk-surface rounded-md border-[rgba(0,255,255,0.38)] bg-[rgba(2,2,10,0.65)] hover:border-[rgba(0,255,255,0.85)]'
                   : isTerminalTheme
                     ? isActive
                       ? 'terminal-surface border-[rgba(var(--color-accent-primary-rgb),1)] text-[var(--color-accent-primary)]'
