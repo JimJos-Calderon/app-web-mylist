@@ -163,10 +163,6 @@
         "title": "Cyberpunk",
         "description": "Neón cyan/pink con alto contraste y glow vibrante."
       },
-      "advanced": {
-        "title": "2Advanced HUD",
-        "description": "Azules hielo y acero con estética táctica limpia."
-      },
       "terminal": {
         "title": "Terminal",
         "description": "Verde fósforo sobre negro puro, estilo consola retro."
@@ -264,6 +260,68 @@
       "lists": "un directorio",
       "profiles": "un perfil",
       "members": "un miembro"
+    }
+  },
+  "activityFeed": {
+    "common": {
+      "actorUnknown": "Usuario desconocido",
+      "fallbackItem": "titulo sin nombre",
+      "fallbackList": "lista sin nombre",
+      "countBadge": "{{count}} movimientos"
+    },
+    "default": {
+      "header": {
+        "label": "ACTIVITY",
+        "errorLabel": "ERROR",
+        "title": "Historial de actividad",
+        "subtitle": "Movimientos recientes de esta lista colaborativa"
+      },
+      "states": {
+        "loading": "Sincronizando actividad reciente...",
+        "error": "No se pudo cargar el historial de actividad.",
+        "empty": "Todavia no hay movimientos recientes en esta lista."
+      },
+      "events": {
+        "item_added": "{{user}} ha añadido \"{{item}}\" a la lista {{list}}.",
+        "item_updated": "{{user}} ha actualizado \"{{item}}\" en la lista {{list}}.",
+        "item_deleted": "{{user}} ha quitado \"{{item}}\" de la lista {{list}}.",
+        "rating_added": "{{user}} ha valorado \"{{item}}\".",
+        "rating_updated": "{{user}} ha cambiado la valoración de \"{{item}}\".",
+        "comment_added": "{{user}} ha añadido un comentario sobre \"{{item}}\".",
+        "comment_updated": "{{user}} ha editado su comentario sobre \"{{item}}\".",
+        "comment_deleted": "{{user}} ha eliminado su comentario sobre \"{{item}}\".",
+        "list_created": "{{user}} ha creado la lista \"{{list}}\".",
+        "list_updated": "{{user}} ha actualizado la lista \"{{list}}\".",
+        "list_deleted": "{{user}} ha eliminado la lista \"{{list}}\".",
+        "fallback": "{{user}} ha realizado una actualización en {{list}}."
+      }
+    },
+    "retro": {
+      "header": {
+        "label": "CLUB.RETRO",
+        "errorLabel": "UPS.RETRO",
+        "title": "Ultimos movimientos del videoclub",
+        "subtitle": "Chismes frescos de la lista compartida."
+      },
+      "states": {
+        "loading": "Rebobinando la cinta del videoclub...",
+        "error": "Se ha atascado la cinta del historial.",
+        "empty": "Todavia no ha pasado nada digno de portada."
+      },
+      "events": {
+        "item_added": "¡Pum! {{user}} ha enchufado \"{{item}}\" en la videoteca de {{list}}.",
+        "item_updated": "{{user}} le ha dado otra vuelta a \"{{item}}\" en {{list}}.",
+        "item_deleted": "¡Zas! {{user}} ha sacado \"{{item}}\" de la estantería de {{list}}.",
+        "rating_added": "{{user}} acaba de puntuar \"{{item}}\". Huele a peli de culto.",
+        "rating_updated": "{{user}} ha rehecho la nota de \"{{item}}\". Nuevo veredicto arcade.",
+        "comment_added": "{{user}} acaba de dejar una reseña en \"{{item}}\".",
+        "comment_updated": "{{user}} ha retocado su reseña de \"{{item}}\".",
+        "comment_deleted": "{{user}} ha borrado su reseña de \"{{item}}\" del cuaderno del videoclub.",
+        "list_created": "¡Nivel nuevo! {{user}} ha montado la lista \"{{list}}\".",
+        "list_updated": "{{user}} ha tuneado la lista \"{{list}}\".",
+        "list_deleted": "Pantalla final: {{user}} ha bajado la persiana de \"{{list}}\".",
+        "fallback": "{{user}} ha movido fichas en \"{{item}}\" dentro de {{list}}."
+      }
     }
   }
 }

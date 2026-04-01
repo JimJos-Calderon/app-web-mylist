@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { validateEmail, validatePassword, validateUsername, ERROR_MESSAGES, LanguageSwitcher, useTheme } from '@/features/shared'
+import { validateEmail, validatePassword, validateUsername, ERROR_MESSAGES, useTheme } from '@/features/shared'
+import { LanguageSwitcher } from '@/features/shared/components/LanguageSwitcher'
 import { supabase } from '@/supabaseClient'
 import { Eye, EyeOff, XCircle, Loader2, X, UserPlus, CheckCircle2, AtSign, Check, AlertCircle } from 'lucide-react'
 

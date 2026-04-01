@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { HudContainer, SORT_OPTIONS, FilterState, TechLabel } from '@/features/shared'
+import { HudContainer, SORT_OPTIONS, FilterState, TechLabel, useTheme } from '@/features/shared'
 
 interface FilterPanelProps {
   filters: any
@@ -16,6 +16,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   sortOptions,
 }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
+
   const getSortOrderLabel = () => {
     if (filters.sortBy === 'date') {
       return filters.sortOrder === 'desc' ? t('sort_order.most_recent') : t('sort_order.oldest')
@@ -35,7 +38,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <TechLabel text="SYS.FILTERS" tone="secondary" blink />
           <button
             onClick={onReset}
-            className="px-4 md:px-5 py-2 hud-filter-reset text-xs md:text-sm font-semibold whitespace-nowrap"
+            className={`px-4 md:px-5 py-2 hud-filter-reset text-xs md:text-sm font-semibold whitespace-nowrap ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
           >
             {t('filter.reset')}
           </button>
@@ -50,7 +53,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             aria-label={t('filter.pending')}
           >
             <span className={`hud-filter-switch-dot ${filters.showUnwatched ? 'hud-filter-switch-dot--active-primary' : ''}`} />
-            <span className="hud-filter-switch-label">{t('filter.pending')}</span>
+            <span className={`hud-filter-switch-label ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('filter.pending')}</span>
           </button>
 
           <button
@@ -61,7 +64,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             aria-label={t('filter.watched')}
           >
             <span className={`hud-filter-switch-dot ${filters.showWatched ? 'hud-filter-switch-dot--active-secondary' : ''}`} />
-            <span className="hud-filter-switch-label">{t('filter.watched')}</span>
+            <span className={`hud-filter-switch-label ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('filter.watched')}</span>
           </button>
         </div>
 
@@ -71,7 +74,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               value={filters.sortBy}
               onChange={(e) => onFilterChange('sortBy', e.target.value)}
               aria-label={t('filter.sort_by')}
-              className="hud-filter-field hud-filter-select px-3 md:px-4 py-2 text-xs md:text-sm"
+              className={`hud-filter-field hud-filter-select px-3 md:px-4 py-2 text-xs md:text-sm ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
             >
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -88,7 +91,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                   filters.sortOrder === 'desc' ? 'asc' : 'desc'
                 )
               }
-              className="px-3 md:px-4 py-2 hud-filter-order text-xs md:text-sm font-semibold whitespace-nowrap"
+              className={`px-3 md:px-4 py-2 hud-filter-order text-xs md:text-sm font-semibold whitespace-nowrap ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
               aria-label={t('filter.sort_order_toggle')}
             >
               {getSortOrderLabel()}
@@ -101,7 +104,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             aria-label={t('filter.search_label')}
             value={filters.searchQuery}
             onChange={(e) => onFilterChange('searchQuery', e.target.value)}
-            className="flex-1 hud-filter-field hud-filter-search px-3 md:px-4 py-2 text-xs md:text-sm"
+            className={`flex-1 hud-filter-field hud-filter-search px-3 md:px-4 py-2 text-xs md:text-sm ${isRetroCartoon ? 'theme-heading-font' : ''}`}
           />
         </div>
       </div>

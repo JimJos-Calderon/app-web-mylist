@@ -3,6 +3,7 @@ import { Session, User } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
 import { queryClient } from '@config/queryClient'
 import { clearPersistedQueryCache } from '@config/queryPersistence'
+import { DEFAULT_THEME, applyThemeToDocument, getPersistedTheme, persistTheme } from '@config/appPreferences'
 
 interface AuthContextType {
   session: Session | null
@@ -68,24 +69,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     try {
-      const persistedTheme = typeof window !== 'undefined'
-        ? window.localStorage.getItem('theme') || 'cyberpunk'
-        : 'cyberpunk'
+      const persistedTheme = await getPersistedTheme()
 
       const { error } = await supabase.auth.signOut()
       if (error) throw error
 
       queryClient.clear()
-      clearPersistedQueryCache()
+      await clearPersistedQueryCache()
       setSession(null)
       setUser(null)
       setError(null)
       setNeedsUsername(false)
 
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('theme', persistedTheme)
-        document.documentElement.setAttribute('data-theme', persistedTheme)
-      }
+      await persistTheme(persistedTheme || DEFAULT_THEME)
+      applyThemeToDocument(persistedTheme || DEFAULT_THEME)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cerrar sesión'
       setError(message)

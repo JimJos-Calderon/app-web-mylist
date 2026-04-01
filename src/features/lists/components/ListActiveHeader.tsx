@@ -1,5 +1,5 @@
 import React from 'react'
-import { List } from '@/features/shared'
+import { List, useTheme } from '@/features/shared'
 import ListSelector from './ListSelector'
 
 interface ListActiveHeaderProps {
@@ -33,15 +33,18 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
   inviteLabel,
   onRandomPick,
 }) => {
+  const { theme } = useTheme()
+  const isRetroCartoon = theme === 'retro-cartoon'
+
   return (
     <section className="mb-6 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.22)] bg-[var(--color-bg-elevated)] p-4 shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.05)] md:p-5">
       <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
-            <h2 className="text-xl font-black uppercase tracking-tighter text-[var(--color-text-primary)] md:text-2xl">
+            <h2 className={`text-xl font-black uppercase tracking-tighter text-[var(--color-text-primary)] md:text-2xl ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
               {currentList?.name || 'Sin lista seleccionada'}
             </h2>
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-60">
+            <p className={`text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-60 ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}>
               {currentList ? 'ID_ACTIVE_CONTEXT' : 'SYSTEM_IDLE'}
             </p>
           </div>
@@ -63,7 +66,7 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
             <div className="flex gap-2">
               <button
                 type="button"
-                className="flex h-11 items-center justify-center gap-2 rounded-xl border px-5 font-mono text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110"
+                className={`flex h-11 items-center justify-center gap-2 rounded-xl border px-5 text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110 ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
                 style={{
                   borderColor: 'rgba(var(--color-accent-primary-rgb), 0.4)',
                   background: 'rgba(var(--color-accent-primary-rgb), 0.08)',
@@ -79,7 +82,7 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className="flex h-11 items-center justify-center gap-2 rounded-xl border px-5 font-mono text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110"
+                    className={`flex h-11 items-center justify-center gap-2 rounded-xl border px-5 text-[10px] font-bold uppercase tracking-widest transition-all hover:brightness-110 ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
                     style={{
                       borderColor: 'rgba(var(--color-accent-secondary-rgb), 0.4)',
                       background: 'rgba(var(--color-accent-secondary-rgb), 0.08)',
@@ -131,10 +134,10 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
               boxShadow: '0 0 10px rgba(var(--color-accent-primary-rgb), 0.05)'
             }}
           >
-            <p className="mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-accent-primary opacity-70">
+            <p className={`mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-accent-primary opacity-70 ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
               Pendientes
             </p>
-            <h3 className="text-lg font-bold text-[var(--color-text-primary)]">{pendingCount}</h3>
+            <h3 className={`text-lg font-bold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{pendingCount}</h3>
           </div>
 
           <div
@@ -145,10 +148,10 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
               boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1)'
             }}
           >
-            <p className="mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-70">
+            <p className={`mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-70 ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
               Vistos
             </p>
-            <h3 className="text-lg font-bold text-[var(--color-text-primary)]">{watchedCount}</h3>
+            <h3 className={`text-lg font-bold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{watchedCount}</h3>
           </div>
 
           <button
@@ -161,10 +164,10 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
               boxShadow: '0 0 15px rgba(var(--color-accent-secondary-rgb), 0.1)'
             }}
           >
-            <p className="mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-accent-secondary opacity-70">
+            <p className={`mb-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-accent-secondary opacity-70 ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
               Ir a
             </p>
-            <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Pendientes</h3>
+            <h3 className={`text-sm font-bold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>Pendientes</h3>
           </button>
         </div>
       </div>

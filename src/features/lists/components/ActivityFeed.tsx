@@ -1,9 +1,12 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Clock3, Loader2, AlertTriangle, TerminalSquare } from 'lucide-react'
+import { Clock3, Loader2, AlertTriangle, MessageCircleMore } from 'lucide-react'
 import { useActivityFeed } from '../hooks/useActivityFeed'
 import HudContainer from '../../shared/components/HudContainer'
 import TechLabel from '../../shared/components/TechLabel'
+import { useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
+import { getHumanizedFeedMessage, type FeedThemeMode } from '../utils/activityFeedUtils'
 
 interface ActivityFeedProps {
   listId?: string
@@ -36,29 +39,7 @@ const formatRelativeTime = (isoDate: string, locale: string): string => {
   return rtf.format(-days, 'day')
 }
 
-const resolveActionLabel = (
-  actionKey: string,
-  tableName: string,
-  action: string,
-  t: (key: string, options?: Record<string, unknown>) => string
-): string => {
-  const normalizedAction = action.toLowerCase()
-  const fallbackByAction = {
-    insert: t('activity_feed.actions.insert'),
-    update: t('activity_feed.actions.update'),
-    delete: t('activity_feed.actions.delete'),
-  }
-
-  const fallbackLabel = fallbackByAction[normalizedAction as keyof typeof fallbackByAction] || t('activity_feed.actions.generic')
-  const byActionKey = t(`activity_feed.action_keys.${actionKey}`, { defaultValue: '' })
-
-  if (byActionKey) {
-    return byActionKey
-  }
-
-  const byTableAction = t(`activity_feed.action_keys.${tableName.toLowerCase()}_${normalizedAction}`, { defaultValue: '' })
-  return byTableAction || fallbackLabel
-}
+const isRetroTheme = (theme: string) => theme === 'retro' || theme === 'retro-cartoon'
 
 const ActivityFeed: React.FC<ActivityFeedProps> = ({
   listId,
@@ -66,18 +47,29 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   className,
 }) => {
   const { t, i18n } = useTranslation()
+  const { theme } = useTheme()
   const { events, loading, error } = useActivityFeed({ listId, limit })
+  const retroMode = isRetroTheme(theme)
+  const themeMode: FeedThemeMode = retroMode ? 'retro' : 'default'
+  const headerLabel = t(`activityFeed.${themeMode}.header.label`)
+  const errorHeaderLabel = t(`activityFeed.${themeMode}.header.errorLabel`)
+  const headerTitle = t(`activityFeed.${themeMode}.header.title`)
+  const headerSubtitle = t(`activityFeed.${themeMode}.header.subtitle`)
+  const emptyMessage = t(`activityFeed.${themeMode}.states.empty`)
+  const loadingMessage = t(`activityFeed.${themeMode}.states.loading`)
+  const errorMessage = t(`activityFeed.${themeMode}.states.error`)
+  const formattedHeaderTitle = formatRetroHeading(headerTitle, theme)
 
   if (loading) {
     return (
       <HudContainer className={`p-4 ${className || ''}`}>
-        <header className="flex items-center gap-2 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-2 mb-3">
-          <TerminalSquare className="w-4 h-4 text-accent-primary" />
-          <TechLabel text="SYS.LOG" blink />
+        <header className="mb-3 flex items-center gap-2 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-2">
+          <MessageCircleMore className="h-4 w-4 text-accent-primary" />
+          <TechLabel text={headerLabel} blink />
         </header>
-        <div className="flex items-center gap-2 text-[var(--color-text-muted)] font-mono text-xs">
-          <Loader2 className="w-3 h-3 animate-spin text-accent-primary" />
-          <span>{t('activity_feed.initializing')}</span>
+        <div className={`flex items-center gap-2 text-xs text-[var(--color-text-muted)] ${retroMode ? 'theme-heading-font' : 'font-mono'}`}>
+          <Loader2 className="h-3 w-3 animate-spin text-accent-primary" />
+          <span>{loadingMessage}</span>
         </div>
       </HudContainer>
     )
@@ -86,12 +78,12 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   if (error) {
     return (
       <HudContainer className={`p-4 border-[rgba(var(--color-accent-secondary-rgb),0.3)] ${className || ''}`}>
-        <header className="flex items-center gap-2 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)] pb-2 mb-3">
-          <AlertTriangle className="w-4 h-4 text-accent-secondary" />
-          <TechLabel text="ERR.LOG" tone="secondary" blink />
+        <header className="mb-3 flex items-center gap-2 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)] pb-2">
+          <AlertTriangle className="h-4 w-4 text-accent-secondary" />
+          <TechLabel text={errorHeaderLabel} tone="secondary" blink />
         </header>
-        <div className="flex items-start gap-2 text-accent-secondary font-mono text-xs">
-          <span>{'> ERROR:'} {t('activity_feed.error')}</span>
+        <div className={`flex items-start gap-2 text-xs text-accent-secondary ${retroMode ? 'theme-heading-font' : 'font-mono'}`}>
+          <span>{errorMessage}</span>
         </div>
       </HudContainer>
     )
@@ -100,12 +92,12 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   if (events.length === 0) {
     return (
       <HudContainer className={`p-4 ${className || ''}`}>
-        <header className="flex items-center gap-2 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-2 mb-3">
-          <TerminalSquare className="w-4 h-4 text-accent-primary" />
-          <TechLabel text="SYS.LOG" />
+        <header className="mb-3 flex items-center gap-2 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-2">
+          <MessageCircleMore className="h-4 w-4 text-accent-primary" />
+          <TechLabel text={headerLabel} />
         </header>
-        <p className="text-[var(--color-text-muted)] font-mono text-xs">
-          {'>'} {t('activity_feed.empty')}
+        <p className={`text-xs text-[var(--color-text-muted)] ${retroMode ? 'theme-heading-font' : 'font-mono'}`}>
+          {emptyMessage}
         </p>
       </HudContainer>
     )
@@ -113,44 +105,92 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
   return (
     <HudContainer className={`p-4 ${className || ''}`}>
-      <header className="flex items-center justify-between border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-2 mb-3">
-        <div className="flex items-center gap-2">
-          <TerminalSquare className="w-4 h-4 text-accent-primary" />
-          <TechLabel text="SYS.LOG" />
+      <header className="mb-4 flex items-start justify-between gap-4 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-3">
+        <div className="flex items-start gap-3">
+          <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full border ${
+            retroMode
+              ? 'border-black bg-[var(--color-bg-primary)] shadow-[3px_3px_0px_0px_#000000]'
+              : 'border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[rgba(var(--color-accent-primary-rgb),0.08)]'
+          }`}>
+            <MessageCircleMore className="h-4 w-4 text-accent-primary" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <TechLabel text={headerLabel} />
+            </div>
+            <h3 className={`mt-1 text-base font-semibold text-[var(--color-text-primary)] ${retroMode ? 'theme-heading-font uppercase' : ''}`}>
+              {formattedHeaderTitle}
+            </h3>
+            <p className={`mt-1 text-xs text-[var(--color-text-muted)] ${retroMode ? 'theme-heading-font' : ''}`}>
+              {headerSubtitle}
+            </p>
+          </div>
         </div>
-        <span className="text-[10px] uppercase font-mono tracking-widest text-accent-primary opacity-60">
-          {t('activity_feed.count')}: [{events.length.toString().padStart(2, '0')}]
+        <span className={`rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-accent-primary ${
+          retroMode
+            ? 'theme-heading-font border-black bg-[var(--color-bg-primary)] text-black'
+            : 'font-mono border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[rgba(var(--color-accent-primary-rgb),0.08)]'
+        }`}>
+          {t('activityFeed.common.countBadge', { count: events.length })}
         </span>
       </header>
 
-      <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar space-y-2">
+      <div className="custom-scrollbar max-h-[320px] space-y-3 overflow-y-auto pr-2">
         {events.map((event) => {
-          const actionLabel = resolveActionLabel(event.action_key, event.table_name, event.action, t)
           const relativeTime = formatRelativeTime(event.created_at, i18n.language || 'es')
-          const itemTitle = event.item_title || t('activity_feed.fallback.item')
-          const listName = event.list_name || t('activity_feed.fallback.list')
+          const message = getHumanizedFeedMessage(event, themeMode, t)
+          const itemTitle = event.item_title || t('activityFeed.common.fallbackItem')
+          const listName = event.list_name || t('activityFeed.common.fallbackList')
+          const actorName = event.actor_name || t('activityFeed.common.actorUnknown')
 
           return (
-            <article 
-              key={event.activity_id} 
-              className="font-mono text-xs hover:bg-[rgba(var(--color-accent-primary-rgb),0.05)] transition-colors p-1.5 -mx-1.5 rounded"
+            <article
+              key={event.activity_id}
+              className={`rounded-2xl border p-3 transition-all ${
+                retroMode
+                  ? 'border-black bg-[var(--color-bg-primary)] shadow-[4px_4px_0px_0px_#000000]'
+                  : 'border-[rgba(var(--color-accent-primary-rgb),0.14)] bg-[rgba(0,0,0,0.18)] hover:border-[rgba(var(--color-accent-primary-rgb),0.28)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.05)]'
+              }`}
             >
-              <div className="flex gap-2">
-                <span className="text-accent-primary opacity-40 shrink-0">
-                  [{new Date(event.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}]
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                  retroMode
+                    ? 'theme-heading-font border border-black bg-[#fff4a8] text-black'
+                    : 'border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[rgba(var(--color-accent-primary-rgb),0.08)] text-accent-primary'
+                }`}>
+                  {actorName}
                 </span>
-                <span className="text-[var(--color-text-muted)] min-w-0 break-words leading-relaxed">
-                  <span className="text-accent-primary font-bold">{event.actor_name}</span>{' '}
-                  <span className="opacity-80">{t('activity_feed.executed')}</span> <span className="text-[var(--color-text-primary)]">[{actionLabel}]</span>{' '}
-                  <span className="opacity-80">{t('activity_feed.on_target')}</span> <span className="text-accent-secondary">'{itemTitle}'</span>{' '}
-                  <span className="opacity-80">{t('activity_feed.in_region')}</span> <span className="opacity-60">{listName}</span>
-                </span>
+                {event.item_title && (
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                    retroMode
+                      ? 'theme-heading-font border border-black bg-[#c3ecff] text-black'
+                      : 'border border-[rgba(var(--color-accent-secondary-rgb),0.25)] bg-[rgba(var(--color-accent-secondary-rgb),0.08)] text-accent-secondary'
+                  }`}>
+                    {itemTitle}
+                  </span>
+                )}
+                {event.list_name && (
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] ${
+                    retroMode
+                      ? 'theme-heading-font border border-black bg-white text-black/80'
+                      : 'border border-white/10 bg-white/5 text-[var(--color-text-muted)]'
+                  }`}>
+                    {listName}
+                  </span>
+                )}
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-accent-primary opacity-40 mt-1 pl-20">
-                <Clock3 className="w-3 h-3" />
-                <span>{relativeTime.toUpperCase()}</span>
-                <span className="mx-1">|</span>
-                <span>ID:{String(event.activity_id).substring(0,8)}</span>
+
+              <p className={`mt-3 break-words text-sm leading-relaxed text-[var(--color-text-primary)] ${
+                retroMode ? 'theme-heading-font' : ''
+              }`}>
+                {message}
+              </p>
+
+              <div className={`mt-3 flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)] ${
+                retroMode ? 'theme-heading-font' : ''
+              }`}>
+                <Clock3 className="h-3 w-3" />
+                <span>{relativeTime}</span>
               </div>
             </article>
           )

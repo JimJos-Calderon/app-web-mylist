@@ -28,6 +28,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
   const { t } = useTranslation()
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
+  const isTerminal = theme === 'terminal'
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -48,11 +49,15 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
 
   const overlayClassName = isRetroCartoon
     ? 'absolute inset-0 bg-black/60'
-    : 'absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200'
+    : isTerminal
+      ? 'absolute inset-0 bg-black/85 backdrop-blur-sm animate-in fade-in duration-75'
+      : 'absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200'
 
   const panelClassName = isRetroCartoon
     ? 'relative z-10 w-full max-w-md overflow-hidden rounded-xl border-[4px] border-black bg-[#f6eddc] p-6 text-black shadow-[10px_10px_0px_0px_#000000] sm:p-8'
-    : 'relative w-full max-w-md animate-in zoom-in-95 duration-200'
+    : isTerminal
+      ? 'relative w-full max-w-md animate-in zoom-in-95 duration-75'
+      : 'relative w-full max-w-md animate-in zoom-in-95 duration-200'
 
   const retroPaperCardClassName =
     'rounded-xl border-[3px] border-black bg-[#f6eddc] shadow-[5px_5px_0px_0px_#000000]'
@@ -61,16 +66,22 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
     'rounded-md border-[3px] border-black bg-[#f6eddc] text-black shadow-[4px_4px_0px_0px_#000000] transition-all'
 
   const inputClassName = isRetroCartoon
-    ? 'w-full px-4 py-3 bg-white text-black border-[3px] border-black shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.1)] focus-visible:shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-none rounded-md transition-all font-bold placeholder-gray-500'
-    : 'w-full px-4 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)] transition-all font-medium disabled:opacity-50'
+    ? 'theme-heading-font w-full px-4 py-3 bg-white text-black border-[3px] border-black shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.1)] focus-visible:shadow-[inset_3px_3px_0px_0px_rgba(0,0,0,0.2)] focus-visible:outline-none rounded-md transition-all font-bold placeholder-gray-500'
+    : isTerminal
+      ? 'terminal-control theme-body-font w-full px-4 py-3 rounded-none text-[var(--color-text-primary)] text-xl transition-all font-medium disabled:opacity-50'
+      : 'w-full px-4 py-3 bg-[rgba(var(--color-bg-base-rgb),0.8)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] rounded-xl text-[var(--color-text-primary)] text-xl placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-2 focus-visible:ring-[rgba(var(--color-accent-primary-rgb),0.2)] transition-all font-medium disabled:opacity-50'
 
   const primaryButtonClassName = isRetroCartoon
     ? 'bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] rounded-md font-bold hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-0 active:shadow-none transition-all'
-    : 'flex-1 px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.15)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.25)] text-accent-primary font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-primary-rgb),0.6)] hover:border-[rgba(var(--color-accent-primary-rgb),1)] hover:shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2'
+    : isTerminal
+      ? 'terminal-button theme-heading-font flex-1 px-4 py-3 rounded-none text-xs font-bold uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+      : 'flex-1 px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.15)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.25)] text-accent-primary font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-primary-rgb),0.6)] hover:border-[rgba(var(--color-accent-primary-rgb),1)] hover:shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2'
 
   const secondaryButtonClassName = isRetroCartoon
     ? 'bg-transparent text-black border-[3px] border-transparent hover:border-black hover:shadow-[4px_4px_0px_0px_#000000] rounded-md font-bold transition-all'
-    : 'flex-1 px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-secondary-rgb),0.08)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.5)] disabled:opacity-40 disabled:cursor-not-allowed'
+    : isTerminal
+      ? 'terminal-button theme-heading-font flex-1 px-4 py-3 rounded-none text-xs font-bold uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed'
+      : 'flex-1 px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-secondary-rgb),0.08)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.5)] disabled:opacity-40 disabled:cursor-not-allowed'
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -111,13 +122,12 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
                   <Plus className="h-6 w-6 text-black" strokeWidth={2.5} />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                  <span className="theme-heading-font text-[10px] font-black uppercase tracking-[0.2em] text-black">
                     {'>'} SYS.NEW_LIST
                   </span>
                   <h2
                     id="create-list-dialog-title"
-                    className="text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
-                    style={{ fontFamily: "'Pramukh Rounded', sans-serif" }}
+                    className="theme-heading-font text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
                   >
                     {t('dialog.create_list_title', { defaultValue: 'Crear Nueva Lista' })}
                   </h2>
@@ -136,16 +146,16 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
 
             <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 sm:px-8">
               <div className={`${retroPaperCardClassName} px-5 py-4`}>
-                <p className="mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                <p className="theme-heading-font mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
                   {'>'} {t('dialog.create_list_hint', { defaultValue: 'Define tu nueva lista' })}
                 </p>
-                <p className="text-sm font-medium leading-relaxed text-black opacity-90" style={{ fontFamily: "'Pramukh Rounded', sans-serif" }}>
+                <p className="theme-heading-font text-sm font-medium leading-relaxed text-black opacity-90">
                   {t('dialog.create_list_description', { defaultValue: 'Ponle un nombre y una descripción opcional.' })}
                 </p>
               </div>
 
               <div>
-                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                <label className="theme-heading-font mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
                   {'>'} {t('dialog.list_name_label', { defaultValue: 'Nombre de la lista' })}
                 </label>
                 <input
@@ -159,7 +169,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
               </div>
 
               <div>
-                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
+                <label className="theme-heading-font mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
                   {'>'} {t('dialog.list_description_label', { defaultValue: 'Descripción' })}
                 </label>
                 <textarea
@@ -172,7 +182,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
               </div>
 
               {error && (
-                <div className="rounded-md border-[3px] border-black bg-white px-4 py-3 text-sm font-bold text-black shadow-[4px_4px_0px_0px_#000000]">
+                <div className="theme-heading-font rounded-md border-[3px] border-black bg-white px-4 py-3 text-sm font-bold text-black shadow-[4px_4px_0px_0px_#000000]">
                   {error}
                 </div>
               )}
@@ -197,18 +207,18 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
             </form>
           </>
         ) : (
-          <HudContainer className="p-0 border-[rgba(var(--color-accent-primary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]">
+          <HudContainer className={isTerminal ? 'terminal-panel rounded-none p-0 border-[rgba(var(--color-accent-primary-rgb),0.8)] shadow-[0_0_20px_var(--color-glow)] bg-[rgba(0,0,0,0.92)]' : 'p-0 border-[rgba(var(--color-accent-primary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-primary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]'}>
             <div className="px-6 py-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div
-                  className="w-10 h-10 bg-[rgba(var(--color-accent-primary-rgb),0.08)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center shrink-0"
-                  style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                  className={`w-10 h-10 bg-[rgba(var(--color-accent-primary-rgb),0.08)] border border-[rgba(var(--color-accent-primary-rgb),0.4)] flex items-center justify-center shrink-0 ${isTerminal ? 'rounded-none' : ''}`}
+                  style={isTerminal ? undefined : { clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                 >
                   <Plus className="w-5 h-5 text-accent-primary drop-shadow-[0_0_8px_rgba(var(--color-accent-primary-rgb),0.6)]" />
                 </div>
                 <div className="flex flex-col gap-1">
                   <TechLabel text="SYS.NEW_LIST" tone="primary" blink />
-                  <h2 id="create-list-dialog-title" className="text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] font-mono leading-none">
+                  <h2 id="create-list-dialog-title" className={`text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] leading-none ${isTerminal ? 'theme-heading-font' : 'font-mono'}`}>
                     {t('dialog.create_list_title', { defaultValue: 'Crear Nueva Lista' })}
                   </h2>
                 </div>
@@ -217,8 +227,8 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label={t('dialog.close_button', { defaultValue: 'Cerrar' })}
-                className="w-8 h-8 flex items-center justify-center text-[var(--color-text-muted)] hover:text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] transition-all"
-                style={{ clipPath: 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 25%)' }}
+                className={isTerminal ? 'terminal-button theme-heading-font w-8 h-8 flex items-center justify-center rounded-none' : 'w-8 h-8 flex items-center justify-center text-[var(--color-text-muted)] hover:text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] transition-all'}
+                style={isTerminal ? undefined : { clipPath: 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 25%)' }}
               >
                 <X className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -226,13 +236,13 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
 
             <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
               <div
-                className="px-5 py-4 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.2)]"
-                style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                className={isTerminal ? 'terminal-panel rounded-none px-5 py-4' : 'px-5 py-4 bg-[rgba(var(--color-accent-primary-rgb),0.05)] border border-[rgba(var(--color-accent-primary-rgb),0.2)]'}
+                style={isTerminal ? undefined : { clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
               >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-accent-primary opacity-70 mb-1 font-mono">
+                <p className={`text-[10px] font-bold uppercase tracking-widest text-accent-primary opacity-70 mb-1 ${isTerminal ? 'theme-heading-font' : 'font-mono'}`}>
                   {'>'} {t('dialog.create_list_hint', { defaultValue: 'Define tu nueva lista' })}
                 </p>
-                <p className="text-[var(--color-text-primary)] font-mono font-bold text-sm leading-tight">
+                <p className={`text-[var(--color-text-primary)] font-bold text-sm leading-tight ${isTerminal ? 'theme-body-font' : 'font-mono'}`}>
                   {t('dialog.create_list_description', { defaultValue: 'Ponle un nombre y una descripción opcional.' })}
                 </p>
               </div>
@@ -265,7 +275,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
               </div>
 
               {error && (
-                <div className="bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary px-4 py-2 rounded text-sm font-mono">
+                <div className={isTerminal ? 'border border-[rgba(255,0,0,0.8)] bg-[rgba(20,0,0,0.9)] text-[#ff4d4d] px-4 py-2 rounded-none text-sm theme-body-font' : 'bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary px-4 py-2 rounded text-sm font-mono'}>
                   {error}
                 </div>
               )}
@@ -292,6 +302,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
   const { t } = useTranslation()
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
+  const isTerminal = theme === 'terminal'
   const [copiedCode, setCopiedCode] = useState(false)
 
   useEffect(() => {
@@ -319,11 +330,15 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
   const overlayClassName = isRetroCartoon
     ? 'absolute inset-0 bg-black/60'
-    : 'absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200'
+    : isTerminal
+      ? 'absolute inset-0 bg-black/85 backdrop-blur-sm animate-in fade-in duration-75'
+      : 'absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200'
 
   const panelClassName = isRetroCartoon
     ? 'relative z-10 w-full max-w-md overflow-hidden rounded-xl border-[4px] border-black bg-[#f6eddc] p-6 text-black shadow-[10px_10px_0px_0px_#000000] sm:p-8'
-    : 'relative w-full max-w-md animate-in zoom-in-95 duration-200'
+    : isTerminal
+      ? 'relative w-full max-w-md animate-in zoom-in-95 duration-75'
+      : 'relative w-full max-w-md animate-in zoom-in-95 duration-200'
 
   const retroPaperCardClassName =
     'rounded-xl border-[3px] border-black bg-[#f6eddc] shadow-[5px_5px_0px_0px_#000000]'
@@ -349,8 +364,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                   </span>
                   <h2
                     id="invite-dialog-title"
-                    className="text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
-                    style={{ fontFamily: "'Pramukh Rounded', sans-serif" }}
+                    className="theme-heading-font text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
                   >
                     {t('dialog.invite_title')}
                   </h2>
@@ -371,8 +385,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                   {'>'} TARGET: {t('dialog.list_label')}
                 </p>
                 <p
-                  className="text-sm font-black leading-tight text-black"
-                  style={{ fontFamily: "'Pramukh Rounded', sans-serif" }}
+                  className="theme-heading-font text-sm font-black leading-tight text-black"
                 >
                   {list.name}
                 </p>
@@ -426,18 +439,18 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
             </div>
           </>
         ) : (
-          <HudContainer className="p-0 border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]">
+          <HudContainer className={isTerminal ? 'terminal-panel rounded-none p-0 border-[rgba(var(--color-accent-primary-rgb),0.8)] shadow-[0_0_20px_var(--color-glow)] bg-[rgba(0,0,0,0.92)]' : 'p-0 border-[rgba(var(--color-accent-secondary-rgb),0.5)] shadow-[0_0_40px_rgba(var(--color-accent-secondary-rgb),0.15)] bg-[rgba(0,0,0,0.6)]'}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-[rgba(var(--color-accent-secondary-rgb),0.2)]">
               <div className="flex items-center gap-4">
                 <div
-                  className="w-10 h-10 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center shrink-0"
-                  style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                  className={`w-10 h-10 bg-[rgba(var(--color-accent-secondary-rgb),0.08)] border border-[rgba(var(--color-accent-secondary-rgb),0.4)] flex items-center justify-center shrink-0 ${isTerminal ? 'rounded-none' : ''}`}
+                  style={isTerminal ? undefined : { clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                 >
                   <Users className="w-5 h-5 text-accent-secondary drop-shadow-[0_0_8px_rgba(var(--color-accent-secondary-rgb),0.6)]" />
                 </div>
                 <div className="flex flex-col gap-1">
                   <TechLabel text="SYS.INVITE_REQ" tone="secondary" blink />
-                  <h2 id="invite-dialog-title" className="text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] font-mono leading-none">
+                  <h2 id="invite-dialog-title" className={`text-lg font-black uppercase tracking-[0.1em] text-[var(--color-text-primary)] leading-none ${isTerminal ? 'theme-heading-font' : 'font-mono'}`}>
                     {t('dialog.invite_title')}
                   </h2>
                 </div>
@@ -445,8 +458,8 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
               <button
                 onClick={onClose}
                 aria-label={t('dialog.close_button')}
-                className="w-8 h-8 flex items-center justify-center text-[var(--color-text-muted)] hover:text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] transition-all"
-                style={{ clipPath: 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 25%)' }}
+                className={isTerminal ? 'terminal-button theme-heading-font w-8 h-8 flex items-center justify-center rounded-none' : 'w-8 h-8 flex items-center justify-center text-[var(--color-text-muted)] hover:text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] transition-all'}
+                style={isTerminal ? undefined : { clipPath: 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 25%)' }}
               >
                 <X className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -454,13 +467,13 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
             <div className="px-6 py-6 space-y-6">
               <div
-                className="px-5 py-4 bg-[rgba(var(--color-accent-secondary-rgb),0.05)] border border-[rgba(var(--color-accent-secondary-rgb),0.2)]"
-                style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                className={isTerminal ? 'terminal-panel rounded-none px-5 py-4' : 'px-5 py-4 bg-[rgba(var(--color-accent-secondary-rgb),0.05)] border border-[rgba(var(--color-accent-secondary-rgb),0.2)]'}
+                style={isTerminal ? undefined : { clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
               >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-accent-secondary opacity-70 mb-1 font-mono">
+                <p className={`text-[10px] font-bold uppercase tracking-widest text-accent-secondary opacity-70 mb-1 ${isTerminal ? 'theme-heading-font' : 'font-mono'}`}>
                   {'>'} TARGET: {t('dialog.list_label')}
                 </p>
-                <p className="text-[var(--color-text-primary)] font-mono font-bold text-sm leading-tight">
+                <p className={`text-[var(--color-text-primary)] font-bold text-sm leading-tight ${isTerminal ? 'theme-body-font' : 'font-mono'}`}>
                   {list.name}
                 </p>
                 {list.description && (
@@ -479,21 +492,24 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                 </p>
                 <div className="flex flex-col gap-3">
                   <div
-                    className="w-full px-4 py-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] flex items-center overflow-x-auto"
-                    style={{ clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
+                    className={isTerminal ? 'terminal-control theme-body-font w-full px-4 py-3 rounded-none flex items-center overflow-x-auto' : 'w-full px-4 py-3 bg-[rgba(0,0,0,0.5)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] flex items-center overflow-x-auto'}
+                    style={isTerminal ? undefined : { clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)' }}
                   >
-                    <span className="text-sm font-mono text-[var(--color-text-primary)] whitespace-nowrap">
+                    <span className={`text-sm whitespace-nowrap ${isTerminal ? 'theme-body-font text-[var(--color-text-primary)]' : 'font-mono text-[var(--color-text-primary)]'}`}>
                       {inviteUrl}
                     </span>
                   </div>
 
                   <button
                     onClick={handleCopyCode}
-                    className={`px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest transition-all border flex justify-center items-center gap-2 ${copiedCode
-                      ? 'bg-[rgba(var(--color-accent-primary-rgb),0.15)] border-accent-primary text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.2)]'
-                      : 'bg-[rgba(var(--color-accent-secondary-rgb),0.15)] border-[rgba(var(--color-accent-secondary-rgb),0.6)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)]'
+                    className={`px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all border flex justify-center items-center gap-2 ${
+                      isTerminal
+                        ? 'terminal-button theme-heading-font rounded-none'
+                        : copiedCode
+                          ? 'bg-[rgba(var(--color-accent-primary-rgb),0.15)] border-accent-primary text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.2)] font-mono'
+                          : 'bg-[rgba(var(--color-accent-secondary-rgb),0.15)] border-[rgba(var(--color-accent-secondary-rgb),0.6)] text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.25)] hover:border-accent-secondary hover:shadow-[0_0_20px_rgba(var(--color-accent-secondary-rgb),0.35)] font-mono'
                       }`}
-                    style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+                    style={isTerminal ? undefined : { clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
                   >
                     {copiedCode ? (
                       <>
@@ -512,8 +528,8 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
             <div className="px-6 pb-6 mt-2">
               <button
                 onClick={onClose}
-                className="w-full px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.4)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.8)] hover:text-accent-secondary"
-                style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+                className={isTerminal ? 'terminal-button theme-heading-font w-full px-4 py-3 rounded-none text-xs font-bold uppercase tracking-widest' : 'w-full px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.4)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.8)] hover:text-accent-secondary'}
+                style={isTerminal ? undefined : { clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
               >
                 {t('dialog.close_button')}
               </button>

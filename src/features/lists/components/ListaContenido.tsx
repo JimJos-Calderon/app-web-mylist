@@ -286,6 +286,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
         synopsisError={itemDetails.synopsisError}
         modalActionLoading={itemDetails.modalActionLoading}
         canDelete={itemDetails.canDeleteSelectedItem}
+        promptCommentOnOpen={itemDetails.shouldPromptComment}
         titlePrefix={t('details_title')}
         closeLabel={t('modal.close')}
         noImageLabel={t('no_image')}

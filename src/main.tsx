@@ -8,9 +8,10 @@ import { AuthProvider } from '@/features/auth'
 import { GlobalErrorFallback, InstallPwaPrompt } from '@/features/shared'
 import { queryClient } from '@config/queryClient'
 import { persistOptions } from '@config/queryPersistence'
+import { applyThemeToDocument, getPersistedTheme } from '@config/appPreferences'
 import App from './App'
 import './index.css'
-import './i18n' // ← Inicializar i18n
+import { initializeI18n } from './i18n'
 
 // ─── Sentry Initialization ─────────────────────────────────────────────────
 Sentry.init({
@@ -32,30 +33,38 @@ if (!rootElement) {
   throw new Error('Root element not found')
 }
 
-ReactDOM.createRoot(rootElement).render(
-  <React.StrictMode>
-    <ErrorBoundary
-      FallbackComponent={GlobalErrorFallback}
-      onError={(error, info) => {
-        Sentry.captureException(error, {
-          extra: { componentStack: info.componentStack },
-        })
-      }}
-    >
-      <PersistQueryClientProvider
-        client={queryClient}
-        persistOptions={persistOptions}
-        onSuccess={() => {
-          queryClient.resumePausedMutations().catch(() => undefined)
+const bootstrap = async () => {
+  const persistedTheme = await getPersistedTheme()
+  applyThemeToDocument(persistedTheme)
+  await initializeI18n()
+
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <ErrorBoundary
+        FallbackComponent={GlobalErrorFallback}
+        onError={(error, info) => {
+          Sentry.captureException(error, {
+            extra: { componentStack: info.componentStack },
+          })
         }}
       >
-        <BrowserRouter>
-          <InstallPwaPrompt />
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </BrowserRouter>
-      </PersistQueryClientProvider>
-    </ErrorBoundary>
-  </React.StrictMode>
-)
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={persistOptions}
+          onSuccess={() => {
+            queryClient.resumePausedMutations().catch(() => undefined)
+          }}
+        >
+          <BrowserRouter>
+            <InstallPwaPrompt />
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </BrowserRouter>
+        </PersistQueryClientProvider>
+      </ErrorBoundary>
+    </React.StrictMode>
+  )
+}
+
+void bootstrap()

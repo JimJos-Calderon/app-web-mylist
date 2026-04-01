@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
-import { ConfirmDialog, LanguageSwitcher, ThemeSwitcher, usePushNotifications, useTheme } from '@/features/shared'
+import { ConfirmDialog, ThemeSwitcher, usePushNotifications, useTheme } from '@/features/shared'
+import { LanguageSwitcher } from '@/features/shared/components/LanguageSwitcher'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
@@ -298,7 +299,7 @@ const Ajustes: React.FC = () => {
             >
               {t('settings.title')}
             </h1>
-            <p className="text-[var(--color-text-muted)] mt-1">{t('settings.description')}</p>
+            <p className={`mt-1 text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('settings.description')}</p>
           </div>
         </div>
 
@@ -476,7 +477,7 @@ const Ajustes: React.FC = () => {
                     disabled={isSaving || !username.trim()}
                     className={`${
                       isRetroCartoon
-                        ? 'w-full px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
+                        ? 'theme-heading-font w-full px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
                         : 'w-full px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-mono tracking-widest text-xs uppercase hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all rounded'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                     style={isRetroCartoon ? undefined : { clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}

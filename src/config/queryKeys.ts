@@ -19,6 +19,15 @@ export const queryKeys = {
     detail: (id: string) => ['items', id] as const,
   },
 
+  itemComments: {
+    all: ['itemComments'] as const,
+    byItem: (itemId: string) => [...queryKeys.itemComments.all, itemId] as const,
+    byItemAndUser: (itemId: string, userId: string) => [
+      ...queryKeys.itemComments.byItem(itemId),
+      userId,
+    ] as const,
+  },
+
   // ─── Lists ───────────────────────────────────────────────────────
   lists: {
     all: ['lists'] as const,
@@ -42,6 +51,16 @@ export const queryKeys = {
     all: ['userProfile'] as const,
     byUser: (userId: string) => [...queryKeys.userProfile.all, userId] as const,
     themePreferenceByUser: (userId: string) => [...queryKeys.userProfile.all, 'themePreference', userId] as const,
+  },
+
+  translations: {
+    all: ['translations'] as const,
+    byText: (source: string, targetLanguage: string, text: string) => [
+      ...queryKeys.translations.all,
+      source,
+      targetLanguage,
+      text,
+    ] as const,
   },
 
   // ─── Suggestions ─────────────────────────────────────────────────

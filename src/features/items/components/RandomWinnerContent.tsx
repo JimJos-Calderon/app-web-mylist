@@ -8,7 +8,7 @@ interface RandomWinnerContentProps {
   item: ListItem
   pool: ListItem[]
   onReRoll: () => void
-  onClose: () => void
+  onClose: (event?: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 type AnimationPhase = 'idle' | 'spinning' | 'stabilizing' | 'finished'
@@ -17,6 +17,8 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
   const { t } = useTranslation()
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
+  const isTerminal = theme === 'terminal'
+  const isCyberpunk = theme === 'cyberpunk'
   const primaryActionLabel = isRetroCartoon ? 'VER DETALLES' : '> EXEC.VIEW_DETAILS'
   const secondaryActionLabel = isRetroCartoon ? 'VOLVER A TIRAR' : t('action.roll_again', 'SYSTEM_RETRY.EXE')
   const [phase, setPhase] = useState<AnimationPhase>('idle')
@@ -93,12 +95,16 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
   if (isStabilizing || isFinished) translateY = `-${(visualPool.length - 1) * 100}%`
 
   return (
-    <div className="flex flex-col items-center gap-6 p-2 md:p-6 overflow-hidden w-full">
+    <div className="relative z-[1] flex w-full flex-col items-center gap-6 overflow-visible p-2 md:p-6">
       {/* ─── TERMINAL DISPLAY ─── */}
-      <div className={`relative w-full max-w-[280px] aspect-[2/3] overflow-hidden ${
+      <div className={`relative z-[2] w-full max-w-[280px] aspect-[2/3] overflow-hidden ${
         isRetroCartoon
           ? 'rounded-xl border-[4px] border-black shadow-[8px_8px_0px_0px_#000000] bg-white'
-          : 'rounded-2xl border-2 border-[rgba(var(--color-accent-primary-rgb),0.3)] shadow-[0_0_40px_rgba(0,0,0,0.5)] bg-black'
+          : isTerminal
+            ? 'rounded-none border border-[rgba(var(--color-accent-primary-rgb),0.85)] shadow-[0_0_10px_var(--color-glow)] bg-[var(--color-bg-base)]'
+            : isCyberpunk
+              ? 'cyberpunk-surface animate-neon-pulse'
+            : 'rounded-2xl border-2 border-[rgba(var(--color-accent-primary-rgb),0.3)] shadow-[0_0_40px_rgba(0,0,0,0.5)] bg-black'
       }`}>
         
         {/* Overlays de Glitch (Solo durante la animación) */}
@@ -163,7 +169,13 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
                 blink
                 className="mb-2"
               />
-              <h3 className="text-2xl font-black uppercase tracking-tight text-white leading-tight drop-shadow-[0_0_15px_rgba(0,0,0,1)]">
+              <h3 className={`text-2xl font-black uppercase tracking-tight leading-tight ${
+                isTerminal
+                  ? 'theme-heading-font text-[var(--color-text-primary)]'
+                  : isCyberpunk
+                    ? 'theme-heading-font text-[var(--color-text-primary)] cyberpunk-text-glow'
+                    : 'text-white drop-shadow-[0_0_15px_rgba(0,0,0,1)]'
+              }`}>
                 {item.titulo}
               </h3>
             </div>
@@ -175,14 +187,22 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
       </div>
 
       {/* ─── ACCIONES ─── */}
-      <div className={`flex w-full max-w-sm flex-col gap-3 transition-all duration-700 ${isFinished ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
+      <div className={`relative z-[3] flex w-full max-w-sm flex-col gap-3 transition-all duration-700 ${isFinished ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0 pointer-events-none'}`}>
         <button
           type="button"
-          onClick={onClose}
-          className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden py-4 font-mono text-sm font-black uppercase tracking-widest transition active:scale-95 ${
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            onClose(event)
+          }}
+          className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden py-4 text-sm font-black uppercase tracking-widest transition active:scale-95 ${
             isRetroCartoon
               ? 'bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#000000]'
-              : 'rounded-xl border border-accent-primary bg-accent-primary/10 text-accent-primary hover:bg-accent-primary hover:text-black shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.2)]'
+              : isTerminal
+                ? 'terminal-button theme-heading-font rounded-none'
+                : isCyberpunk
+                  ? 'cyberpunk-button cyberpunk-random-cta theme-heading-font rounded-full'
+                : 'font-mono rounded-xl border border-accent-primary bg-accent-primary/10 text-accent-primary hover:bg-accent-primary hover:text-black shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.2)]'
           }`}
         >
           <Play className="h-5 w-5 fill-current" />
@@ -192,11 +212,19 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
 
         <button
           type="button"
-          onClick={onReRoll}
-          className={`flex w-full items-center justify-center gap-3 py-4 font-mono text-xs font-bold uppercase tracking-widest transition active:scale-95 ${
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            onReRoll()
+          }}
+          className={`flex w-full items-center justify-center gap-3 py-4 text-xs font-bold uppercase tracking-widest transition active:scale-95 ${
             isRetroCartoon
               ? 'bg-transparent text-black border-[3px] border-transparent hover:border-black hover:shadow-[4px_4px_0px_0px_#000000] rounded-xl'
-              : 'rounded-xl border border-white/10 bg-black/40 text-[var(--color-text-muted)] hover:border-white/30 hover:text-white'
+              : isTerminal
+                ? 'terminal-button theme-heading-font rounded-none'
+                : isCyberpunk
+                  ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font rounded-full'
+                : 'font-mono rounded-xl border border-white/10 bg-black/40 text-[var(--color-text-muted)] hover:border-white/30 hover:text-white'
           }`}
         >
           <RefreshCw className="h-4 w-4" />
