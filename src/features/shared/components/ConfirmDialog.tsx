@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import TechLabel from './TechLabel'
 import { useTheme } from '../hooks/useTheme'
+import { formatRetroHeading } from '../utils/textUtils'
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -23,10 +25,34 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation()
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
+  const resolveDialogText = (value: string): string => {
+    if (!value) return ''
+
+    const translatedValue = t(value)
+
+    // If the value looks like an i18n key and translation exists, use it.
+    if (translatedValue !== value) {
+      return translatedValue
+    }
+
+    return value
+  }
+
+  const resolvedTitle = resolveDialogText(title)
+  const resolvedMessage = resolveDialogText(message)
+  const resolvedConfirmText = resolveDialogText(confirmText)
+  const resolvedCancelText = resolveDialogText(cancelText)
+  const retroTitle = formatRetroHeading(resolvedTitle, theme)
+  const retroMessage = formatRetroHeading(resolvedMessage, theme)
+  const retroConfirmText = formatRetroHeading(resolvedConfirmText, theme)
+  const retroCancelText = formatRetroHeading(resolvedCancelText, theme)
+  const retroConfirmUsesCompactText = retroConfirmText.length > 10
+  const retroCancelUsesCompactText = retroCancelText.length > 10
 
   useEffect(() => {
     if (isOpen) {
@@ -51,7 +77,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         : 'w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] shadow-2xl'
 
   const titleClass = isRetroCartoon
-    ? 'theme-heading-font mt-2 text-center uppercase tracking-[0.15em] font-black text-black'
+    ? 'theme-heading-font mt-2 text-center uppercase tracking-[0.15em] font-black text-black break-words'
     : isTerminal
       ? 'theme-heading-font mt-2 text-center uppercase tracking-[0.15em] text-xl text-[var(--color-text-primary)]'
       : isCyberpunk
@@ -59,7 +85,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         : 'mt-2 text-center uppercase tracking-[0.15em] font-mono text-xl font-black text-[var(--color-text-primary)]'
 
   const messageClass = isRetroCartoon
-    ? 'mx-auto mb-8 max-w-[90%] text-center text-sm leading-relaxed font-medium text-black'
+    ? 'theme-heading-font mx-auto mb-8 max-w-[90%] text-center text-sm leading-relaxed font-medium text-black break-words'
     : isTerminal
       ? 'theme-body-font mx-auto mb-8 max-w-[90%] text-center text-sm leading-relaxed text-[var(--color-text-muted)]'
       : isCyberpunk
@@ -67,7 +93,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         : 'mx-auto mb-8 max-w-[90%] text-center text-sm leading-relaxed font-mono text-[var(--color-text-muted)] opacity-90'
 
   const cancelButtonClass = isRetroCartoon
-    ? 'theme-heading-font flex-1 px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
+    ? `theme-heading-font flex-1 min-w-0 px-3 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-normal break-words text-center ${retroCancelUsesCompactText ? 'text-xs sm:text-sm' : 'text-sm'}`
     : isTerminal
       ? 'terminal-button theme-heading-font flex-1 px-4 py-3 text-xs uppercase tracking-widest'
       : isCyberpunk
@@ -75,7 +101,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         : 'flex-1 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] transition hover:border-[rgba(var(--color-accent-primary-rgb),0.5)] hover:bg-[var(--color-bg-primary)]'
 
   const confirmButtonClass = isRetroCartoon
-    ? 'theme-heading-font flex-1 px-4 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none'
+    ? `theme-heading-font flex-1 min-w-0 px-3 py-3 font-bold uppercase transition-all bg-white text-black border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none whitespace-normal break-words text-center ${retroConfirmUsesCompactText ? 'text-xs sm:text-sm' : 'text-sm'}`
     : isTerminal
       ? 'terminal-button terminal-button--danger theme-heading-font flex-1 px-4 py-3 text-xs uppercase tracking-widest'
       : isCyberpunk
@@ -95,7 +121,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <div className="p-8">
           {/* Header */}
           <div className="relative mb-6 flex flex-col items-center justify-center">
-            <TechLabel text="SYS.ALERT" tone="secondary" blink className="absolute -top-4" />
+            <TechLabel text={isRetroCartoon ? 'ALERTA' : 'SYS.ALERT'} tone="secondary" blink className="absolute -top-4" />
 
             <div
               className={`mt-6 mb-5 flex h-16 w-16 items-center justify-center border-[3px] ${
@@ -108,28 +134,28 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             </div>
 
             <h3 className={titleClass}>
-              {title}
+              {isRetroCartoon ? retroTitle : resolvedTitle}
             </h3>
           </div>
 
           {/* Message */}
           <p className={messageClass}>
-            {message}
+            {isRetroCartoon ? retroMessage : resolvedMessage}
           </p>
 
           {/* Buttons */}
-          <div className="flex gap-4">
+          <div className={`grid ${isRetroCartoon ? 'grid-cols-1 sm:grid-cols-2 gap-3' : 'grid-cols-1 sm:grid-cols-2 gap-4'}`}>
             <button
               onClick={onCancel}
               className={cancelButtonClass}
             >
-              {cancelText}
+              {isRetroCartoon ? retroCancelText : resolvedCancelText}
             </button>
             <button
               onClick={onConfirm}
               className={confirmButtonClass}
             >
-              {confirmText}
+              {isRetroCartoon ? retroConfirmText : resolvedConfirmText}
             </button>
           </div>
         </div>
