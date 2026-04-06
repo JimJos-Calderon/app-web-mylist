@@ -204,7 +204,21 @@
     "invite_help_text": "Comparte este enlace. Cualquier persona con el link puede unirse a la lista.",
     "copy_button": "Copiar",
     "copied_button": "Copiado",
-    "close_button": "Cerrar"
+    "close_button": "Cerrar",
+    "saving_button": "Guardando…",
+    "list_settings_title": "Ajustes de la lista",
+    "list_settings_webhook_label": "Webhook de Discord",
+    "list_settings_webhook_help": "Recibe notificaciones en tu canal cuando alguien añada ítems a esta lista. Deja el campo vacío para desactivarlas.",
+    "list_settings_save": "Guardar",
+    "list_settings_saved": "Guardado correctamente.",
+    "list_settings_save_error": "No se pudo guardar el webhook.",
+    "list_settings_owner_only": "Solo el propietario de la lista puede cambiar esta configuración.",
+    "list_settings_theme_label": "Tema de notificaciones (Discord)",
+    "list_settings_theme_help": "Define el estilo del mensaje en Discord cuando se añaden ítems a esta lista.",
+    "list_settings_theme_default": "Normal (por defecto)",
+    "list_settings_theme_cyberpunk": "Cyberpunk",
+    "list_settings_theme_terminal": "Terminal",
+    "list_settings_theme_retro": "Retro cartoon"
   },
   "buttons": {
     "delete": "Borrar",

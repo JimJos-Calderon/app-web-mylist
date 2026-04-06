@@ -7,6 +7,8 @@ interface UseListItemDetailsParams {
   onToggleVisto: (id: string, currentState: boolean) => Promise<void>
   onDeleteItem: (id: string) => Promise<void>
   getDeleteConfirmationMessage: (item: ListItem) => string
+  onQuickCritiqueSave: (itemId: string, rating: number, liked: boolean) => Promise<void>
+  onQuickCritiqueSuccess?: () => void
 }
 
 interface OpenDetailsOptions {
@@ -28,6 +30,8 @@ interface UseListItemDetailsReturn {
   handleCloseDetails: () => void
   handleToggleFromModal: () => Promise<void>
   handleDeleteFromModal: () => Promise<void>
+  handleConfirmQuickCritique: (rating: number, liked: boolean) => Promise<void>
+  isQuickCritiqueSaving: boolean
 }
 
 export const useListItemDetails = ({
@@ -35,6 +39,8 @@ export const useListItemDetails = ({
   onToggleVisto,
   onDeleteItem,
   getDeleteConfirmationMessage,
+  onQuickCritiqueSave,
+  onQuickCritiqueSuccess,
 }: UseListItemDetailsParams): UseListItemDetailsReturn => {
   const [selectedItem, setSelectedItem] = useState<ListItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -43,7 +49,9 @@ export const useListItemDetails = ({
   const [synopsisLoading, setSynopsisLoading] = useState(false)
   const [synopsisError, setSynopsisError] = useState<string | null>(null)
   const [synopsisCache, setSynopsisCache] = useState<Record<string, string>>({})
-  const [modalActionLoading, setModalActionLoading] = useState<'toggle' | 'delete' | null>(null)
+  const [modalActionLoading, setModalActionLoading] = useState<'toggle' | 'delete' | 'critique' | null>(
+    null,
+  )
   const [shouldPromptComment, setShouldPromptComment] = useState(false)
 
   const closeTimeoutRef = useRef<number | null>(null)
@@ -159,6 +167,30 @@ export const useListItemDetails = ({
     }
   }
 
+  const handleConfirmQuickCritique = async (rating: number, liked: boolean) => {
+    if (!selectedItem || modalActionLoading) return
+
+    setModalActionLoading('critique')
+
+    try {
+      await onQuickCritiqueSave(selectedItem.id, rating, liked)
+      onQuickCritiqueSuccess?.()
+      setSelectedItem((previousItem) =>
+        previousItem ? { ...previousItem, visto: true } : previousItem
+      )
+      handleCloseDetails()
+    } catch (error) {
+      console.error('Quick critique error:', error)
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo guardar la critica. Revisa permisos o vuelve a intentar.',
+      )
+    } finally {
+      setModalActionLoading(null)
+    }
+  }
+
   const handleDeleteFromModal = async () => {
     if (!selectedItem || modalActionLoading) return
     if (!confirm(getDeleteConfirmationMessage(selectedItem))) return
@@ -189,5 +221,7 @@ export const useListItemDetails = ({
     handleCloseDetails,
     handleToggleFromModal,
     handleDeleteFromModal,
+    handleConfirmQuickCritique,
+    isQuickCritiqueSaving: modalActionLoading === 'critique',
   }
 }

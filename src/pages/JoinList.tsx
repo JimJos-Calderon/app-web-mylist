@@ -6,6 +6,7 @@ import { List, useTheme } from '@/features/shared'
 import { LanguageSwitcher } from '@/features/shared/components/LanguageSwitcher'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { supabase } from '@/supabaseClient'
+import { LIST_SELECT_PUBLIC } from '@/config/listSelect'
 import { CheckCircle, XCircle, Users, ArrowRight, Loader2 } from 'lucide-react'
 
 type Status = 'loading' | 'found' | 'joining' | 'success' | 'already_member' | 'not_found' | 'error' | 'login_required'
@@ -54,7 +55,7 @@ const JoinList: React.FC = () => {
             try {
                 const { data, error } = await supabase
                     .from('lists')
-                    .select('*')
+                    .select(LIST_SELECT_PUBLIC)
                     .eq('invite_code', code.toUpperCase())
                     .maybeSingle()
 
@@ -111,7 +112,7 @@ const JoinList: React.FC = () => {
                 if (!list && result.list_id) {
                     const { data: joinedList } = await supabase
                         .from('lists')
-                        .select('*')
+                        .select(LIST_SELECT_PUBLIC)
                         .eq('id', result.list_id)
                         .maybeSingle()
 
@@ -135,7 +136,7 @@ const JoinList: React.FC = () => {
             if (!list && result.list_id) {
                 const { data: joinedList } = await supabase
                     .from('lists')
-                    .select('*')
+                    .select(LIST_SELECT_PUBLIC)
                     .eq('id', result.list_id)
                     .maybeSingle()
 
