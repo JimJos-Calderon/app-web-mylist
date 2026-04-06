@@ -18,7 +18,7 @@ interface ItemDetailsModalProps {
   synopsis: string | null
   synopsisLoading: boolean
   synopsisError: string | null
-  modalActionLoading: 'toggle' | 'delete' | null
+  modalActionLoading: 'toggle' | 'delete' | 'critique' | null
   canDelete: boolean
   promptCommentOnOpen?: boolean
   titlePrefix: string
@@ -36,7 +36,7 @@ interface ItemDetailsModalProps {
   onClose: () => void
   onToggle: () => void
   onDelete: () => void
-  onQuickCritiqueConfirm: (rating: number, liked: boolean) => Promise<void>
+  onQuickCritiqueConfirm: (rating: number, liked: boolean, comment: string) => Promise<void>
   isQuickCritiqueSaving: boolean
   onNext?: () => void
   onPrevious?: () => void
@@ -81,7 +81,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   const isTerminal = theme === 'terminal'
   const [showQuickCritique, setShowQuickCritique] = React.useState(false)
   const quickCritiqueAutoOpenedRef = React.useRef(false)
-  const { deleteComment } = useItemComments(selectedItem?.id)
+  const { deleteComment, comment: existingCommentRow } = useItemComments(selectedItem?.id)
   const { rating: existingItemRating } = useItemRating(selectedItem?.id ?? '')
   const selectedItemId = selectedItem?.id
   const isSelectedItemWatched = Boolean(selectedItem?.visto)
@@ -134,8 +134,9 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
     await onToggle()
   }
 
-  const handleQuickCritiqueConfirm = async (rating: number, liked: boolean) => {
-    await onQuickCritiqueConfirm(rating, liked)
+  const handleQuickCritiqueConfirm = async (rating: number, liked: boolean, comment: string) => {
+    await onQuickCritiqueConfirm(rating, liked, comment)
+    setShowQuickCritique(false)
   }
 
   if (!isOpen || !selectedItem) return null
@@ -405,19 +406,26 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
         document.body,
       )}
       <QuickCritiqueModal
-      isOpen={showQuickCritique}
-      itemTitle={String(displayTitle)}
-      initialStars={existingItemRating?.rating ?? null}
-      initialReaction={
-        existingItemRating?.liked === true
-          ? 'like'
-          : existingItemRating?.liked === false
-            ? 'dislike'
-            : null
-      }
-      saving={isQuickCritiqueSaving}
-      onCancel={() => setShowQuickCritique(false)}
-      onConfirm={handleQuickCritiqueConfirm}
+        isOpen={showQuickCritique}
+        itemTitle={String(displayTitle)}
+        initialStars={existingItemRating?.rating ?? null}
+        initialReaction={
+          existingItemRating?.liked === true
+            ? 'like'
+            : existingItemRating?.liked === false
+              ? 'dislike'
+              : null
+        }
+        initialComment={existingCommentRow?.content ?? ''}
+        enhanceContext={{
+          title: selectedItem.titulo,
+          type: selectedItem.tipo,
+          genre: selectedItem.genero ?? null,
+          synopsis: displaySynopsis?.trim() ? displaySynopsis : null,
+        }}
+        saving={isQuickCritiqueSaving}
+        onCancel={() => setShowQuickCritique(false)}
+        onConfirm={handleQuickCritiqueConfirm}
       />
     </>
   )

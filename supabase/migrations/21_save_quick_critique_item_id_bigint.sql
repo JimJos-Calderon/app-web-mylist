@@ -1,41 +1,9 @@
--- Crítica rápida: marcar visto + rating + liked en una transacción (RPC).
--- Amplía el trigger de "comentario obligatorio" para aceptar también item_ratings.
+-- items.id e item_ratings.item_id son bigint/integer en este proyecto, no uuid.
+-- Sustituye la firma de save_quick_critique para aceptar p_item_id bigint.
 
 BEGIN;
 
-CREATE OR REPLACE FUNCTION public.check_item_comment_on_watch()
-RETURNS trigger
-LANGUAGE plpgsql
-AS $$
-DECLARE
-  v_uid uuid := auth.uid();
-BEGIN
-  IF NEW.visto IS TRUE
-     AND COALESCE(OLD.visto, FALSE) IS FALSE
-  THEN
-    IF NOT (
-      EXISTS (
-        SELECT 1
-        FROM public.item_comments ic
-        WHERE ic.item_id = NEW.id
-          AND ic.user_id = v_uid
-          AND char_length(btrim(ic.content)) > 0
-      )
-      OR EXISTS (
-        SELECT 1
-        FROM public.item_ratings ir
-        WHERE ir.item_id = NEW.id
-          AND ir.user_id = v_uid
-          AND (ir.rating IS NOT NULL OR ir.liked IS NOT NULL)
-      )
-    ) THEN
-      RAISE EXCEPTION 'No se puede marcar como visto sin reseña ni critica rapida';
-    END IF;
-  END IF;
-
-  RETURN NEW;
-END;
-$$;
+DROP FUNCTION IF EXISTS public.save_quick_critique(uuid, integer, boolean);
 
 CREATE OR REPLACE FUNCTION public.save_quick_critique(
   p_item_id bigint,
@@ -112,6 +80,6 @@ REVOKE ALL ON FUNCTION public.save_quick_critique(bigint, integer, boolean) FROM
 GRANT EXECUTE ON FUNCTION public.save_quick_critique(bigint, integer, boolean) TO authenticated;
 
 COMMENT ON FUNCTION public.save_quick_critique IS
-  'Marca item como visto y guarda rating/liked del usuario en una sola transacción.';
+  'Marca item como visto y guarda rating/liked del usuario en una sola transacción (items.id bigint).';
 
 COMMIT;
