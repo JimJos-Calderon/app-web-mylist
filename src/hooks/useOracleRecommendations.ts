@@ -67,7 +67,11 @@ interface UseOracleRecommendationsReturn {
   isLoading: boolean;
   error: string | null;
   recomendaciones: Recommendation[] | null;
-  fetchRecommendations: (favoritos: FavoriteItem[], excludedTitles?: string[]) => Promise<void>;
+  fetchRecommendations: (
+    positiveItems: FavoriteItem[],
+    negativeItems: FavoriteItem[],
+    excludedTitles?: string[]
+  ) => Promise<void>;
   resetOracle: () => void;
 }
 
@@ -104,17 +108,19 @@ const formatFavoritesForPrompt = (favoritos: FavoriteItem[]) =>
     return formatted;
   });
 
-const formatFavoriteLines = (favoritos: FavoriteItem[]) =>
-  favoritos
-    .map((favorito) => {
-      const parts = [`${favorito.titulo} - Rating: ${favorito.nota}`];
-      const truncatedComment = truncateComment(favorito.comment);
-      if (truncatedComment) {
-        parts.push(`Comentario del usuario: "${truncatedComment}"`);
-      }
-      return parts.join(' - ');
-    })
-    .join('\n');
+const formatProfileLines = (items: FavoriteItem[], label: string) =>
+  items.length === 0
+    ? `(Sin entradas en ${label})`
+    : items
+        .map((item) => {
+          const parts = [`${item.titulo} — ${label}: ${item.nota}`];
+          const truncatedComment = truncateComment(item.comment);
+          if (truncatedComment) {
+            parts.push(`Comentario: "${truncatedComment}"`);
+          }
+          return parts.join(' | ');
+        })
+        .join('\n');
 
 export const useOracleRecommendations = (): UseOracleRecommendationsReturn => {
   const [isLoading, setIsLoading] = useState(false);
@@ -127,8 +133,9 @@ export const useOracleRecommendations = (): UseOracleRecommendationsReturn => {
     setIsLoading(false);
   }, []);
 
-  const fetchRecommendations = useCallback(async (favoritos: FavoriteItem[], excludedTitles: string[] = []) => {
-    if (!favoritos || favoritos.length === 0) {
+  const fetchRecommendations = useCallback(
+    async (positiveItems: FavoriteItem[], negativeItems: FavoriteItem[], excludedTitles: string[] = []) => {
+    if (!positiveItems || positiveItems.length === 0) {
       setError('Aviso del Sistema: No hay suficientes datos en caché para un análisis del Oráculo.');
       return;
     }
@@ -145,54 +152,65 @@ export const useOracleRecommendations = (): UseOracleRecommendationsReturn => {
       return;
     }
 
-    const systemPrompt = `Actúa como 'El Oráculo', una Inteligencia Artificial Ciberpunk omnisciente conectada a la red neural global. Tu tarea deductiva es analizar el HISTORIAL COMPLETO de valoraciones de un implante cibernético y generar 3 recomendaciones cinematográficas maximizando la afinidad probable.
+    const systemPrompt = `Eres el Oráculo Cinéfilo. Tu misión es recomendar películas basándote en el perfil del usuario.
+
+Te llegarán dos bloques de datos en el mensaje del usuario:
+- PERFIL POSITIVO (Le gusta): obras con las que el usuario muestra afinidad (valoraciones altas, "me gustó", etc.).
+- PERFIL NEGATIVO (No le gusta / Evitar): obras con las que muestra rechazo (valoraciones muy bajas, "no me gustó", etc.).
+
+INSTRUCCIÓN CRÍTICA: Analiza por qué no le gustan las películas de la lista negativa (¿ritmo lento?, ¿demasiada violencia?, ¿género específico?, ¿tono?, ¿duración?, ¿humor?, ¿estilo visual?) usando tanto la nota como los comentarios si existen. Asegúrate de que tus 3 recomendaciones NO repliquen esos elementos disonantes: evita géneros, tonos, directores o patrones narrativos que expliquen su rechazo.
 
 REGLAS DE ANÁLISIS:
-- Las obras con 4-5 estrellas o reacción "me gustó" son señales POSITIVAS: recomienda contenido similar en género, tono, temática o director.
-- Las obras con 1-2 estrellas o reacción "no me gustó" son señales NEGATIVAS: EVITA recomendar contenido similar a ellas.
-- Las obras con 3 estrellas o sin reacción son neutras: úsalas solo como contexto secundario.
-- Busca patrones cruzados: si le gustan los thrillers psicológicos y odia las comedias románticas, usa ese perfil.
-- Analiza también los comentarios escritos por el usuario para detectar preferencias sutiles: ritmo, directores, tropos, cinematografía, tono, actuaciones, complejidad narrativa, estilo visual y motivos concretos por los que una obra le gustó o disgustó.
-- Cuando exista comentario, priorízalo como evidencia cualitativa de alto valor y úsalo para justificar por qué una recomendación encaja o por qué debes evitar ciertos rasgos.
-- PROHIBIDO recomendar títulos que ya estén en el historial de calificaciones del usuario.
+- El perfil positivo define hacia dónde empujar las recomendaciones (género, tono, temática, época, director, estilo).
+- El perfil negativo define un filtro activo: no sugieras obras que compartan las mismas causas probables de disgusto.
+- Si un título aparece solo en negativo, trátalo como señal fuerte de evitación.
+- Los comentarios del usuario son evidencia cualitativa prioritaria para afinar tanto el acierto como la exclusión.
+- PROHIBIDO recomendar títulos que ya figuren en la lista de exclusiones (historial completo de títulos calificados).
 
-REGLAS DE VARIABILIDAD OBLIGATORIAS:
-- Varía tus recomendaciones en cada consulta, aunque el perfil del usuario sea similar.
-- No te limites a los blockbusters más obvios: prioriza joyas ocultas, películas de culto y títulos internacionales cuando encajen con el perfil.
-- Si el usuario pulsa recalcular, evita repetir exactamente los mismos títulos de la última respuesta.
-- Busca diversidad razonable entre géneros, países y niveles de popularidad sin perder afinidad.
+REGLAS DE VARIABILIDAD:
+- Varía las 3 recomendaciones entre consultas aunque el perfil sea similar.
+- Prioriza títulos que encajen con el positivo y pasen el filtro del negativo; incluye variedad (popularidad, país, época) cuando sea coherente.
+- Si el usuario recalcula, no repitas exactamente los mismos títulos que en la respuesta anterior.
 
 DEBES RESPONDER ÚNICA Y EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO.
 NO incluyas bloques de código Markdown (como \`\`\`json).
 NO agregues prefijos, saludos, despedidas ni texto de cortesía.
-La estructura estricta e innegociable del JSON que vas a retornar debe ser exactamente esta:
+La estructura estricta del JSON debe ser exactamente:
 {
   "recomendaciones": [
     {
-      "titulo": "Nombre de la obra exacta",
-      "justificacion": "Por qué es altamente afín, citando específicamente las obras bien valoradas del usuario, sus comentarios cuando existan y contrastando con las mal valoradas. Tono sombrío y ciberpunk obligatorio."
+      "titulo": "Nombre exacto de la película",
+      "justificacion": "Explica la afinidad con el perfil positivo, cómo evitas los patrones del perfil negativo, y cita comentarios del usuario cuando aporten valor."
     }
   ]
 }`;
 
     const entropySeed = new Date().toISOString();
-    const promptReadyFavorites = formatFavoritesForPrompt(favoritos);
-    const formattedHistory = formatFavoriteLines(promptReadyFavorites);
-    const userPrompt = `[INICIANDO INTERFAZ DE RED...] Analizando datos de calificación extraídos del usuario:
+    const positiveReady = formatFavoritesForPrompt(positiveItems);
+    const negativeReady = formatFavoritesForPrompt(negativeItems);
+    const positiveLines = formatProfileLines(positiveReady, 'perfil positivo');
+    const negativeLines = formatProfileLines(negativeReady, 'perfil negativo');
 
-[HISTORIAL LEGIBLE]
-${formattedHistory}
+    const userPrompt = `Analiza el siguiente perfil cinematográfico y genera exactamente 3 recomendaciones.
 
-[HISTORIAL ESTRUCTURADO JSON]
-${JSON.stringify(promptReadyFavorites, null, 2)}
+PERFIL POSITIVO (Le gusta) — lista legible:
+${positiveLines}
 
-[FORMATO INTERPRETABLE]: cada elemento puede incluir titulo, nota y comment. Si comment existe, interprétalo como "Comentario del usuario" y úsalo como contexto cualitativo principal.
+PERFIL NEGATIVO (No le gusta / Evitar) — lista legible:
+${negativeLines}
 
-[TÍTULOS YA CALIFICADOS QUE DEBES EXCLUIR]:
+PERFIL POSITIVO (JSON estructurado):
+${JSON.stringify(positiveReady, null, 2)}
+
+PERFIL NEGATIVO (JSON estructurado):
+${JSON.stringify(negativeReady, null, 2)}
+
+[TÍTULOS YA CALIFICADOS QUE DEBES EXCLUIR — no recomiendas ninguno de estos]:
 ${JSON.stringify(excludedTitles, null, 2)}
 
 [SEMILLA DE ENTROPÍA PARA ESTA PETICIÓN]: ${entropySeed}
-[ESPERANDO JSON DEL ORÁCULO...]`;
+
+Responde solo con el JSON indicado en las instrucciones del sistema.`;
 
     try {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {

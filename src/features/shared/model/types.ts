@@ -79,6 +79,8 @@ export interface List {
   updated_at: string
   is_private: boolean
   invite_code: string
+  /** Tema para embeds Discord (y UI futura); null = estilo por defecto. */
+  theme?: string | null
 }
 
 export interface ListMember {

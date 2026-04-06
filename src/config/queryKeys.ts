@@ -68,4 +68,9 @@ export const queryKeys = {
     all: ['suggestions'] as const,
     byType: (tipo: 'pelicula' | 'serie', query: string = '') => [...queryKeys.suggestions.all, tipo, query] as const,
   },
+
+  /** Ratings agregados para Oráculo / perfil */
+  oracle: {
+    allRatingsForUser: (userId: string) => ['itemRatings', 'oracle', 'all', userId] as const,
+  },
 } as const

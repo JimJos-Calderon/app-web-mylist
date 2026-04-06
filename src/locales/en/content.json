@@ -204,7 +204,21 @@
     "invite_help_text": "Share this link. Anyone with the link can join the list.",
     "copy_button": "Copy",
     "copied_button": "Copied",
-    "close_button": "Close"
+    "close_button": "Close",
+    "saving_button": "Saving…",
+    "list_settings_title": "List settings",
+    "list_settings_webhook_label": "Discord webhook",
+    "list_settings_webhook_help": "Get notified in your channel when someone adds items to this list. Leave empty to disable.",
+    "list_settings_save": "Save",
+    "list_settings_saved": "Saved successfully.",
+    "list_settings_save_error": "Could not save the webhook.",
+    "list_settings_owner_only": "Only the list owner can change this setting.",
+    "list_settings_theme_label": "Notification theme (Discord)",
+    "list_settings_theme_help": "Chooses how Discord messages look when items are added to this list.",
+    "list_settings_theme_default": "Default (standard)",
+    "list_settings_theme_cyberpunk": "Cyberpunk",
+    "list_settings_theme_terminal": "Terminal",
+    "list_settings_theme_retro": "Retro cartoon"
   },
   "buttons": {
     "delete": "Delete",

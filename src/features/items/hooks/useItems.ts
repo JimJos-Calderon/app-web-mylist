@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
-import { ERROR_MESSAGES, ListItem } from '@/features/shared'
+import { ListItem } from '@/features/shared'
 import { queryKeys } from '@config/queryKeys'
+import { saveQuickCritique } from '../services/quickCritiqueService'
 
 interface UseItemsReturn {
   items: ListItem[]
@@ -13,9 +14,11 @@ interface UseItemsReturn {
   deleteItem: (id: string) => Promise<void>
   toggleVisto: (id: string, currentState: boolean) => Promise<void>
   updateItem: (id: string, updates: Partial<ListItem>) => Promise<void>
+  quickCritiqueAndWatch: (args: { itemId: string; rating: number; liked: boolean }) => Promise<void>
   isAddingItem: boolean
   isDeletingItem: boolean
   isUpdatingItem: boolean
+  isSavingQuickCritique: boolean
 }
 
 /**
@@ -189,6 +192,53 @@ export const useItems = (
     },
   })
 
+  const quickCritiqueMutation = useMutation({
+    mutationFn: async ({
+      itemId,
+      rating,
+      liked,
+    }: {
+      itemId: string
+      rating: number
+      liked: boolean
+    }) => {
+      await saveQuickCritique(itemId, rating, liked)
+    },
+    onMutate: async ({ itemId }) => {
+      const key = queryKeys.items.byList(tipo, listId || '')
+      await queryClient.cancelQueries({ queryKey: key })
+      const previousItems = queryClient.getQueryData<ListItem[]>(key)
+      if (previousItems) {
+        queryClient.setQueryData<ListItem[]>(
+          key,
+          previousItems.map((item) =>
+            item.id === itemId ? { ...item, visto: true } : item,
+          ),
+        )
+      }
+      return { previousItems, key }
+    },
+    onError: (err, _vars, context) => {
+      console.error('quickCritique error:', err)
+      if (context?.previousItems && context.key) {
+        queryClient.setQueryData(context.key, context.previousItems)
+      }
+    },
+    onSettled: (_data, _err, vars) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.byList(tipo, listId || ''),
+      })
+      if (vars?.itemId) {
+        queryClient.invalidateQueries({
+          queryKey: ['itemRating', vars.itemId, userId],
+        })
+      }
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.oracle.allRatingsForUser(userId),
+      })
+    },
+  })
+
   const refetchItems = async () => {
     await refetch()
   }
@@ -204,9 +254,13 @@ export const useItems = (
       toggleVistoMutation.mutateAsync({ id, currentState }),
     updateItem: (id, updates) =>
       updateItemMutation.mutateAsync({ id, updates }),
+    quickCritiqueAndWatch: (args) => quickCritiqueMutation.mutateAsync(args),
     isAddingItem: addItemMutation.isPending,
     isDeletingItem: deleteItemMutation.isPending,
     isUpdatingItem:
-      updateItemMutation.isPending || toggleVistoMutation.isPending,
+      updateItemMutation.isPending ||
+      toggleVistoMutation.isPending ||
+      quickCritiqueMutation.isPending,
+    isSavingQuickCritique: quickCritiqueMutation.isPending,
   }
 }

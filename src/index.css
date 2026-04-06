@@ -282,6 +282,33 @@
   opacity: 0.9;
 }
 
+/* Retro: fuente de títulos en buscador (input, botón, sugerencias y panel desplegable) */
+[data-theme="retro-cartoon"] .hud-search-input,
+[data-theme="retro-cartoon"] .hud-search-submit {
+  font-family: var(--app-font-heading) !important;
+}
+
+[data-theme="retro-cartoon"] .hud-search-suggestion-title,
+[data-theme="retro-cartoon"] .hud-search-suggestion-meta {
+  font-family: var(--app-font-heading) !important;
+  color: #000000 !important;
+}
+
+[data-theme="retro-cartoon"] .hud-search-dropdown.hud-container {
+  background: #ffffff !important;
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  color: #000000 !important;
+}
+
+[data-theme="retro-cartoon"] .hud-search-dropdown .hud-search-dropdown-content {
+  background: transparent !important;
+}
+
+[data-theme="retro-cartoon"] .hud-search-suggestion:hover {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+
 .retro-fx {
   position: relative;
   isolation: isolate;

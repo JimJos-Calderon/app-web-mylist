@@ -5,6 +5,7 @@ export { default as RatingWidget } from './components/RatingWidget'
 export { default as SearchBar } from './components/SearchBar'
 export { default as StatsWidget } from './components/StatsWidget'
 export { default as RandomPickManager } from './components/RandomPickManager'
+export { default as QuickCritiqueModal } from './components/QuickCritiqueModal'
 
 export { useFilters } from './hooks/useFilters'
 export { useEnhanceComment, ENHANCE_COMMENT_SYSTEM_PROMPT } from './hooks/useEnhanceComment'

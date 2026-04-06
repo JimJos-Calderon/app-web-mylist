@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Cog, UserCircle, Film } from 'lucide-react'
 import { useAuth } from '@/features/auth'
@@ -7,6 +8,8 @@ import { ItemCard } from '@/features/items'
 import ItemDetailsModal from '@/features/lists/components/ItemDetailsModal'
 import { useListItemDetails } from '@/features/lists/hooks/useListItemDetails'
 import { ListItem, useTheme } from '@/features/shared'
+import { saveQuickCritique } from '@/features/items/services/quickCritiqueService'
+import { queryKeys } from '@config/queryKeys'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/supabaseClient'
 import HudContainer from '@/features/shared/components/HudContainer'
@@ -22,8 +25,10 @@ const Perfil: React.FC = () => {
   const { user } = useAuth()
   const { profile, loading } = useUserProfile()
   const { theme } = useTheme()
+  const queryClient = useQueryClient()
   const isRetroCartoon = theme === 'retro-cartoon'
   const navigate = useNavigate()
+  const [critiqueToast, setCritiqueToast] = useState<string | null>(null)
   const [ratedItems, setRatedItems] = useState<{ item: ListItem; rating: RatingInfo }[]>([])
   const [isLoadingItems, setIsLoadingItems] = useState(true)
   const [totalRatings, setTotalRatings] = useState(0)
@@ -98,6 +103,12 @@ const Perfil: React.FC = () => {
     }
   }, [user, fetchRatedItems])
 
+  useEffect(() => {
+    if (!critiqueToast) return
+    const timer = window.setTimeout(() => setCritiqueToast(null), 3200)
+    return () => window.clearTimeout(timer)
+  }, [critiqueToast])
+
   const handleDelete = async (_id: string) => {
     // No eliminar desde perfil - solo ver
   }
@@ -125,8 +136,15 @@ const Perfil: React.FC = () => {
     )
   }
 
-  const handleOpenDetails = async (item: ListItem, options?: { promptComment?: boolean }) => {
-    await itemDetails.handleOpenDetails(item, options)
+  const handleQuickCritiqueSave = async (itemId: string, rating: number, liked: boolean) => {
+    await saveQuickCritique(itemId, rating, liked)
+    await fetchRatedItems()
+    if (user?.id) {
+      await queryClient.invalidateQueries({ queryKey: ['itemRating', itemId, user.id] })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.oracle.allRatingsForUser(user.id),
+      })
+    }
   }
 
   const itemDetails = useListItemDetails({
@@ -134,7 +152,23 @@ const Perfil: React.FC = () => {
     onToggleVisto: handleToggleVisto,
     onDeleteItem: async () => {},
     getDeleteConfirmationMessage: (item) => `Eliminar ${item.titulo}?`,
+    onQuickCritiqueSave: handleQuickCritiqueSave,
+    onQuickCritiqueSuccess: () => {
+      const msg =
+        theme === 'retro-cartoon'
+          ? 'ARCHIVO ACTUALIZADO!'
+          : theme === 'terminal'
+            ? '[OK] ARCHIVO_ACTUALIZADO'
+            : theme === 'cyberpunk'
+              ? 'BUFFER SYNC · VISTO + CRITICA OK'
+              : 'Critica guardada'
+      setCritiqueToast(msg)
+    },
   })
+
+  const handleOpenDetails = async (item: ListItem, options?: { promptComment?: boolean }) => {
+    await itemDetails.handleOpenDetails(item, options)
+  }
 
   const totalPages = Math.max(1, Math.ceil(ratedItems.length / itemsPerPage))
   const paginatedRatedItems = ratedItems.slice(
@@ -351,8 +385,19 @@ const Perfil: React.FC = () => {
         onClose={itemDetails.handleCloseDetails}
         onToggle={itemDetails.handleToggleFromModal}
         onDelete={itemDetails.handleDeleteFromModal}
+        onQuickCritiqueConfirm={itemDetails.handleConfirmQuickCritique}
+        isQuickCritiqueSaving={itemDetails.isQuickCritiqueSaving}
         closeButtonRef={itemDetails.closeButtonRef}
       />
+
+      {critiqueToast && (
+        <div
+          className="fixed bottom-6 left-1/2 z-[200] max-w-[min(90vw,24rem)] -translate-x-1/2 border border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] px-4 py-3 text-center text-sm font-bold text-[var(--color-text-primary)] shadow-xl theme-heading-font"
+          role="status"
+        >
+          {critiqueToast}
+        </div>
+      )}
     </div>
   )
 }

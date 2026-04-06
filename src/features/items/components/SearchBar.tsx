@@ -1,6 +1,7 @@
 import React, { Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HudContainer, OmdbSuggestion, OptimizedImage, TechLabel } from '@/features/shared'
+import { useTheme } from '@/features/shared/hooks/useTheme'
 import { Loader2 } from 'lucide-react'
 
 interface SearchBarProps {
@@ -32,8 +33,11 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     ref
   ) => {
     const { t } = useTranslation()
+    const { theme } = useTheme()
+    const isRetroCartoon = theme === 'retro-cartoon'
     const ariaLabel = React.useMemo(() => t('placeholders.search_aria_label'), [t])
-    
+    const searchTypeClass = isRetroCartoon ? 'theme-heading-font tracking-wide font-bold' : 'font-mono tracking-wide'
+
     return (
       <div className="relative" ref={ref}>
         <form onSubmit={onSubmit} className="flex gap-2 md:gap-3">
@@ -42,14 +46,14 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
               text="INPUT.QUERY"
               tone="primary"
               blink
-              className="absolute left-4 -top-2 z-10"
+              className={`absolute left-4 -top-2 z-10 ${isRetroCartoon ? 'theme-heading-font' : ''}`}
             />
 
             <input
               type="text"
               placeholder={placeholder}
               aria-label={ariaLabel}
-              className="w-full hud-search-input px-4 md:px-5 py-3 md:py-4 text-sm md:text-base outline-none transition-all font-mono tracking-wide"
+              className={`w-full hud-search-input px-4 md:px-5 py-3 md:py-4 text-sm md:text-base outline-none transition-all ${searchTypeClass}`}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onFocus={onFocus}
@@ -64,7 +68,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
           <button
             type="submit"
             disabled={loading}
-            className="hud-search-submit px-4 md:px-7 py-3 md:py-4 font-black transition-all uppercase text-[10px] md:text-xs disabled:cursor-not-allowed"
+            className={`hud-search-submit px-4 md:px-7 py-3 md:py-4 font-black transition-all uppercase text-[10px] md:text-xs disabled:cursor-not-allowed ${isRetroCartoon ? 'theme-heading-font' : ''}`}
           >
             {loading ? '...' : t('action.search_ok_button')}
           </button>
@@ -81,7 +85,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
                 key={suggestion.imdbID}
                 type="button"
                 onClick={() => onSuggestionSelect?.(suggestion)}
-                className="w-full flex items-center gap-4 p-3 hud-search-suggestion text-left transition-all"
+                className={`w-full flex items-center gap-4 p-3 hud-search-suggestion text-left transition-all ${isRetroCartoon ? 'theme-heading-font' : ''}`}
               >
                 <div className="w-10 h-14 flex-shrink-0 rounded hud-search-suggestion-thumb overflow-hidden">
                   <OptimizedImage
@@ -91,10 +95,14 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
                   />
                 </div>
                 <div>
-                  <div className="hud-search-suggestion-title font-black text-sm uppercase italic">
+                  <div
+                    className={`hud-search-suggestion-title font-black text-sm uppercase italic ${isRetroCartoon ? 'theme-heading-font' : ''}`}
+                  >
                     {suggestion.Title}
                   </div>
-                  <div className="hud-search-suggestion-meta text-[10px] font-bold mt-1">
+                  <div
+                    className={`hud-search-suggestion-meta text-[10px] font-bold mt-1 ${isRetroCartoon ? 'theme-heading-font' : ''}`}
+                  >
                     {suggestion.Year}
                   </div>
                 </div>

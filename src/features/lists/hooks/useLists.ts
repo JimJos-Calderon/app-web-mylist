@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
+import { LIST_SELECT_PUBLIC } from '@/config/listSelect'
 import { List, ListMember } from '@/features/shared'
 import { queryKeys } from '@config/queryKeys'
 import { useActiveList } from './useActiveList'
@@ -67,7 +68,7 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
 
         const { data: listsData, error: listsError } = await supabase
           .from('lists')
-          .select('*')
+          .select(LIST_SELECT_PUBLIC)
           .in('id', listIds)
           .order('created_at', { ascending: false })
 
@@ -151,7 +152,7 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
           invite_code: inviteCode,
           is_private: false,
         })
-        .select()
+        .select(LIST_SELECT_PUBLIC)
         .single()
 
       if (listError) throw listError

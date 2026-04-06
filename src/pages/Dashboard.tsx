@@ -1,14 +1,16 @@
-import React, { Suspense, lazy, useState } from 'react'
+import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Film, Tv, Plus, ArrowRight, Trash2, LogOut, Shuffle } from 'lucide-react'
+import { Film, Tv, Plus, ArrowRight, Trash2, LogOut, Shuffle, Settings } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
-import { CreateListDialog, ListSelector, useLists } from '@/features/lists'
+import { CreateListDialog, ListSelector, ListSettingsModal, useLists } from '@/features/lists'
 import { RandomPickManager } from '@/features/items'
+import { saveQuickCritique } from '@/features/items/services/quickCritiqueService'
+import { queryKeys } from '@config/queryKeys'
 import { SectionErrorFallback, ConfirmDialog, useTheme } from '@/features/shared'
 import type { List, ListItem } from '@/features/shared'
 import { OracleSection } from '@/features/oracle/components/OracleSection'
@@ -112,6 +114,14 @@ const Dashboard: React.FC = () => {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
   const [isConfirmLeaveOpen, setIsConfirmLeaveOpen] = useState(false)
   const [isRandomPickerOpen, setIsRandomPickerOpen] = useState(false)
+  const [isListSettingsOpen, setIsListSettingsOpen] = useState(false)
+  const [critiqueToast, setCritiqueToast] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!critiqueToast) return
+    const timer = window.setTimeout(() => setCritiqueToast(null), 3200)
+    return () => window.clearTimeout(timer)
+  }, [critiqueToast])
 
   // Fetch all items from the active list for the random picker and Oracle
   const { data: allItems = [] } = useQuery({
@@ -153,11 +163,35 @@ const Dashboard: React.FC = () => {
     await queryClient.invalidateQueries({ queryKey: ['items'] })
   }
 
+  const handleQuickCritiqueSave = async (itemId: string, rating: number, liked: boolean) => {
+    await saveQuickCritique(itemId, rating, liked)
+    await queryClient.invalidateQueries({ queryKey: ['items'] })
+    await queryClient.invalidateQueries({ queryKey: ['items', 'all', currentList?.id] })
+    if (user?.id) {
+      await queryClient.invalidateQueries({ queryKey: ['itemRating', itemId, user.id] })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.oracle.allRatingsForUser(user.id),
+      })
+    }
+  }
+
   const itemDetails = useListItemDetails({
     currentUserId: user?.id || '',
     onToggleVisto: handleToggleVisto,
     onDeleteItem: handleDeleteItem,
     getDeleteConfirmationMessage: (item) => t('modal.delete_title', { title: item.titulo }),
+    onQuickCritiqueSave: handleQuickCritiqueSave,
+    onQuickCritiqueSuccess: () => {
+      const msg =
+        theme === 'retro-cartoon'
+          ? 'ARCHIVO ACTUALIZADO!'
+          : theme === 'terminal'
+            ? '[OK] ARCHIVO_ACTUALIZADO'
+            : theme === 'cyberpunk'
+              ? 'BUFFER SYNC · VISTO + CRITICA OK'
+              : 'Critica guardada'
+      setCritiqueToast(msg)
+    },
   })
 
   const handleListCreated = (newList: List) => {
@@ -289,6 +323,16 @@ const Dashboard: React.FC = () => {
 
                     {currentList && (
                       <div className="flex items-center gap-1 p-1 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)]">
+                        {currentList.owner_id === user.id && (
+                          <button
+                            type="button"
+                            className="p-2 text-[var(--color-text-muted)] hover:text-accent-primary transition-colors"
+                            onClick={() => setIsListSettingsOpen(true)}
+                            title={t('dialog.list_settings_title')}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="p-2 text-[var(--color-text-muted)] hover:text-red-500 transition-colors"
@@ -442,6 +486,15 @@ const Dashboard: React.FC = () => {
         onCreated={handleListCreated}
       />
 
+      {currentList && (
+        <ListSettingsModal
+          open={isListSettingsOpen}
+          onClose={() => setIsListSettingsOpen(false)}
+          list={currentList}
+          userId={user.id}
+        />
+      )}
+
       <ConfirmDialog
         isOpen={isConfirmDeleteOpen}
         title={t('confirm_delete_list.title')}
@@ -497,8 +550,19 @@ const Dashboard: React.FC = () => {
         onClose={itemDetails.handleCloseDetails}
         onToggle={itemDetails.handleToggleFromModal}
         onDelete={itemDetails.handleDeleteFromModal}
+        onQuickCritiqueConfirm={itemDetails.handleConfirmQuickCritique}
+        isQuickCritiqueSaving={itemDetails.isQuickCritiqueSaving}
         closeButtonRef={itemDetails.closeButtonRef}
       />
+
+      {critiqueToast && (
+        <div
+          className="fixed bottom-6 left-1/2 z-[200] max-w-[min(90vw,24rem)] -translate-x-1/2 border border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] px-4 py-3 text-center text-sm font-bold text-[var(--color-text-primary)] shadow-xl theme-heading-font"
+          role="status"
+        >
+          {critiqueToast}
+        </div>
+      )}
     </>
   )
 }

@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth'
 import { useFilters, useItems, RandomPickManager } from '@/features/items'
-import { FilterState, List, ErrorAlert } from '@/features/shared'
+import { FilterState, List, ErrorAlert, useTheme } from '@/features/shared'
 import { CreateListDialog, InviteDialog } from './ListDialogs'
 import ListActiveHeader from './ListActiveHeader'
 import ListSetupEmptyState from './ListSetupEmptyState'
@@ -47,11 +47,30 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   const searchSectionRef = useRef<HTMLDivElement>(null)
   const discoverSectionRef = useRef<HTMLDivElement>(null)
 
-  const { items, loading, error: itemsError, addItem, deleteItem, toggleVisto } = useItems(
-    tipo,
-    user?.id || '',
-    listId
-  )
+  const { theme } = useTheme()
+  const { items, loading, error: itemsError, addItem, deleteItem, toggleVisto, quickCritiqueAndWatch } =
+    useItems(tipo, user?.id || '', listId)
+
+  const [critiqueToast, setCritiqueToast] = useState<string | null>(null)
+
+  const critiqueSuccessCopy = useMemo(() => {
+    switch (theme) {
+      case 'retro-cartoon':
+        return 'ARCHIVO ACTUALIZADO!'
+      case 'terminal':
+        return '[OK] ARCHIVO_ACTUALIZADO'
+      case 'cyberpunk':
+        return 'BUFFER SYNC · VISTO + CRITICA OK'
+      default:
+        return 'Critica guardada'
+    }
+  }, [theme])
+
+  useEffect(() => {
+    if (!critiqueToast) return
+    const timer = window.setTimeout(() => setCritiqueToast(null), 3200)
+    return () => window.clearTimeout(timer)
+  }, [critiqueToast])
 
   const { filters, updateFilter, resetFilters } = useFilters()
 
@@ -128,6 +147,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     onToggleVisto: toggleVisto,
     onDeleteItem: deleteItem,
     getDeleteConfirmationMessage: (item) => t('modal.delete_title', { title: item.titulo }),
+    onQuickCritiqueSave: async (itemId, rating, liked) => {
+      await quickCritiqueAndWatch({ itemId, rating, liked })
+    },
+    onQuickCritiqueSuccess: () => setCritiqueToast(critiqueSuccessCopy),
   })
 
   const allVisibleItems = React.useMemo(() => {
@@ -302,10 +325,21 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
         onClose={itemDetails.handleCloseDetails}
         onToggle={itemDetails.handleToggleFromModal}
         onDelete={itemDetails.handleDeleteFromModal}
+        onQuickCritiqueConfirm={itemDetails.handleConfirmQuickCritique}
+        isQuickCritiqueSaving={itemDetails.isQuickCritiqueSaving}
         onNext={handleNextItem}
         onPrevious={handlePrevItem}
         closeButtonRef={itemDetails.closeButtonRef}
       />
+
+      {critiqueToast && (
+        <div
+          className="fixed bottom-6 left-1/2 z-[200] max-w-[min(90vw,24rem)] -translate-x-1/2 px-4 py-3 text-center text-sm font-bold shadow-xl border border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] theme-heading-font"
+          role="status"
+        >
+          {critiqueToast}
+        </div>
+      )}
     </div>
   )
 }

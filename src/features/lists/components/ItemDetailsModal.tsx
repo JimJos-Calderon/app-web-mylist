@@ -1,7 +1,13 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { ItemCommentBox, useItemComments, useTranslateSynopsis } from '@/features/items'
+import {
+  ItemCommentBox,
+  QuickCritiqueModal,
+  useItemComments,
+  useItemRating,
+  useTranslateSynopsis,
+} from '@/features/items'
 import { ListItem, useTheme } from '@/features/shared'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 
@@ -30,6 +36,8 @@ interface ItemDetailsModalProps {
   onClose: () => void
   onToggle: () => void
   onDelete: () => void
+  onQuickCritiqueConfirm: (rating: number, liked: boolean) => Promise<void>
+  isQuickCritiqueSaving: boolean
   onNext?: () => void
   onPrevious?: () => void
   closeButtonRef: React.RefObject<HTMLButtonElement | null>
@@ -60,6 +68,8 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   onClose,
   onToggle,
   onDelete,
+  onQuickCritiqueConfirm,
+  isQuickCritiqueSaving,
   onNext,
   onPrevious,
   closeButtonRef,
@@ -69,8 +79,10 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   const isRetroCartoon = theme === 'retro-cartoon'
   const isCyberpunk = theme === 'cyberpunk'
   const isTerminal = theme === 'terminal'
-  const [isPromptingComment, setIsPromptingComment] = React.useState(false)
-  const { saveComment, deleteComment } = useItemComments(selectedItem?.id)
+  const [showQuickCritique, setShowQuickCritique] = React.useState(false)
+  const quickCritiqueAutoOpenedRef = React.useRef(false)
+  const { deleteComment } = useItemComments(selectedItem?.id)
+  const { rating: existingItemRating } = useItemRating(selectedItem?.id ?? '')
   const selectedItemId = selectedItem?.id
   const isSelectedItemWatched = Boolean(selectedItem?.visto)
   const activeLanguage = i18n.resolvedLanguage || i18n.language
@@ -88,11 +100,23 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
     'border-[3px] border-black bg-[var(--color-bg-primary)] text-black shadow-[4px_4px_0px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none'
 
   React.useEffect(() => {
-    setIsPromptingComment(Boolean(promptCommentOnOpen) && !isSelectedItemWatched)
-  }, [promptCommentOnOpen, selectedItemId, isSelectedItemWatched, isOpen])
+    if (!isOpen || !selectedItem) {
+      quickCritiqueAutoOpenedRef.current = false
+      setShowQuickCritique(false)
+      return
+    }
+    if (promptCommentOnOpen && !selectedItem.visto && !quickCritiqueAutoOpenedRef.current) {
+      setShowQuickCritique(true)
+      quickCritiqueAutoOpenedRef.current = true
+    }
+  }, [isOpen, selectedItemId, promptCommentOnOpen, selectedItem?.visto])
 
   const handleRequestClose = () => {
-    if (isPromptingComment) return
+    if (isQuickCritiqueSaving) return
+    if (showQuickCritique) {
+      setShowQuickCritique(false)
+      return
+    }
     onClose()
   }
 
@@ -100,7 +124,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
     if (modalActionLoading !== null) return
 
     if (!selectedItem.visto) {
-      setIsPromptingComment(true)
+      setShowQuickCritique(true)
       return
     }
 
@@ -110,10 +134,8 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
     await onToggle()
   }
 
-  const handleConfirmWatch = async (content: string) => {
-    await saveComment(content)
-    await onToggle()
-    setIsPromptingComment(false)
+  const handleQuickCritiqueConfirm = async (rating: number, liked: boolean) => {
+    await onQuickCritiqueConfirm(rating, liked)
   }
 
   if (!isOpen || !selectedItem) return null
@@ -125,8 +147,10 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
       : translatedSynopsis || synopsis
   const displayTitle = formatRetroHeading(selectedItem.titulo, theme)
 
-  return createPortal(
-    <div
+  return (
+    <>
+      {createPortal(
+        <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
@@ -234,7 +258,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                     : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
               }`}
               aria-label={closeLabel}
-              disabled={isPromptingComment}
+              disabled={isQuickCritiqueSaving}
             >
               X
             </button>
@@ -290,7 +314,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               </div>
             </div>
 
-            {(selectedItem.visto || isPromptingComment) && (
+            {selectedItem.visto && (
               <div className="mb-6">
                 <ItemCommentBox
                   itemId={selectedItem.id}
@@ -300,12 +324,6 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                     genre: selectedItem.genero,
                     synopsis,
                   }}
-                  requireCommentForWatch={isPromptingComment}
-                  watchConfirmationLoading={modalActionLoading === 'toggle'}
-                  onConfirmWatch={isPromptingComment ? handleConfirmWatch : undefined}
-                  onCancelWatchPrompt={
-                    isPromptingComment ? () => setIsPromptingComment(false) : undefined
-                  }
                 />
               </div>
             )}
@@ -314,7 +332,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               <button
                 type="button"
                 onClick={handleToggleClick}
-                disabled={modalActionLoading !== null}
+                disabled={modalActionLoading !== null || showQuickCritique}
                 className={`theme-heading-font flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm md:text-base font-bold uppercase tracking-[0.14em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
                   isRetroCartoon
                     ? 'border-[3px] border-black bg-[var(--color-bg-primary)] text-black shadow-[5px_5px_0px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[4px_4px_0px_0px_#000000] active:translate-x-[5px] active:translate-y-[5px] active:shadow-none'
@@ -332,11 +350,13 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                 <span>
                   {modalActionLoading === 'toggle'
                     ? 'Actualizando...'
-                    : isPromptingComment
-                      ? 'Reseña obligatoria pendiente'
+                    : showQuickCritique
+                      ? isRetroCartoon
+                        ? 'CIERRA LA CRITICA O COMPLETA'
+                        : 'Completa la crítica rápida o ciérrala'
                       : selectedItem.visto
-                      ? markUnwatchedLabel
-                      : markWatchedLabel}
+                        ? markUnwatchedLabel
+                        : markWatchedLabel}
                 </span>
               </button>
             </div>
@@ -354,7 +374,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                         ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
                       : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
                 }`}
-                disabled={isPromptingComment}
+                disabled={isQuickCritiqueSaving}
               >
                 Cerrar
               </button>
@@ -382,7 +402,24 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
         </div>
       </div>
     </div>,
-    document.body
+        document.body,
+      )}
+      <QuickCritiqueModal
+      isOpen={showQuickCritique}
+      itemTitle={String(displayTitle)}
+      initialStars={existingItemRating?.rating ?? null}
+      initialReaction={
+        existingItemRating?.liked === true
+          ? 'like'
+          : existingItemRating?.liked === false
+            ? 'dislike'
+            : null
+      }
+      saving={isQuickCritiqueSaving}
+      onCancel={() => setShowQuickCritique(false)}
+      onConfirm={handleQuickCritiqueConfirm}
+      />
+    </>
   )
 }
 
