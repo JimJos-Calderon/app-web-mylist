@@ -22,6 +22,14 @@ interface UseListContentViewReturn {
 
 const DEFAULT_ITEMS_PER_PAGE = 9
 
+function normalizeSearchText(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+}
+
 export const useListContentView = ({
   items,
   filters,
@@ -31,8 +39,12 @@ export const useListContentView = ({
   const searchedAndSortedItems = useMemo(() => {
     return items
       .filter((item) => {
-        if (!filters.searchQuery) return true
-        return item.titulo.toLowerCase().includes(filters.searchQuery.toLowerCase())
+        const raw = filters.searchQuery?.trim() ?? ''
+        if (!raw) return true
+        const q = normalizeSearchText(raw)
+        const t1 = normalizeSearchText(item.titulo ?? '')
+        const t2 = normalizeSearchText(item.title_es ?? '')
+        return t1.includes(q) || (t2.length > 0 && t2.includes(q))
       })
       .sort((a, b) => {
         let compareResult = 0

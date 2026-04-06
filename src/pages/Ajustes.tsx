@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
 import { ConfirmDialog, ThemeSwitcher, usePushNotifications, useTheme } from '@/features/shared'
@@ -6,6 +7,7 @@ import { LanguageSwitcher } from '@/features/shared/components/LanguageSwitcher'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/supabaseClient'
+import { syncTitleEsForUserLists } from '@/features/items/services/syncTitleEsFromTmdb'
 import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key, Bell } from 'lucide-react'
 import HudContainer from '@/features/shared/components/HudContainer'
 import TechLabel from '@/features/shared/components/TechLabel'
@@ -39,6 +41,11 @@ const Ajustes: React.FC = () => {
   const [showVerifyEmailPassword, setShowVerifyEmailPassword] = useState(false)
   const [securityMessage, setSecurityMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [pushMessage, setPushMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [syncTitleEsMessage, setSyncTitleEsMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
+    null
+  )
+  const [syncTitleEsLoading, setSyncTitleEsLoading] = useState(false)
+  const queryClient = useQueryClient()
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
@@ -73,6 +80,30 @@ const Ajustes: React.FC = () => {
   } = usePushNotifications()
   
   const navigate = useNavigate()
+
+  const handleSyncTitleEs = async () => {
+    if (!user?.id) return
+    setSyncTitleEsLoading(true)
+    setSyncTitleEsMessage(null)
+    try {
+      const r = await syncTitleEsForUserLists(user.id)
+      setSyncTitleEsMessage({
+        type: 'success',
+        text: t('settings.sync_title_es_success', {
+          updated: r.updated,
+          scanned: r.scanned,
+          skipped: r.skipped,
+          errors: r.errors,
+        }),
+      })
+      await queryClient.invalidateQueries({ queryKey: ['items'] })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setSyncTitleEsMessage({ type: 'error', text: msg })
+    } finally {
+      setSyncTitleEsLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (profile) {
@@ -494,6 +525,38 @@ const Ajustes: React.FC = () => {
                     style={isRetroCartoon ? undefined : { clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
                   >
                     {isSaving ? t('settings.saving_button') : t('settings.save_button')}
+                  </button>
+                </HudContainer>
+
+                <HudContainer className="p-6">
+                  <h2
+                    className={`text-lg font-black tracking-widest uppercase mb-3 text-accent-primary ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}
+                  >
+                    {formatRetroHeading(t('settings.sync_title_es_title'), theme)}
+                  </h2>
+                  <p className="text-xs font-mono text-[var(--color-text-muted)] mb-4">
+                    {t('settings.sync_title_es_description')}
+                  </p>
+                  {syncTitleEsMessage && (
+                    <div
+                      className={`text-sm font-mono mb-3 px-3 py-2 rounded border ${
+                        syncTitleEsMessage.type === 'success'
+                          ? 'border-[rgba(var(--color-accent-primary-rgb),0.35)] text-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.08)]'
+                          : 'border-[rgba(var(--color-accent-secondary-rgb),0.35)] text-accent-secondary bg-[rgba(var(--color-accent-secondary-rgb),0.08)]'
+                      }`}
+                    >
+                      {syncTitleEsMessage.text}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleSyncTitleEs}
+                    disabled={syncTitleEsLoading || !user?.id}
+                    className={`w-full px-4 py-3 font-mono tracking-widest text-xs uppercase transition-all rounded border border-[rgba(var(--color-accent-primary-rgb),0.35)] text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.12)] disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isRetroCartoon ? 'theme-heading-font' : ''
+                    }`}
+                  >
+                    {syncTitleEsLoading ? t('settings.sync_title_es_loading') : t('settings.sync_title_es_button')}
                   </button>
                 </HudContainer>
 

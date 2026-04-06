@@ -13,6 +13,8 @@ export interface Session {
 export interface ListItem {
   id: string
   titulo: string
+  /** Título en español (TMDB u orígenes); nullable para ítems antiguos. */
+  title_es?: string | null
   tipo: 'pelicula' | 'serie'
   visto: boolean
   user_id: string

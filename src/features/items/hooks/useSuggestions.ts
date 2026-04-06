@@ -3,6 +3,27 @@ import { useQuery } from '@tanstack/react-query'
 import { OmdbSuggestion, OmdbResponse, DEBOUNCE_DELAY, MAX_SUGGESTIONS } from '@/features/shared'
 import { queryKeys } from '@config/queryKeys'
 import { supabase } from '@/supabaseClient'
+import { searchTmdbAsOmdbSuggestions } from '@/features/items/services/tmdbService'
+
+function normalizeSuggestionKey(s: OmdbSuggestion): string {
+  const t = s.Title.trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  return `${t}|${s.Year}`
+}
+
+/** TMDB primero (mejor para títulos en español); OMDB rellena huecos. Sin duplicados obvios por título+año. */
+function mergeSearchSuggestions(tmdb: OmdbSuggestion[], omdb: OmdbSuggestion[]): OmdbSuggestion[] {
+  const seen = new Set<string>()
+  const out: OmdbSuggestion[] = []
+  for (const s of [...tmdb, ...omdb]) {
+    if (!s.Title?.trim()) continue
+    const k = normalizeSuggestionKey(s)
+    if (seen.has(k)) continue
+    seen.add(k)
+    out.push(s)
+    if (out.length >= MAX_SUGGESTIONS) break
+  }
+  return out
+}
 
 interface UseSuggestionsReturn {
   suggestions: OmdbSuggestion[]
@@ -40,13 +61,18 @@ export const useSuggestions = (
         return []
       }
 
-      const { data, error } = await supabase.functions.invoke('search-omdb', {
-        body: {
-          query: debouncedQuery,
-          type: tipo === 'pelicula' ? 'movie' : 'series',
-          page: 1,
-        },
-      })
+      const [tmdbList, omdbResult] = await Promise.all([
+        searchTmdbAsOmdbSuggestions(debouncedQuery, tipo),
+        supabase.functions.invoke('search-omdb', {
+          body: {
+            query: debouncedQuery,
+            type: tipo === 'pelicula' ? 'movie' : 'series',
+            page: 1,
+          },
+        }),
+      ])
+
+      const { data, error } = omdbResult
 
       if (error) {
         throw new Error(error.message || 'Failed to fetch OMDB suggestions')
@@ -54,11 +80,12 @@ export const useSuggestions = (
 
       const omdbData = data as OmdbResponse
 
-      if (omdbData.Response === 'False' || omdbData.Error) {
-        return []
-      }
+      const omdbList =
+        omdbData.Response === 'False' || omdbData.Error
+          ? []
+          : (omdbData.Search || []).slice(0, MAX_SUGGESTIONS)
 
-      return (omdbData.Search || []).slice(0, MAX_SUGGESTIONS)
+      return mergeSearchSuggestions(tmdbList, omdbList)
     },
     enabled: debouncedQuery.length >= 3,
     staleTime: 60 * 60 * 1000, // 60 minutos (mismo TTL que antes)
