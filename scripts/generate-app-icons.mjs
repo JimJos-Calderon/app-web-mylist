@@ -1,7 +1,9 @@
 /**
  * Genera iconos en public/ desde assets/icon.png:
  * recorte centrado tipo "cover" (cuadrado) + maskable con margen seguro.
+ * Además: pwa-64x64 (manifest) y logo-navbar.webp (navbar + preload, desde icon-sin-fondo si existe).
  */
+import fs from 'fs'
 import sharp from 'sharp'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -38,9 +40,34 @@ async function maskable512() {
   }).composite([{ input: buf, left, top }]).png()
 }
 
+async function writeNavbarWebp() {
+  const candidates = [
+    path.join(root, 'assets', 'icon-sin-fondo.png'),
+    path.join(root, 'assets', 'icon.png'),
+    path.join(outDir, 'pwa-512x512.png'),
+  ]
+  const src = candidates.find((p) => fs.existsSync(p))
+  if (!src) {
+    console.warn('skip logo-navbar.webp: no source found')
+    return
+  }
+  const dest = path.join(outDir, 'logo-navbar.webp')
+  await sharp(src)
+    .resize(256, 256, { fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: 85, effort: 4 })
+    .toFile(dest)
+  console.log('written', 'logo-navbar.webp', '(from', path.basename(src) + ')')
+}
+
 async function main() {
+  if (!fs.existsSync(input)) {
+    console.error('Missing', input, '- coloca assets/icon.png para generar PWA icons.')
+    process.exit(1)
+  }
+
   const targets = [
     ['favicon.png', 48],
+    ['pwa-64x64.png', 64],
     ['apple-touch-icon.png', 180],
     ['pwa-192x192.png', 192],
     ['pwa-512x512.png', 512],
@@ -55,6 +82,8 @@ async function main() {
   const maskPath = path.join(outDir, 'pwa-512x512-maskable.png')
   await (await maskable512()).toFile(maskPath)
   console.log('written', 'pwa-512x512-maskable.png', '512x512 (safe zone)')
+
+  await writeNavbarWebp()
 }
 
 main().catch((err) => {

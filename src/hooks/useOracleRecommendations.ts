@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { invokeAiProxy } from '@/lib/invokeAiProxy';
 
 export interface FavoriteItem {
   titulo: string;
@@ -144,14 +145,6 @@ export const useOracleRecommendations = (): UseOracleRecommendationsReturn => {
     setError(null);
     setRecomendaciones(null);
 
-    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-
-    if (!apiKey) {
-      setError('Error Crítico: Llave de acceso al Oráculo no detectada en la variable VITE_GROQ_API_KEY.');
-      setIsLoading(false);
-      return;
-    }
-
     const systemPrompt = `Eres el Oráculo Cinéfilo. Tu misión es recomendar películas basándote en el perfil del usuario.
 
 Te llegarán dos bloques de datos en el mensaje del usuario:
@@ -213,32 +206,17 @@ ${JSON.stringify(excludedTitles, null, 2)}
 Responde solo con el JSON indicado en las instrucciones del sistema.`;
 
     try {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          response_format: { type: 'json_object' },
-          temperature: 0.8,
-          presence_penalty: 0.3,
-          frequency_penalty: 0.3,
-        })
+      const data = await invokeAiProxy({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.8,
+        presence_penalty: 0.3,
+        frequency_penalty: 0.3,
       });
-
-      if (!response.ok) {
-        const errBody = await response.json().catch(() => ({}))
-        console.error('[Oracle API Error body]:', errBody)
-        throw new Error(`Conexión con el Oráculo rechazada. Código nativo: ${response.status} — ${(errBody as any)?.error?.message ?? 'sin detalle'}`);
-      }
-
-      const data = await response.json();
       let content = data.choices?.[0]?.message?.content;
 
       if (!content) {

@@ -1,0 +1,11 @@
+# Configuración de Edge Functions para el CLI de Supabase.
+# Sin esto, el gateway puede responder 401 aunque el cliente envíe el anon key,
+# según la política del proyecto. La clave Groq sigue solo en el servidor (secreto).
+#
+# Tras añadir o cambiar esto: volver a desplegar la función.
+#   npx supabase functions deploy ai-proxy
+#
+# Alternativa en dashboard: Edge Functions → ai-proxy → desactivar "Verify JWT".
+
+[functions.ai-proxy]
+verify_jwt = false
