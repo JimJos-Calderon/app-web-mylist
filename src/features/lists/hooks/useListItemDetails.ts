@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
-import { useOmdb } from '@/features/items'
+import { resolveItemSynopsis } from '@/features/items/services/itemSynopsisService'
 import { ListItem } from '@/features/shared'
 
 interface UseListItemDetailsParams {
@@ -36,8 +36,6 @@ export const useListItemDetails = ({
   onDeleteItem,
   getDeleteConfirmationMessage,
 }: UseListItemDetailsParams): UseListItemDetailsReturn => {
-  const { fetchPlot } = useOmdb()
-
   const [selectedItem, setSelectedItem] = useState<ListItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalAnimating, setIsModalAnimating] = useState(false)
@@ -113,7 +111,7 @@ export const useListItemDetails = ({
     setSynopsisLoading(true)
 
     try {
-      const plot = await fetchPlot(item.titulo)
+      const plot = await resolveItemSynopsis(item)
       setSynopsis(plot)
 
       if (plot) {

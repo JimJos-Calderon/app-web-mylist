@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent, type RefObject } from 'react'
 import { useSuggestions } from '@/features/items'
 import {
+  enrichFromTmdb,
+  enrichFromTmdbByNumericId,
+  parseTmdbSuggestionImdbId,
+} from '@/features/items/services/tmdbService'
+import {
   ListItem,
   OmdbSuggestion,
   User,
@@ -109,15 +114,20 @@ export const useListSearchFlow = ({
     try {
       const poster = suggestion.Poster !== 'N/A' ? suggestion.Poster : null
       const omdbData = await fetchOmdbData(suggestion.Title)
+      const pick = parseTmdbSuggestionImdbId(suggestion.imdbID)
+      const tmdb = pick
+        ? await enrichFromTmdbByNumericId(pick.id, pick.tipo)
+        : await enrichFromTmdb(suggestion.Title, tipo)
 
       await onAddItem({
-        titulo: suggestion.Title,
+        titulo: tmdb?.titulo ?? suggestion.Title,
+        title_es: tmdb?.title_es ?? null,
         tipo,
         visto: false,
         user_id: user.id,
         user_email: user.email || '',
-        poster_url: poster,
-        genero: omdbData.Genre || undefined,
+        poster_url: tmdb?.posterUrl ?? poster,
+        genero: (tmdb?.genresCsv ?? omdbData.Genre) || undefined,
         list_id: listId || '',
       })
 
@@ -138,16 +148,19 @@ export const useListSearchFlow = ({
     }
 
     try {
-      const omdbData = await fetchOmdbData(searchInput)
+      const titleRaw = sanitizeInput(searchInput)
+      const omdbData = await fetchOmdbData(titleRaw)
+      const tmdb = await enrichFromTmdb(titleRaw, tipo)
 
       await onAddItem({
-        titulo: sanitizeInput(searchInput),
+        titulo: tmdb?.titulo ?? titleRaw,
+        title_es: tmdb?.title_es ?? null,
         tipo,
         visto: false,
         user_id: user.id,
         user_email: user.email || '',
-        poster_url: omdbData.Poster || null,
-        genero: omdbData.Genre || undefined,
+        poster_url: tmdb?.posterUrl ?? omdbData.Poster ?? null,
+        genero: (tmdb?.genresCsv ?? omdbData.Genre) || undefined,
         list_id: listId || '',
       })
 
