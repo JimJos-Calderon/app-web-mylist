@@ -55,7 +55,8 @@ const Perfil: React.FC = () => {
             user_email,
             poster_url,
             created_at,
-            genero
+            genero,
+            list_id
           )
         `)
         .eq('user_id', user?.id)
@@ -77,7 +78,7 @@ const Perfil: React.FC = () => {
             created_at: r.items.created_at,
             genero: r.items.genero,
             rating: r.rating,
-            list_id: '' // Satisfy ListItem typing for global ratings without a specific list context
+            list_id: r.items.list_id != null ? String(r.items.list_id) : '',
           },
           rating: {
             rating: r.rating,
@@ -109,9 +110,58 @@ const Perfil: React.FC = () => {
     return () => window.clearTimeout(timer)
   }, [critiqueToast])
 
-  const handleDelete = async (_id: string) => {
-    // No eliminar desde perfil - solo ver
-  }
+  const handleRemoveRatingAndUnwatch = useCallback(
+    async (itemId: string) => {
+      if (!user?.id) throw new Error('Sin sesión')
+
+      const { data: meta, error: metaError } = await supabase
+        .from('items')
+        .select('list_id, tipo')
+        .eq('id', itemId)
+        .single()
+
+      if (metaError) throw metaError
+
+      const listId = meta?.list_id != null ? String(meta.list_id) : ''
+      const tipo = meta?.tipo as 'pelicula' | 'serie' | undefined
+
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({ visto: false })
+        .eq('id', itemId)
+
+      if (updateError) throw updateError
+
+      const { error: ratingsError } = await supabase
+        .from('item_ratings')
+        .delete()
+        .eq('item_id', itemId)
+        .eq('user_id', user.id)
+
+      if (ratingsError) throw ratingsError
+
+      const { error: commentsError } = await supabase
+        .from('item_comments')
+        .delete()
+        .eq('item_id', itemId)
+        .eq('user_id', user.id)
+
+      if (commentsError) throw commentsError
+
+      await fetchRatedItems()
+
+      if (listId && tipo) {
+        await queryClient.invalidateQueries({ queryKey: queryKeys.items.byList(tipo, listId) })
+      }
+      await queryClient.invalidateQueries({ queryKey: ['itemRating', itemId, user.id] })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.itemComments.byItemAndUser(itemId, user.id),
+      })
+      await queryClient.invalidateQueries({ queryKey: queryKeys.itemComments.byItem(itemId) })
+      await queryClient.invalidateQueries({ queryKey: queryKeys.oracle.allRatingsForUser(user.id) })
+    },
+    [user?.id, fetchRatedItems, queryClient],
+  )
 
   const handleToggleVisto = async (id: string, currentState: boolean) => {
     const { error } = await supabase
@@ -136,11 +186,22 @@ const Perfil: React.FC = () => {
     )
   }
 
-  const handleQuickCritiqueSave = async (itemId: string, rating: number, liked: boolean) => {
-    await saveQuickCritique(itemId, rating, liked)
+  const handleQuickCritiqueSave = async (
+    itemId: string,
+    rating: number,
+    liked: boolean,
+    comment?: string | null
+  ) => {
+    await saveQuickCritique(itemId, rating, liked, comment)
     await fetchRatedItems()
     if (user?.id) {
       await queryClient.invalidateQueries({ queryKey: ['itemRating', itemId, user.id] })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.itemComments.byItemAndUser(itemId, user.id),
+      })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.itemComments.byItem(itemId),
+      })
       await queryClient.invalidateQueries({
         queryKey: queryKeys.oracle.allRatingsForUser(user.id),
       })
@@ -150,8 +211,9 @@ const Perfil: React.FC = () => {
   const itemDetails = useListItemDetails({
     currentUserId: user?.id || '',
     onToggleVisto: handleToggleVisto,
-    onDeleteItem: async () => {},
-    getDeleteConfirmationMessage: (item) => `Eliminar ${item.titulo}?`,
+    onDeleteItem: handleRemoveRatingAndUnwatch,
+    getDeleteConfirmationMessage: () => t('item.remove_rating_modal_confirm'),
+    canDeleteItem: (item) => ratedItems.some((r) => r.item.id === item.id),
     onQuickCritiqueSave: handleQuickCritiqueSave,
     onQuickCritiqueSuccess: () => {
       const msg =
@@ -258,7 +320,7 @@ const Perfil: React.FC = () => {
               onClick={() => navigate('/ajustes')}
               className={`px-6 py-3 font-bold transition-all flex items-center justify-center gap-2 ${
                 isRetroCartoon
-                  ? 'border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl bg-white text-black hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none'
+                  ? 'theme-heading-font border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl bg-white text-black text-sm uppercase tracking-[0.12em] hover:-translate-y-[2px] hover:shadow-[7px_7px_0px_0px_#000000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none'
                   : 'bg-[rgba(var(--color-accent-primary-rgb),0.05)] backdrop-blur-md border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:border-accent-primary hover:shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.3)]'
               }`}
               style={isRetroCartoon ? { clipPath: 'none' } : undefined}
@@ -282,11 +344,14 @@ const Perfil: React.FC = () => {
                   key={item.id}
                   item={item}
                   isOwn={true}
-                  onDelete={handleDelete}
+                  onDelete={handleRemoveRatingAndUnwatch}
                   onToggleVisto={handleToggleVisto}
                   onOpenDetails={handleOpenDetails}
                   disableVistoEffect={true}
                   compactWatchedToggle={true}
+                  deleteDialogTitle={t('item.remove_rating_title')}
+                  deleteConfirmMessage={t('item.remove_rating_confirm', { title: item.titulo })}
+                  deleteConfirmButtonText={t('item.remove_rating_button')}
                 />
               ))}
             </div>
@@ -368,7 +433,7 @@ const Perfil: React.FC = () => {
         synopsisLoading={itemDetails.synopsisLoading}
         synopsisError={itemDetails.synopsisError}
         modalActionLoading={itemDetails.modalActionLoading}
-        canDelete={false}
+        canDelete={itemDetails.canDeleteSelectedItem}
         promptCommentOnOpen={itemDetails.shouldPromptComment}
         titlePrefix={t('details_title')}
         closeLabel={t('modal.close')}
@@ -381,7 +446,7 @@ const Perfil: React.FC = () => {
         notWatchedLabel={t('item.not_watched')}
         markWatchedLabel={t('item.mark_watched')}
         markUnwatchedLabel={t('item.mark_unwatched')}
-        deleteLabel={t('action.delete')}
+        deleteLabel={t('item.remove_rating_short')}
         onClose={itemDetails.handleCloseDetails}
         onToggle={itemDetails.handleToggleFromModal}
         onDelete={itemDetails.handleDeleteFromModal}

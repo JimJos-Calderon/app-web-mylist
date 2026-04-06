@@ -109,11 +109,11 @@ const RatingWidget: React.FC<RatingWidgetProps> = ({ itemId, onlyOwn = true, ton
               disabled={isUpdating}
               className={`mt-2 w-full px-2 py-1 transition-colors disabled:opacity-50 ${
                 isRetroCartoon
-                  ? 'text-black font-bold uppercase text-xs hover:underline'
+                  ? 'theme-heading-font text-black font-bold uppercase text-xs tracking-[0.12em] hover:underline'
                   : `text-xs hud-clear-button hud-clear-button--${toneClass}`
               }`}
             >
-              Limpiar
+              {t('filter.reset')}
             </button>
           </div>
         )}

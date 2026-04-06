@@ -14,6 +14,10 @@ interface ItemCardProps {
   onOpenDetails: (item: ListItem, options?: { promptComment?: boolean }) => void
   disableVistoEffect?: boolean
   compactWatchedToggle?: boolean
+  /** Textos del diálogo de confirmación al borrar (p. ej. perfil: quitar valoración, no borrar de lista). */
+  deleteDialogTitle?: string
+  deleteConfirmMessage?: string
+  deleteConfirmButtonText?: string
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({
@@ -24,6 +28,9 @@ const ItemCard: React.FC<ItemCardProps> = ({
   onOpenDetails,
   disableVistoEffect = false,
   compactWatchedToggle = false,
+  deleteDialogTitle,
+  deleteConfirmMessage,
+  deleteConfirmButtonText,
 }) => {
   const { t } = useTranslation()
   const [deleting, setDeleting] = React.useState(false)
@@ -284,9 +291,9 @@ const ItemCard: React.FC<ItemCardProps> = ({
 
       <ConfirmDialog
         isOpen={showConfirmDialog}
-        title={t('buttons.delete')}
-        message={t('item.delete_confirm')}
-        confirmText={t('buttons.delete')}
+        title={deleteDialogTitle ?? t('buttons.delete')}
+        message={deleteConfirmMessage ?? t('item.delete_confirm')}
+        confirmText={deleteConfirmButtonText ?? t('buttons.delete')}
         cancelText={t('buttons.cancel')}
         onConfirm={handleDelete}
         onCancel={() => setShowConfirmDialog(false)}

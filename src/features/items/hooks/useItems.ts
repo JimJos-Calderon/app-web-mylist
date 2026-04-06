@@ -197,12 +197,14 @@ export const useItems = (
       itemId,
       rating,
       liked,
+      comment,
     }: {
       itemId: string
       rating: number
       liked: boolean
+      comment?: string | null
     }) => {
-      await saveQuickCritique(itemId, rating, liked)
+      await saveQuickCritique(itemId, rating, liked, comment)
     },
     onMutate: async ({ itemId }) => {
       const key = queryKeys.items.byList(tipo, listId || '')
@@ -231,6 +233,12 @@ export const useItems = (
       if (vars?.itemId) {
         queryClient.invalidateQueries({
           queryKey: ['itemRating', vars.itemId, userId],
+        })
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.itemComments.byItemAndUser(vars.itemId, userId),
+        })
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.itemComments.byItem(vars.itemId),
         })
       }
       queryClient.invalidateQueries({

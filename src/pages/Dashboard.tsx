@@ -163,12 +163,23 @@ const Dashboard: React.FC = () => {
     await queryClient.invalidateQueries({ queryKey: ['items'] })
   }
 
-  const handleQuickCritiqueSave = async (itemId: string, rating: number, liked: boolean) => {
-    await saveQuickCritique(itemId, rating, liked)
+  const handleQuickCritiqueSave = async (
+    itemId: string,
+    rating: number,
+    liked: boolean,
+    comment?: string | null
+  ) => {
+    await saveQuickCritique(itemId, rating, liked, comment)
     await queryClient.invalidateQueries({ queryKey: ['items'] })
     await queryClient.invalidateQueries({ queryKey: ['items', 'all', currentList?.id] })
     if (user?.id) {
       await queryClient.invalidateQueries({ queryKey: ['itemRating', itemId, user.id] })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.itemComments.byItemAndUser(itemId, user.id),
+      })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.itemComments.byItem(itemId),
+      })
       await queryClient.invalidateQueries({
         queryKey: queryKeys.oracle.allRatingsForUser(user.id),
       })

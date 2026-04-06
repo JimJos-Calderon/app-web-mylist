@@ -7,7 +7,14 @@ interface UseListItemDetailsParams {
   onToggleVisto: (id: string, currentState: boolean) => Promise<void>
   onDeleteItem: (id: string) => Promise<void>
   getDeleteConfirmationMessage: (item: ListItem) => string
-  onQuickCritiqueSave: (itemId: string, rating: number, liked: boolean) => Promise<void>
+  /** Si se define, sustituye la regla por defecto (solo el dueño del ítem puede borrar). */
+  canDeleteItem?: (item: ListItem) => boolean
+  onQuickCritiqueSave: (
+    itemId: string,
+    rating: number,
+    liked: boolean,
+    comment?: string | null
+  ) => Promise<void>
   onQuickCritiqueSuccess?: () => void
 }
 
@@ -22,7 +29,7 @@ interface UseListItemDetailsReturn {
   synopsis: string | null
   synopsisLoading: boolean
   synopsisError: string | null
-  modalActionLoading: 'toggle' | 'delete' | null
+  modalActionLoading: 'toggle' | 'delete' | 'critique' | null
   canDeleteSelectedItem: boolean
   shouldPromptComment: boolean
   closeButtonRef: RefObject<HTMLButtonElement | null>
@@ -30,7 +37,7 @@ interface UseListItemDetailsReturn {
   handleCloseDetails: () => void
   handleToggleFromModal: () => Promise<void>
   handleDeleteFromModal: () => Promise<void>
-  handleConfirmQuickCritique: (rating: number, liked: boolean) => Promise<void>
+  handleConfirmQuickCritique: (rating: number, liked: boolean, comment: string) => Promise<void>
   isQuickCritiqueSaving: boolean
 }
 
@@ -39,6 +46,7 @@ export const useListItemDetails = ({
   onToggleVisto,
   onDeleteItem,
   getDeleteConfirmationMessage,
+  canDeleteItem,
   onQuickCritiqueSave,
   onQuickCritiqueSuccess,
 }: UseListItemDetailsParams): UseListItemDetailsReturn => {
@@ -167,18 +175,17 @@ export const useListItemDetails = ({
     }
   }
 
-  const handleConfirmQuickCritique = async (rating: number, liked: boolean) => {
+  const handleConfirmQuickCritique = async (rating: number, liked: boolean, comment: string) => {
     if (!selectedItem || modalActionLoading) return
 
     setModalActionLoading('critique')
 
     try {
-      await onQuickCritiqueSave(selectedItem.id, rating, liked)
+      await onQuickCritiqueSave(selectedItem.id, rating, liked, comment)
       onQuickCritiqueSuccess?.()
       setSelectedItem((previousItem) =>
         previousItem ? { ...previousItem, visto: true } : previousItem
       )
-      handleCloseDetails()
     } catch (error) {
       console.error('Quick critique error:', error)
       alert(
@@ -206,6 +213,11 @@ export const useListItemDetails = ({
     }
   }
 
+  const canDeleteSelectedItem = Boolean(
+    selectedItem &&
+      (canDeleteItem ? canDeleteItem(selectedItem) : selectedItem.user_id === currentUserId),
+  )
+
   return {
     selectedItem,
     isModalOpen,
@@ -214,7 +226,7 @@ export const useListItemDetails = ({
     synopsisLoading,
     synopsisError,
     modalActionLoading,
-    canDeleteSelectedItem: selectedItem?.user_id === currentUserId,
+    canDeleteSelectedItem,
     shouldPromptComment,
     closeButtonRef,
     handleOpenDetails,

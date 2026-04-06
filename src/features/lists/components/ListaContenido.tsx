@@ -147,8 +147,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     onToggleVisto: toggleVisto,
     onDeleteItem: deleteItem,
     getDeleteConfirmationMessage: (item) => t('modal.delete_title', { title: item.titulo }),
-    onQuickCritiqueSave: async (itemId, rating, liked) => {
-      await quickCritiqueAndWatch({ itemId, rating, liked })
+    onQuickCritiqueSave: async (itemId, rating, liked, comment) => {
+      await quickCritiqueAndWatch({ itemId, rating, liked, comment })
     },
     onQuickCritiqueSuccess: () => setCritiqueToast(critiqueSuccessCopy),
   })
