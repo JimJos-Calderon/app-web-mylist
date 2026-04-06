@@ -16,7 +16,8 @@ import HudContainer from '@/features/shared/components/HudContainer'
 import { useTheme } from '@/features/shared'
 import type { ThemePreference } from '@/features/shared'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
-import appLogo from '../../../../assets/icon-sin-fondo.png'
+/** Fallback si aún no existe public/logo-navbar.webp (ej. sin ejecutar npm run icons). */
+import appLogoPngFallback from '../../../../assets/icon-sin-fondo.png'
 
 const AppNavbar: React.FC = () => {
   const { signOut, session } = useAuth()
@@ -64,17 +65,23 @@ const AppNavbar: React.FC = () => {
         : 'border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-primary)] backdrop-blur-md'
     }`}>
       <Link to="/" className="group flex items-center gap-2 sm:gap-3">
-        <img
-          src={appLogo}
-          alt="Logo de la App"
-          loading="eager"
-          decoding="async"
-          className={`h-8 w-auto object-contain shrink-0 transition-all duration-300 group-hover:scale-110 sm:h-10 ${
-            isRetroCartoon
-              ? 'drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] contrast-125 saturate-75'
-              : 'drop-shadow-[0_0_10px_rgba(var(--color-accent-secondary-rgb),0.35)]'
-          }`}
-        />
+        <picture>
+          <source srcSet="/logo-navbar.webp" type="image/webp" />
+          <img
+            src={appLogoPngFallback}
+            alt="Logo de la App"
+            width={160}
+            height={40}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            className={`h-8 w-auto max-h-10 object-contain shrink-0 transition-all duration-300 group-hover:scale-110 sm:h-10 ${
+              isRetroCartoon
+                ? 'drop-shadow-[2px_2px_0px_rgba(0,0,0,1)] contrast-125 saturate-75'
+                : 'drop-shadow-[0_0_10px_rgba(var(--color-accent-secondary-rgb),0.35)]'
+            }`}
+          />
+        </picture>
         <span className={`text-base sm:text-2xl font-black tracking-tighter text-[var(--color-text-primary)] ${isTerminal || isCyberpunk ? 'theme-heading-font' : ''} ${isCyberpunk ? 'cyberpunk-text-glow' : ''}`}>
           <span className="hidden sm:inline">
             <span className={isRetroCartoon || isCyberpunk ? 'theme-heading-font uppercase' : ''}>

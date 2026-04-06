@@ -20,9 +20,11 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       includeAssets: [
-        'favicon.ico',
+        'favicon.png',
         'apple-touch-icon.png',
         'masked-icon.svg',
+        'logo-navbar.webp',
+        'pwa-64x64.png',
       ],
       manifest: {
         name: 'MyList - Peliculas y Series',
@@ -34,6 +36,11 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         icons: [
+          {
+            src: '/pwa-64x64.png',
+            sizes: '64x64',
+            type: 'image/png',
+          },
           {
             src: '/pwa-192x192.png',
             sizes: '192x192',
@@ -53,8 +60,18 @@ export default defineConfig({
         ],
       },
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,ico,svg,webp,woff2}', 'pwa-*.png', 'favicon.png', 'apple-touch-icon.png', 'masked-icon.svg'],
+        // Incluye explícitamente marca y PWA para precache inmediato (logo webp + PNGs de icono).
+        globPatterns: [
+          '**/*.{js,css,html,ico,svg,webp,woff2}',
+          'pwa-*.png',
+          'favicon.png',
+          'apple-touch-icon.png',
+          'logo-navbar.webp',
+          'masked-icon.svg',
+        ],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MiB
+        // Evita meter fondos enormes de login en precache (sí se sirven desde /public).
+        globIgnores: ['**/login-bg.png', '**/retro-login-bg.png'],
       },
     }),
   ],

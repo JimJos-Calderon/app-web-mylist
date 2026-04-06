@@ -1,4 +1,5 @@
 import type { ListItem, OmdbResponse } from '@/features/shared'
+import { invokeAiProxy } from '@/lib/invokeAiProxy'
 import { supabase } from '@/supabaseClient'
 import { getTmdbDetailsEs, searchTmdbFirstId } from './tmdbService'
 
@@ -32,9 +33,6 @@ async function fetchOmdbPlot(title: string, tipo: 'pelicula' | 'serie'): Promise
 }
 
 async function fetchGroqSynopsis(titulo: string, titleEs: string | null | undefined): Promise<string | null> {
-  const apiKey = import.meta.env.VITE_GROQ_API_KEY
-  if (!apiKey?.trim()) return null
-
   const userPrompt = [
     `Obra: "${titulo}"`,
     titleEs?.trim() ? `Título en español (referencia): "${titleEs.trim()}"` : '',
@@ -44,13 +42,8 @@ async function fetchGroqSynopsis(titulo: string, titleEs: string | null | undefi
     .filter(Boolean)
     .join('\n')
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey.trim()}`,
-    },
-    body: JSON.stringify({
+  try {
+    const data = await invokeAiProxy({
       model: 'llama-3.1-8b-instant',
       messages: [
         { role: 'system', content: GROQ_SYNOPSIS_SYSTEM_PROMPT },
@@ -58,14 +51,13 @@ async function fetchGroqSynopsis(titulo: string, titleEs: string | null | undefi
       ],
       temperature: 0.2,
       max_completion_tokens: 400,
-    }),
-  })
-
-  if (!response.ok) return null
-
-  const data = await response.json()
-  const text = normalizeGroqText(data.choices?.[0]?.message?.content ?? '')
-  return text.length > 0 ? text : null
+    })
+    const text = normalizeGroqText(data.choices?.[0]?.message?.content ?? '')
+    return text.length > 0 ? text : null
+  } catch (err) {
+    console.warn('Sinopsis vía ai-proxy:', err)
+    return null
+  }
 }
 
 async function tmdbOverviewForItem(item: ListItem): Promise<string | null> {

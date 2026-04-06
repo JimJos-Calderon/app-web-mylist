@@ -4,11 +4,11 @@
 
 ![React](https://img.shields.io/badge/React-19.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-4.1.18-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-2.93.3-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-Una aplicación web moderna y elegante para gestionar **listas compartidas** de películas y series. Con diseño retro-futurista inspirado en los años 80, búsqueda inteligente con OMDB API, sistema de calificaciones, y autenticación segura con Supabase.
+Una aplicación web para gestionar **listas compartidas** de películas y series: autenticación Supabase, búsqueda con **Edge Function + OMDB**, metadatos enriquecidos con **TMDB** (título ES, póster, géneros), calificaciones, comentarios, **crítica rápida** al marcar como visto, **Oráculo** (sugerencias vía Groq) y **varios temas visuales** (retro cartoon, terminal, cyberpunk y default).
 
 [✨ WebSite](https://jandn.onrender.com/) • [📖 Documentación](#características) • [🐛 Reportar Bug](../../issues)
 
@@ -18,23 +18,24 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 
 ## 🌟 Características
 
-- 🔐 **Autenticación segura** — Sistema completo de login/registro con Supabase
-- 🎯 **Búsqueda inteligente** — Autocompletado con sugerencias en tiempo real de OMDB API
+- 🔐 **Autenticación segura** — Login/registro con Supabase
+- 🎯 **Búsqueda** — Sugerencias vía Edge Function `search-omdb` (OMDB); enriquecimiento opcional con TMDB en cliente (`VITE_TMDB_ACCESS_TOKEN`, Bearer v3)
 - 📋 **Listas compartidas** — Crea listas, invita a otras personas con un código y colabora en tiempo real
-- 📊 **Gestión completa** — Agrega, elimina y marca películas/series como vistas
-- ⭐ **Sistema de calificaciones** — Puntúa del 1 al 5 y marca con "me gusta / no me gusta"
+- 📊 **Gestión completa** — Añade, elimina (en lista), marca visto/pendiente; **colaboración**: cualquier miembro puede actualizar `visto` en la lista
+- ⭐ **Calificaciones y reacciones** — Estrellas 1–5 y me gusta / no me gusta (`item_ratings`)
+- 📝 **Comentarios / reseñas** — `item_comments`; al marcar visto pueden exigirse reseña o **crítica rápida** (modal: estrellas, reacción, texto opcional) vía RPC `save_quick_critique`
+- 🤖 **IA (opcional)** — Mejora de borradores con **Groq** en la caja de comentarios y en el modal de crítica (`VITE_GROQ_API_KEY`); **Oráculo** usa el mismo modelo para recomendaciones según tu historial
 - 🕒 **Historial de actividad** — Timeline colaborativo por lista con eventos recientes de cambios
-- 🎨 **Diseño único** — Interfaz retro-futurista con efectos cyberpunk y animaciones
+- 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` y default; preferencia sincronizada en perfil
 - 🔍 **Filtros avanzados** — Filtra por estado (vistas/pendientes), texto y ordenamiento
 - 💎 **Dos modos de vista** — Grid clásico con paginación y carrusel Ring en 3D
 - ⚡ **Cache inteligente** — React Query con persistencia local y política offline-first
 - 📲 **PWA instalable** — Soporte de instalación nativa en Android (prompt) e iOS (Add to Home Screen)
 - 📴 **Modo offline lectura** — Usuarios pueden seguir viendo listas/items cacheados sin conexión
 - 📡 **Tiempo real** — Sincronización en vivo con Supabase Realtime Subscriptions
-- 👤 **Perfiles de usuario** — Username, bio y avatar personalizable (subido a Supabase Storage)
+- 👤 **Perfil** — Estadísticas, valoraciones globales; **quitar valoración** restaura pendiente en la lista y borra tu rating/comentario (no elimina el título de la lista)
 - 🔒 **Ajustes de seguridad** — Cambio de email y contraseña con verificación
-- 🎵 **Spotify integrado** — Cards de Spotify embebidas y arrastrables en el home (solo desktop)
-- 📱 **Responsive** — Diseño adaptable a todos los dispositivos
+- 📱 **Responsive** — Adaptable a móvil y escritorio; **Capacitor** para Android (`npm run android`, `sincronizar`)
 - 🛡️ **Seguridad a nivel empresarial** — RLS en BD, Edge Functions con rate limiting, validaciones en cliente y servidor
 - ✅ **Testing completo** — Unit tests + E2E tests con Playwright + CI/CD con GitHub Actions
 
@@ -42,11 +43,10 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 
 ## 🆕 Últimos cambios
 
-- 🎨 **Tema `retro-cartoon` refinado** — se ajustaron Login, modal de registro, modales de listas y diálogos de creación/invitación para que el estilo retro se vea sólido, legible y neobrutalista.
-- 🔐 **Persistencia de tema al cerrar sesión** — el tema activo ahora sobrevive al logout y se reaplica correctamente para usuarios no autenticados.
-- 🌓 **Login reactivo al tema** — la pantalla de acceso responde a cambios reales de `data-theme` sin parpadeos al escribir en los inputs.
-- 🤖 **Oráculo AI menos repetitivo** — se aumentó la varianza de recomendaciones ajustando `temperature` y penalizaciones, además de reforzar el system prompt con reglas anti-repetición.
-- 🖱️ **Cursor retro personalizado** — se agregaron cursores exclusivos para `retro-cartoon`, incluyendo cobertura para enlaces, botones y elementos clickeables con `.cursor-pointer`.
+- 🎭 **Modal de crítica rápida** — Colores y tipografía alineados con cada tema (retro / terminal / cyberpunk / default); botón principal retro coherente con el modal de detalle; contador de caracteres con fuente retro; **Mejorar con IA** (Groq) de nuevo disponible en el modal con contexto de título y sinopsis.
+- 👤 **Perfil** — Acción para **quitar valoración**: deja el título en la lista como pendiente y elimina tu fila en `item_ratings` y `item_comments`; invalidación de caché por lista.
+- 🎨 **Retro** — Ajustes de fuente en botón Ajustes (perfil), botón «Limpiar» del widget de estrellas y textos del modal de crítica.
+- 🗄️ **Esquema** — Migraciones recientes: comentarios en crítica rápida (`save_quick_critique`), `items` / ratings con IDs enteros, temas por lista, webhook Discord opcional, `title_es`, etc. (ver `supabase/migrations/`).
 
 ## 🛠️ Stack Tecnológico
 
@@ -65,8 +65,10 @@ Una aplicación web moderna y elegante para gestionar **listas compartidas** de 
 
 ### Backend & Servicios
 - **Supabase** — Auth + PostgreSQL + Realtime + Storage + Edge Functions
-- **OMDB API** — Base de datos de películas y series (acceso seguro vía Edge Function)
-- **Supabase Edge Functions** — API segura con rate limiting (30 búsquedas/hora por usuario)
+- **OMDB API** — Búsqueda de títulos (solo servidor: secret en Edge Function `search-omdb`, rate limit por usuario)
+- **TMDB API** — Opcional en el navegador (`VITE_TMDB_ACCESS_TOKEN`) para póster, título en español y sinopsis
+- **Groq API** — Opcional en el navegador (`VITE_GROQ_API_KEY`) para mejora de comentarios y Oráculo (**la clave viaja en el bundle**; en despliegues públicos valora un proxy en backend si necesitas ocultarla)
+- **Supabase Edge Functions** — `search-omdb`, `send-push`, `notify-discord` (según configuración)
 
 ### Testing & CI/CD
 - **Vitest 4.0** — Framework de testing rápido
@@ -98,6 +100,7 @@ Todos los accesos se filtran automáticamente por usuario:
 - **lists**: Solo ves listas que posees o te invitaron
 - **list_members**: Solo ves tus registros de membresía
 - **item_ratings**: Solo ves/modificas tus propias calificaciones
+- **item_comments**: Comentarios visibles para miembros del ítem; insert/update/delete del autor según políticas
 
 ### Check Constraints (Validación en BD)
 Previene datos inválidos incluso sin validación frontend:
@@ -143,212 +146,40 @@ Crea un archivo `.env` en la raíz del proyecto:
 ```env
 VITE_SUPABASE_URL=tu_supabase_url
 VITE_SUPABASE_ANON_KEY=tu_supabase_anon_key
+
+# Opcional — TMDB (Bearer API v3): póster/título ES/sinopsis enriquecida
+# VITE_TMDB_ACCESS_TOKEN=tu_token_bearer_tmdb
+
+# Opcional — Groq (cliente): mejora de comentarios + Oráculo
+# VITE_GROQ_API_KEY=tu_clave_groq
 ```
 
-⚠️ **Importante**: `OMDB_API_KEY` se configura como Secret en Supabase (ver paso 5)
+⚠️ **Importante**: `OMDB_API_KEY` va como **Secret** de Edge Functions en Supabase (paso 5), no en `.env` del front.
 
-4. **Configura Supabase**
+4. **Configura Supabase (esquema y RLS)**
 
-Ejecuta el siguiente SQL en tu proyecto de Supabase para crear todas las tablas necesarias:
+No uses el esquema “copiar y pegar” antiguo de este README: **el modelo real lo definen las migraciones** del repo (por ejemplo `items.id` e `item_ratings.item_id` como enteros, comentarios, crítica rápida, soft delete, etc.).
 
-```sql
--- ============================================================
--- TABLA PRINCIPAL DE ITEMS (películas y series)
--- ============================================================
-CREATE TABLE items (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  titulo TEXT NOT NULL,
-  tipo TEXT NOT NULL CHECK (tipo IN ('pelicula', 'serie')),
-  visto BOOLEAN DEFAULT false,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  user_email TEXT NOT NULL,
-  poster_url TEXT,
-  genero TEXT,
-  list_id UUID REFERENCES lists(id) ON DELETE CASCADE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+**Recomendado (CLI Supabase):** en la carpeta del proyecto, con el CLI enlazado a tu proyecto:
 
--- ============================================================
--- TABLA DE LISTAS COMPARTIDAS
--- ============================================================
-CREATE TABLE lists (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  owner_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  is_private BOOLEAN DEFAULT false,
-  invite_code VARCHAR(20) UNIQUE NOT NULL
-);
-
--- ============================================================
--- TABLA DE MIEMBROS DE LISTAS (many-to-many)
--- ============================================================
-CREATE TABLE list_members (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  list_id UUID REFERENCES lists(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  role VARCHAR(20) DEFAULT 'member', -- 'owner', 'admin', 'member'
-  joined_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(list_id, user_id)
-);
-
--- ============================================================
--- TABLA DE PERFILES DE USUARIO
--- ============================================================
-CREATE TABLE user_profiles (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
-  username TEXT NOT NULL,
-  avatar_url TEXT,
-  bio TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- ============================================================
--- TABLA DE CALIFICACIONES POR ITEM
--- ============================================================
-CREATE TABLE item_ratings (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  item_id UUID REFERENCES items(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-  liked BOOLEAN,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(item_id, user_id)
-);
-
--- ============================================================
--- ÍNDICES PARA RENDIMIENTO
--- ============================================================
-CREATE INDEX idx_items_user_id ON items(user_id);
-CREATE INDEX idx_items_tipo ON items(tipo);
-CREATE INDEX idx_items_list_id ON items(list_id);
-CREATE INDEX idx_items_visto ON items(visto);
-CREATE INDEX idx_lists_owner ON lists(owner_id);
-CREATE INDEX idx_lists_invite_code ON lists(invite_code);
-CREATE INDEX idx_list_members_list ON list_members(list_id);
-CREATE INDEX idx_list_members_user ON list_members(user_id);
-CREATE INDEX idx_item_ratings_item ON item_ratings(item_id);
-CREATE INDEX idx_item_ratings_user ON item_ratings(user_id);
-
--- ============================================================
--- ROW LEVEL SECURITY (RLS)
--- ============================================================
-
--- ITEMS: ver los de listas donde soy miembro
-ALTER TABLE items ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view items from their lists"
-ON items FOR SELECT TO authenticated
-USING (
-  list_id IN (
-    SELECT list_id FROM list_members WHERE user_id = auth.uid()
-  )
-);
-
-CREATE POLICY "Users can insert items to their lists"
-ON items FOR INSERT TO authenticated
-WITH CHECK (
-  list_id IN (
-    SELECT list_id FROM list_members WHERE user_id = auth.uid()
-  )
-);
-
-CREATE POLICY "Users can update items in their lists"
-ON items FOR UPDATE TO authenticated
-USING (
-  user_id = auth.uid()
-  AND list_id IN (
-    SELECT list_id FROM list_members WHERE user_id = auth.uid()
-  )
-);
-
-CREATE POLICY "Users can delete their own items"
-ON items FOR DELETE TO authenticated
-USING (user_id = auth.uid());
-
--- LISTS
-ALTER TABLE lists ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view lists they belong to"
-ON lists FOR SELECT TO authenticated
-USING (
-  owner_id = auth.uid()
-  OR id IN (SELECT list_id FROM list_members WHERE user_id = auth.uid())
-);
-
-CREATE POLICY "Users can create lists"
-ON lists FOR INSERT TO authenticated
-WITH CHECK (owner_id = auth.uid());
-
-CREATE POLICY "Owners can update their lists"
-ON lists FOR UPDATE TO authenticated
-USING (owner_id = auth.uid());
-
-CREATE POLICY "Owners can delete their lists"
-ON lists FOR DELETE TO authenticated
-USING (owner_id = auth.uid());
-
--- LIST_MEMBERS
-ALTER TABLE list_members ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view members of their lists"
-ON list_members FOR SELECT TO authenticated
-USING (
-  list_id IN (SELECT list_id FROM list_members WHERE user_id = auth.uid())
-);
-
-CREATE POLICY "Users can join lists (self insert)"
-ON list_members FOR INSERT TO authenticated
-WITH CHECK (user_id = auth.uid());
-
-CREATE POLICY "Owners can manage members"
-ON list_members FOR ALL TO authenticated
-USING (
-  list_id IN (SELECT id FROM lists WHERE owner_id = auth.uid())
-);
-
--- USER_PROFILES
-ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view all profiles"
-ON user_profiles FOR SELECT TO authenticated USING (true);
-
-CREATE POLICY "Users can manage own profile"
-ON user_profiles FOR ALL TO authenticated
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
-
--- ITEM_RATINGS
-ALTER TABLE item_ratings ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view all ratings"
-ON item_ratings FOR SELECT TO authenticated USING (true);
-
-CREATE POLICY "Users can manage own ratings"
-ON item_ratings FOR ALL TO authenticated
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
+```bash
+supabase db push
 ```
 
-**O mejor aún**: Usa el archivo de migración incluido:
-- Archivo: `supabase/migrations/04_security_rls_and_constraints.sql`
-- Contiene: RLS completo + Check Constraints + Índices optimizados
-- Ejecución en Supabase: SQL Editor → Copiar contenido → Run
+**O manual:** en el **SQL Editor** de Supabase, ejecuta **en orden numérico** los archivos de `supabase/migrations/`, empezando por:
 
-Para habilitar auditoría, push y dispatch automático end-to-end, aplica también:
-- `supabase/migrations/05_soft_delete_and_join_rpc.sql`
-- `supabase/migrations/06_audit_logs_triggers.sql`
-- `supabase/migrations/07_0_push_subscriptions.sql`
-- `supabase/migrations/08_dispatch_push_record_id_text_match.sql`
-- `supabase/migrations/09_items_delete_own_or_admin.sql`
-- `supabase/migrations/10_activity_feed_and_member_deletion.sql`
+| Migración | Contenido (resumen) |
+|-----------|----------------------|
+| `04_security_rls_and_constraints.sql` | RLS base, constraints, índices |
+| `05` … `10` | Soft delete, auditoría, push, activity feed, etc. |
+| `11_fix_collab_visto_rls.sql` | Miembros de lista pueden actualizar `visto` |
+| `12` … `13` | Ajustes soft delete / triggers |
+| `14_item_comments.sql` | Comentarios por ítem y usuario |
+| `15_require_comment_before_watch.sql` | Reseña o crítica antes de marcar visto |
+| `16` … `19` | Join RPC, `title_es`, Discord webhook, tema por lista |
+| `20` … `22` | RPC `save_quick_critique` (bigint + comentario opcional) |
 
-> Nota: en el repositorio actual existe `07_audit_logs_push_dispatch.sql.bak` como respaldo, no como migración activa.
+> En el repo hay `07_audit_logs_push_dispatch.sql.bak` como respaldo; la migración activa de push es `07_0_push_subscriptions.sql` y siguientes.
 
 5. **Configura Supabase Edge Functions & Secrets**
 
@@ -427,7 +258,8 @@ npm.cmd run dev
 ```
 app-web-mylist/
 ├── src/
-│   ├── App.tsx                   # Rutas, nav, guards y lazy loading por página
+│   ├── App.tsx                   # Rutas y lazy loading por página
+│   ├── app/AppShell.tsx          # Layout: navbar, invitaciones, onboarding
 │   ├── main.tsx                  # Bootstrap app + Query persistence + providers
 │   ├── sw.ts                     # Service Worker custom (Workbox + Push handlers)
 │   ├── i18n.ts                   # Configuración i18next
@@ -438,13 +270,16 @@ app-web-mylist/
 │   │   └── queryPersistence.ts   # Persistencia offline de cache
 │   ├── features/
 │   │   ├── auth/                 # Contexto y hook de autenticación
-│   │   ├── items/                # Búsqueda OMDB, cards, filtros, ratings
+│   │   ├── items/                # Cards, ratings, comentarios, QuickCritiqueModal, servicios TMDB/sinopsis/crítica
 │   │   ├── lists/                # Listas, dialogs, selector, Activity Feed
 │   │   ├── profile/              # Hooks de perfil/username
-│   │   └── shared/               # Componentes base, validaciones, tipos y constantes
+│   │   ├── oracle/               # Oráculo (recomendaciones Groq)
+│   │   └── shared/               # Componentes base, tema, tipos y constantes
+│   ├── hooks/                    # p. ej. useOracleRecommendations
 │   ├── pages/
 │   │   ├── Login.tsx
-│   │   ├── JoinList.tsx          # Ruta pública de invitación: /join/:code
+│   │   ├── Dashboard.tsx         # Entrada al flujo y lista activa
+│   │   ├── JoinList.tsx          # Ruta pública: /join/:code
 │   │   ├── Peliculas.tsx
 │   │   ├── Series.tsx
 │   │   ├── Perfil.tsx
@@ -478,12 +313,15 @@ app-web-mylist/
 4. **Cambiar lista activa**: Usa el selector de lista en la parte superior de Películas/Series
 
 ### Gestión de Películas/Series
-1. **Buscar**: Escribe al menos 3 caracteres para ver sugerencias de OMDB
-2. **Agregar**: Haz clic en una sugerencia o presiona "OK" para agregar manualmente
-3. **Marcar como vista**: Click en el checkbox de la tarjeta
-4. **Calificar**: Usa el widget de estrellas (1-5) y los botones de "me gusta / no me gusta"
-5. **Detalles**: Haz click en una tarjeta para ver la sinopsis y acciones
-6. **Eliminar**: Botón de eliminar en el modal de detalles (solo el creador puede hacerlo)
+1. **Buscar**: Escribe para ver sugerencias (Edge Function + OMDB; TMDB opcional para mejor carátula/título)
+2. **Agregar**: Elige una sugerencia o confirma título manual
+3. **Marcar como vista**: Abre el **modal de crítica rápida** (estrellas, reacción, comentario opcional); opcionalmente **Mejorar con IA** si configuraste Groq
+4. **Calificar después**: Widget de estrellas y me gusta / no me gusta en la tarjeta o en detalle
+5. **Detalles**: Clic en la tarjeta para sinopsis, comentario largo y marcar no visto
+6. **Eliminar de la lista**: En el modal de detalles, quien tenga permiso (dueño del ítem / políticas RLS) puede borrar el ítem de la lista
+
+### Perfil
+- **Quitar valoración** (papelera o acción en detalle): elimina tu rating y comentario, pone el ítem en **pendiente** en la lista; **no** quita la película/serie de la lista compartida
 
 ### Modos de Vista
 - 📋 **Grid**: Vista en cuadrícula con paginación (9 items por página)
@@ -515,16 +353,18 @@ app-web-mylist/
 
 ---
 
-## 🎨 Diseño
+## 🎨 Diseño y temas
 
-El proyecto cuenta con un diseño **retro-futurista** inspirado en la estética cyberpunk de los años 80:
+El aspecto depende de `data-theme` (preferencia en **Ajustes** y sincronizada en Supabase):
 
-- Fondo negro con gradientes neón (cyan, purple, pink)
-- Grid de perspectiva animado en el fondo
-- Efectos de sombra y brillo (box-shadow neon)
-- Transiciones y micro-animaciones suaves
-- Tipografía bold e itálica con letter-spacing
-- Glassmorphism en modales y menús (`backdrop-blur`)
+| Tema | Notas |
+|------|--------|
+| **Default** | Neón / retrowave, acentos cyan y variables CSS |
+| **Cyberpunk** | Superficies `cyberpunk-surface`, botones con brillo magenta/cyan |
+| **Terminal** | Verde fósforo, bordes rectos, paneles estilo consola |
+| **Retro cartoon** | Papel y tinta, bordes gruesos negros, sombras desplazadas, fuente `theme-heading-font` (Space Meatball), clase `retro-fx` en modales clave |
+
+Los modales (detalle, crítica rápida, confirmaciones) reutilizan los mismos tokens y patrones por tema.
 
 ---
 
@@ -558,12 +398,11 @@ Service Worker custom:
 - Caching runtime para imágenes (`registerRoute` + `StaleWhileRevalidate`)
 - Handlers de push (`push` y `notificationclick`)
 
-Archivos de iconos requeridos en `public/`:
+Iconos PWA y marca: generar con `npm run icons` (lee `assets/icon.png` y escribe en `public/`):
 
-- `pwa-192x192.png`
-- `pwa-512x512.png`
-- `pwa-512x512-maskable.png`
-- `apple-touch-icon.png`
+- `pwa-64x64.png`, `pwa-192x192.png`, `pwa-512x512.png`, `pwa-512x512-maskable.png`
+- `favicon.png`, `apple-touch-icon.png`
+- `logo-navbar.webp` (navbar + preload, desde `assets/icon-sin-fondo.png` si existe)
 - `masked-icon.svg`
 
 Metadatos iOS: `index.html` incluye `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`, `apple-mobile-web-app-title` y `apple-touch-icon`.
@@ -589,6 +428,8 @@ En Chrome: `Application > Manifest` y `Application > Service Workers`.
 | `VITE_SUPABASE_URL` | URL de tu proyecto Supabase | ✅ Sí |
 | `VITE_SUPABASE_ANON_KEY` | Clave anónima de Supabase | ✅ Sí |
 | `VITE_VAPID_PUBLIC_KEY` | Clave pública VAPID para suscripción Push en navegador | ✅ Sí (si usas Push) |
+| `VITE_TMDB_ACCESS_TOKEN` | Token Bearer TMDB v3 (metadatos y sinopsis enriquecida) | Opcional |
+| `VITE_GROQ_API_KEY` | API key Groq (mejora de texto con IA + Oráculo en cliente) | Opcional |
 
 ### Supabase Edge Functions Secrets
 
@@ -603,7 +444,8 @@ En Chrome: `Application > Manifest` y `Application > Service Workers`.
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave service role para enviar push y leer suscripciones | Supabase → Edge Functions → Secrets |
 
 **Nota importante**:
-- `OMDB_API_KEY` se mantiene **seguro en el servidor** y **NUNCA se expone en el frontend**.
+- `OMDB_API_KEY` solo en **secrets de Edge Functions**; no en `.env` del front.
+- `VITE_GROQ_API_KEY` y `VITE_TMDB_ACCESS_TOKEN` son **variables de entorno del build** Vite: quedan accesibles en el cliente.
 - `PUSH_WEBHOOK_SECRET` debe existir en ambos lados: secret de función y fila `public.push_dispatch_config`.
 - Nunca guardes claves sensibles reales en el repositorio.
 
@@ -660,7 +502,9 @@ Interpretación rápida:
 - **Push no dispara en automático**: Confirma que estén aplicadas las migraciones de auditoría/push vigentes (`06`, `07_0`, `08`, `09`, `10`)
 
 ### API y Datos
-- **Las imágenes no cargan**: Verifica que `OMDB_API_KEY` sea válida. Algunas películas no tienen póster (placeholder automático)
+- **Oráculo / “Mejorar con IA” no hace nada**: Configura `VITE_GROQ_API_KEY` y reinicia `npm run dev` / vuelve a desplegar.
+- **TMDB sin datos extra**: Configura `VITE_TMDB_ACCESS_TOKEN` (Bearer) si quieres carátulas o títulos ES desde TMDB.
+- **Las imágenes no cargan**: Revisa OMDB/TMDB. Algunas obras no tienen póster (placeholder automático)
 - **Error de autenticación / RLS**: Verifica tus credenciales de Supabase en el `.env`
 - **Datos inconsistentes**: Asegúrate de haber ejecutado las migraciones en orden (`04` a `10`)
 
@@ -868,7 +712,8 @@ Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 
 ## 🙏 Agradecimientos
 
-- [OMDB API](http://www.omdbapi.com) por la base de datos de películas
+- [OMDB API](http://www.omdbapi.com) y [TMDB](https://www.themoviedb.org/) por metadatos de obras
+- [Groq](https://groq.com/) por inferencia rápida en el Oráculo y mejora de texto
 - [Supabase](https://supabase.com) por el excelente BaaS
 - [Vite](https://vitejs.dev) por el increíble DX
 - [Vite Plugin PWA](https://vite-pwa-org.netlify.app/) por la integración de PWA y Workbox
