@@ -16,8 +16,10 @@ import HudContainer from '@/features/shared/components/HudContainer'
 import { useTheme } from '@/features/shared'
 import type { ThemePreference } from '@/features/shared'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
-/** Fallback si aún no existe public/logo-navbar.webp (ej. sin ejecutar npm run icons). */
-import appLogoPngFallback from '../../../../assets/icon-sin-fondo.png'
+
+/** Fallback ligero (~64×64) en `public/`; no importar PNG grandes (evita inflar el bundle JS). */
+const NAV_LOGO_WEBP = '/logo-navbar.webp'
+const NAV_LOGO_PNG_FALLBACK = '/pwa-64x64.png'
 
 const AppNavbar: React.FC = () => {
   const { signOut, session } = useAuth()
@@ -66,9 +68,9 @@ const AppNavbar: React.FC = () => {
     }`}>
       <Link to="/" className="group flex items-center gap-2 sm:gap-3">
         <picture>
-          <source srcSet="/logo-navbar.webp" type="image/webp" />
+          <source srcSet={NAV_LOGO_WEBP} type="image/webp" />
           <img
-            src={appLogoPngFallback}
+            src={NAV_LOGO_PNG_FALLBACK}
             alt="Logo de la App"
             width={160}
             height={40}

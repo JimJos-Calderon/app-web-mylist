@@ -10,6 +10,6 @@
 [functions.ai-proxy]
 verify_jwt = false
 
-# Llamada desde pg_net / triggers (sin sesión de usuario). Tras cambiar: deploy notify-discord.
-[functions.notify-discord]
+# Llamada desde pg_net / triggers (sin sesión de usuario). Tras cambiar: deploy push-orchestrator.
+[functions.push-orchestrator]
 verify_jwt = false

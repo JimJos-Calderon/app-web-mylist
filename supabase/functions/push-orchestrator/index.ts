@@ -47,7 +47,7 @@ async function getFirebaseMessagingAccessToken(sa: FirebaseServiceAccount): Prom
   try {
     key = await importPKCS8(sa.private_key, 'RS256')
   } catch (e) {
-    console.error('[notify-discord] FCM: importPKCS8 failed', e)
+    console.error('[push-orchestrator] FCM: importPKCS8 failed', e)
     return null
   }
 
@@ -62,7 +62,7 @@ async function getFirebaseMessagingAccessToken(sa: FirebaseServiceAccount): Prom
       .setExpirationTime('1h')
       .sign(key)
   } catch (e) {
-    console.error('[notify-discord] FCM: SignJWT failed', e)
+    console.error('[push-orchestrator] FCM: SignJWT failed', e)
     return null
   }
 
@@ -77,7 +77,7 @@ async function getFirebaseMessagingAccessToken(sa: FirebaseServiceAccount): Prom
 
   const tokenJson = (await tokenRes.json()) as { access_token?: string; expires_in?: number }
   if (!tokenRes.ok || !tokenJson.access_token) {
-    console.error('[notify-discord] FCM: oauth token error', tokenRes.status, tokenJson)
+    console.error('[push-orchestrator] FCM: oauth token error', tokenRes.status, tokenJson)
     return null
   }
 
@@ -219,7 +219,7 @@ async function dispatchWebPush(args: {
   const { supabase, item, listTheme, listName, authorDisplay, listUrl } = args
 
   if (!ensureWebPushVapid()) {
-    console.warn('[notify-discord] Web push omitido: faltan VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY')
+    console.warn('[push-orchestrator] Web push omitido: faltan VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY')
     return { ok: true, sent: 0, failed: 0, skipped: 'vapid_not_configured' }
   }
 
@@ -230,7 +230,7 @@ async function dispatchWebPush(args: {
     .neq('user_id', item.user_id)
 
   if (membersErr) {
-    console.error('[notify-discord] list_members:', membersErr.message)
+    console.error('[push-orchestrator] list_members:', membersErr.message)
     return { ok: false, sent: 0, failed: 0, skipped: membersErr.message }
   }
 
@@ -250,7 +250,7 @@ async function dispatchWebPush(args: {
     .eq('platform', 'web')
 
   if (subsErr) {
-    console.error('[notify-discord] push_subscriptions:', subsErr.message)
+    console.error('[push-orchestrator] push_subscriptions:', subsErr.message)
     return { ok: false, sent: 0, failed: 0, skipped: subsErr.message }
   }
 
@@ -302,7 +302,7 @@ async function dispatchWebPush(args: {
           .update({ is_active: false, updated_at: new Date().toISOString() })
           .eq('id', row.id)
       }
-      console.error('[notify-discord] push send failed', { rowId: row.id, statusCode, error })
+      console.error('[push-orchestrator] push send failed', { rowId: row.id, statusCode, error })
     }
   }
 
@@ -324,7 +324,7 @@ async function dispatchAndroidFcmPush(args: {
 
   const sa = parseFirebaseServiceAccount()
   if (!sa) {
-    console.warn('[notify-discord] FCM omitido: falta FIREBASE_SERVICE_ACCOUNT_JSON')
+    console.warn('[push-orchestrator] FCM omitido: falta FIREBASE_SERVICE_ACCOUNT_JSON')
     return { ok: true, sent: 0, failed: 0, skipped: 'firebase_not_configured' }
   }
 
@@ -340,7 +340,7 @@ async function dispatchAndroidFcmPush(args: {
     .neq('user_id', item.user_id)
 
   if (membersErr) {
-    console.error('[notify-discord] FCM list_members:', membersErr.message)
+    console.error('[push-orchestrator] FCM list_members:', membersErr.message)
     return { ok: false, sent: 0, failed: 0, skipped: membersErr.message }
   }
 
@@ -360,7 +360,7 @@ async function dispatchAndroidFcmPush(args: {
     .eq('platform', 'android')
 
   if (subsErr) {
-    console.error('[notify-discord] FCM push_subscriptions:', subsErr.message)
+    console.error('[push-orchestrator] FCM push_subscriptions:', subsErr.message)
     return { ok: false, sent: 0, failed: 0, skipped: subsErr.message }
   }
 
@@ -442,13 +442,13 @@ async function dispatchAndroidFcmPush(args: {
             .update({ is_active: false, updated_at: new Date().toISOString() })
             .eq('id', row.id)
         }
-        console.error('[notify-discord] FCM send failed', { rowId: row.id, status: res.status, errText: errText.slice(0, 400) })
+        console.error('[push-orchestrator] FCM send failed', { rowId: row.id, status: res.status, errText: errText.slice(0, 400) })
         continue
       }
       sent += 1
     } catch (e) {
       failed += 1
-      console.error('[notify-discord] FCM fetch error', row.id, e)
+      console.error('[push-orchestrator] FCM fetch error', row.id, e)
     }
   }
 
@@ -583,12 +583,12 @@ async function sendDiscordNotification(webhookUrl: string, embed: Record<string,
     })
     if (!discordRes.ok) {
       const errorText = await discordRes.text()
-      console.error('[notify-discord] Discord error:', discordRes.status, errorText)
+      console.error('[push-orchestrator] Discord error:', discordRes.status, errorText)
       return { ok: false, status: discordRes.status, detail: errorText.slice(0, 500) }
     }
     return { ok: true }
   } catch (err) {
-    console.error('[notify-discord] Discord fetch failed:', err)
+    console.error('[push-orchestrator] Discord fetch failed:', err)
     return { ok: false, detail: err instanceof Error ? err.message : String(err) }
   }
 }
@@ -665,13 +665,13 @@ Deno.serve(async (req: Request) => {
     ])
 
     if (webhookUrl && !discordOutcome.ok) {
-      console.warn('[notify-discord] Discord falló; el envío push se ejecutó en paralelo.', discordOutcome)
+      console.warn('[push-orchestrator] Discord falló; el envío push se ejecutó en paralelo.', discordOutcome)
     }
     if (!webPushOutcome.ok) {
-      console.warn('[notify-discord] Web push: error de consulta o envío parcial.', webPushOutcome)
+      console.warn('[push-orchestrator] Web push: error de consulta o envío parcial.', webPushOutcome)
     }
     if (!fcmOutcome.ok) {
-      console.warn('[notify-discord] FCM: error de consulta o envío parcial.', fcmOutcome)
+      console.warn('[push-orchestrator] FCM: error de consulta o envío parcial.', fcmOutcome)
     }
 
     const discordJson =

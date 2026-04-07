@@ -2,9 +2,11 @@ import React, { useEffect } from 'react'
 import { SplashScreen } from '@capacitor/splash-screen'
 import AppShell from '@/app/AppShell'
 import { useAndroidBackButton } from '@/hooks/useAndroidBackButton'
+import { useAndroidPushNotificationDeepLink } from '@/hooks/useAndroidPushNotificationDeepLink'
 
 const App: React.FC = () => {
   useAndroidBackButton()
+  useAndroidPushNotificationDeepLink()
 
   useEffect(() => {
     // El delay de 500ms asegura que React y el DOM final hayan pintado el primer frame realista

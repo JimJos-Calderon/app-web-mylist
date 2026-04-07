@@ -1,9 +1,9 @@
--- Invoca la Edge Function notify-discord tras INSERT en items (Discord + push web).
+-- Invoca la Edge Function push-orchestrator tras INSERT en items (Discord + Web Push + FCM Android).
 -- Sin esto, la función nunca se ejecuta salvo que configures un "Database Webhook" manual en el panel.
 --
 -- Tras aplicar la migración, en SQL Editor (como postgres / service role):
 --   UPDATE public.notify_discord_config SET
---     function_url = 'https://TU_PROJECT_REF.supabase.co/functions/v1/notify-discord',
+--     function_url = 'https://TU_PROJECT_REF.supabase.co/functions/v1/push-orchestrator',
 --     bearer_token = 'TU_SUPABASE_ANON_KEY_O_SERVICE_ROLE',
 --     is_enabled = true
 --   WHERE id = 1;
@@ -26,7 +26,7 @@ INSERT INTO public.notify_discord_config (id) VALUES (1)
 ON CONFLICT (id) DO NOTHING;
 
 COMMENT ON TABLE public.notify_discord_config IS
-  'URL de notify-discord + clave anon o service_role para cabeceras Authorization/apikey. is_enabled = true para activar.';
+  'URL de push-orchestrator + clave anon o service_role para cabeceras Authorization/apikey. is_enabled = true para activar.';
 
 REVOKE ALL ON public.notify_discord_config FROM PUBLIC;
 GRANT ALL ON public.notify_discord_config TO service_role;
