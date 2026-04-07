@@ -24,7 +24,7 @@ Una aplicación web para gestionar **listas compartidas** de películas y series
 - 📊 **Gestión completa** — Añade, elimina (en lista), marca visto/pendiente; **colaboración**: cualquier miembro puede actualizar `visto` en la lista
 - ⭐ **Calificaciones y reacciones** — Estrellas 1–5 y me gusta / no me gusta (`item_ratings`)
 - 📝 **Comentarios / reseñas** — `item_comments`; al marcar visto pueden exigirse reseña o **crítica rápida** (modal: estrellas, reacción, texto opcional) vía RPC `save_quick_critique`
-- 🤖 **IA (opcional)** — Mejora de borradores con **Groq** en la caja de comentarios y en el modal de crítica (`VITE_GROQ_API_KEY`); **Oráculo** usa el mismo modelo para recomendaciones según tu historial
+- 🤖 **IA (opcional)** — Mejora de borradores con **Groq** en la caja de comentarios y en el modal de crítica; **Oráculo** usa el mismo modelo para recomendaciones según tu historial (todo vía Edge Function **`ai-proxy`**, clave solo en servidor)
 - 🕒 **Historial de actividad** — Timeline colaborativo por lista con eventos recientes de cambios
 - 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` y default; preferencia sincronizada en perfil
 - 🔍 **Filtros avanzados** — Filtra por estado (vistas/pendientes), texto y ordenamiento
@@ -67,8 +67,8 @@ Una aplicación web para gestionar **listas compartidas** de películas y series
 - **Supabase** — Auth + PostgreSQL + Realtime + Storage + Edge Functions
 - **OMDB API** — Búsqueda de títulos (solo servidor: secret en Edge Function `search-omdb`, rate limit por usuario)
 - **TMDB API** — Opcional en el navegador (`VITE_TMDB_ACCESS_TOKEN`) para póster, título en español y sinopsis
-- **Groq API** — Opcional en el navegador (`VITE_GROQ_API_KEY`) para mejora de comentarios y Oráculo (**la clave viaja en el bundle**; en despliegues públicos valora un proxy en backend si necesitas ocultarla)
-- **Supabase Edge Functions** — `search-omdb`, `send-push`, `notify-discord` (según configuración)
+- **Groq API** — Opcional en servidor: secreto `GROQ_API_KEY` en Supabase para la Edge Function **`ai-proxy`** (el cliente usa `invokeAiProxy()`; la clave no va en el bundle)
+- **Supabase Edge Functions** — `search-omdb`, `ai-proxy`, `send-push`, `push-orchestrator` (antes `notify-discord`; según configuración)
 
 ### Testing & CI/CD
 - **Vitest 4.0** — Framework de testing rápido
@@ -118,6 +118,21 @@ Previene datos inválidos incluso sin validación frontend:
 
 ---
 
+## 🤖 IA & Seguridad
+
+Las funciones de **IA** (mejora de comentarios, sinopsis asistida, traducción de sinopsis, **Oráculo**) **no** usan ninguna clave Groq en el navegador.
+
+| Qué | Dónde |
+|-----|--------|
+| **Cliente** | `src/lib/invokeAiProxy.ts` llama a `supabase.functions.invoke('ai-proxy', { body })` con la sesión del usuario. |
+| **Servidor** | La Edge Function `ai-proxy` lee el secreto **`GROQ_API_KEY`** (Supabase → Edge Functions → Secrets) y reenvía la petición a la API de Groq. |
+
+**Configuración:** en el panel de Supabase, crea el secreto `GROQ_API_KEY` con tu clave de [Groq](https://console.groq.com/). Despliega la función `ai-proxy` (`npx supabase functions deploy ai-proxy`). No añadas `VITE_*` para Groq: **no debe existir `VITE_GROQ_API_KEY` en el frontend.**
+
+Si recibes **401** al invocar el proxy, revisa que la función `ai-proxy` tenga `verify_jwt` acorde a tu `supabase/config.toml` y que el usuario esté autenticado.
+
+---
+
 ## 📦 Instalación
 
 ### Prerrequisitos
@@ -150,11 +165,9 @@ VITE_SUPABASE_ANON_KEY=tu_supabase_anon_key
 # Opcional — TMDB (Bearer API v3): póster/título ES/sinopsis enriquecida
 # VITE_TMDB_ACCESS_TOKEN=tu_token_bearer_tmdb
 
-# Opcional — Groq (cliente): mejora de comentarios + Oráculo
-# VITE_GROQ_API_KEY=tu_clave_groq
 ```
 
-⚠️ **Importante**: `OMDB_API_KEY` va como **Secret** de Edge Functions en Supabase (paso 5), no en `.env` del front.
+⚠️ **Importante**: `OMDB_API_KEY` va como **Secret** de Edge Functions en Supabase (paso 5), no en `.env` del front. La clave de **Groq** también se configura solo en Supabase (`GROQ_API_KEY`); véase la sección **IA & Seguridad** más abajo.
 
 4. **Configura Supabase (esquema y RLS)**
 
@@ -289,7 +302,7 @@ app-web-mylist/
 │   ├── functions/
 │   │   ├── search-omdb/          # Proxy seguro OMDB con rate limit
 │   │   ├── send-push/            # Envío web push
-│   │   └── notify-discord/       # Notificación opcional a Discord
+│   │   └── push-orchestrator/    # Discord + Web Push + FCM (antes notify-discord)
 │   └── migrations/               # Esquema, RLS, auditoría, push y fixes
 ├── scripts/
 │   └── push-health-check.ps1     # Verificación operativa de push
@@ -429,12 +442,12 @@ En Chrome: `Application > Manifest` y `Application > Service Workers`.
 | `VITE_SUPABASE_ANON_KEY` | Clave anónima de Supabase | ✅ Sí |
 | `VITE_VAPID_PUBLIC_KEY` | Clave pública VAPID para suscripción Push en navegador | ✅ Sí (si usas Push) |
 | `VITE_TMDB_ACCESS_TOKEN` | Token Bearer TMDB v3 (metadatos y sinopsis enriquecida) | Opcional |
-| `VITE_GROQ_API_KEY` | API key Groq (mejora de texto con IA + Oráculo en cliente) | Opcional |
 
 ### Supabase Edge Functions Secrets
 
 | Variable | Descripción | Configuración |
 |----------|-------------|----------|
+| `GROQ_API_KEY` | Clave Groq para la Edge Function `ai-proxy` (Oráculo, mejora de texto, sinopsis) | Supabase → Edge Functions → Secrets |
 | `OMDB_API_KEY` | API Key de OMDB (protegida en servidor) | Supabase → Edge Functions → Secrets |
 | `VAPID_PUBLIC_KEY` | Clave pública VAPID usada por `send-push` | Supabase → Edge Functions → Secrets |
 | `VAPID_PRIVATE_KEY` | Clave privada VAPID usada por `send-push` | Supabase → Edge Functions → Secrets |
@@ -444,8 +457,8 @@ En Chrome: `Application > Manifest` y `Application > Service Workers`.
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave service role para enviar push y leer suscripciones | Supabase → Edge Functions → Secrets |
 
 **Nota importante**:
-- `OMDB_API_KEY` solo en **secrets de Edge Functions**; no en `.env` del front.
-- `VITE_GROQ_API_KEY` y `VITE_TMDB_ACCESS_TOKEN` son **variables de entorno del build** Vite: quedan accesibles en el cliente.
+- `OMDB_API_KEY` y `GROQ_API_KEY` solo en **secrets de Edge Functions**; no en `.env` del front.
+- `VITE_TMDB_ACCESS_TOKEN` es variable de **build** Vite y queda accesible en el cliente (solo TMDB).
 - `PUSH_WEBHOOK_SECRET` debe existir en ambos lados: secret de función y fila `public.push_dispatch_config`.
 - Nunca guardes claves sensibles reales en el repositorio.
 
@@ -502,7 +515,7 @@ Interpretación rápida:
 - **Push no dispara en automático**: Confirma que estén aplicadas las migraciones de auditoría/push vigentes (`06`, `07_0`, `08`, `09`, `10`)
 
 ### API y Datos
-- **Oráculo / “Mejorar con IA” no hace nada**: Configura `VITE_GROQ_API_KEY` y reinicia `npm run dev` / vuelve a desplegar.
+- **Oráculo / “Mejorar con IA” no hace nada**: Configura el secreto `GROQ_API_KEY` en Supabase, despliega `ai-proxy` y comprueba que la sesión esté activa.
 - **TMDB sin datos extra**: Configura `VITE_TMDB_ACCESS_TOKEN` (Bearer) si quieres carátulas o títulos ES desde TMDB.
 - **Las imágenes no cargan**: Revisa OMDB/TMDB. Algunas obras no tienen póster (placeholder automático)
 - **Error de autenticación / RLS**: Verifica tus credenciales de Supabase en el `.env`

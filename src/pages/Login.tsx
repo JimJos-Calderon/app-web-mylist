@@ -533,13 +533,13 @@ const Login: React.FC = () => {
 
 const rootStyle = isRetroCartoon
   ? {
-      backgroundImage: 'url(/retro-login-bg.png)', // Asegúrate de que este nombre coincida con el archivo en /public 
+      backgroundImage: 'url(/retro-login-bg.webp)',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
     }
   : {
-      backgroundImage: 'url(/login-bg.png)',
+      backgroundImage: 'url(/login-bg.webp)',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',

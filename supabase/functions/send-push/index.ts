@@ -103,6 +103,7 @@ Deno.serve(async (req: Request) => {
       .select('id, user_id, endpoint, p256dh, auth, subscription')
       .eq('user_id', body.user_id)
       .eq('is_active', true)
+      .eq('platform', 'web')
 
     if (queryError) {
       throw queryError
