@@ -6,4 +6,4 @@ export { default as ListSelector } from './components/ListSelector'
 
 export { useActivityFeed } from './hooks/useActivityFeed'
 export { useLists } from './hooks/useLists'
-export type { ActivityFeedEvent } from './hooks/useActivityFeed'
+export type { ActivityEvent, ActivityFeedEvent } from './hooks/useActivityFeed'

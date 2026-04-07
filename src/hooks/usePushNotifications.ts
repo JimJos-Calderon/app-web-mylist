@@ -102,14 +102,17 @@ async function waitForAndroidFcmToken(): Promise<string> {
         errHandle = await PushNotifications.addListener('registrationError', async (err) => {
           await removeListeners()
           const raw = err.error?.trim()
-          reject(
-            new Error(
-              raw ||
-                'FCM no pudo registrar el dispositivo. Comprueba google-services.json, que Cloud Messaging esté activo en Firebase y que Google Play Services esté actualizado.'
-            )
-          )
+          const msg =
+            raw ||
+            'FCM no pudo registrar el dispositivo. Comprueba google-services.json, que Cloud Messaging esté activo en Firebase y que Google Play Services esté actualizado.'
+          console.error('[usePushNotifications] registrationError:', err)
+          if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+            window.alert(`[Push] registrationError\n\n${msg}`)
+          }
+          reject(new Error(msg))
         })
 
+        console.log('--- PASO 2: Llamando a register() ---')
         await PushNotifications.register()
       } catch (e) {
         await removeListeners()
@@ -211,13 +214,11 @@ export const usePushNotifications = (): UsePushNotificationsReturn => {
     setError(null)
     setLoading(true)
     try {
+      console.log('--- PASO 1: Solicitando permiso nativo ---')
       const permResult = await PushNotifications.requestPermissions()
       const mapped = mapNativePermission(permResult)
       setPermission(mapped)
-      if (mapped !== 'granted') {
-        setError('Permiso de notificaciones denegado')
-        return null
-      }
+      console.log('[usePushNotifications] requestPermissions resultado:', permResult, '→', mapped)
 
       const token = await waitForAndroidFcmToken()
       if (!token?.trim()) {
