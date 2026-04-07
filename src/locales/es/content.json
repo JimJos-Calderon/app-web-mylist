@@ -118,7 +118,6 @@
     "avatar_changing": "⏳ Subiendo...",
     "avatar_uploading": "Subiendo...",
     "avatar_button": "Cambiar foto de perfil",
-    "avatar_upload_hint": "Formatos: JPG, PNG, GIF (máx. 2MB)",
     "save_button": "Guardar Cambios",
     "saving_button": "Guardando...",
     "save_success": "✓ Cambios guardados correctamente",
@@ -326,6 +325,7 @@
     "common": {
       "actorUnknown": "Usuario desconocido",
       "fallbackItem": "titulo sin nombre",
+      "itemGeneric": "un elemento",
       "fallbackList": "lista sin nombre",
       "countBadge": "{{count}} movimientos"
     },
@@ -342,6 +342,13 @@
         "empty": "Todavia no hay movimientos recientes en esta lista."
       },
       "events": {
+        "rating_stars": "{{user}} le dio {{rating}} estrellas a {{item}}.",
+        "rating_generic": "{{user}} valoró {{item}}.",
+        "comment_on_item": "{{user}} comentó en {{item}}.",
+        "comment_removed": "{{user}} eliminó un comentario en {{item}}.",
+        "item_insert_social": "{{user}} añadió {{item}} a {{list}}.",
+        "item_delete_social": "{{user}} eliminó un elemento de {{list}}.",
+        "item_update_social": "{{user}} editó detalles de {{item}}.",
         "item_added": "{{user}} ha añadido \"{{item}}\" a la lista {{list}}.",
         "item_updated": "{{user}} ha actualizado \"{{item}}\" en la lista {{list}}.",
         "item_deleted": "{{user}} ha quitado \"{{item}}\" de la lista {{list}}.",
@@ -369,6 +376,13 @@
         "empty": "Todavia no ha pasado nada digno de portada."
       },
       "events": {
+        "rating_stars": "{{user}} le puso {{rating}} estrellas a {{item}} en el videoclub.",
+        "rating_generic": "{{user}} valoró {{item}}.",
+        "comment_on_item": "{{user}} soltó un comentario sobre {{item}}.",
+        "comment_removed": "{{user}} borró su comentario en {{item}}.",
+        "item_insert_social": "{{user}} fichó {{item}} para la lista {{list}}.",
+        "item_delete_social": "{{user}} sacó un título de {{list}}.",
+        "item_update_social": "{{user}} retocó los detalles de {{item}}.",
         "item_added": "¡Pum! {{user}} ha enchufado \"{{item}}\" en la videoteca de {{list}}.",
         "item_updated": "{{user}} le ha dado otra vuelta a \"{{item}}\" en {{list}}.",
         "item_deleted": "¡Zas! {{user}} ha sacado \"{{item}}\" de la estantería de {{list}}.",

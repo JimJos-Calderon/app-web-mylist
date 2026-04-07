@@ -96,9 +96,6 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
     originalText: synopsis,
   })
 
-  const retroFloatingButton =
-    'border-[3px] border-black bg-[var(--color-bg-primary)] text-black shadow-[4px_4px_0px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_0px_#000000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none'
-
   React.useEffect(() => {
     if (!isOpen || !selectedItem) {
       quickCritiqueAutoOpenedRef.current = false
@@ -171,36 +168,55 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
       }}
     >
       <div
-        className={`${isRetroCartoon ? 'retro-fx ' : ''}w-full max-w-4xl max-h-[90vh] overflow-y-auto border bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] transition-all duration-200 ${
+        className={`item-details-modal ${isRetroCartoon ? 'retro-fx ' : ''}w-full max-w-4xl max-h-[90vh] overflow-y-auto text-[var(--color-text-primary)] transition-all duration-200 ${
           isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         } ${
           isRetroCartoon
-            ? 'rounded-xl border-[4px] border-black shadow-[10px_10px_0px_0px_#000000]'
-            : isTerminal
-              ? 'terminal-surface rounded-md'
-              : isCyberpunk
-                ? 'cyberpunk-surface'
-              : 'rounded-2xl border-[rgba(var(--color-accent-primary-rgb),0.25)] shadow-2xl'
+            ? ''
+            : 'border bg-[var(--color-bg-secondary)] ' +
+              (isTerminal
+                ? 'terminal-surface rounded-md'
+                : isCyberpunk
+                  ? 'cyberpunk-surface'
+                  : 'rounded-2xl border-[rgba(var(--color-accent-primary-rgb),0.25)] shadow-2xl')
         }`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] p-5">
+        <div
+          className={`flex items-start justify-between gap-4 ${
+            isRetroCartoon
+              ? 'item-details-modal__header'
+              : 'border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] p-5'
+          }`}
+        >
           <div>
-            <h3 className="theme-heading-font text-xl md:text-2xl font-black tracking-wide uppercase text-[var(--color-text-primary)]">
+            <h3
+              className={`theme-heading-font text-xl md:text-2xl font-black tracking-wide uppercase text-[var(--color-text-primary)] ${
+                isRetroCartoon ? 'item-details-modal__title' : ''
+              }`}
+            >
               {displayTitle}
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="theme-heading-font rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.4)] bg-transparent px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-primary)]">
+              <span
+                className={
+                  isRetroCartoon
+                    ? 'item-details-modal__tag item-details-modal__tag--type'
+                    : 'theme-heading-font rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.4)] bg-transparent px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-primary)]'
+                }
+              >
                 {selectedItem.tipo === 'pelicula' ? movieTypeLabel : seriesTypeLabel}
               </span>
               <span
-                className={`theme-heading-font rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] ${
+                className={
                   isRetroCartoon
-                    ? 'border-black bg-transparent text-black'
-                    : selectedItem.visto
-                      ? 'border-[rgba(var(--color-accent-primary-rgb),0.45)] bg-transparent text-[var(--color-accent-primary)]'
-                      : 'border-[rgba(var(--color-accent-secondary-rgb),0.45)] bg-transparent text-[var(--color-accent-secondary)]'
-                }`}
+                    ? `item-details-modal__tag ${selectedItem.visto ? 'item-details-modal__tag--watched' : 'item-details-modal__tag--unwatched'}`
+                    : `theme-heading-font rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] ${
+                        selectedItem.visto
+                          ? 'border-[rgba(var(--color-accent-primary-rgb),0.45)] bg-transparent text-[var(--color-accent-primary)]'
+                          : 'border-[rgba(var(--color-accent-secondary-rgb),0.45)] bg-transparent text-[var(--color-accent-secondary)]'
+                      }`
+                }
               >
                 {selectedItem.visto ? watchedLabel : notWatchedLabel}
               </span>
@@ -212,15 +228,17 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               <button
                 type="button"
                 onClick={onPrevious}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                className={
                   isRetroCartoon
-                    ? retroFloatingButton
-                    : isTerminal
-                      ? 'terminal-button theme-heading-font rounded-md'
-                      : isCyberpunk
-                        ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
-                      : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
-                }`}
+                    ? 'item-details-modal__nav-btn item-details-modal__nav-btn--prev'
+                    : `flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                        isTerminal
+                          ? 'terminal-button theme-heading-font rounded-md'
+                          : isCyberpunk
+                            ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
+                            : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
+                      }`
+                }
                 aria-label="Anterior"
               >
                 {'<'}
@@ -230,34 +248,44 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               <button
                 type="button"
                 onClick={onNext}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                className={
                   isRetroCartoon
-                    ? retroFloatingButton
-                    : isTerminal
-                      ? 'terminal-button theme-heading-font rounded-md'
-                      : isCyberpunk
-                        ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
-                      : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
-                }`}
+                    ? 'item-details-modal__nav-btn item-details-modal__nav-btn--next'
+                    : `flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                        isTerminal
+                          ? 'terminal-button theme-heading-font rounded-md'
+                          : isCyberpunk
+                            ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
+                            : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
+                      }`
+                }
                 aria-label="Siguiente"
               >
                 {'>'}
               </button>
             )}
-            <div className="mx-1 h-6 w-px bg-[rgba(var(--color-accent-primary-rgb),0.25)]"></div>
+            <div
+              className={
+                isRetroCartoon
+                  ? 'item-details-modal__nav-divider mx-1'
+                  : 'mx-1 h-6 w-px bg-[rgba(var(--color-accent-primary-rgb),0.25)]'
+              }
+            />
             <button
               ref={closeButtonRef}
               type="button"
               onClick={handleRequestClose}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
+              className={
                 isRetroCartoon
-                  ? retroFloatingButton
-                  : isTerminal
-                    ? 'terminal-button theme-heading-font rounded-md'
-                    : isCyberpunk
-                      ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
-                    : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
-              }`}
+                  ? 'item-details-modal__nav-btn item-details-modal__nav-btn--close'
+                  : `flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                      isTerminal
+                        ? 'terminal-button theme-heading-font rounded-md'
+                        : isCyberpunk
+                          ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
+                          : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
+                    }`
+              }
               aria-label={closeLabel}
               disabled={isQuickCritiqueSaving}
             >
@@ -267,7 +295,13 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
         </div>
 
         <div className="grid gap-0 md:grid-cols-[320px_minmax(0,1fr)]">
-          <div className="border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-primary)] p-5 md:border-b-0 md:border-r">
+          <div
+            className={
+              isRetroCartoon
+                ? 'item-details-modal__media-col p-5'
+                : 'border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-primary)] p-5 md:border-b-0 md:border-r'
+            }
+          >
             {selectedItem.poster_url ? (
               <div className="flex max-h-[420px] w-full items-center justify-center overflow-hidden rounded-xl bg-[var(--color-bg-secondary)]">
                 <img
@@ -284,33 +318,67 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
             )}
 
             {selectedItem.genero && (
-              <div className="mt-4 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] px-4 py-3">
-                <p className="theme-heading-font mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
+              <div
+                className={
+                  isRetroCartoon
+                    ? 'item-details-modal__genre-panel mt-4 px-4 py-3'
+                    : 'mt-4 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] px-4 py-3'
+                }
+              >
+                <p
+                  className={
+                    isRetroCartoon
+                      ? 'item-details-modal__section-label mb-1'
+                      : 'theme-heading-font mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]'
+                  }
+                >
                   Genero
                 </p>
-                <p className="theme-heading-font text-[11px] font-bold uppercase text-[var(--color-text-primary)]">{selectedItem.genero}</p>
+                <p className="theme-heading-font text-[11px] font-bold uppercase text-[var(--color-text-primary)]">
+                  {selectedItem.genero}
+                </p>
               </div>
             )}
           </div>
 
           <div className="flex flex-col p-5">
             <div className="mb-8 flex-1">
-              <p className="theme-heading-font mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
+              <p
+                className={
+                  isRetroCartoon
+                    ? 'item-details-modal__section-label mb-3'
+                    : 'theme-heading-font mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]'
+                }
+              >
                 Sinopsis
               </p>
-              <div className={`text-sm md:text-base leading-relaxed text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
-                {synopsisLoading && <p className={isRetroCartoon ? 'theme-heading-font text-[var(--color-text-muted)]' : 'text-[var(--color-text-muted)]'}>{loadingSynopsisLabel}</p>}
-                {synopsisError && <p className={isRetroCartoon ? 'theme-heading-font text-[var(--color-accent-secondary)]' : 'text-[var(--color-accent-secondary)]'}>{synopsisError}</p>}
+              <div
+                className={`text-sm md:text-base leading-relaxed text-[var(--color-text-primary)] ${
+                  isRetroCartoon ? 'item-details-modal__synopsis' : ''
+                }`}
+              >
+                {synopsisLoading && (
+                  <p className={isRetroCartoon ? 'theme-body-font text-[var(--color-text-muted)]' : 'text-[var(--color-text-muted)]'}>
+                    {loadingSynopsisLabel}
+                  </p>
+                )}
+                {synopsisError && (
+                  <p className={isRetroCartoon ? 'theme-body-font text-[var(--color-accent-secondary)]' : 'text-[var(--color-accent-secondary)]'}>
+                    {synopsisError}
+                  </p>
+                )}
                 {!synopsisLoading && !synopsisError && isTranslatingSynopsis && (
-                  <div className={`flex items-center gap-2 ${isRetroCartoon ? 'theme-heading-font text-[var(--color-text-muted)]' : 'text-[var(--color-text-muted)]'}`}>
+                  <div
+                    className={`flex items-center gap-2 ${
+                      isRetroCartoon ? 'theme-body-font text-[var(--color-text-muted)]' : 'text-[var(--color-text-muted)]'
+                    }`}
+                  >
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
                     <span>Traduciendo sinopsis...</span>
                   </div>
                 )}
                 {!synopsisLoading && !synopsisError && !isTranslatingSynopsis && (
-                  <p className={isRetroCartoon ? 'theme-heading-font' : ''}>
-                    {displaySynopsis || emptySynopsisLabel}
-                  </p>
+                  <p className={isRetroCartoon ? 'theme-body-font' : ''}>{displaySynopsis || emptySynopsisLabel}</p>
                 )}
               </div>
             </div>
@@ -334,19 +402,21 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                 type="button"
                 onClick={handleToggleClick}
                 disabled={modalActionLoading !== null || showQuickCritique}
-                className={`theme-heading-font flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm md:text-base font-bold uppercase tracking-[0.14em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={
                   isRetroCartoon
-                    ? 'border-[3px] border-black bg-[var(--color-bg-primary)] text-black shadow-[5px_5px_0px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[4px_4px_0px_0px_#000000] active:translate-x-[5px] active:translate-y-[5px] active:shadow-none'
-                    : isTerminal
-                      ? selectedItem.visto
-                        ? 'terminal-button theme-heading-font rounded-md'
-                        : 'terminal-button terminal-button--danger theme-heading-font rounded-md'
-                    : isCyberpunk
-                      ? 'cyberpunk-button theme-heading-font'
-                    : selectedItem.visto
-                      ? 'border-[rgba(var(--color-accent-primary-rgb),0.45)] bg-[rgba(var(--color-accent-primary-rgb),0.12)] text-[var(--color-accent-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.18)] shadow-lg'
-                      : 'border-[rgba(var(--color-accent-secondary-rgb),0.45)] bg-[rgba(var(--color-accent-secondary-rgb),0.12)] text-[var(--color-accent-secondary)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.18)] shadow-lg'
-                }`}
+                    ? `ui-card-action-btn ui-card-action-btn--lg ${selectedItem.visto ? 'ui-card-action-btn--alt' : ''} disabled:cursor-not-allowed`
+                    : `theme-heading-font flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm md:text-base font-bold uppercase tracking-[0.14em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                        isTerminal
+                          ? selectedItem.visto
+                            ? 'terminal-button theme-heading-font rounded-md'
+                            : 'terminal-button terminal-button--danger theme-heading-font rounded-md'
+                          : isCyberpunk
+                            ? 'cyberpunk-button theme-heading-font'
+                            : selectedItem.visto
+                              ? 'border-[rgba(var(--color-accent-primary-rgb),0.45)] bg-[rgba(var(--color-accent-primary-rgb),0.12)] text-[var(--color-accent-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.18)] shadow-lg'
+                              : 'border-[rgba(var(--color-accent-secondary-rgb),0.45)] bg-[rgba(var(--color-accent-secondary-rgb),0.12)] text-[var(--color-accent-secondary)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.65)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.18)] shadow-lg'
+                      }`
+                }
               >
                 <span>
                   {modalActionLoading === 'toggle'
@@ -366,15 +436,17 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               <button
                 type="button"
                 onClick={handleRequestClose}
-                className={`theme-heading-font rounded-xl border px-4 py-3 text-sm font-bold transition ${
+                className={
                   isRetroCartoon
-                    ? retroFloatingButton
-                    : isTerminal
-                      ? 'terminal-button rounded-md'
-                      : isCyberpunk
-                        ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
-                      : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
-                }`}
+                    ? 'ui-card-action-btn ui-card-action-btn--lg item-details-modal__close-btn w-full sm:w-auto'
+                    : `theme-heading-font rounded-xl border px-4 py-3 text-sm font-bold transition ${
+                        isTerminal
+                          ? 'terminal-button rounded-md'
+                          : isCyberpunk
+                            ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
+                            : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
+                      }`
+                }
                 disabled={isQuickCritiqueSaving}
               >
                 Cerrar
@@ -385,15 +457,17 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                   type="button"
                   onClick={onDelete}
                   disabled={modalActionLoading !== null}
-                  className={`theme-heading-font rounded-xl border px-4 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                  className={
                     isRetroCartoon
-                      ? retroFloatingButton
-                      : isTerminal
-                        ? 'terminal-button terminal-button--danger rounded-md'
-                        : isCyberpunk
-                          ? 'cyberpunk-button cyberpunk-button--danger theme-heading-font'
-                        : 'border-red-500/40 bg-red-500/12 text-red-300 hover:border-red-400 hover:bg-red-500/18 hover:text-red-200'
-                  }`}
+                      ? 'item-details-modal__destructive-btn disabled:cursor-not-allowed'
+                      : `theme-heading-font rounded-xl border px-4 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                          isTerminal
+                            ? 'terminal-button terminal-button--danger rounded-md'
+                            : isCyberpunk
+                              ? 'cyberpunk-button cyberpunk-button--danger theme-heading-font'
+                              : 'border-red-500/40 bg-red-500/12 text-red-300 hover:border-red-400 hover:bg-red-500/18 hover:text-red-200'
+                        }`
+                  }
                 >
                   {modalActionLoading === 'delete' ? 'Borrando...' : `DELETE ${deleteLabel}`}
                 </button>

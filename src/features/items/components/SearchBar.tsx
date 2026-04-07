@@ -1,7 +1,6 @@
 import React, { Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HudContainer, OmdbSuggestion, OptimizedImage, TechLabel } from '@/features/shared'
-import { useTheme } from '@/features/shared/hooks/useTheme'
 import { Loader2 } from 'lucide-react'
 
 interface SearchBarProps {
@@ -33,10 +32,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     ref
   ) => {
     const { t } = useTranslation()
-    const { theme } = useTheme()
-    const isRetroCartoon = theme === 'retro-cartoon'
     const ariaLabel = React.useMemo(() => t('placeholders.search_aria_label'), [t])
-    const searchTypeClass = isRetroCartoon ? 'theme-heading-font tracking-wide font-bold' : 'font-mono tracking-wide'
 
     return (
       <div className="relative" ref={ref}>
@@ -46,21 +42,21 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
               text="INPUT.QUERY"
               tone="primary"
               blink
-              className={`absolute left-4 -top-2 z-10 ${isRetroCartoon ? 'theme-heading-font' : ''}`}
+              className="ui-search-tech-label absolute left-4 -top-2 z-10"
             />
 
             <input
               type="text"
               placeholder={placeholder}
               aria-label={ariaLabel}
-              className={`w-full hud-search-input px-4 md:px-5 py-3 md:py-4 text-sm md:text-base outline-none transition-all ${searchTypeClass}`}
+              className="hud-search-input w-full px-4 py-3 text-sm outline-none transition-all md:px-5 md:py-4 md:text-base"
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onFocus={onFocus}
             />
             {loading && (
-              <div className="absolute right-3 md:right-4 top-3 md:top-4 text-accent-primary">
-                <Loader2 className="animate-spin h-4 w-4 md:h-5 md:w-5" />
+              <div className="absolute right-3 top-3 text-accent-primary md:right-4 md:top-4">
+                <Loader2 className="h-4 w-4 animate-spin md:h-5 md:w-5" />
               </div>
             )}
           </div>
@@ -68,43 +64,36 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
           <button
             type="submit"
             disabled={loading}
-            className={`hud-search-submit px-4 md:px-7 py-3 md:py-4 font-black transition-all uppercase text-[10px] md:text-xs disabled:cursor-not-allowed ${isRetroCartoon ? 'theme-heading-font' : ''}`}
+            className="hud-search-submit px-4 py-3 text-[10px] font-black uppercase transition-all disabled:cursor-not-allowed md:px-7 md:py-4 md:text-xs"
           >
             {loading ? '...' : t('action.search_ok_button')}
           </button>
         </form>
 
-        {/* Suggestions Dropdown */}
         {showDropdown && suggestions.length > 0 && (
           <HudContainer
-            className="absolute w-full mt-2 z-50 hud-search-dropdown"
-            contentClassName="max-h-[500px] overflow-y-auto hud-search-dropdown-content"
+            className="absolute z-50 mt-2 w-full hud-search-dropdown"
+            contentClassName="hud-search-dropdown-content max-h-[500px] overflow-y-auto"
           >
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion.imdbID}
                 type="button"
                 onClick={() => onSuggestionSelect?.(suggestion)}
-                className={`w-full flex items-center gap-4 p-3 hud-search-suggestion text-left transition-all ${isRetroCartoon ? 'theme-heading-font' : ''}`}
+                className="hud-search-suggestion flex w-full items-center gap-4 p-3 text-left transition-all"
               >
-                <div className="w-10 h-14 flex-shrink-0 rounded hud-search-suggestion-thumb overflow-hidden">
+                <div className="hud-search-suggestion-thumb flex h-14 w-10 flex-shrink-0 overflow-hidden rounded">
                   <OptimizedImage
                     src={suggestion.Poster !== 'N/A' ? suggestion.Poster : undefined}
                     alt={suggestion.Title}
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </div>
                 <div>
-                  <div
-                    className={`hud-search-suggestion-title font-black text-sm uppercase italic ${isRetroCartoon ? 'theme-heading-font' : ''}`}
-                  >
+                  <div className="hud-search-suggestion-title text-sm font-black uppercase italic">
                     {suggestion.Title}
                   </div>
-                  <div
-                    className={`hud-search-suggestion-meta text-[10px] font-bold mt-1 ${isRetroCartoon ? 'theme-heading-font' : ''}`}
-                  >
-                    {suggestion.Year}
-                  </div>
+                  <div className="hud-search-suggestion-meta mt-1 text-[10px] font-bold">{suggestion.Year}</div>
                 </div>
               </button>
             ))}

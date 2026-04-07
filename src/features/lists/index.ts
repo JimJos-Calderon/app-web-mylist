@@ -1,5 +1,7 @@
 export { default as ListaContenido } from './components/ListaContenido'
 export { default as ActivityFeed } from './components/ActivityFeed'
+export { default as ActivityFeedSkeleton } from './components/ActivityFeedSkeleton'
+export type { ActivityFeedSkeletonTheme } from './components/ActivityFeedSkeleton'
 export { CreateListDialog, InviteDialog } from './components/ListDialogs'
 export { default as ListSettingsModal } from './components/ListSettingsModal'
 export { default as ListSelector } from './components/ListSelector'

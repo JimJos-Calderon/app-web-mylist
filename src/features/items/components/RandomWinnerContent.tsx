@@ -97,9 +97,10 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
   return (
     <div className="relative z-[1] flex w-full flex-col items-center gap-6 overflow-visible p-2 md:p-6">
       {/* ─── TERMINAL DISPLAY ─── */}
-      <div className={`relative z-[2] w-full max-w-[280px] aspect-[2/3] overflow-hidden ${
+      <div
+        className={`relative z-[2] w-full max-w-[280px] aspect-[2/3] overflow-hidden ${
         isRetroCartoon
-          ? 'rounded-xl border-[4px] border-black shadow-[8px_8px_0px_0px_#000000] bg-white'
+          ? 'random-winner__poster-frame rounded-xl'
           : isTerminal
             ? 'rounded-none border border-[rgba(var(--color-accent-primary-rgb),0.85)] shadow-[0_0_10px_var(--color-glow)] bg-[var(--color-bg-base)]'
             : isCyberpunk
@@ -130,7 +131,7 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
                 <OptimizedImage
                   src={p.poster_url ?? undefined}
                   alt={p.titulo}
-                  className={`h-full w-full object-cover opacity-90 ${isRetroCartoon ? 'grayscale contrast-125' : ''}`}
+                  className="h-full w-full object-cover opacity-90"
                 />
               </div>
               
@@ -148,34 +149,49 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
 
         {/* ─── REVELACIÓN FINAL ─── */}
         {isFinished && (
-          <div 
-            className={`absolute inset-0 z-30 flex flex-col items-center justify-end bg-black transition-all duration-500 ease-out ${
-              showCleanCard ? 'opacity-100 scale-100' : 'opacity-0 scale-110 blur-xl'
-            }`}
+          <div
+            className={`absolute inset-0 z-30 flex flex-col items-center justify-end transition-all duration-500 ease-out ${
+              isRetroCartoon ? 'random-winner__reveal-overlay' : 'bg-black'
+            } ${showCleanCard ? 'opacity-100 scale-100' : 'opacity-0 scale-110 blur-xl'}`}
           >
-            {/* Marco de Neón Pulsante */}
-            <div className="absolute inset-0 border-[6px] border-accent-primary animate-neon-pulse shadow-[inset_0_0_30px_rgba(var(--color-accent-primary-rgb),0.5)] z-10 pointer-events-none" />
+            <div
+              className={`absolute inset-0 z-10 pointer-events-none ${
+                isRetroCartoon
+                  ? 'random-winner__reveal-frame'
+                  : 'border-[6px] border-accent-primary animate-neon-pulse shadow-[inset_0_0_30px_rgba(var(--color-accent-primary-rgb),0.5)]'
+              }`}
+            />
             
             <OptimizedImage
               src={item.poster_url ?? undefined}
               alt={item.titulo}
-              className={`h-full w-full object-cover ${isRetroCartoon ? 'grayscale contrast-125' : ''}`}
+              className="h-full w-full object-cover"
             />
             
-            <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/90 to-transparent p-5">
+            <div
+              className={`absolute inset-x-0 bottom-0 z-20 p-5 ${
+                isRetroCartoon
+                  ? 'random-winner__reveal-bottom'
+                  : 'bg-gradient-to-t from-black via-black/90 to-transparent'
+              }`}
+            >
               <TechLabel
                 text={item.tipo === 'pelicula' ? 'DATA_LNK.FILM' : 'DATA_LNK.SERIE'}
                 tone="primary"
                 blink
                 className="mb-2"
               />
-              <h3 className={`text-2xl font-black uppercase tracking-tight leading-tight ${
-                isTerminal
-                  ? 'theme-heading-font text-[var(--color-text-primary)]'
-                  : isCyberpunk
-                    ? 'theme-heading-font text-[var(--color-text-primary)] cyberpunk-text-glow'
-                    : 'text-white drop-shadow-[0_0_15px_rgba(0,0,0,1)]'
-              }`}>
+              <h3
+                className={`text-2xl font-black uppercase tracking-tight leading-tight ${
+                  isRetroCartoon
+                    ? 'random-winner__reveal-title'
+                    : isTerminal
+                      ? 'theme-heading-font text-[var(--color-text-primary)]'
+                      : isCyberpunk
+                        ? 'theme-heading-font text-[var(--color-text-primary)] cyberpunk-text-glow'
+                        : 'text-white drop-shadow-[0_0_15px_rgba(0,0,0,1)]'
+                }`}
+              >
                 {item.titulo}
               </h3>
             </div>
@@ -195,19 +211,21 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
             event.stopPropagation()
             onClose(event)
           }}
-          className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden py-4 text-sm font-black uppercase tracking-widest transition active:scale-95 ${
+          className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden text-sm font-black uppercase tracking-widest transition active:scale-95 ${
             isRetroCartoon
-              ? 'bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] rounded-xl hover:-translate-y-[2px] hover:shadow-[6px_6px_0px_0px_#000000]'
+              ? 'ui-card-action-btn ui-card-action-btn--lg'
               : isTerminal
-                ? 'terminal-button theme-heading-font rounded-none'
+                ? 'terminal-button theme-heading-font rounded-none py-4'
                 : isCyberpunk
-                  ? 'cyberpunk-button cyberpunk-random-cta theme-heading-font rounded-full'
-                : 'font-mono rounded-xl border border-accent-primary bg-accent-primary/10 text-accent-primary hover:bg-accent-primary hover:text-black shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.2)]'
+                  ? 'cyberpunk-button cyberpunk-random-cta theme-heading-font rounded-full py-4'
+                : 'py-4 font-mono rounded-xl border border-accent-primary bg-accent-primary/10 text-accent-primary hover:bg-accent-primary hover:text-black shadow-[0_0_20px_rgba(var(--color-accent-primary-rgb),0.2)]'
           }`}
         >
           <Play className="h-5 w-5 fill-current" />
           <span>{primaryActionLabel}</span>
-          <div className="absolute inset-0 -translate-y-full bg-gradient-to-b from-transparent via-white/10 to-transparent group-hover:animate-scan-hover pointer-events-none" />
+          {!isRetroCartoon ? (
+            <div className="absolute inset-0 -translate-y-full bg-gradient-to-b from-transparent via-white/10 to-transparent group-hover:animate-scan-hover pointer-events-none" />
+          ) : null}
         </button>
 
         <button
@@ -217,14 +235,14 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
             event.stopPropagation()
             onReRoll()
           }}
-          className={`flex w-full items-center justify-center gap-3 py-4 text-xs font-bold uppercase tracking-widest transition active:scale-95 ${
+          className={`flex w-full items-center justify-center gap-3 text-xs font-bold uppercase tracking-widest transition active:scale-95 ${
             isRetroCartoon
-              ? 'bg-transparent text-black border-[3px] border-transparent hover:border-black hover:shadow-[4px_4px_0px_0px_#000000] rounded-xl'
+              ? 'ui-card-action-btn ui-card-action-btn--alt'
               : isTerminal
-                ? 'terminal-button theme-heading-font rounded-none'
+                ? 'terminal-button theme-heading-font rounded-none py-4'
                 : isCyberpunk
-                  ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font rounded-full'
-                : 'font-mono rounded-xl border border-white/10 bg-black/40 text-[var(--color-text-muted)] hover:border-white/30 hover:text-white'
+                  ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font rounded-full py-4'
+                : 'py-4 font-mono rounded-xl border border-white/10 bg-black/40 text-[var(--color-text-muted)] hover:border-white/30 hover:text-white'
           }`}
         >
           <RefreshCw className="h-4 w-4" />

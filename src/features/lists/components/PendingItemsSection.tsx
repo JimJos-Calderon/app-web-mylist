@@ -36,33 +36,35 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
   pageLabel,
 }) => {
   const { theme } = useTheme()
-  const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
-
-  const retroPageButtonBase =
-    'relative z-10 m-1 hover:z-20 bg-white text-black border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-md font-bold hover:-translate-y-[2px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all'
-  const retroPageButtonDisabled = 'relative z-10 m-1 bg-white text-black border-[3px] border-black rounded-md font-bold opacity-50 cursor-not-allowed'
-  const retroPageButtonActive =
-    'relative z-10 m-1 hover:z-20 bg-black text-white border-[3px] border-black shadow-[3px_3px_0px_0px_#000000] rounded-md font-bold transition-all'
+  const plainPaginationLabels = theme === 'retro-cartoon'
 
   return (
     <>
       <section className="mb-12 mt-10 md:mb-16 md:mt-16">
         <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className={`text-xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-2xl ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+            <h2 className="list-section-heading text-xl font-bold tracking-tight text-[var(--color-text-primary)] md:text-2xl">
               {searchQuery ? 'Pendientes filtrados' : 'Para decidir hoy'}
             </h2>
             {isCyberpunk && <div className="cyberpunk-separator mt-3" />}
           </div>
 
-          <div className="flex flex-wrap gap-2 text-xs text-[var(--color-text-muted)]">
-            <span className={`px-3 py-1 ${isRetroCartoon ? 'rounded-full border border-cyan-500/20 bg-[rgba(var(--color-accent-primary-rgb),0.08)] theme-heading-font' : isTerminal ? 'terminal-panel theme-heading-font rounded-none' : 'rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.08)]'}`}>
+          <div className="flex flex-wrap gap-[var(--ui-list-meta-gap)] text-[var(--color-text-muted)]">
+            <span
+              className={
+                isTerminal ? 'terminal-panel theme-heading-font rounded-none px-3 py-1' : 'list-meta-tag-a'
+              }
+            >
               {visiblePendingItems.length} pendientes visibles
             </span>
             {totalPages > 1 && (
-              <span className={`px-3 py-1 ${isRetroCartoon ? 'rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] theme-heading-font' : isTerminal ? 'terminal-panel theme-heading-font rounded-none' : 'rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)]'}`}>
+              <span
+                className={
+                  isTerminal ? 'terminal-panel theme-heading-font rounded-none px-3 py-1' : 'list-meta-tag-b'
+                }
+              >
                 PAGINA {currentPage} DE {totalPages}
               </span>
             )}
@@ -70,8 +72,14 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
         </div>
 
         {visiblePendingItems.length === 0 ? (
-          <div className={`p-6 text-center ${isTerminal ? 'terminal-panel rounded-none' : 'rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)]'}`}>
-            <h4 className={`mb-2 text-base font-semibold text-[var(--color-text-primary)] ${isTerminal ? 'theme-heading-font uppercase' : ''}`}>No hay pendientes visibles</h4>
+          <div
+            className={
+              isTerminal ? 'terminal-panel rounded-none p-6 text-center' : 'rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] p-6 text-center'
+            }
+          >
+            <h4 className={`mb-2 text-base font-semibold text-[var(--color-text-primary)] ${isTerminal ? 'theme-heading-font uppercase' : ''}`}>
+              No hay pendientes visibles
+            </h4>
             <p className={`text-sm text-[var(--color-text-muted)] ${isTerminal ? 'theme-body-font' : ''}`}>
               Todo está marcado como visto o la búsqueda no devuelve pendientes.
             </p>
@@ -94,29 +102,19 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
 
       {visiblePendingItems.length > 0 && totalPages > 1 && (
         <>
-          <div className="mt-8 py-2 overflow-visible flex items-center justify-center gap-1 md:mt-10 md:gap-2">
+          <div className="mt-8 flex items-center justify-center gap-1 overflow-visible py-2 md:mt-10 md:gap-2">
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`flex flex-shrink-0 items-center border px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
-                isRetroCartoon
-                  ? currentPage === 1
-                    ? retroPageButtonDisabled
-                    : retroPageButtonBase
-                  : currentPage === 1
-                    ? isTerminal
-                      ? 'terminal-button theme-heading-font rounded-none opacity-50'
-                      : 'cursor-not-allowed border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] opacity-50'
-                    : isTerminal
-                      ? 'terminal-button theme-heading-font rounded-none'
-                      : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
-              }`}
-              style={{
-                clipPath:
-                  isRetroCartoon || isTerminal ? 'none' : 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
-              }}
+              className={
+                isTerminal
+                  ? `theme-heading-font rounded-none md:px-4 md:py-2 md:text-sm ${currentPage === 1 ? 'terminal-button opacity-50' : 'terminal-button'}`
+                  : `list-pagination-btn font-mono md:px-4 md:py-2 md:text-sm`
+              }
             >
-              <span className="hidden sm:inline">[ {previousLabel} ]</span>
+              <span className="hidden sm:inline">
+                {plainPaginationLabels ? previousLabel : `[ ${previousLabel} ]`}
+              </span>
               <span className="sm:hidden">{'<'}</span>
             </button>
 
@@ -124,9 +122,7 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
                 const showPageMobile = page === currentPage || page === 1 || page === totalPages
                 const showPageDesktop =
-                  page === 1 ||
-                  page === totalPages ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
+                  page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)
                 const showPage = isMobile ? showPageMobile : showPageDesktop
 
                 if (!showPage) {
@@ -134,7 +130,7 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
                     return (
                       <span
                         key={page}
-                        className={`px-1 py-2 text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
+                        className="list-pagination-ellipsis px-1 py-2 text-xs text-[var(--color-text-muted)] opacity-50 md:px-2 md:text-sm font-mono"
                       >
                         ...
                       </span>
@@ -147,23 +143,17 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
                   <button
                     key={page}
                     onClick={() => onPageChange(page)}
-                    className={`flex min-w-[36px] flex-shrink-0 items-center justify-center border px-3 py-2 text-xs font-bold uppercase transition-all md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
-                      isRetroCartoon
-                        ? currentPage === page
-                          ? retroPageButtonActive
-                          : retroPageButtonBase
-                        : currentPage === page
-                          ? isTerminal
-                            ? 'terminal-button theme-heading-font rounded-none bg-[var(--color-accent-primary)] text-[var(--color-bg-base)]'
-                            : 'border-accent-primary bg-[rgba(var(--color-accent-primary-rgb),0.15)] text-accent-primary shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
-                          : isTerminal
-                            ? 'terminal-button theme-heading-font rounded-none opacity-80'
-                            : 'border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] hover:border-[rgba(var(--color-accent-primary-rgb),0.8)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary'
-                    }`}
-                    style={{
-                      clipPath:
-                        isRetroCartoon || isTerminal ? 'none' : 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
-                    }}
+                    className={
+                      isTerminal
+                        ? `theme-heading-font rounded-none md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${
+                            currentPage === page
+                              ? 'terminal-button bg-[var(--color-accent-primary)] text-[var(--color-bg-base)]'
+                              : 'terminal-button opacity-80'
+                          }`
+                        : `list-pagination-page font-mono md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${
+                            currentPage === page ? 'list-pagination-page--active' : 'list-pagination-page--idle'
+                          }`
+                    }
                   >
                     {page}
                   </button>
@@ -174,31 +164,21 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`flex flex-shrink-0 items-center border px-3 py-2 text-xs font-bold uppercase tracking-widest transition-all md:px-4 md:py-2 md:text-sm ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'} ${
-                isRetroCartoon
-                  ? currentPage === totalPages
-                    ? retroPageButtonDisabled
-                    : retroPageButtonBase
-                  : currentPage === totalPages
-                    ? isTerminal
-                      ? 'terminal-button theme-heading-font rounded-none opacity-50'
-                      : 'cursor-not-allowed border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.5)] text-[var(--color-text-muted)] opacity-50'
-                    : isTerminal
-                      ? 'terminal-button theme-heading-font rounded-none'
-                      : 'border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.5)] text-accent-primary hover:border-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.3)]'
-              }`}
-              style={{
-                clipPath:
-                  isRetroCartoon || isTerminal ? 'none' : 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
-              }}
+              className={
+                isTerminal
+                  ? `theme-heading-font rounded-none md:px-4 md:py-2 md:text-sm ${
+                      currentPage === totalPages ? 'terminal-button opacity-50' : 'terminal-button'
+                    }`
+                  : `list-pagination-btn font-mono md:px-4 md:py-2 md:text-sm`
+              }
             >
-              <span className="hidden sm:inline">[ {nextLabel} ]</span>
+              <span className="hidden sm:inline">{plainPaginationLabels ? nextLabel : `[ ${nextLabel} ]`}</span>
               <span className="sm:hidden">{'>'}</span>
             </button>
           </div>
 
           <div className="mt-3 text-center">
-            <p className={`text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] md:text-xs md:tracking-widest ${isRetroCartoon || isTerminal ? 'theme-heading-font' : ''}`}>
+            <p className="list-pagination-footer text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] md:text-xs md:tracking-widest">
               <span className="hidden sm:inline">{pageLabel} • </span>
               {visiblePendingItems.length} por decidir
             </p>

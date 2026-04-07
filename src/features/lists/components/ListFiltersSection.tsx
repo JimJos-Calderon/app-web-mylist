@@ -1,5 +1,5 @@
 import React from 'react'
-import { FilterState, SORT_OPTIONS, useTheme } from '@/features/shared'
+import { FilterState, SORT_OPTIONS } from '@/features/shared'
 import { FilterPanel } from '@/features/items'
 
 interface ListFiltersSectionProps {
@@ -17,40 +17,33 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
   onResetFilters,
   onFilterChange,
 }) => {
-  const { theme } = useTheme()
-  const isRetroCartoon = theme === 'retro-cartoon'
-
   return (
-    <section className="mb-8">
-      <div className="flex justify-end gap-6 px-2">
-        {showSecondaryControls && (
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className={`text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
-          >
-            Quitar filtros
+    <section className="list-filters-section mb-8">
+      <div
+        className={`list-filters-shell ${showSecondaryControls ? 'list-filters-shell--open' : ''}`}
+      >
+        <div className="list-filters-toolbar flex justify-end gap-6">
+          {showSecondaryControls && (
+            <button type="button" onClick={onResetFilters} className="ui-action-link">
+              Quitar filtros
+            </button>
+          )}
+          <button type="button" onClick={onToggleSecondaryControls} className="ui-action-link">
+            {showSecondaryControls ? 'Ocultar filtros' : 'Filtros'}
           </button>
-        )}
-        <button
-          type="button"
-          onClick={onToggleSecondaryControls}
-          className={`text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
-        >
-          {showSecondaryControls ? 'Ocultar filtros' : 'Filtros'}
-        </button>
-      </div>
-
-      {showSecondaryControls && (
-        <div className="list-filters-shell mt-4 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] p-4">
-          <FilterPanel
-            filters={filters}
-            onFilterChange={onFilterChange}
-            onReset={onResetFilters}
-            sortOptions={SORT_OPTIONS}
-          />
         </div>
-      )}
+
+        {showSecondaryControls && (
+          <div className="list-filters-panel">
+            <FilterPanel
+              filters={filters}
+              onFilterChange={onFilterChange}
+              onReset={onResetFilters}
+              sortOptions={SORT_OPTIONS}
+            />
+          </div>
+        )}
+      </div>
     </section>
   )
 }
