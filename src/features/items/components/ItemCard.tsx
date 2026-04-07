@@ -186,15 +186,13 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 event.stopPropagation()
                 onOpenDetails(item)
               }}
-                className={`flex w-full items-center justify-center gap-2 border px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
-                  isRetroCartoon
-                    ? 'rounded-xl border-slate-700 bg-slate-800/50 text-white hover:border-slate-500 hover:bg-slate-700/50 theme-heading-font'
-                    : isTerminal
-                      ? 'terminal-button theme-heading-font rounded-none'
-                      : isCyberpunk
-                        ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
-                      : 'rounded-xl border-slate-700 bg-slate-800/50 text-white hover:border-slate-500 hover:bg-slate-700/50'
-                }`}
+              className={
+                isTerminal
+                  ? 'terminal-button theme-heading-font rounded-none flex w-full items-center justify-center gap-2 border px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition'
+                  : isCyberpunk
+                    ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition'
+                    : 'ui-card-action-btn ui-card-action-btn--lg'
+              }
             >
               Ver detalle
             </button>
@@ -208,15 +206,13 @@ const ItemCard: React.FC<ItemCardProps> = ({
                     handleToggle()
                   }}
                   disabled={togglingWatched}
-                  className={`flex w-full items-center justify-center border px-3 py-2 transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                    isRetroCartoon
-                      ? 'rounded-xl border-cyan-400/35 bg-cyan-400/10 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18 theme-heading-font'
-                      : isTerminal
-                        ? 'terminal-button theme-heading-font rounded-none'
-                        : isCyberpunk
-                          ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font'
-                        : 'rounded-xl border-cyan-400/35 bg-cyan-400/10 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18'
-                  }`}
+                  className={
+                    isTerminal
+                      ? 'terminal-button theme-heading-font rounded-none flex w-full items-center justify-center border px-3 py-2 transition disabled:cursor-not-allowed disabled:opacity-60'
+                      : isCyberpunk
+                        ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font flex w-full items-center justify-center px-3 py-2 transition disabled:cursor-not-allowed disabled:opacity-60'
+                        : 'ui-card-action-btn ui-card-action-btn--alt w-full transition disabled:opacity-60'
+                  }
                   aria-label={progressActionLabel}
                   title={progressActionLabel}
                 >
@@ -234,17 +230,15 @@ const ItemCard: React.FC<ItemCardProps> = ({
                     handleToggle()
                   }}
                   disabled={togglingWatched}
-                  className={`flex min-w-0 w-full items-center justify-center gap-2 border px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
-                    isRetroCartoon
-                      ? `rounded-xl ${item.visto ? 'border-cyan-400/40 bg-cyan-400/12 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18' : 'border-purple-400/40 bg-purple-400/12 text-purple-200 hover:border-purple-300 hover:bg-purple-400/18'} theme-heading-font`
-                      : isTerminal
-                        ? 'terminal-button theme-heading-font rounded-none'
-                        : isCyberpunk
-                          ? 'cyberpunk-button theme-heading-font'
-                        : item.visto
-                          ? 'rounded-xl border-cyan-400/40 bg-cyan-400/12 text-cyan-200 hover:border-cyan-300 hover:bg-cyan-400/18'
-                          : 'rounded-xl border-purple-400/40 bg-purple-400/12 text-purple-200 hover:border-purple-300 hover:bg-purple-400/18'
-                  }`}
+                  className={
+                    isTerminal
+                      ? 'terminal-button theme-heading-font rounded-none flex min-w-0 w-full items-center justify-center gap-2 border px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition-all disabled:cursor-not-allowed disabled:opacity-60'
+                      : isCyberpunk
+                        ? 'cyberpunk-button theme-heading-font flex min-w-0 w-full items-center justify-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] transition-all disabled:cursor-not-allowed disabled:opacity-60'
+                        : `ui-card-action-btn min-w-0 w-full gap-2 transition-all disabled:opacity-60 ${
+                            item.visto ? 'ui-card-action-btn--alt' : ''
+                          }`
+                  }
                   aria-label={progressActionLabel}
                   title={progressActionLabel}
                 >
@@ -267,13 +261,15 @@ const ItemCard: React.FC<ItemCardProps> = ({
                     setShowConfirmDialog(true)
                   }}
                   disabled={deleting}
-                  className={`flex items-center justify-center border px-3 py-2 transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                  className={
                     isTerminal
-                      ? 'terminal-button terminal-button--danger theme-heading-font rounded-none'
+                      ? 'terminal-button terminal-button--danger theme-heading-font flex items-center justify-center rounded-none border px-3 py-2 transition disabled:cursor-not-allowed disabled:opacity-50'
                       : isCyberpunk
-                        ? 'cyberpunk-button cyberpunk-button--danger theme-heading-font'
-                      : 'rounded-xl border-red-500/35 bg-red-500/10 text-red-300 hover:border-red-400 hover:bg-red-500/15 hover:text-red-200'
-                  }`}
+                        ? 'cyberpunk-button cyberpunk-button--danger theme-heading-font flex items-center justify-center px-3 py-2 transition disabled:cursor-not-allowed disabled:opacity-50'
+                        : isRetroCartoon
+                          ? 'ui-card-delete-btn'
+                          : 'flex items-center justify-center rounded-xl border border-red-500/35 bg-red-500/10 px-3 py-2 text-red-300 transition hover:border-red-400 hover:bg-red-500/15 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50'
+                  }
                   title={t('buttons.delete')}
                   aria-label={`${t('buttons.delete')} ${item.titulo}`}
                 >

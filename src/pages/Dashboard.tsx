@@ -280,21 +280,45 @@ const Dashboard: React.FC = () => {
         </section>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="dashboard-main-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.28)] bg-[var(--color-bg-elevated)] p-6 md:p-8">
+          <div
+            className={`dashboard-main-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.28)] bg-[var(--color-bg-elevated)] ${isRetroCartoon ? 'overflow-hidden p-0' : 'p-6 md:p-8'}`}
+          >
+            {isRetroCartoon && (
+              <div
+                className="!bg-retro-yellow border-b-2 border-black px-6 py-3 md:px-8"
+                style={{ backgroundColor: 'var(--color-retro-yellow)' }}
+              >
+                <p className="theme-heading-font mb-1 text-[10px] font-bold uppercase tracking-[0.24em] !text-black">
+                  {activeListLabel}
+                </p>
+                <h2 className="theme-heading-font text-xl font-semibold uppercase !text-black md:text-2xl">
+                  {loadingLists
+                    ? formatRetroLabel('Cargando listas')
+                    : currentList?.name
+                      ? formatRetroLabel(currentList.name)
+                      : formatRetroLabel('Sin lista seleccionada')}
+                </h2>
+              </div>
+            )}
+            <div className={isRetroCartoon ? 'p-6 md:p-8' : undefined}>
             <div className="mb-6">
-              <p className={`mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-accent-primary opacity-85 ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
-                {activeListLabel}
-              </p>
+              {!isRetroCartoon ? (
+                <>
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-accent-primary opacity-85">
+                    {activeListLabel}
+                  </p>
 
-              <h2 className={`text-2xl font-semibold text-[var(--color-text-primary)] md:text-3xl ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
-                {loadingLists
-                  ? (isRetroCartoon ? formatRetroLabel('Cargando listas') : 'Cargando listas...')
-                  : currentList?.name
-                    ? (isRetroCartoon ? formatRetroLabel(currentList.name) : currentList.name)
-                    : (isRetroCartoon ? formatRetroLabel('Sin lista seleccionada') : 'Sin lista seleccionada')}
-              </h2>
+                  <h2 className={`text-2xl font-semibold text-[var(--color-text-primary)] md:text-3xl ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
+                    {loadingLists
+                      ? (isRetroCartoon ? formatRetroLabel('Cargando listas') : 'Cargando listas...')
+                      : currentList?.name
+                        ? (isRetroCartoon ? formatRetroLabel(currentList.name) : currentList.name)
+                        : (isRetroCartoon ? formatRetroLabel('Sin lista seleccionada') : 'Sin lista seleccionada')}
+                  </h2>
+                </>
+              ) : null}
 
-              <p className={`mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
+              <p className={`mt-3 max-w-2xl text-sm leading-relaxed ${isRetroCartoon ? 'theme-heading-font !text-black' : 'text-[var(--color-text-muted)]'}`}>
                 {loadingLists
                   ? retroText('Estamos preparando tu contexto.')
                   : hasActiveList
@@ -398,9 +422,26 @@ const Dashboard: React.FC = () => {
                 {goSeriesLabel}
               </Link>
             </div>
+            </div>
           </div>
 
-          <div className="dashboard-next-step-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[var(--color-bg-elevated)] p-6">
+          <div
+            className={`dashboard-next-step-card rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.18)] bg-[var(--color-bg-elevated)] ${isRetroCartoon ? 'overflow-hidden p-0' : 'p-6'}`}
+          >
+            {isRetroCartoon && (
+              <div
+                className="!bg-retro-cyan border-b-2 border-black px-6 py-3"
+                style={{ backgroundColor: 'var(--color-retro-cyan)' }}
+              >
+                <p className="theme-heading-font mb-1 text-[10px] font-bold uppercase tracking-[0.22em] !text-[var(--color-bg-primary)]">{nextStepLabel}</p>
+                <h2 className="theme-heading-font text-xl font-semibold uppercase !text-[var(--color-bg-primary)]">
+                  {formatRetroLabel(nextStepTitle)}
+                </h2>
+              </div>
+            )}
+            <div className={isRetroCartoon ? 'p-6' : undefined}>
+            {!isRetroCartoon && (
+              <>
             <p className={`mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
               {nextStepLabel}
             </p>
@@ -408,8 +449,10 @@ const Dashboard: React.FC = () => {
             <h2 className={`text-2xl font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
               {isRetroCartoon ? formatRetroLabel(nextStepTitle) : nextStepTitle}
             </h2>
+              </>
+            )}
 
-            <p className={`mt-3 text-sm leading-relaxed text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{retroText(nextStepDescription)}</p>
+            <p className={`mt-3 text-sm leading-relaxed ${isRetroCartoon ? 'theme-heading-font !text-black' : 'text-[var(--color-text-muted)]'}`}>{retroText(nextStepDescription)}</p>
 
             <div className="mt-6 grid gap-3">
               <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[var(--color-bg-secondary)] p-4">
@@ -433,6 +476,7 @@ const Dashboard: React.FC = () => {
                     : (isRetroCartoon ? formatRetroLabel('Falta lista activa') : 'Falta lista activa')}
                 </p>
               </div>
+            </div>
             </div>
           </div>
         </section>

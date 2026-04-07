@@ -12,7 +12,11 @@ interface ActivityFeedSkeletonProps {
   className?: string
 }
 
-const rowPulse = 'animate-pulse rounded bg-[rgba(var(--color-text-muted-rgb),0.15)]'
+const rowPulseDefault =
+  'animate-pulse rounded bg-[rgba(var(--color-text-muted-rgb,161,161,170),0.15)]'
+
+const rowPulseRetro =
+  'animate-pulse rounded bg-[color:var(--color-retro-skeleton-pulse)]'
 
 const ActivityFeedSkeleton: React.FC<ActivityFeedSkeletonProps> = ({
   headerLabel,
@@ -32,6 +36,8 @@ const ActivityFeedSkeleton: React.FC<ActivityFeedSkeletonProps> = ({
         ? 'border-green-500/25'
         : 'border-[rgba(var(--color-accent-primary-rgb),0.2)]'
 
+  const rowPulse = retro ? rowPulseRetro : rowPulseDefault
+
   return (
     <HudContainer className={`p-4 ${className || ''}`}>
       <header className={`mb-4 flex items-center gap-2 border-b pb-2 ${borderClass}`}>
@@ -43,9 +49,27 @@ const ActivityFeedSkeleton: React.FC<ActivityFeedSkeletonProps> = ({
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
-            className={`flex gap-3 rounded-2xl border p-3 ${borderClass} ${
-              retro ? 'bg-[var(--color-bg-primary)] shadow-[4px_4px_0px_0px_#000000]' : cyber ? 'bg-black/50' : term ? 'bg-black/80' : 'bg-[rgba(0,0,0,0.2)]'
+            className={`flex gap-3 rounded-2xl p-3 ${borderClass} ${
+              retro
+                ? 'border-2 border-black shadow-[5px_5px_0px_0px_#000000] !text-black'
+                : cyber
+                  ? 'border bg-black/50'
+                  : term
+                    ? 'border bg-black/80'
+                    : 'border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(0,0,0,0.2)]'
             }`}
+            style={
+              retro
+                ? {
+                    backgroundColor:
+                      i % 3 === 0
+                        ? 'var(--color-bg-primary)'
+                        : i % 3 === 1
+                          ? 'var(--color-retro-yellow)'
+                          : 'var(--color-retro-pink)',
+                  }
+                : undefined
+            }
           >
             <div className={`h-11 w-11 shrink-0 rounded-full ${rowPulse}`} />
             <div className="min-w-0 flex-1 space-y-2">

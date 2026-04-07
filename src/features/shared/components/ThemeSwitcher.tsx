@@ -43,14 +43,22 @@ const ThemeSwitcher: React.FC = () => {
   const isTerminalTheme = theme === 'terminal'
   const isCyberpunkTheme = theme === 'cyberpunk'
 
+  const retroFontClass = 'theme-heading-font font-heading'
+
   return (
-    <HudContainer className="p-6 sm:p-8">
+    <HudContainer className={`p-6 sm:p-8 ${isRetroCartoonTheme ? retroFontClass : ''}`}>
       <header className="mb-5 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] pb-4">
-        <h2 className={`text-xl font-black tracking-widest uppercase mb-2 flex items-center gap-3 text-[var(--color-text-primary)] ${isRetroCartoonTheme || isTerminalTheme || isCyberpunkTheme ? 'theme-heading-font' : 'font-mono'} ${isCyberpunkTheme ? 'cyberpunk-text-glow' : ''}`}>
+        <h2 className={`text-xl font-black tracking-widest uppercase mb-2 flex items-center gap-3 text-[var(--color-text-primary)] ${isRetroCartoonTheme ? retroFontClass : isTerminalTheme || isCyberpunkTheme ? 'theme-heading-font' : 'font-mono'} ${isCyberpunkTheme ? 'cyberpunk-text-glow' : ''}`}>
           <Palette className="w-5 h-5 text-accent-primary" />
           {t('settings.theme_title')}
         </h2>
-        <p className={`text-[var(--color-text-muted)] text-sm ${isRetroCartoonTheme || isTerminalTheme || isCyberpunkTheme ? 'theme-body-font' : 'font-mono'}`}>{t('settings.theme_description')}</p>
+        <p
+          className={`text-[var(--color-text-muted)] text-sm ${
+            isRetroCartoonTheme ? retroFontClass : isTerminalTheme || isCyberpunkTheme ? 'theme-body-font' : 'font-mono'
+          }`}
+        >
+          {t('settings.theme_description')}
+        </p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -65,6 +73,8 @@ const ThemeSwitcher: React.FC = () => {
               disabled={isChangingTheme}
               aria-pressed={isActive}
               className={`text-left rounded-lg border p-4 transition-all duration-300 group disabled:opacity-60 disabled:cursor-not-allowed ${
+                isRetroCartoonTheme ? retroFontClass : ''
+              } ${
                 isRetroCartoonTheme
                   ? isActive
                     ? 'bg-black text-white border-[3px] border-black shadow-[6px_6px_0px_0px_#000000] rounded-xl'
@@ -114,9 +124,11 @@ const ThemeSwitcher: React.FC = () => {
                   }`} />
                 </div>
                 {isActive && (
-                  <span className={`text-[10px] uppercase tracking-widest font-bold font-mono ${
-                    isRetroCartoonTheme ? 'text-white' : 'text-accent-primary'
-                  }`}>
+                  <span
+                    className={`text-[10px] uppercase tracking-widest font-bold ${
+                      isRetroCartoonTheme ? `${retroFontClass} text-white` : 'font-mono text-accent-primary'
+                    }`}
+                  >
                     {t('settings.theme_active')}
                   </span>
                 )}
@@ -124,7 +136,7 @@ const ThemeSwitcher: React.FC = () => {
 
               <div className={`h-2 rounded bg-gradient-to-r ${previewClassName} mb-3`} />
 
-              <h3 className={`text-sm font-black uppercase tracking-widest mb-1 ${isRetroCartoonTheme || isTerminalTheme || isCyberpunkTheme ? 'theme-heading-font' : 'font-mono'} ${
+              <h3 className={`text-sm font-black uppercase tracking-widest mb-1 ${isRetroCartoonTheme ? retroFontClass : isTerminalTheme || isCyberpunkTheme ? 'theme-heading-font' : 'font-mono'} ${
                 isRetroCartoonTheme
                   ? isActive
                     ? 'text-white'
@@ -139,7 +151,7 @@ const ThemeSwitcher: React.FC = () => {
               }`}>
                 {t(titleKey)}
               </h3>
-              <p className={`text-xs leading-relaxed ${isRetroCartoonTheme || isTerminalTheme || isCyberpunkTheme ? 'theme-body-font' : 'font-mono'} ${
+              <p className={`text-xs leading-relaxed ${isRetroCartoonTheme ? retroFontClass : isTerminalTheme || isCyberpunkTheme ? 'theme-body-font' : 'font-mono'} ${
                 isRetroCartoonTheme
                   ? isActive ? 'text-white/90' : 'text-black/80'
                   : isCyberpunkTheme
@@ -156,7 +168,11 @@ const ThemeSwitcher: React.FC = () => {
       </div>
 
       {error && (
-        <div className="mt-4 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary text-sm px-4 py-3 rounded font-mono tracking-wide">
+        <div
+          className={`mt-4 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary text-sm px-4 py-3 rounded tracking-wide ${
+            isRetroCartoonTheme ? retroFontClass : 'font-mono'
+          }`}
+        >
           {error}
         </div>
       )}

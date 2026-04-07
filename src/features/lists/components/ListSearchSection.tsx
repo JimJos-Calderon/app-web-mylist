@@ -27,14 +27,7 @@ const ListSearchSection: React.FC<ListSearchSectionProps> = ({
 }) => {
   return (
     <section className="relative z-30 mb-8 md:sticky md:top-6 md:mb-12">
-      <div
-        className="list-search-shell mx-auto max-w-2xl rounded-2xl border p-4 backdrop-blur-xl md:p-5"
-        style={{
-          borderColor: 'rgba(var(--color-accent-primary-rgb), 0.4)',
-          background: 'var(--color-bg-elevated)',
-          boxShadow: '0 4px 24px rgba(var(--color-accent-primary-rgb), 0.1)',
-        }}
-      >
+      <div className="list-search-shell mx-auto max-w-2xl p-4 md:p-5">
         <SearchBar
           value={searchInput}
           onChange={setSearchInput}

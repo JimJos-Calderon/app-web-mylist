@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useId } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth'
@@ -15,6 +15,26 @@ import TechLabel from '@/features/shared/components/TechLabel'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 
 type Section = 'perfil' | 'seguridad' | 'notificaciones'
+
+/** Icono lápiz (Radix) para overlay de edición de avatar. */
+const AvatarEditPencilIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    className={className}
+    width={15}
+    height={15}
+    viewBox="0 0 15 15"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden
+  >
+    <path
+      d="M11.8536 1.14645C11.6583 0.951184 11.3417 0.951184 11.1465 1.14645L3.71455 8.57836C3.62459 8.66832 3.55263 8.77461 3.50251 8.89155L2.04044 12.303C1.9599 12.491 2.00189 12.709 2.14646 12.8536C2.29103 12.9981 2.50905 13.0401 2.69697 12.9596L6.10847 11.4975C6.2254 11.4474 6.3317 11.3754 6.42166 11.2855L13.8536 3.85355C14.0488 3.65829 14.0488 3.34171 13.8536 3.14645L11.8536 1.14645ZM4.42166 9.28547L11.5 2.20711L12.7929 3.5L5.71455 10.5784L4.21924 11.2192L3.78081 10.7808L4.42166 9.28547Z"
+      fill="currentColor"
+      fillRule="evenodd"
+      clipRule="evenodd"
+    />
+  </svg>
+)
 
 const Ajustes: React.FC = () => {
   const { t } = useTranslation()
@@ -52,6 +72,7 @@ const Ajustes: React.FC = () => {
   const [syncTitleEsLoading, setSyncTitleEsLoading] = useState(false)
   const queryClient = useQueryClient()
   const { theme } = useTheme()
+  const avatarInputId = useId()
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
@@ -449,41 +470,71 @@ const Ajustes: React.FC = () => {
 
                 {/* Profile Card */}
                 <HudContainer className="p-4 sm:p-8">
-                  {/* Avatar Preview */}
-                  <div className="flex justify-center mb-8">
-                    <div 
-                      className={`relative w-32 h-32 aspect-square overflow-hidden flex items-center justify-center ${
+                  {/* Avatar: hover blur + lápiz; clic abre selector de archivo */}
+                  <div className="mb-8 flex justify-center">
+                    <div
+                      className={`group relative aspect-square w-32 overflow-hidden ${
                         isRetroCartoon
-                          ? 'rounded-md border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] bg-white p-1'
+                          ? 'rounded-md border-[3px] border-black bg-white p-1 shadow-[5px_5px_0px_0px_#000000]'
                           : 'rounded-full border-4'
                       }`}
-                      style={{ 
+                      style={{
                         borderColor: isRetroCartoon ? undefined : 'rgba(var(--color-accent-primary-rgb), 0.5)',
-                        background: isRetroCartoon ? undefined : 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)'
+                        background: isRetroCartoon ? undefined : 'radial-gradient(circle, rgba(var(--color-accent-primary-rgb), 0.2) 0%, transparent 70%)',
                       }}
                     >
+                      <input
+                        id={avatarInputId}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        disabled={isUploading || isSaving}
+                        className="sr-only"
+                        aria-label={t('settings.avatar_button')}
+                      />
                       {isUploading ? (
-                        <div className="text-center">
-                          <div 
-                            className="animate-spin w-12 h-12 border-4 rounded-full mx-auto mb-2"
-                            style={{ 
-                              borderColor: 'rgba(var(--color-accent-primary-rgb), 0.3)', 
-                              borderTopColor: 'var(--color-accent-primary)' 
+                        <div className="flex h-full w-full flex-col items-center justify-center text-center">
+                          <div
+                            className="mx-auto mb-2 h-12 w-12 animate-spin rounded-full border-4"
+                            style={{
+                              borderColor: 'rgba(var(--color-accent-primary-rgb), 0.3)',
+                              borderTopColor: 'var(--color-accent-primary)',
                             }}
-                          ></div>
-                          <p className="text-xs text-[var(--color-text-primary)] font-mono">{t('settings.avatar_uploading')}</p>
+                          />
+                          <p
+                            className={`text-xs text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
+                          >
+                            {t('settings.avatar_uploading')}
+                          </p>
                         </div>
-                      ) : avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt="Avatar"
-                          className={`w-full h-full object-cover ${isRetroCartoon ? 'rounded-none' : ''}`}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none'
-                          }}
-                        />
                       ) : (
-                        <UserCircle className="w-16 h-16 text-accent-primary opacity-60" />
+                        <label
+                          htmlFor={avatarInputId}
+                          className={`relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden ${
+                            isSaving ? 'pointer-events-none opacity-60' : ''
+                          } ${isRetroCartoon ? 'rounded-sm' : 'rounded-full'}`}
+                        >
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt=""
+                              className={`h-full w-full object-cover transition-[filter,transform] duration-200 ease-out group-hover:blur-md group-hover:scale-[1.02] ${
+                                isRetroCartoon ? 'rounded-sm' : 'rounded-full'
+                              }`}
+                              onError={(e) => {
+                                ;(e.target as HTMLImageElement).style.display = 'none'
+                              }}
+                            />
+                          ) : (
+                            <UserCircle className="h-16 w-16 text-accent-primary opacity-60 transition-opacity duration-200 group-hover:opacity-40" />
+                          )}
+                          <span
+                            className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 backdrop-blur-[2px] transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
+                            aria-hidden
+                          >
+                            <AvatarEditPencilIcon className="h-7 w-7 scale-[1.35] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]" />
+                          </span>
+                        </label>
                       )}
                     </div>
                   </div>
@@ -504,32 +555,6 @@ const Ajustes: React.FC = () => {
                     />
                     <div className="text-xs text-[var(--color-text-muted)] font-mono">
                       {username.length}/20 {t('placeholders.character_count')}
-                    </div>
-                  </div>
-
-                  {/* Avatar Form */}
-                  <div className="mb-6 pb-6 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
-                    <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                      {t('settings.avatar_label')}
-                    </label>
-                    
-                    {/* File Upload */}
-                    <div className="mb-2">
-                      <label className="block w-full">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileUpload}
-                          disabled={isUploading || isSaving}
-                          className="hidden"
-                        />
-                        <div className="w-full px-4 py-3 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-accent-secondary text-accent-secondary font-mono tracking-widest text-xs uppercase rounded hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)] transition-all cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed">
-                          {isUploading ? t('settings.avatar_uploading') : t('settings.avatar_button')}
-                        </div>
-                      </label>
-                      <p className="text-xs text-[var(--color-text-muted)] font-mono mt-2">
-                        {t('settings.avatar_upload_hint')}
-                      </p>
                     </div>
                   </div>
 
