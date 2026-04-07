@@ -326,6 +326,7 @@
     "common": {
       "actorUnknown": "Unknown user",
       "fallbackItem": "untitled item",
+      "itemGeneric": "an item",
       "fallbackList": "unnamed list",
       "countBadge": "{{count}} moves"
     },
@@ -342,6 +343,13 @@
         "empty": "There is no recent activity in this list yet."
       },
       "events": {
+        "rating_stars": "{{user}} gave {{rating}} stars to {{item}}.",
+        "rating_generic": "{{user}} rated {{item}}.",
+        "comment_on_item": "{{user}} commented on {{item}}.",
+        "comment_removed": "{{user}} removed a comment on {{item}}.",
+        "item_insert_social": "{{user}} added {{item}} to {{list}}.",
+        "item_delete_social": "{{user}} removed an item from {{list}}.",
+        "item_update_social": "{{user}} edited details for {{item}}.",
         "item_added": "{{user}} added \"{{item}}\" to the {{list}} list.",
         "item_updated": "{{user}} updated \"{{item}}\" in the {{list}} list.",
         "item_deleted": "{{user}} removed \"{{item}}\" from the {{list}} list.",
@@ -369,6 +377,13 @@
         "empty": "Nothing headline-worthy has happened yet."
       },
       "events": {
+        "rating_stars": "{{user}} gave {{item}} {{rating}} stars at the club.",
+        "rating_generic": "{{user}} rated {{item}}.",
+        "comment_on_item": "{{user}} commented on {{item}}.",
+        "comment_removed": "{{user}} deleted a comment on {{item}}.",
+        "item_insert_social": "{{user}} added {{item}} to {{list}}.",
+        "item_delete_social": "{{user}} removed an item from {{list}}.",
+        "item_update_social": "{{user}} edited the details for {{item}}.",
         "item_added": "Pow! {{user}} plugged \"{{item}}\" into the {{list}} video shelf.",
         "item_updated": "{{user}} gave \"{{item}}\" another spin in {{list}}.",
         "item_deleted": "Zap! {{user}} pulled \"{{item}}\" off the {{list}} shelf.",

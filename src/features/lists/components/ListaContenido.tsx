@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth'
 import { useFilters, useItems, RandomPickManager } from '@/features/items'
@@ -36,6 +37,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
 }) => {
   const { user } = useAuth()
   const { t } = useTranslation()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
@@ -152,6 +154,42 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     },
     onQuickCritiqueSuccess: () => setCritiqueToast(critiqueSuccessCopy),
   })
+
+  const listIdFromUrl = searchParams.get('list')
+  const openItemId = searchParams.get('openItem')
+  const deepLinkHandledRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!listIdFromUrl || !lists.length || !setCurrentList) return
+    const match = lists.find((l) => l.id === listIdFromUrl)
+    if (match && currentList?.id !== match.id) {
+      setCurrentList(match)
+    }
+  }, [listIdFromUrl, lists, setCurrentList, currentList?.id])
+
+  useEffect(() => {
+    if (!openItemId) {
+      deepLinkHandledRef.current = null
+      return
+    }
+    if (!items.length) return
+    const item = items.find((i) => String(i.id) === String(openItemId))
+    if (!item) return
+
+    const key = `${listId ?? ''}:${openItemId}`
+    if (deepLinkHandledRef.current === key) return
+    deepLinkHandledRef.current = key
+
+    void itemDetails.handleOpenDetails(item)
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('openItem')
+        return next
+      },
+      { replace: true }
+    )
+  }, [openItemId, items, listId, itemDetails, setSearchParams])
 
   const allVisibleItems = React.useMemo(() => {
     return [...visiblePendingItems, ...visibleWatchedItems]
