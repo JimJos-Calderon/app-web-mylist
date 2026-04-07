@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth'
 import { useUserProfile } from '@/features/profile'
@@ -17,6 +18,10 @@ type Section = 'perfil' | 'seguridad' | 'notificaciones'
 
 const Ajustes: React.FC = () => {
   const { t } = useTranslation()
+  const isAndroidNativePush = useMemo(
+    () => Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android',
+    []
+  )
   const { user, signOut } = useAuth()
   const { profile, loading, error, saveProfile, uploadAvatar, updateBio } = useUserProfile()
   const [activeSection, setActiveSection] = useState<Section>('perfil')
@@ -313,6 +318,7 @@ const Ajustes: React.FC = () => {
   }`
 
   const handleEnablePush = async () => {
+    console.log('BOTÓN PULSADO')
     if (!user?.id) {
       setPushMessage({ type: 'error', text: t('settings.push_not_authenticated') })
       return
@@ -326,7 +332,11 @@ const Ajustes: React.FC = () => {
       return
     }
 
-    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+    if (
+      !isAndroidNativePush &&
+      typeof Notification !== 'undefined' &&
+      Notification.permission === 'denied'
+    ) {
       setPushMessage({ type: 'error', text: t('settings.push_permission_denied') })
       return
     }
@@ -836,10 +846,9 @@ const Ajustes: React.FC = () => {
                       onClick={handleEnablePush}
                       disabled={
                         !isPushSupported ||
-                        isPushLoading ||
-                        pushPermission === 'denied' ||
                         isPushSubscribed ||
-                        !user?.id
+                        !user?.id ||
+                        (!isAndroidNativePush && pushPermission === 'denied')
                       }
                       className={pushActionPrimaryClass}
                       style={

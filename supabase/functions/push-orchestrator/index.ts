@@ -368,6 +368,15 @@ async function dispatchAndroidFcmPush(args: {
     return { ok: true, sent: 0, failed: 0, skipped: 'no_active_fcm_tokens' }
   }
 
+  const seenFcmTokens = new Set<string>()
+  const uniqueFcmRows = (subscriptions as FcmSubscriptionRow[]).filter((row) => {
+    const t = row.fcm_token?.trim()
+    if (!t) return false
+    if (seenFcmTokens.has(t)) return false
+    seenFcmTokens.add(t)
+    return true
+  })
+
   const title = pushTitleForTheme(listTheme)
   const body = buildPushBody(authorDisplay, item.titulo, listName)
   const relativeUrl = listUrl
@@ -380,17 +389,18 @@ async function dispatchAndroidFcmPush(args: {
       })()
     : '/'
 
+  // FCM HTTP v1 exige que `data` sea un mapa de string → string (nunca números).
   const dataStrings: Record<string, string> = {
-    url: relativeUrl || '/',
-    list_id: item.list_id,
-    item_id: item.id,
+    url: String(relativeUrl || '/'),
+    list_id: String(item.list_id ?? ''),
+    item_id: String(item.id ?? ''),
   }
 
   const fcmUrl = `https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`
   let sent = 0
   let failed = 0
 
-  for (const row of subscriptions as FcmSubscriptionRow[]) {
+  for (const row of uniqueFcmRows) {
     const token = row.fcm_token?.trim()
     if (!token) continue
 
@@ -399,27 +409,29 @@ async function dispatchAndroidFcmPush(args: {
       notification.image = item.poster_url.trim()
     }
 
+    const fcmPayload = {
+      message: {
+        token,
+        notification,
+        data: dataStrings,
+        android: { priority: 'HIGH' as const },
+      },
+    }
+
     try {
+      console.log('DEBUG PAYLOAD FCM:', JSON.stringify(fcmPayload, null, 2))
       const res = await fetch(fcmUrl, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: {
-            token,
-            notification,
-            data: dataStrings,
-            android: { priority: 'HIGH' },
-          },
-        }),
+        body: JSON.stringify(fcmPayload),
       })
 
       if (!res.ok) {
-        failed += 1
         const errText = await res.text()
-        let shouldDeactivate = res.status === 404
+        let isUnregisteredGhost = res.status === 404 || res.status === 410
         try {
           const j = JSON.parse(errText) as { error?: { status?: string; message?: string } }
           const st = (j.error?.status ?? '').toUpperCase()
@@ -431,18 +443,27 @@ async function dispatchAndroidFcmPush(args: {
             msg.includes('unregistered') ||
             msg.includes('requested entity was not found')
           ) {
-            shouldDeactivate = true
+            isUnregisteredGhost = true
           }
         } catch {
-          /* ignore */
+          /* usar solo status HTTP */
         }
-        if (shouldDeactivate) {
+
+        if (isUnregisteredGhost) {
           await supabase
             .from('push_subscriptions')
             .update({ is_active: false, updated_at: new Date().toISOString() })
             .eq('id', row.id)
+          console.log(`[Mantenimiento] Desactivando token antiguo (UNREGISTERED): ${row.id}`)
+          continue
         }
-        console.error('[push-orchestrator] FCM send failed', { rowId: row.id, status: res.status, errText: errText.slice(0, 400) })
+
+        failed += 1
+        console.error('[push-orchestrator] FCM send failed', {
+          rowId: row.id,
+          status: res.status,
+          errText: errText.slice(0, 400),
+        })
         continue
       }
       sent += 1

@@ -11,15 +11,26 @@ export interface ActivityFeedEvent {
   created_at: string
   actor_user_id: string
   actor_name: string
-  table_name: 'items' | 'lists' | 'item_ratings' | 'list_members' | string
+  /** URL pública del avatar (user_profiles.avatar_url). */
+  avatar_url?: string | null
+  table_name: 'items' | 'lists' | 'item_ratings' | 'item_comments' | 'list_members' | string
   action: 'INSERT' | 'UPDATE' | 'DELETE' | string
   action_key: string
   record_id: string
   item_id: string | null
   item_title: string | null
+  /** Póster del ítem (items.poster_url). */
+  item_poster_url?: string | null
   list_id: string | null
   list_name: string | null
+  /** Solo filas de item_ratings. */
+  rating?: number | null
+  /** Solo filas de item_comments. */
+  comment_text?: string | null
 }
+
+/** Alias solicitado para capas de UI / documentación. */
+export type ActivityEvent = ActivityFeedEvent
 
 interface UseActivityFeedOptions {
   listId?: string
