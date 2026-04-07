@@ -24,6 +24,8 @@ export default defineConfig({
         'apple-touch-icon.png',
         'masked-icon.svg',
         'logo-navbar.webp',
+        'login-bg.webp',
+        'retro-login-bg.webp',
         'pwa-64x64.png',
       ],
       manifest: {
@@ -67,11 +69,11 @@ export default defineConfig({
           'favicon.png',
           'apple-touch-icon.png',
           'logo-navbar.webp',
+          'login-bg.webp',
+          'retro-login-bg.webp',
           'masked-icon.svg',
         ],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MiB
-        // Evita meter fondos enormes de login en precache (sí se sirven desde /public).
-        globIgnores: ['**/login-bg.png', '**/retro-login-bg.png'],
       },
     }),
   ],

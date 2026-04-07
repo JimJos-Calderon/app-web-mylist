@@ -5,6 +5,9 @@ const config: CapacitorConfig = {
   appName: 'app-web-jimjos',
   webDir: 'dist',
   plugins: {
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
+    },
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: "#0b0b12",

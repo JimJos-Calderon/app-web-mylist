@@ -34,8 +34,10 @@ type PushPayload = {
 
 const DEFAULT_TITLE = 'MyList'
 const DEFAULT_BODY = 'Tienes una nueva notificacion'
-const DEFAULT_URL = '/peliculas'
+/** Ruta al abrir la notificación si el payload no trae `url` / `data.url` */
+const DEFAULT_URL = '/'
 const DEFAULT_ICON = '/pwa-192x192.png'
+const DEFAULT_IMAGE = '/logo-navbar.webp'
 const DEFAULT_TAG = 'mylist-activity'
 
 cleanupOutdatedCaches()
@@ -91,6 +93,7 @@ self.addEventListener('push', (event) => {
   const notificationOptions: NotificationOptions = {
     body,
     icon: payload.icon || DEFAULT_ICON,
+    image: DEFAULT_IMAGE,
     badge: payload.badge || DEFAULT_ICON,
     tag: payload.tag || DEFAULT_TAG,
     data: {
@@ -124,8 +127,9 @@ self.addEventListener('notificationclick', (event) => {
 
         await client.focus()
 
-        if ('navigate' in client && client.url !== targetUrl) {
-          await client.navigate(targetUrl)
+        const windowClient = client as WindowClient
+        if (typeof windowClient.navigate === 'function' && windowClient.url !== targetUrl) {
+          await windowClient.navigate(targetUrl)
         }
 
         return

@@ -72,12 +72,21 @@ const Ajustes: React.FC = () => {
   }
 
   const {
-    isSupported: isPushSupported,
+    supported: isPushSupported,
     permission: pushPermission,
-    isSubscribing: isSubscribingPush,
+    loading: isPushLoading,
+    isSubscribed: isPushSubscribed,
     error: pushError,
-    subscribeCurrentUser,
+    subscribe: subscribePush,
+    unsubscribe: unsubscribePush,
+    refresh: refreshPush,
   } = usePushNotifications()
+
+  useEffect(() => {
+    if (activeSection === 'notificaciones') {
+      void refreshPush()
+    }
+  }, [activeSection, refreshPush])
   
   const navigate = useNavigate()
 
@@ -283,6 +292,26 @@ const Ajustes: React.FC = () => {
     }
   }
 
+  const pushActionPrimaryClass = `w-full px-4 py-3 tracking-widest text-xs uppercase transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+    isRetroCartoon
+      ? 'theme-heading-font bg-white text-black border-[3px] border-black shadow-[4px_4px_0px_#000] rounded-xl'
+      : isTerminal
+        ? 'terminal-button theme-heading-font rounded-none'
+        : isCyberpunk
+          ? 'cyberpunk-button theme-heading-font rounded-xl'
+          : 'bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-mono hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] rounded'
+  }`
+
+  const pushActionSecondaryClass = `w-full px-4 py-3 tracking-widest text-xs uppercase transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+    isRetroCartoon
+      ? 'theme-heading-font bg-transparent text-black border-[3px] border-black shadow-[3px_3px_0px_#000] rounded-xl hover:-translate-y-0.5'
+      : isTerminal
+        ? 'border border-[rgba(var(--color-accent-primary-rgb),0.5)] text-accent-primary font-mono rounded-none hover:bg-[rgba(var(--color-accent-primary-rgb),0.08)]'
+        : isCyberpunk
+          ? 'cyberpunk-button cyberpunk-button--ghost theme-heading-font rounded-xl'
+          : 'bg-[rgba(var(--color-text-muted-rgb,161,161,170),0.08)] border border-[rgba(var(--color-text-muted-rgb,161,161,170),0.35)] text-[var(--color-text-primary)] font-mono hover:border-accent-primary rounded'
+  }`
+
   const handleEnablePush = async () => {
     if (!user?.id) {
       setPushMessage({ type: 'error', text: t('settings.push_not_authenticated') })
@@ -290,20 +319,33 @@ const Ajustes: React.FC = () => {
     }
 
     setPushMessage(null)
-    const subscription = await subscribeCurrentUser(user.id)
+    const result = await subscribePush()
 
-    if (subscription) {
+    if (result !== null) {
       setPushMessage({ type: 'success', text: t('settings.push_success') })
       return
     }
 
-    if (pushPermission === 'denied') {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
       setPushMessage({ type: 'error', text: t('settings.push_permission_denied') })
       return
     }
 
     if (pushError) {
       setPushMessage({ type: 'error', text: pushError })
+    }
+  }
+
+  const handleDisablePush = async () => {
+    setPushMessage(null)
+    try {
+      const removed = await unsubscribePush()
+      if (removed) {
+        setPushMessage({ type: 'success', text: t('settings.push_unsubscribe_success') })
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : t('settings.push_unsubscribe_error')
+      setPushMessage({ type: 'error', text: msg })
     }
   }
 
@@ -747,27 +789,81 @@ const Ajustes: React.FC = () => {
                   <p className="text-[var(--color-text-muted)] mb-6 font-mono text-sm">{t('settings.push_description')}</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm font-mono">
-                    <div className="bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded p-4">
+                    <div
+                      className={`p-4 rounded ${
+                        isRetroCartoon
+                          ? 'bg-white border-[3px] border-black shadow-[3px_3px_0px_#000]'
+                          : 'bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)]'
+                      }`}
+                    >
                       <span className="text-[var(--color-text-muted)] text-xs uppercase tracking-widest">{t('settings.push_support_label')}:</span>
                       <p className="mt-1 font-semibold text-[var(--color-text-primary)]">
                         {isPushSupported ? t('settings.push_support_yes') : t('settings.push_support_no')}
                       </p>
                     </div>
-                    <div className="bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded p-4">
+                    <div
+                      className={`p-4 rounded ${
+                        isRetroCartoon
+                          ? 'bg-white border-[3px] border-black shadow-[3px_3px_0px_#000]'
+                          : 'bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)]'
+                      }`}
+                    >
                       <span className="text-[var(--color-text-muted)] text-xs uppercase tracking-widest">{t('settings.push_permission_label')}:</span>
                       <p className="mt-1 font-semibold text-[var(--color-text-primary)] opacity-80">{pushPermission}</p>
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleEnablePush}
-                    disabled={!isPushSupported || isSubscribingPush}
-                    className="w-full px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-mono tracking-widest text-xs uppercase hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded"
-                    style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
-                  >
-                    {isSubscribingPush ? t('settings.push_button_loading') : t('settings.push_button')}
-                  </button>
+                  {pushPermission === 'denied' && (
+                    <div
+                      className={`mb-6 p-4 rounded text-sm font-mono leading-relaxed ${
+                        isRetroCartoon
+                          ? 'bg-amber-100 text-black border-[3px] border-black shadow-[4px_4px_0px_#000]'
+                          : 'bg-[rgba(var(--color-accent-secondary-rgb),0.12)] border border-[rgba(var(--color-accent-secondary-rgb),0.35)] text-[var(--color-text-primary)]'
+                      }`}
+                    >
+                      <p className="font-bold uppercase tracking-widest text-xs mb-2 text-accent-secondary">{t('settings.push_denied_title')}</p>
+                      <p className="text-[var(--color-text-muted)]">{t('settings.push_denied_instructions')}</p>
+                    </div>
+                  )}
+
+                  {isPushSubscribed && (
+                    <p className="mb-3 text-xs font-mono uppercase tracking-widest text-accent-primary">{t('settings.push_subscribed_hint')}</p>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={handleEnablePush}
+                      disabled={
+                        !isPushSupported ||
+                        isPushLoading ||
+                        pushPermission === 'denied' ||
+                        isPushSubscribed ||
+                        !user?.id
+                      }
+                      className={pushActionPrimaryClass}
+                      style={
+                        !isRetroCartoon && !isTerminal && !isCyberpunk
+                          ? { clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }
+                          : undefined
+                      }
+                    >
+                      {isPushLoading && !isPushSubscribed
+                        ? t('settings.push_button_loading')
+                        : t('settings.push_activate_device')}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleDisablePush}
+                      disabled={!isPushSupported || isPushLoading || !isPushSubscribed}
+                      className={pushActionSecondaryClass}
+                    >
+                      {isPushLoading && isPushSubscribed
+                        ? t('settings.push_unsubscribe_loading')
+                        : t('settings.push_unsubscribe')}
+                    </button>
+                  </div>
 
                   {pushMessage && (
                     <div className={`mt-4 px-4 py-3 rounded text-sm font-mono tracking-wide ${
