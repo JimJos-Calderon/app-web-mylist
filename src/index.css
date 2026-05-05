@@ -1719,6 +1719,129 @@ nav {
   font-family: var(--app-font-body);
 }
 
+/* Plataformas (TMDB) — mismo lenguaje que género / ficha retro */
+[data-theme='retro-cartoon'] .item-details-modal__watch-providers {
+  background: var(--color-retro-yellow-muted);
+  border: var(--ui-panel-border-width) solid var(--ui-panel-border-color);
+  border-radius: var(--ui-radius-inner);
+  box-shadow: var(--ui-panel-shadow);
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-providers-inner {
+  padding: 0.5rem 0.625rem 0.625rem;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-region {
+  font-family: var(--app-font-heading);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-retro-pizarra);
+  margin-bottom: 0.35rem;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-group {
+  margin-bottom: 0.45rem;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-group:last-of-type {
+  margin-bottom: 0;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-group-title {
+  font-family: var(--app-font-heading);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #000;
+  margin-bottom: 0.25rem;
+  opacity: 0.88;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-chip {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.35rem 0.15rem 0.25rem;
+  font-family: var(--app-font-body);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #000;
+  background: #fffef6;
+  border: var(--ui-shell-border-width) solid #000;
+  border-radius: var(--ui-radius-inner);
+  box-shadow: 2px 2px 0 #000;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-chip img {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 2px;
+  background: #fff;
+  border: 1px solid #000;
+  padding: 0;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-link {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-family: var(--app-font-heading);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #000;
+  background: var(--color-retro-cyan);
+  border: var(--ui-shell-border-width) solid #000;
+  border-radius: var(--ui-radius-inner);
+  padding: 0.25rem 0.45rem;
+  box-shadow: 2px 2px 0 #000;
+  text-decoration: none;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-link:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-loading,
+[data-theme='retro-cartoon'] .item-details-modal__watch-muted {
+  font-family: var(--app-font-body);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-retro-pizarra);
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-error {
+  font-family: var(--app-font-body);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #8b1538;
+}
+
+[data-theme='retro-cartoon'] .item-details-modal__watch-spinner {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  border: 2px solid var(--color-retro-pizarra);
+  border-top-color: transparent;
+}
+
 [data-theme='retro-cartoon'] .item-details-modal__nav-btn {
   display: flex;
   width: 2.25rem;

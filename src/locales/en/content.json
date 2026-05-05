@@ -41,7 +41,17 @@
     "watch_group_ratio": "{{watched}}/{{total}}",
     "watch_group_title": "{{watched}} of {{total}} list members have marked this title as watched.",
     "watch_group_caption": "List progress",
-    "duplicate_in_list": "That title is already on this list (same type). It was not added again."
+    "duplicate_in_list": "That title is already on this list (same type). It was not added again.",
+    "watch_providers_title": "Where to watch",
+    "watch_providers_streaming": "Streaming (subscription)",
+    "watch_providers_rent": "Rent",
+    "watch_providers_buy": "Buy",
+    "watch_providers_loading": "Looking up platforms…",
+    "watch_providers_none": "No regional availability data for this title.",
+    "watch_providers_error": "Platforms could not be loaded.",
+    "watch_providers_region": "Data for region {{region}}",
+    "watch_providers_more_link": "More options (JustWatch)",
+    "watch_providers_no_token": "To show where this title is available, the app needs a read-only The Movie Database (TMDB) token. Add VITE_TMDB_ACCESS_TOKEN to your .env, restart the dev server, and open details again."
   },
   "stats": {
     "total": "Total",

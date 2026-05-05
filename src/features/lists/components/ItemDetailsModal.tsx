@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
   ItemCommentBox,
+  ItemWatchProvidersSection,
   QuickCritiqueModal,
   useItemComments,
   useItemRating,
@@ -367,7 +368,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
           </div>
 
           <div className="flex flex-col p-5">
-            <div className="mb-8 flex-1">
+            <div className="mb-4 flex-1">
               <p
                 className={
                   isRetroCartoon
@@ -407,6 +408,13 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                 )}
               </div>
             </div>
+
+            <ItemWatchProvidersSection
+              item={selectedItem}
+              isOpen={isOpen}
+              uiLanguage={activeLanguage}
+              isRetroCartoon={isRetroCartoon}
+            />
 
             {selectedItem.visto && (
               <div className="mb-6">

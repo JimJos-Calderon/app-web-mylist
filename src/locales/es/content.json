@@ -41,7 +41,17 @@
     "watch_group_ratio": "{{watched}}/{{total}}",
     "watch_group_title": "{{watched}} de {{total}} miembros han marcado este título como visto en la lista.",
     "watch_group_caption": "Progreso en la lista",
-    "duplicate_in_list": "Ese título ya está en esta lista (mismo tipo). No se ha añadido de nuevo."
+    "duplicate_in_list": "Ese título ya está en esta lista (mismo tipo). No se ha añadido de nuevo.",
+    "watch_providers_title": "Dónde verlo",
+    "watch_providers_streaming": "Streaming (suscripción)",
+    "watch_providers_rent": "Alquiler",
+    "watch_providers_buy": "Compra",
+    "watch_providers_loading": "Buscando plataformas…",
+    "watch_providers_none": "No hay datos de disponibilidad por región para este título.",
+    "watch_providers_error": "No se pudieron cargar las plataformas.",
+    "watch_providers_region": "Datos para la región {{region}}",
+    "watch_providers_more_link": "Más opciones (JustWatch)",
+    "watch_providers_no_token": "Para ver en qué plataformas está disponible hace falta un token de lectura de The Movie Database. Añade VITE_TMDB_ACCESS_TOKEN en tu .env (solo lectura), reinicia el servidor de desarrollo y vuelve a abrir los detalles."
   },
   "stats": {
     "total": "Total",

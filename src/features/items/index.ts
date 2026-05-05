@@ -1,3 +1,4 @@
+export { default as ItemWatchProvidersSection } from './components/ItemWatchProvidersSection'
 export { default as FilterPanel } from './components/FilterPanel'
 export { default as ItemCard } from './components/ItemCard'
 export { default as ItemCommentBox } from './components/ItemCommentBox'
@@ -7,6 +8,7 @@ export { default as StatsWidget } from './components/StatsWidget'
 export { default as RandomPickManager } from './components/RandomPickManager'
 export { default as QuickCritiqueModal } from './components/QuickCritiqueModal'
 
+export { useItemWatchProviders } from './hooks/useItemWatchProviders'
 export { useFilters } from './hooks/useFilters'
 export { useEnhanceComment, ENHANCE_COMMENT_SYSTEM_PROMPT } from './hooks/useEnhanceComment'
 export { useItemComments } from './hooks/useItemComments'

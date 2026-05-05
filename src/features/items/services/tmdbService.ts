@@ -3,10 +3,12 @@
  * Búsqueda por título y detalles en es-ES; el póster guardado usa assets en inglés (en-US) cuando existan.
  */
 
-import type { OmdbSuggestion } from '@/features/shared'
+import type { ListItem, OmdbSuggestion } from '@/features/shared'
 
 const TMDB_BASE = 'https://api.themoviedb.org/3'
 const TMDB_IMAGE_W500 = 'https://image.tmdb.org/t/p/w500'
+/** Logos de proveedores (streaming / alquiler / compra). */
+export const TMDB_LOGO_W45 = 'https://image.tmdb.org/t/p/w45'
 
 function getBearerHeaders(): HeadersInit {
   const token = import.meta.env.VITE_TMDB_ACCESS_TOKEN
@@ -321,6 +323,177 @@ export async function enrichFromTmdb(
     return enrichmentFromDetails(details, displayTitle)
   } catch (e) {
     console.warn('enrichFromTmdb:', e)
+    return null
+  }
+}
+
+/** Código de región TMDB para watch-providers (resultados por país). */
+export function tmdbWatchRegionFromUiLanguage(language: string): string {
+  const base = (language || 'es').split('-')[0]?.toLowerCase() ?? 'es'
+  if (base === 'en') return 'US'
+  if (base === 'es') return 'ES'
+  if (base === 'pt') return 'BR'
+  if (base === 'fr') return 'FR'
+  if (base === 'de') return 'DE'
+  return 'ES'
+}
+
+export interface WatchProviderEntry {
+  provider_id: number
+  provider_name: string
+  logo_path: string | null
+}
+
+export interface ItemWatchProvidersResult {
+  /** Región TMDB cuyos datos se muestran (p. ej. ES, US). */
+  regionCode: string
+  /** Enlace JustWatch / TMDB para la región, si viene en la API. */
+  watchLink: string | null
+  flatrate: WatchProviderEntry[]
+  rent: WatchProviderEntry[]
+  buy: WatchProviderEntry[]
+}
+
+interface TmdbProviderRaw {
+  logo_path: string | null
+  provider_id: number
+  provider_name: string
+}
+
+interface TmdbRegionBundle {
+  link?: string
+  flatrate?: TmdbProviderRaw[]
+  /** Gratis con anuncios / AVOD (TMDB). */
+  ads?: TmdbProviderRaw[]
+  free?: TmdbProviderRaw[]
+  rent?: TmdbProviderRaw[]
+  buy?: TmdbProviderRaw[]
+}
+
+interface TmdbWatchProvidersApi {
+  results?: Record<string, TmdbRegionBundle>
+}
+
+function mapProviderList(list: TmdbProviderRaw[] | undefined): WatchProviderEntry[] {
+  if (!list?.length) return []
+  return list.map((p) => ({
+    provider_id: p.provider_id,
+    provider_name: p.provider_name,
+    logo_path: p.logo_path,
+  }))
+}
+
+function regionBundleProviderCount(bundle: TmdbRegionBundle): number {
+  return (
+    (bundle.flatrate?.length ?? 0) +
+    (bundle.ads?.length ?? 0) +
+    (bundle.free?.length ?? 0) +
+    (bundle.rent?.length ?? 0) +
+    (bundle.buy?.length ?? 0)
+  )
+}
+
+/** Suscripción + gratis / con anuncios, sin duplicar por `provider_id`. */
+function mergeSubscriptionProviders(bundle: TmdbRegionBundle): WatchProviderEntry[] {
+  const out: WatchProviderEntry[] = []
+  const seen = new Set<number>()
+  const push = (list: TmdbProviderRaw[] | undefined) => {
+    for (const p of mapProviderList(list)) {
+      if (seen.has(p.provider_id)) continue
+      seen.add(p.provider_id)
+      out.push(p)
+    }
+  }
+  push(bundle.flatrate)
+  push(bundle.free)
+  push(bundle.ads)
+  return out
+}
+
+function pickRegionBundle(
+  results: Record<string, TmdbRegionBundle> | undefined,
+  preferred: string
+): { regionCode: string; bundle: TmdbRegionBundle } | null {
+  if (!results) return null
+  const order = [preferred, 'ES', 'MX', 'AR', 'US', 'GB', 'DE', 'FR', 'BR']
+  const seen = new Set<string>()
+  for (const code of order) {
+    if (!code || seen.has(code)) continue
+    seen.add(code)
+    const bundle = results[code]
+    if (!bundle) continue
+    if (regionBundleProviderCount(bundle) > 0) return { regionCode: code, bundle }
+  }
+  for (const code of Object.keys(results)) {
+    if (seen.has(code)) continue
+    const bundle = results[code]
+    if (!bundle) continue
+    if (regionBundleProviderCount(bundle) > 0) return { regionCode: code, bundle }
+  }
+  return null
+}
+
+/**
+ * Resuelve el id numérico TMDB del ítem (misma heurística que la sinopsis: títulos en orden).
+ */
+export async function resolveTmdbIdForItem(item: ListItem): Promise<number | null> {
+  if (!import.meta.env.VITE_TMDB_ACCESS_TOKEN?.trim()) return null
+
+  const tryTitles = [item.titulo, item.title_es].filter((t): t is string => Boolean(t?.trim()))
+  const seen = new Set<string>()
+
+  try {
+    for (const raw of tryTitles) {
+      const t = raw.trim()
+      const key = t.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      const id = await searchTmdbFirstId(t, item.tipo)
+      if (id != null) return id
+    }
+  } catch {
+    return null
+  }
+  return null
+}
+
+/**
+ * Proveedores de streaming / alquiler / compra (TMDB watch providers) para una región.
+ * Si la región pedida no tiene datos, prueba otras en cascada.
+ */
+export async function resolveItemWatchProviders(
+  item: ListItem,
+  uiLanguage: string
+): Promise<ItemWatchProvidersResult | null> {
+  if (!import.meta.env.VITE_TMDB_ACCESS_TOKEN?.trim()) return null
+
+  try {
+    const id = await resolveTmdbIdForItem(item)
+    if (id == null) return null
+
+    const path =
+      item.tipo === 'pelicula' ? `/movie/${id}/watch/providers` : `/tv/${id}/watch/providers`
+    const res = await tmdbFetch(path)
+    if (!res.ok) {
+      console.warn('TMDB watch providers', res.status)
+      return null
+    }
+
+    const body = (await res.json()) as TmdbWatchProvidersApi
+    const preferred = tmdbWatchRegionFromUiLanguage(uiLanguage)
+    const picked = pickRegionBundle(body.results, preferred)
+    if (!picked) return null
+
+    const { regionCode, bundle } = picked
+    return {
+      regionCode,
+      watchLink: typeof bundle.link === 'string' && bundle.link.length > 0 ? bundle.link : null,
+      flatrate: mergeSubscriptionProviders(bundle),
+      rent: mapProviderList(bundle.rent),
+      buy: mapProviderList(bundle.buy),
+    }
+  } catch (e) {
+    console.warn('resolveItemWatchProviders:', e)
     return null
   }
 }

@@ -17,6 +17,8 @@ export const queryKeys = {
       listId,
     ] as const,
     detail: (id: string) => ['items', id] as const,
+    watchProviders: (itemId: string, tipo: 'pelicula' | 'serie', uiLanguage: string) =>
+      [...queryKeys.items.detail(itemId), 'watchProviders', tipo, uiLanguage] as const,
   },
 
   itemComments: {
