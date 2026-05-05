@@ -12,7 +12,6 @@ export { useEnhanceComment, ENHANCE_COMMENT_SYSTEM_PROMPT } from './hooks/useEnh
 export { useItemComments } from './hooks/useItemComments'
 export { useItemRating } from './hooks/useItemRating'
 export { useItems } from './hooks/useItems'
-export { useOmdb } from './hooks/useOmdb'
 export { useSuggestions } from './hooks/useSuggestions'
 export { useRandomSelection } from './hooks/useRandomSelection'
 export { useTranslateSynopsis, TRANSLATE_SYNOPSIS_SYSTEM_PROMPT } from './hooks/useTranslateSynopsis'

@@ -16,6 +16,7 @@ export interface ListItem {
   /** Título en español (TMDB u orígenes); nullable para ítems antiguos. */
   title_es?: string | null
   tipo: 'pelicula' | 'serie'
+  /** Visto para el usuario de la sesión (`item_user_watch`); la columna legacy `items.visto` no se usa en UI. */
   visto: boolean
   user_id: string
   user_email: string
@@ -25,6 +26,11 @@ export interface ListItem {
   comentario?: string
   genero?: string
   list_id: string
+  /** Miembros que han marcado visto este título (solo si la lista tiene más de un miembro). */
+  watch_group?: {
+    watched: number
+    total: number
+  }
 }
 
 export interface ItemRating {

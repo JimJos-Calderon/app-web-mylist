@@ -36,7 +36,7 @@ La aplicación es una **SPA React + TypeScript (Vite)** orientada a **listas col
 - **`oracle/`** — UI del Oráculo (`OracleSection`).  
 - **`profile/`** — Perfil de usuario y username.  
 - **`shared/`** — Tema, componentes UI reutilizables (`HudContainer`, `ConfirmDialog`, …), utilidades, validación.  
-- **`navigation/`**, **`dashboard/`**, **`invites/`**, **`onboarding/`**, **`app/`** — Navegación, tarjetas de inicio, invitaciones pendientes, setup de username, pantalla de arranque.
+- **`navigation/`**, **`invites/`**, **`onboarding/`**, **`app/`** — Navegación, invitaciones pendientes, setup de username, pantalla de arranque.
 
 ### 2.3 Patrones detectados
 
@@ -79,6 +79,10 @@ La aplicación es una **SPA React + TypeScript (Vite)** orientada a **listas col
 | `@playwright/test` | E2E. |
 | `terser` | Minificación producción. |
 
+### 3.3 Auditoría de dependencias (`npm audit`)
+
+Tras `npm audit fix` (parches automáticos sin `--force`), pueden quedar **avisos transitivos** sin parche en el árbol (p. ej. `@xmldom/xmldom`, `tar` vía `@capacitor/assets` / `@capacitor/cli`). Conviene repetir `npm audit` al subir versiones mayores de Capacitor o al regenerar assets. No exponer secretos en scripts versionados.
+
 ---
 
 ## 4. Arquitectura de datos (Supabase)
@@ -117,9 +121,11 @@ Las migraciones **no recrean desde cero** todas las tablas en un solo archivo; a
 |---------|---------------------------|
 | **`search-omdb`** | Body: `query`, `type`, `page`. Usa secret `OMDB_API_KEY`, validación y rate limit por usuario. |
 | **`send-push`** | Envío web push; autenticación vía `x-push-secret` alineado con `push_dispatch_config`. |
-| **`notify-discord`** | POST JSON con payload tipo webhook de BD (`INSERT` en `items`): lee `lists.discord_webhook_url`, `lists.theme`, `lists.name`, resuelve autor vía `user_profiles`, construye **embed temático** y hace `fetch` al webhook de Discord. Requiere secrets `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y opcionalmente `PUBLIC_APP_URL` / `APP_BASE_URL` para enlaces. |
+| **`push-orchestrator`** | Recibe un JSON con forma de **Database Webhook** de Supabase (`type: INSERT`, `table: items`, `record`: fila nueva). Con `SUPABASE_SERVICE_ROLE_KEY` lee `lists.discord_webhook_url`, tema y nombre; resuelve autor; construye embed y llama al webhook de Discord; en paralelo dispara web push y FCM. |
 
-**Importante:** en el repositorio **no** aparece la definición SQL/pg_net que **invoca** `notify-discord` ante cada inserción; eso suele configurarse como **Database Webhook** o job en el panel de Supabase. La función está preparada para recibir el payload estándar de esos webhooks.
+**Disparo desde Postgres (versionado en repo):** la migración **`25_notify_discord_trigger_items.sql`** define la tabla `notify_discord_config` (URL de la Edge Function + bearer + `is_enabled`) y el trigger **`trg_items_notify_discord`** en `AFTER INSERT ON public.items`, que usa **`pg_net.http_post`** para invocar `push-orchestrator`. Hay que rellenar `function_url` y `bearer_token` con SQL (como indica el comentario en la migración) y tener la extensión **`pg_net`** habilitada.
+
+**Doble envío a Discord:** si además existe un **Database Webhook** en el panel de Supabase apuntando al mismo `INSERT` en `items` y a la misma función, se recibirán **dos** notificaciones. Dejar solo un camino: o el trigger `pg_net`, o el webhook del panel (la migración 25 lo advierte explícitamente).
 
 ### 4.4 RLS — líneas maestras
 
@@ -129,7 +135,12 @@ Las migraciones **no recrean desde cero** todas las tablas en un solo archivo; a
 - **`item_ratings`**: políticas “propias” (lectura/escritura del dueño de la fila) según README histórico y migraciones de seguridad.  
 - **`item_comments`**: políticas por membresía al ítem y autor (mig. 14).  
 
-Para despliegues nuevos, la fuente de verdad es el **conjunto ordenado de migraciones** `04` → `22`.
+Para despliegues nuevos, la fuente de verdad es el **conjunto ordenado de migraciones** `04` → `30` (y posteriores en el repo).
+
+### 4.5 Ítems: duplicados y notificaciones push (referencia operativa)
+
+- **Migración `30_items_unique_list_tipo_title.sql`**: deduplica filas activas con el mismo `(list_id, tipo, lower(trim(titulo)))` vía `deleted_at`, luego crea el índice único parcial `ux_items_active_list_tipo_title_norm`. Comprobar en cada entorno (`supabase db push` o SQL Editor) que el índice exista y que no queden duplicados activos antes de aplicar.
+- **Cliente**: `useItems` normaliza `titulo` con trim al insertar; error Postgres `23505` se trata como duplicado en UI (ver `useListSearchFlow` / `ListaContenido`).
 
 ---
 
@@ -154,11 +165,13 @@ Para despliegues nuevos, la fuente de verdad es el **conjunto ordenado de migrac
 
 **Riesgo de arquitectura:** la API key Groq en `VITE_GROQ_API_KEY` **se expone en el bundle**; para entornos cerrados habría que proxyar en backend.
 
-### 5.3 Notificaciones Discord por lista
+### 5.3 Notificaciones Discord por lista (resumen)
 
-- **Configuración UI**: `ListSettingsModal` guarda `lists.discord_webhook_url` (y tema de lista en `lists.theme`). Solo el propietario puede actualizar (RLS).  
-- **Runtime**: Edge **`notify-discord`** arma embeds distintos según `lists.theme` (cyberpunk, retro-cartoon, terminal, default), incluye título, `title_es`, género, autor (username > email), enlace a la app si `PUBLIC_APP_URL` está definido.  
-- **Disparo**: la función espera un **webhook de base de datos** (o equivalente) que envíe `INSERT` en `items`; la configuración exacta del trigger/webhook **no está versionada** en `migrations/` analizadas.
+Guía operativa de **rotación del webhook** del canal: [DISCORD_WEBHOOK.md](DISCORD_WEBHOOK.md).
+
+- **Configuración UI**: `ListSettingsModal` guarda `lists.discord_webhook_url` (y tema en `lists.theme`). Solo el propietario debería poder actualizar (RLS). El listado general de listas en cliente usa **`LIST_SELECT_PUBLIC`** en [`src/config/listSelect.ts`](../src/config/listSelect.ts) para **no** exponer la URL del webhook en selects habituales; invitaciones pendientes (`usePendingInvite`) también usan esa constante.
+- **Runtime**: la Edge **`push-orchestrator`** (ver §4.3) arma embeds según `lists.theme` y envía a Discord si hay webhook configurado.
+- **Disparo**: trigger `trg_items_notify_discord` + `pg_net` (migración 25), no depender solo de configuración manual salvo que se desactive el trigger a propósito.
 
 ### 5.4 Crítica rápida persistida
 

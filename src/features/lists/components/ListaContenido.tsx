@@ -50,10 +50,11 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   const discoverSectionRef = useRef<HTMLDivElement>(null)
 
   const { theme } = useTheme()
-  const { items, loading, error: itemsError, addItem, deleteItem, toggleVisto, quickCritiqueAndWatch } =
+  const { items, listMemberCount, loading, error: itemsError, addItem, deleteItem, toggleVisto, quickCritiqueAndWatch } =
     useItems(tipo, user?.id || '', listId)
 
   const [critiqueToast, setCritiqueToast] = useState<string | null>(null)
+  const [duplicateToast, setDuplicateToast] = useState<string | null>(null)
 
   const critiqueSuccessCopy = useMemo(() => {
     switch (theme) {
@@ -67,6 +68,12 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
         return 'Critica guardada'
     }
   }, [theme])
+
+  useEffect(() => {
+    if (!duplicateToast) return
+    const timer = window.setTimeout(() => setDuplicateToast(null), 4200)
+    return () => window.clearTimeout(timer)
+  }, [duplicateToast])
 
   useEffect(() => {
     if (!critiqueToast) return
@@ -142,6 +149,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     listId,
     user: user || { id: '', email: '' },
     onAddItem: addItem,
+    onDuplicateItem: () => setDuplicateToast(t('item.duplicate_in_list')),
   })
 
   const itemDetails = useListItemDetails({
@@ -253,6 +261,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           loadingLists={loadingLists}
           pendingCount={pendingItems.length}
           watchedCount={watchedItems.length}
+          listMemberCount={listMemberCount}
           onCreateList={() => setShowCreateDialog(true)}
           onInvite={() => setShowInviteDialog(true)}
           onListChange={handleListChange}
@@ -376,6 +385,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           role="status"
         >
           {critiqueToast}
+        </div>
+      )}
+
+      {duplicateToast && (
+        <div
+          className="fixed bottom-20 left-1/2 z-[200] max-w-[min(90vw,24rem)] -translate-x-1/2 px-4 py-3 text-center text-sm font-semibold shadow-xl border border-amber-500/40 bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)]"
+          role="alert"
+        >
+          {duplicateToast}
         </div>
       )}
     </div>

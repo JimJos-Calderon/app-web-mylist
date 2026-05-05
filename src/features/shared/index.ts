@@ -10,6 +10,7 @@ export { default as ThemeSwitcher } from './components/ThemeSwitcher'
 export { default as TechBackground } from './components/TechBackground'
 export { default as HudContainer } from './components/HudContainer'
 export { default as TechLabel } from './components/TechLabel'
+export { default as ItemGroupWatchBadge } from './components/ItemGroupWatchBadge'
 
 export { useReducedMotion } from './hooks/useReducedMotion'
 export { useMediaQuery } from './hooks/useMediaQuery'

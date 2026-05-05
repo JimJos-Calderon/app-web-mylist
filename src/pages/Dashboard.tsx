@@ -10,6 +10,8 @@ import { useUserProfile } from '@/features/profile'
 import { CreateListDialog, ListSelector, ListSettingsModal, useLists } from '@/features/lists'
 import { RandomPickManager } from '@/features/items'
 import { saveQuickCritique } from '@/features/items/services/quickCritiqueService'
+import { setUserItemWatched } from '@/features/items/services/itemUserWatchService'
+import { mergeUserWatchIntoItems } from '@/features/items/utils/mergeUserWatchIntoItems'
 import { queryKeys } from '@config/queryKeys'
 import { SectionErrorFallback, ConfirmDialog, useTheme } from '@/features/shared'
 import type { List, ListItem } from '@/features/shared'
@@ -125,16 +127,31 @@ const Dashboard: React.FC = () => {
 
   // Fetch all items from the active list for the random picker and Oracle
   const { data: allItems = [] } = useQuery({
-    queryKey: ['items', 'all', currentList?.id],
+    queryKey: ['items', 'all', currentList?.id, user?.id],
     queryFn: async () => {
+      const uid = user?.id
+      if (!uid || !currentList?.id) {
+        return []
+      }
       const { data, error } = await supabase
         .from('items')
         .select('*')
         .eq('list_id', currentList?.id)
       if (error) throw error
-      return data as ListItem[]
+      const rows = (data || []) as ListItem[]
+      const ids = rows.map((r) => r.id).filter(Boolean)
+      if (ids.length === 0) {
+        return mergeUserWatchIntoItems(rows, [])
+      }
+      const { data: watchRows, error: watchError } = await supabase
+        .from('item_user_watch')
+        .select('item_id, watched')
+        .eq('user_id', uid)
+        .in('item_id', ids)
+      if (watchError) throw watchError
+      return mergeUserWatchIntoItems(rows, watchRows ?? [])
     },
-    enabled: !!currentList?.id,
+    enabled: !!currentList?.id && !!user?.id,
   })
 
   const displayName = profile?.username || t('navbar.myAccount')
@@ -142,13 +159,8 @@ const Dashboard: React.FC = () => {
   const hasActiveList = Boolean(currentList)
 
   const handleToggleVisto = async (id: string, currentState: boolean) => {
-    const { error } = await supabase
-      .from('items')
-      .update({ visto: !currentState })
-      .eq('id', id)
-
-    if (error) throw error
-
+    if (!user?.id) throw new Error(t('dashboard.session_required'))
+    await setUserItemWatched(id, user.id, !currentState)
     await queryClient.invalidateQueries({ queryKey: ['items'] })
   }
 
@@ -195,12 +207,12 @@ const Dashboard: React.FC = () => {
     onQuickCritiqueSuccess: () => {
       const msg =
         theme === 'retro-cartoon'
-          ? 'ARCHIVO ACTUALIZADO!'
+          ? t('dashboard.critique_toast_retro')
           : theme === 'terminal'
-            ? '[OK] ARCHIVO_ACTUALIZADO'
+            ? t('dashboard.critique_toast_terminal')
             : theme === 'cyberpunk'
-              ? 'BUFFER SYNC · VISTO + CRITICA OK'
-              : 'Critica guardada'
+              ? t('dashboard.critique_toast_cyberpunk')
+              : t('dashboard.critique_toast_default')
       setCritiqueToast(msg)
     },
   })
@@ -224,45 +236,45 @@ const Dashboard: React.FC = () => {
 
   if (!user) return null
 
+  const listName = currentList?.name ?? ''
   const nextStepTitle = loadingLists
-    ? 'Preparando tu contexto'
+    ? t('dashboard.next_title_loading')
     : hasActiveList
-      ? `Entrar con "${currentList?.name}"`
+      ? t('dashboard.next_title_active', { name: listName })
       : hasLists
-        ? 'Elegir lista activa'
-        : 'Crear la primera lista'
+        ? t('dashboard.next_title_pick')
+        : t('dashboard.next_title_create')
 
   const nextStepDescription = loadingLists
-    ? 'En cuanto carguen tus listas, podrás seguir el flujo principal.'
+    ? t('dashboard.next_desc_loading')
     : hasActiveList
-      ? 'La forma más rápida de avanzar es entrar a películas o series y decidir desde pendientes.'
+      ? t('dashboard.next_desc_active')
       : hasLists
-        ? 'Ya tienes listas. Solo falta marcar cuál manda ahora mismo.'
-        : 'Primero necesitas una lista para añadir opciones y empezar a decidir juntos.'
+        ? t('dashboard.next_desc_pick')
+        : t('dashboard.next_desc_no_lists')
   const retroText = (value: string) => (isRetroCartoon ? formatRetroLabel(value) : value)
 
-  const heroTitle = isRetroCartoon
-    ? formatRetroLabel('Decide que ver juntos rapido')
-    : 'Decide qué ver juntos, rápido.'
-  const activeListLabel = isRetroCartoon ? formatRetroLabel('Lista activa') : 'Lista activa'
-  const nextStepLabel = isRetroCartoon ? formatRetroLabel('Siguiente paso') : 'Siguiente paso'
-  const stateLabel = isRetroCartoon ? formatRetroLabel('Estado') : 'Estado'
-  const contextLabel = isRetroCartoon ? formatRetroLabel('Contexto') : 'Contexto'
-  const chooseForMeLabel = isRetroCartoon ? formatRetroLabel('Elegir por mi') : 'Elegir por mí'
-  const createListLabel = isRetroCartoon ? formatRetroLabel('Crear lista') : 'Crear lista'
-  const goMoviesLabel = isRetroCartoon ? formatRetroLabel('Ir a peliculas') : 'Ir a películas'
-  const goSeriesLabel = isRetroCartoon ? formatRetroLabel('Ir a series') : 'Ir a series'
-  const noListsLabel = isRetroCartoon
-    ? 'NO HAY NINGUNA LISTA TODAVIA. CREAR UNA ES EL PRIMER PASO PARA PODER ANADIR Y DECIDIR.'
-    : 'No hay ninguna lista todavía. Crear una es el primer paso para poder añadir y decidir.'
-  const globalActivityLabel = isRetroCartoon ? formatRetroLabel('Global activity log') : 'GLOBAL_ACTIVITY_LOG'
+  const heroTitle = isRetroCartoon ? formatRetroLabel(t('dashboard.hero_title')) : t('dashboard.hero_title')
+  const activeListLabel = isRetroCartoon ? formatRetroLabel(t('dashboard.active_list_badge')) : t('dashboard.active_list_badge')
+  const nextStepLabel = isRetroCartoon ? formatRetroLabel(t('dashboard.next_step_label')) : t('dashboard.next_step_label')
+  const stateLabel = isRetroCartoon ? formatRetroLabel(t('dashboard.state_label')) : t('dashboard.state_label')
+  const contextLabel = isRetroCartoon ? formatRetroLabel(t('dashboard.context_label')) : t('dashboard.context_label')
+  const chooseForMeLabel = isRetroCartoon ? formatRetroLabel(t('dashboard.choose_random_short')) : t('dashboard.choose_random_short')
+  const createListLabel = isRetroCartoon ? formatRetroLabel(t('dashboard.create_list_button')) : t('dashboard.create_list_button')
+  const goMoviesLabel = isRetroCartoon ? formatRetroLabel(t('dashboard.go_movies')) : t('dashboard.go_movies')
+  const goSeriesLabel = isRetroCartoon ? formatRetroLabel(t('dashboard.go_series')) : t('dashboard.go_series')
+  const noListsLabel = isRetroCartoon ? t('dashboard.no_lists_banner_retro') : t('dashboard.no_lists_banner')
+  const globalActivityLabel = isRetroCartoon
+    ? formatRetroLabel(t('dashboard.global_activity_retro_line'))
+    : t('dashboard.global_activity_sys')
+  const listsCountLabel = t('dashboard.lists_count', { count: lists.length })
 
   return (
     <>
       <div className="mx-auto max-w-6xl px-4 pb-24 md:px-6">
         <section className="space-y-4 pb-8 pt-10 md:pb-10 md:pt-14">
           <p className={`text-[10px] uppercase tracking-[0.25em] text-accent-primary opacity-80 md:text-xs ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}>
-            {'>'} DECISION_DASHBOARD
+            {t('dashboard.sys_kicker')}
           </p>
 
           <h1 className={`text-4xl font-black tracking-tighter text-[var(--color-text-primary)] md:text-6xl ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
@@ -270,12 +282,12 @@ const Dashboard: React.FC = () => {
           </h1>
 
           <p className={`max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)] md:text-lg ${isRetroCartoon ? 'theme-heading-font' : ''}`}>
-            {retroText('Bienvenido de nuevo')},{' '}
+            {retroText(t('dashboard.welcome_back'))},{' '}
             <span className={`font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
               {isRetroCartoon ? formatRetroLabel(displayName) : displayName}
-            </span>.
-            {' '}
-            {retroText('Aqui solo deberia quedar claro que lista esta activa y por donde seguir.')}
+            </span>
+            .{' '}
+            {retroText(t('dashboard.intro_line'))}
           </p>
         </section>
 
@@ -293,10 +305,10 @@ const Dashboard: React.FC = () => {
                 </p>
                 <h2 className="theme-heading-font text-xl font-semibold uppercase !text-black md:text-2xl">
                   {loadingLists
-                    ? formatRetroLabel('Cargando listas')
+                    ? formatRetroLabel(t('dashboard.loading_lists_short'))
                     : currentList?.name
                       ? formatRetroLabel(currentList.name)
-                      : formatRetroLabel('Sin lista seleccionada')}
+                      : formatRetroLabel(t('dashboard.no_list_selected'))}
                 </h2>
               </div>
             )}
@@ -310,22 +322,22 @@ const Dashboard: React.FC = () => {
 
                   <h2 className={`text-2xl font-semibold text-[var(--color-text-primary)] md:text-3xl ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
                     {loadingLists
-                      ? (isRetroCartoon ? formatRetroLabel('Cargando listas') : 'Cargando listas...')
+                      ? (isRetroCartoon ? formatRetroLabel(t('dashboard.loading_lists_short')) : t('dashboard.loading_lists'))
                       : currentList?.name
                         ? (isRetroCartoon ? formatRetroLabel(currentList.name) : currentList.name)
-                        : (isRetroCartoon ? formatRetroLabel('Sin lista seleccionada') : 'Sin lista seleccionada')}
+                        : (isRetroCartoon ? formatRetroLabel(t('dashboard.no_list_selected')) : t('dashboard.no_list_selected'))}
                   </h2>
                 </>
               ) : null}
 
               <p className={`mt-3 max-w-2xl text-sm leading-relaxed ${isRetroCartoon ? 'theme-heading-font !text-black' : 'text-[var(--color-text-muted)]'}`}>
                 {loadingLists
-                  ? retroText('Estamos preparando tu contexto.')
+                  ? retroText(t('dashboard.main_hint_loading'))
                   : hasActiveList
-                    ? retroText('Todo lo que hagas al entrar en peliculas o series se aplicara a esta lista.')
+                    ? retroText(t('dashboard.main_hint_active'))
                     : hasLists
-                      ? retroText('Elige cual quieres usar ahora para que el flujo quede claro.')
-                      : retroText('Todavia no tienes listas. Crea una para empezar.')}
+                      ? retroText(t('dashboard.main_hint_pick'))
+                      : retroText(t('dashboard.main_hint_no_lists'))}
               </p>
             </div>
 
@@ -350,7 +362,7 @@ const Dashboard: React.FC = () => {
                       onClick={() => setIsRandomPickerOpen(true)}
                       disabled={!hasActiveList || loadingLists}
                       className={`flex h-11 items-center justify-center gap-2 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[rgba(var(--color-accent-primary-rgb),0.05)] px-5 text-[11px] font-black uppercase tracking-widest text-[var(--color-accent-primary)] transition hover:bg-[rgba(var(--color-accent-primary-rgb),0.08)] hover:shadow-[0_0_15px_rgba(var(--color-accent-primary-rgb),0.1)] disabled:opacity-50 ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
-                      title={t('random_picker.button_tooltip', 'Elegir algo al azar')}
+                      title={t('dashboard.random_pick_tooltip')}
                     >
                       <Shuffle className="h-4 w-4" />
                       <span className="hidden sm:inline">{chooseForMeLabel}</span>
@@ -461,8 +473,10 @@ const Dashboard: React.FC = () => {
                 </p>
                 <p className={`text-lg font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
                   {loadingLists
-                    ? (isRetroCartoon ? formatRetroLabel('Preparando listas') : 'Preparando listas')
-                    : `${lists.length} ${isRetroCartoon ? formatRetroLabel(lists.length === 1 ? 'lista' : 'listas') : lists.length === 1 ? 'lista' : 'listas'}`}
+                    ? (isRetroCartoon ? formatRetroLabel(t('dashboard.preparing_lists_state')) : t('dashboard.preparing_lists_state'))
+                    : isRetroCartoon
+                      ? formatRetroLabel(listsCountLabel)
+                      : listsCountLabel}
                 </p>
               </div>
 
@@ -472,8 +486,8 @@ const Dashboard: React.FC = () => {
                 </p>
                 <p className={`text-sm font-semibold text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}>
                   {hasActiveList
-                    ? (isRetroCartoon ? formatRetroLabel('Lista activa resuelta') : 'Lista activa resuelta')
-                    : (isRetroCartoon ? formatRetroLabel('Falta lista activa') : 'Falta lista activa')}
+                    ? (isRetroCartoon ? formatRetroLabel(t('dashboard.context_resolved')) : t('dashboard.context_resolved'))
+                    : (isRetroCartoon ? formatRetroLabel(t('dashboard.context_missing')) : t('dashboard.context_missing'))}
                 </p>
               </div>
             </div>
@@ -483,27 +497,43 @@ const Dashboard: React.FC = () => {
 
         <section className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           <FlowCard
-            title={isRetroCartoon ? formatRetroLabel('Peliculas') : 'Películas'}
+            title={isRetroCartoon ? formatRetroLabel(t('movies.title')) : t('movies.title')}
             description={
               hasActiveList
-                ? retroText(`Entrar con "${currentList?.name}" para anadir opciones y decidir desde pendientes.`)
-                : retroText('Abrir peliculas y continuar el flujo principal.')
+                ? retroText(t('dashboard.flow_movies_desc_with_list', { name: listName }))
+                : retroText(t('dashboard.flow_movies_desc_default'))
             }
             to="/peliculas"
-            cta={hasActiveList ? (isRetroCartoon ? 'SEGUIR CON PELICULAS' : 'Seguir con películas') : (isRetroCartoon ? 'ABRIR PELICULAS' : 'Abrir películas')}
+            cta={
+              hasActiveList
+                ? isRetroCartoon
+                  ? formatRetroLabel(t('dashboard.flow_movies_cta_continue'))
+                  : t('dashboard.flow_movies_cta_continue')
+                : isRetroCartoon
+                  ? formatRetroLabel(t('dashboard.flow_movies_cta_open'))
+                  : t('dashboard.flow_movies_cta_open')
+            }
             accent="cyan"
             icon={<Film className="h-4 w-4" strokeWidth={2.5} />}
           />
 
           <FlowCard
-            title="Series"
+            title={isRetroCartoon ? formatRetroLabel(t('series.title')) : t('series.title')}
             description={
               hasActiveList
-                ? retroText(`Usar "${currentList?.name}" para seguir el mismo flujo en series.`)
-                : retroText('Abrir series y continuar el flujo principal.')
+                ? retroText(t('dashboard.flow_series_desc_with_list', { name: listName }))
+                : retroText(t('dashboard.flow_series_desc_default'))
             }
             to="/series"
-            cta={hasActiveList ? (isRetroCartoon ? 'SEGUIR CON SERIES' : 'Seguir con series') : (isRetroCartoon ? 'ABRIR SERIES' : 'Abrir series')}
+            cta={
+              hasActiveList
+                ? isRetroCartoon
+                  ? formatRetroLabel(t('dashboard.flow_series_cta_continue'))
+                  : t('dashboard.flow_series_cta_continue')
+                : isRetroCartoon
+                  ? formatRetroLabel(t('dashboard.flow_series_cta_open'))
+                  : t('dashboard.flow_series_cta_open')
+            }
             accent="purple"
             icon={<Tv className="h-4 w-4" strokeWidth={2.5} />}
           />

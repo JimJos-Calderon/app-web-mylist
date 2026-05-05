@@ -18,4 +18,5 @@ Write-Host "Verificando instalacion..."
 
 Write-Host "Listo!"
 
-supabase secrets set DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1475867794271764497/yxIDZ5dNFhfcSb6JuxPEL4X1EB-QA1a5_d2QSDlOWtfCbdLI56BXFuYhgZkjJJD1Y-ri
+# No incluyas secretos ni URLs de webhooks en scripts versionados.
+# Configura secretos con: supabase secrets set --env-file .env.secrets (archivo local, sin commitear)

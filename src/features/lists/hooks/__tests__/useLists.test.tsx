@@ -4,6 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { useLists } from '@/features/lists/hooks/useLists'
 
+const joinRpcState = vi.hoisted(() => ({
+  rpcError: null as { message?: string } | null,
+}))
+
 // Mock data
 const mockLists = [
   {
@@ -34,15 +38,17 @@ vi.mock('@/supabaseClient', () => {
     supabase: {
       rpc: vi.fn(() =>
         Promise.resolve({
-          data: [
-            {
-              joined: true,
-              status: 'JOINED',
-              list_id: 'list-1',
-              membership_role: 'member',
-            },
-          ],
-          error: null,
+          data: joinRpcState.rpcError
+            ? null
+            : [
+                {
+                  joined: true,
+                  status: 'JOINED',
+                  list_id: 'list-1',
+                  membership_role: 'member',
+                },
+              ],
+          error: joinRpcState.rpcError,
         })
       ),
       from: vi.fn((table: string) => {
@@ -106,6 +112,7 @@ describe('useLists', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
+    joinRpcState.rpcError = null
   })
 
   const createWrapper = () => {
@@ -214,5 +221,18 @@ describe('useLists', () => {
 
     expect(result.current.isCreatingList).toBe(false)
     expect(result.current.isJoiningList).toBe(false)
+  })
+
+  it('joinListByCode propaga error de RPC', async () => {
+    joinRpcState.rpcError = { message: 'permission denied' }
+    const { result } = renderHook(() => useLists('user-1'), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => expect(result.current.lists.length).toBe(2))
+
+    await expect(result.current.joinListByCode('ABC123')).rejects.toMatchObject({
+      message: 'permission denied',
+    })
   })
 })

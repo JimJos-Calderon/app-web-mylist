@@ -521,7 +521,7 @@ const Login: React.FC = () => {
     observer.observe(document.documentElement, { attributes: true })
 
     return () => observer.disconnect()
-  }, []) // Array vac�o para que solo se monte una vez
+  }, [authTheme, activeTheme])
 
   const isRetroCartoon = activeTheme === 'retro-cartoon'
   const isTerminal = activeTheme === 'terminal'

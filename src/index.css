@@ -2613,6 +2613,146 @@ nav {
   background: rgba(var(--color-accent-secondary-rgb), 0.08);
 }
 
+/* Progreso colaborativo: miembros que han visto el mismo título */
+.item-group-watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--color-accent-secondary-rgb), 0.35);
+  background: rgba(var(--color-accent-secondary-rgb), 0.06);
+  color: var(--color-text-muted);
+  font-family: ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.item-group-watch--compact {
+  margin-top: 0.35rem;
+  padding: 0.2rem 0.45rem 0.2rem 0.35rem;
+}
+
+.item-group-watch--comfortable {
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.65rem 0.35rem 0.5rem;
+  font-size: 10px;
+}
+
+.item-group-watch__icon {
+  flex-shrink: 0;
+  width: 0.85rem;
+  height: 0.85rem;
+  color: rgba(var(--color-accent-secondary-rgb), 0.95);
+}
+
+.item-group-watch--comfortable .item-group-watch__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.item-group-watch__ratio {
+  color: var(--color-text-primary);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.item-group-watch--complete {
+  border-color: rgba(var(--color-accent-primary-rgb), 0.45);
+  background: rgba(var(--color-accent-primary-rgb), 0.1);
+  color: var(--color-accent-primary);
+}
+
+.item-group-watch--complete .item-group-watch__icon {
+  color: var(--color-accent-primary);
+}
+
+[data-theme="retro-cartoon"] .item-group-watch {
+  border-width: 3px;
+  border-color: #1a1a1a;
+  background: #fffef6;
+  color: #1a1a1a;
+  box-shadow: 3px 3px 0 #1a1a1a;
+  font-family: var(--font-heading, inherit);
+  letter-spacing: 0.06em;
+}
+
+[data-theme="retro-cartoon"] .item-group-watch__icon {
+  color: #1a1a1a;
+}
+
+[data-theme="retro-cartoon"] .item-group-watch__ratio {
+  color: #1a1a1a;
+}
+
+[data-theme="retro-cartoon"] .item-group-watch--complete {
+  background: var(--color-retro-cyan, #7dd3c0);
+  border-color: #1a1a1a;
+}
+
+[data-theme="terminal"] .item-group-watch {
+  border-radius: 0.25rem;
+  border-color: rgba(var(--color-accent-primary-rgb), 0.55);
+  background: rgba(5, 5, 5, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--color-accent-primary-rgb), 0.12),
+    0 0 10px rgba(var(--color-accent-primary-rgb), 0.08);
+  color: rgba(var(--color-accent-primary-rgb), 0.85);
+}
+
+[data-theme="terminal"] .item-group-watch__ratio {
+  color: var(--color-accent-primary);
+}
+
+[data-theme="cyberpunk"] .item-group-watch {
+  border-radius: 0.5rem;
+  border-color: rgba(0, 255, 255, 0.35);
+  background: linear-gradient(
+    120deg,
+    rgba(var(--color-accent-primary-rgb), 0.14) 0%,
+    rgba(0, 255, 255, 0.06) 100%
+  );
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.12);
+  color: rgba(226, 232, 240, 0.85);
+}
+
+[data-theme="cyberpunk"] .item-group-watch__icon {
+  color: rgba(0, 255, 255, 0.9);
+}
+
+[data-theme="cyberpunk"] .item-group-watch__ratio {
+  color: #f8fafc;
+}
+
+.list-active-header__roster {
+  margin-top: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+[data-theme="retro-cartoon"] .list-active-header__roster {
+  font-family: var(--font-heading, inherit);
+  letter-spacing: 0.1em;
+  color: #1a1a1a;
+  opacity: 0.85;
+}
+
+[data-theme="terminal"] .list-active-header__roster {
+  font-family: ui-monospace, monospace;
+  color: rgba(var(--color-accent-primary-rgb), 0.75);
+}
+
+[data-theme="cyberpunk"] .list-active-header__roster {
+  color: rgba(148, 163, 184, 0.95);
+}
+
 .hud-item-rating-divider {
   border-top: 1px solid rgba(var(--color-accent-primary-rgb), 0.2);
 }

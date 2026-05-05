@@ -45,8 +45,11 @@ const ItemCommentBox: React.FC<ItemCommentBoxProps> = ({
   } = useEnhanceComment()
 
   useEffect(() => {
-    setContent(comment?.content || '')
-    setOriginalDraft(null)
+    const id = window.setTimeout(() => {
+      setContent(comment?.content || '')
+      setOriginalDraft(null)
+    }, 0)
+    return () => window.clearTimeout(id)
   }, [comment?.content, itemId])
 
   const isSaving = isCreatingComment || isUpdatingComment || watchConfirmationLoading

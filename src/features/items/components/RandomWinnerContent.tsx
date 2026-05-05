@@ -27,11 +27,20 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
   // Detectar si el usuario prefiere movimiento reducido
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+  const poolKey = pool.map((p) => String(p.id)).join('|')
   const [shuffledPool, setShuffledPool] = useState<ListItem[]>([])
 
   useEffect(() => {
-    setShuffledPool([...pool].sort(() => Math.random() - 0.5))
-  }, [pool])
+    const id = window.setTimeout(() => {
+      const copy = [...pool]
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[copy[i], copy[j]] = [copy[j], copy[i]]
+      }
+      setShuffledPool(copy)
+    }, 0)
+    return () => window.clearTimeout(id)
+  }, [poolKey, pool])
 
   // Crear un pool visual para el efecto de scroll vertical
   const visualPool = useMemo(() => {
@@ -50,14 +59,17 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
 
   useEffect(() => {
     if (prefersReducedMotion) {
-      setPhase('finished')
-      setShowCleanCard(true)
-      return
+      const reducedId = window.setTimeout(() => {
+        setPhase('finished')
+        setShowCleanCard(true)
+      }, 0)
+      return () => window.clearTimeout(reducedId)
     }
 
-    // Reiniciar estados
-    setPhase('idle')
-    setShowCleanCard(false)
+    const resetId = window.setTimeout(() => {
+      setPhase('idle')
+      setShowCleanCard(false)
+    }, 0)
 
     // Iniciamos la secuencia de animación con un pequeño respiro para que el navegador registre el 'idle'
     const startTimer = window.setTimeout(() => {
@@ -71,16 +83,18 @@ const RandomWinnerContent: React.FC<RandomWinnerContentProps> = ({ item, pool, o
       setPhase('stabilizing')
     }, 50 + spinDuration)
 
+    let flashTimer: ReturnType<typeof window.setTimeout> | undefined
     const finishedTimer = window.setTimeout(() => {
       setPhase('finished')
-      // El flash ocurre justo cuando se detiene
-      window.setTimeout(() => setShowCleanCard(true), 150)
+      flashTimer = window.setTimeout(() => setShowCleanCard(true), 150)
     }, 50 + spinDuration + stabilizeDuration)
 
     return () => {
+      window.clearTimeout(resetId)
       clearTimeout(startTimer)
       clearTimeout(spinningTimer)
       clearTimeout(finishedTimer)
+      if (flashTimer != null) window.clearTimeout(flashTimer)
     }
   }, [item, prefersReducedMotion])
 

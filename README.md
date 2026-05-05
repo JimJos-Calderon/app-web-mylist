@@ -47,6 +47,7 @@ Una aplicación web para gestionar **listas compartidas** de películas y series
 - 👤 **Perfil** — Acción para **quitar valoración**: deja el título en la lista como pendiente y elimina tu fila en `item_ratings` y `item_comments`; invalidación de caché por lista.
 - 🎨 **Retro** — Ajustes de fuente en botón Ajustes (perfil), botón «Limpiar» del widget de estrellas y textos del modal de crítica.
 - 🗄️ **Esquema** — Migraciones recientes: comentarios en crítica rápida (`save_quick_critique`), `items` / ratings con IDs enteros, temas por lista, webhook Discord opcional, `title_es`, etc. (ver `supabase/migrations/`).
+- 📣 **Discord** — Guía para **rotar el webhook** de un canal (revocar el antiguo y pegar uno nuevo): [docs/DISCORD_WEBHOOK.md](docs/DISCORD_WEBHOOK.md).
 
 ## 🛠️ Stack Tecnológico
 
@@ -191,8 +192,9 @@ supabase db push
 | `15_require_comment_before_watch.sql` | Reseña o crítica antes de marcar visto |
 | `16` … `19` | Join RPC, `title_es`, Discord webhook, tema por lista |
 | `20` … `22` | RPC `save_quick_critique` (bigint + comentario opcional) |
+| `28` … `29` | Visto por miembro (`item_user_watch`) y roster de lista compartida |
 
-> En el repo hay `07_audit_logs_push_dispatch.sql.bak` como respaldo; la migración activa de push es `07_0_push_subscriptions.sql` y siguientes.
+La migración activa de dispatch de push a Edge Functions es `08_dispatch_push_record_id_text_match.sql` (tras `07_0_push_subscriptions.sql` y relacionadas).
 
 5. **Configura Supabase Edge Functions & Secrets**
 
@@ -512,7 +514,7 @@ Interpretación rápida:
 - **Error de validación en búsqueda**: Asegúrate de escribir 2-100 caracteres, sin caracteres especiales
 - **Push devuelve 401**: Verifica que `PUSH_WEBHOOK_SECRET` coincida entre secrets y `public.push_dispatch_config`
 - **Push no llega pero hay 200**: Revisa permisos del navegador y que exista una fila activa en `push_subscriptions`
-- **Push no dispara en automático**: Confirma que estén aplicadas las migraciones de auditoría/push vigentes (`06`, `07_0`, `08`, `09`, `10`)
+- **Push no dispara en automático**: Confirma que estén aplicadas las migraciones de auditoría/push vigentes (`06`, `07_0`, `08`, `09`, `10`) y, para Discord + push desde inserción de ítems, la **`25`** (`pg_net` → `push-orchestrator`). No dupliques con un Database Webhook manual sobre el mismo `INSERT` en `items`.
 
 ### API y Datos
 - **Oráculo / “Mejorar con IA” no hace nada**: Configura el secreto `GROQ_API_KEY` en Supabase, despliega `ai-proxy` y comprueba que la sesión esté activa.

@@ -9,6 +9,8 @@ import ItemDetailsModal from '@/features/lists/components/ItemDetailsModal'
 import { useListItemDetails } from '@/features/lists/hooks/useListItemDetails'
 import { ListItem, useTheme } from '@/features/shared'
 import { saveQuickCritique } from '@/features/items/services/quickCritiqueService'
+import { setUserItemWatched } from '@/features/items/services/itemUserWatchService'
+import { mergeUserWatchIntoItems } from '@/features/items/utils/mergeUserWatchIntoItems'
 import { queryKeys } from '@config/queryKeys'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/supabaseClient'
@@ -50,7 +52,6 @@ const Perfil: React.FC = () => {
             id,
             titulo,
             tipo,
-            visto,
             user_id,
             user_email,
             poster_url,
@@ -64,27 +65,43 @@ const Perfil: React.FC = () => {
 
       if (error) throw error
 
-      const formatted = data
-        .filter((r: any) => r.items)
-        .map((r: any) => ({
-          item: {
-            id: r.items.id,
-            titulo: r.items.titulo,
-            tipo: r.items.tipo,
-            visto: r.items.visto,
-            user_id: r.items.user_id,
-            user_email: r.items.user_email,
-            poster_url: r.items.poster_url,
-            created_at: r.items.created_at,
-            genero: r.items.genero,
-            rating: r.rating,
-            list_id: r.items.list_id != null ? String(r.items.list_id) : '',
-          },
-          rating: {
-            rating: r.rating,
-            liked: r.liked
-          }
-        }))
+      const filtered = data.filter((r: any) => r.items)
+      const listItems: ListItem[] = filtered.map((r: any) => ({
+        id: r.items.id,
+        titulo: r.items.titulo,
+        tipo: r.items.tipo,
+        visto: false,
+        user_id: r.items.user_id,
+        user_email: r.items.user_email,
+        poster_url: r.items.poster_url,
+        created_at: r.items.created_at,
+        genero: r.items.genero,
+        rating: r.rating,
+        list_id: r.items.list_id != null ? String(r.items.list_id) : '',
+      }))
+      const itemIds = [...new Set(listItems.map((i) => i.id))]
+      let watchRows: { item_id: number; watched: boolean }[] = []
+      if (itemIds.length > 0 && user?.id) {
+        const { data: watches, error: watchError } = await supabase
+          .from('item_user_watch')
+          .select('item_id, watched')
+          .eq('user_id', user.id)
+          .in('item_id', itemIds)
+        if (watchError) throw watchError
+        watchRows = (watches || []) as { item_id: number; watched: boolean }[]
+      }
+      const merged = mergeUserWatchIntoItems(listItems, watchRows)
+      const formatted = filtered.map((r: any, idx: number) => ({
+        item: {
+          ...merged[idx],
+          rating: r.rating,
+          list_id: r.items.list_id != null ? String(r.items.list_id) : '',
+        },
+        rating: {
+          rating: r.rating,
+          liked: r.liked,
+        },
+      }))
 
       setRatedItems(formatted)
       setTotalRatings(formatted.length)
@@ -125,12 +142,13 @@ const Perfil: React.FC = () => {
       const listId = meta?.list_id != null ? String(meta.list_id) : ''
       const tipo = meta?.tipo as 'pelicula' | 'serie' | undefined
 
-      const { error: updateError } = await supabase
-        .from('items')
-        .update({ visto: false })
-        .eq('id', itemId)
+      const { error: watchError } = await supabase
+        .from('item_user_watch')
+        .delete()
+        .eq('item_id', itemId)
+        .eq('user_id', user.id)
 
-      if (updateError) throw updateError
+      if (watchError) throw watchError
 
       const { error: ratingsError } = await supabase
         .from('item_ratings')
@@ -164,12 +182,8 @@ const Perfil: React.FC = () => {
   )
 
   const handleToggleVisto = async (id: string, currentState: boolean) => {
-    const { error } = await supabase
-      .from('items')
-      .update({ visto: !currentState })
-      .eq('id', id)
-
-    if (error) throw error
+    if (!user?.id) throw new Error('Sesión requerida')
+    await setUserItemWatched(id, user.id, !currentState)
 
     setRatedItems((previous) =>
       previous.map((entry) =>
@@ -194,6 +208,7 @@ const Perfil: React.FC = () => {
   ) => {
     await saveQuickCritique(itemId, rating, liked, comment)
     await fetchRatedItems()
+    await queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
     if (user?.id) {
       await queryClient.invalidateQueries({ queryKey: ['itemRating', itemId, user.id] })
       await queryClient.invalidateQueries({

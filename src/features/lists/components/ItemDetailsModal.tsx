@@ -8,7 +8,7 @@ import {
   useItemRating,
   useTranslateSynopsis,
 } from '@/features/items'
-import { ListItem, useTheme } from '@/features/shared'
+import { ItemGroupWatchBadge, ListItem, useTheme } from '@/features/shared'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 
 interface ItemDetailsModalProps {
@@ -74,7 +74,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   onPrevious,
   closeButtonRef,
 }) => {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
   const isCyberpunk = theme === 'cyberpunk'
@@ -84,7 +84,6 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   const { deleteComment, comment: existingCommentRow } = useItemComments(selectedItem?.id)
   const { rating: existingItemRating } = useItemRating(selectedItem?.id ?? '')
   const selectedItemId = selectedItem?.id
-  const isSelectedItemWatched = Boolean(selectedItem?.visto)
   const activeLanguage = i18n.resolvedLanguage || i18n.language
   const {
     data: translatedSynopsis,
@@ -97,16 +96,16 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   })
 
   React.useEffect(() => {
-    if (!isOpen || !selectedItem) {
+    if (!isOpen || !selectedItemId) {
       quickCritiqueAutoOpenedRef.current = false
       setShowQuickCritique(false)
       return
     }
-    if (promptCommentOnOpen && !selectedItem.visto && !quickCritiqueAutoOpenedRef.current) {
+    if (promptCommentOnOpen && selectedItem && !selectedItem.visto && !quickCritiqueAutoOpenedRef.current) {
       setShowQuickCritique(true)
       quickCritiqueAutoOpenedRef.current = true
     }
-  }, [isOpen, selectedItemId, promptCommentOnOpen, selectedItem?.visto])
+  }, [isOpen, selectedItemId, promptCommentOnOpen, selectedItem])
 
   const handleRequestClose = () => {
     if (isQuickCritiqueSaving) return
@@ -118,7 +117,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   }
 
   const handleToggleClick = async () => {
-    if (modalActionLoading !== null) return
+    if (!selectedItem || modalActionLoading !== null) return
 
     if (!selectedItem.visto) {
       setShowQuickCritique(true)
@@ -221,6 +220,32 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                 {selectedItem.visto ? watchedLabel : notWatchedLabel}
               </span>
             </div>
+            {selectedItem.watch_group && selectedItem.watch_group.total > 1 && (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <p
+                  className={
+                    isRetroCartoon
+                      ? 'theme-heading-font text-[10px] font-black uppercase tracking-[0.14em] text-[var(--color-text-muted)]'
+                      : 'font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]'
+                  }
+                >
+                  {t('item.watch_group_caption')}
+                </p>
+                <ItemGroupWatchBadge
+                  watched={selectedItem.watch_group.watched}
+                  total={selectedItem.watch_group.total}
+                  ratioLabel={t('item.watch_group_ratio', {
+                    watched: selectedItem.watch_group.watched,
+                    total: selectedItem.watch_group.total,
+                  })}
+                  title={t('item.watch_group_title', {
+                    watched: selectedItem.watch_group.watched,
+                    total: selectedItem.watch_group.total,
+                  })}
+                  density="comfortable"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">

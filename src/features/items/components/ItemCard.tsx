@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Trash2, Loader2, Film } from 'lucide-react'
-import { ConfirmDialog, HudContainer, ListItem, OptimizedImage, TechLabel, useTheme } from '@/features/shared'
+import { ConfirmDialog, HudContainer, ItemGroupWatchBadge, ListItem, OptimizedImage, TechLabel, useTheme } from '@/features/shared'
 import { useUsername } from '@/features/profile'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import RatingWidget from './RatingWidget'
@@ -171,6 +171,24 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 </>
               )}
             </div>
+
+            {item.watch_group && item.watch_group.total > 1 && (
+              <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                <ItemGroupWatchBadge
+                  watched={item.watch_group.watched}
+                  total={item.watch_group.total}
+                  ratioLabel={t('item.watch_group_ratio', {
+                    watched: item.watch_group.watched,
+                    total: item.watch_group.total,
+                  })}
+                  title={t('item.watch_group_title', {
+                    watched: item.watch_group.watched,
+                    total: item.watch_group.total,
+                  })}
+                  density="compact"
+                />
+              </div>
+            )}
 
 
 

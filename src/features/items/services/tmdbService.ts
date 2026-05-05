@@ -1,6 +1,6 @@
 /**
  * Cliente TMDB v3 con Bearer (VITE_TMDB_ACCESS_TOKEN).
- * Búsqueda por título y detalles localizados en es-ES.
+ * Búsqueda por título y detalles en es-ES; el póster guardado usa assets en inglés (en-US) cuando existan.
  */
 
 import type { OmdbSuggestion } from '@/features/shared'
@@ -104,7 +104,8 @@ export async function searchTmdbFirstId(
 }
 
 /**
- * Detalles en español (es-ES): título localizado, sinopsis, póster, géneros.
+ * Detalles en español (es-ES): título localizado, sinopsis, géneros.
+ * El póster se toma de la variante en-US (arte habitual en inglés); si no hay, se usa el de es-ES.
  */
 export async function getTmdbDetailsEs(
   id: number,
@@ -116,40 +117,53 @@ export async function getTmdbDetailsEs(
   posterUrl: string | null
   genresCsv: string | null
 } | null> {
-  const path =
+  const pathEs =
     tipo === 'pelicula'
       ? `/movie/${id}?language=es-ES`
       : `/tv/${id}?language=es-ES`
+  const pathEn =
+    tipo === 'pelicula'
+      ? `/movie/${id}?language=en-US`
+      : `/tv/${id}?language=en-US`
 
-  const res = await tmdbFetch(path)
-  if (!res.ok) {
-    console.warn('TMDB details error', res.status)
+  const [resEs, resEn] = await Promise.all([tmdbFetch(pathEs), tmdbFetch(pathEn)])
+
+  if (!resEs.ok) {
+    console.warn('TMDB details (es-ES) error', resEs.status)
     return null
   }
 
+  let posterPathEn: string | null | undefined
+  if (resEn.ok) {
+    const dEn = (await resEn.json()) as TmdbMovieDetailsEs | TmdbTvDetailsEs
+    posterPathEn = dEn.poster_path
+  }
+
   if (tipo === 'pelicula') {
-    const d = (await res.json()) as TmdbMovieDetailsEs
+    const d = (await resEs.json()) as TmdbMovieDetailsEs
     const original = (d.original_title || d.title || '').trim()
     const localized = (d.title || d.original_title || '').trim()
     const overview = d.overview?.trim()
+    const posterPath = posterPathEn ?? d.poster_path
     return {
       originalTitle: original || localized,
       localizedTitle: localized || original,
       overviewEs: overview && overview.length > 0 ? overview : null,
-      posterUrl: tmdbPosterUrl(d.poster_path),
+      posterUrl: tmdbPosterUrl(posterPath),
       genresCsv: d.genres?.map((g) => g.name).filter(Boolean).join(', ') || null,
     }
   }
 
-  const d = (await res.json()) as TmdbTvDetailsEs
+  const d = (await resEs.json()) as TmdbTvDetailsEs
   const original = (d.original_name || d.name || '').trim()
   const localized = (d.name || d.original_name || '').trim()
   const overview = d.overview?.trim()
+  const posterPath = posterPathEn ?? d.poster_path
   return {
     originalTitle: original || localized,
     localizedTitle: localized || original,
     overviewEs: overview && overview.length > 0 ? overview : null,
-    posterUrl: tmdbPosterUrl(d.poster_path),
+    posterUrl: tmdbPosterUrl(posterPath),
     genresCsv: d.genres?.map((g) => g.name).filter(Boolean).join(', ') || null,
   }
 }

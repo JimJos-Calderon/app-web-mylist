@@ -13,12 +13,15 @@ import {
   validateTitle,
 } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
+import { isDuplicateItemConstraintError } from '@/features/items/utils/isDuplicateItemConstraintError'
 
 interface UseListSearchFlowParams {
   tipo: 'pelicula' | 'serie'
   listId?: string
   user: User
   onAddItem: (item: Omit<ListItem, 'id' | 'created_at'>) => Promise<void>
+  /** Cuando el índice único impide insertar (mismo título+tipo en la lista). */
+  onDuplicateItem?: () => void
 }
 
 interface UseListSearchFlowReturn {
@@ -39,6 +42,7 @@ export const useListSearchFlow = ({
   listId,
   user,
   onAddItem,
+  onDuplicateItem,
 }: UseListSearchFlowParams): UseListSearchFlowReturn => {
   const [searchInput, setSearchInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -133,6 +137,10 @@ export const useListSearchFlow = ({
 
       resetSearchUi()
     } catch (error) {
+      if (isDuplicateItemConstraintError(error)) {
+        onDuplicateItem?.()
+        return
+      }
       const details = error && typeof error === 'object' ? JSON.stringify(error) : String(error)
       console.error('Error adding item:', details, error)
     }
@@ -166,6 +174,10 @@ export const useListSearchFlow = ({
 
       resetSearchUi()
     } catch (error) {
+      if (isDuplicateItemConstraintError(error)) {
+        onDuplicateItem?.()
+        return
+      }
       const details = error && typeof error === 'object' ? JSON.stringify(error) : String(error)
       console.error('Error adding item manually:', details, error)
     }

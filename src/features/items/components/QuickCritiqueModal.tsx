@@ -57,13 +57,16 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return
-    setStars(clampStar(initialStars ?? 4))
-    setReaction(initialReaction)
-    setComment(initialComment)
-    setLocalError(null)
-    setOriginalDraft(null)
-    setEnhanceFeedback(null)
-    resetEnhanceError()
+    const id = window.setTimeout(() => {
+      setStars(clampStar(initialStars ?? 4))
+      setReaction(initialReaction)
+      setComment(initialComment)
+      setLocalError(null)
+      setOriginalDraft(null)
+      setEnhanceFeedback(null)
+      resetEnhanceError()
+    }, 0)
+    return () => window.clearTimeout(id)
   }, [isOpen, initialStars, initialReaction, initialComment, resetEnhanceError])
 
   if (!isOpen || typeof document === 'undefined') return null

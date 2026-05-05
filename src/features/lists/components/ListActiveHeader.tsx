@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { List } from '@/features/shared'
 import ListSelector from './ListSelector'
 
@@ -9,6 +10,8 @@ interface ListActiveHeaderProps {
   loadingLists?: boolean
   pendingCount: number
   watchedCount: number
+  /** Número de miembros de la lista activa (para copy colaborativa). */
+  listMemberCount?: number
   onCreateList: () => void
   onInvite: () => void
   onListChange: (list: List) => void
@@ -25,6 +28,7 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
   loadingLists,
   pendingCount,
   watchedCount,
+  listMemberCount,
   onCreateList,
   onInvite,
   onListChange,
@@ -33,6 +37,7 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
   inviteLabel,
   onRandomPick,
 }) => {
+  const { t } = useTranslation()
   return (
     <section className="list-active-header font-heading mb-6 p-4 md:p-5">
       <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
@@ -44,6 +49,9 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
             <p className="list-active-header__eyebrow text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-60">
               {currentList ? 'ID_ACTIVE_CONTEXT' : 'SYSTEM_IDLE'}
             </p>
+            {currentList != null && listMemberCount != null && listMemberCount > 1 && (
+              <p className="list-active-header__roster">{t('list.members_roster', { count: listMemberCount })}</p>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

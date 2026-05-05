@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { LIST_SELECT_PUBLIC } from '@/config/listSelect'
 import { supabase } from '@/supabaseClient'
 
 type PendingInvite = {
@@ -44,7 +45,7 @@ export const usePendingInvite = ({
       try {
         const { data, error } = await supabase
           .from('lists')
-          .select('id, name, description, invite_code')
+          .select(LIST_SELECT_PUBLIC)
           .eq('invite_code', code)
           .maybeSingle()
 
