@@ -1,12 +1,14 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { SORT_OPTIONS, FilterState, TechLabel } from '@/features/shared'
+import { FilterState, TechLabel } from '@/features/shared'
 
 interface FilterPanelProps {
-  filters: any
-  onFilterChange: (key: keyof FilterState, value: any) => void
+  filters: FilterState
+  onFilterChange: (key: keyof FilterState, value: unknown) => void
   onReset: () => void
-  sortOptions: readonly (typeof SORT_OPTIONS)[number][]
+  sortOptions: ReadonlyArray<{ value: FilterState['sortBy']; label: string }>
+  /** Etiquetas presentes en la lista o en ítems (para filtrar). */
+  tagOptions?: string[]
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
@@ -14,10 +16,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   onFilterChange,
   onReset,
   sortOptions,
+  tagOptions = [],
 }) => {
   const { t } = useTranslation()
 
   const getSortOrderLabel = () => {
+    if (filters.sortBy === 'manual') {
+      return filters.sortOrder === 'desc' ? t('sort_order.manual_desc') : t('sort_order.manual_asc')
+    }
     if (filters.sortBy === 'date') {
       return filters.sortOrder === 'desc' ? t('sort_order.most_recent') : t('sort_order.oldest')
     }
@@ -94,6 +100,22 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             {getSortOrderLabel()}
           </button>
         </div>
+
+        {tagOptions.length > 0 && (
+          <select
+            value={filters.tagFilter}
+            onChange={(e) => onFilterChange('tagFilter', e.target.value)}
+            aria-label={t('filter.tag_filter')}
+            className="hud-filter-field hud-filter-select px-3 py-2 text-xs md:px-4 md:text-sm sm:max-w-[200px]"
+          >
+            <option value="">{t('filter.tag_filter_all')}</option>
+            {tagOptions.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
+            ))}
+          </select>
+        )}
 
         <input
           type="text"

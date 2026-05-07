@@ -17,7 +17,10 @@
     "list_description": "Description",
     "description_placeholder": "A list of movies and shows to watch together...",
     "description_optional": "(optional)",
-    "members_roster": "{{count}} people on this list"
+    "members_roster": "{{count}} people on this list",
+    "drag_reorder_handle": "Drag to reorder",
+    "reordering": "Saving order…",
+    "manual_reorder_hint": "Clear search and tag filter to drag and reorder."
   },
   "item": {
     "watched": "✓ Watched",
@@ -51,7 +54,14 @@
     "watch_providers_error": "Platforms could not be loaded.",
     "watch_providers_region": "Data for region {{region}}",
     "watch_providers_more_link": "More options (JustWatch)",
-    "watch_providers_no_token": "To show where this title is available, the app needs a read-only The Movie Database (TMDB) token. Add VITE_TMDB_ACCESS_TOKEN to your .env, restart the dev server, and open details again."
+    "watch_providers_no_token": "To show where this title is available, the app needs a read-only The Movie Database (TMDB) token. Add VITE_TMDB_ACCESS_TOKEN to your .env, restart the dev server, and open details again.",
+    "tags_label": "Tags",
+    "tags_placeholder": "documentary, date night… (comma-separated)",
+    "tags_save": "Save tags",
+    "tags_saving": "Saving…",
+    "next_queue_set": "Set as next in queue",
+    "next_queue_clear": "Remove from queue",
+    "next_queue_saving": "Saving…"
   },
   "stats": {
     "total": "Total",
@@ -104,7 +114,13 @@
     "sort_order_toggle": "Toggle sort order",
     "search_placeholder": "Filter by title...",
     "search_label": "Filter by title",
-    "reset": "Clear"
+    "reset": "Clear",
+    "sort_date": "Date",
+    "sort_title": "Title",
+    "sort_rating": "Rating",
+    "sort_manual": "Manual order (drag)",
+    "tag_filter": "Tag",
+    "tag_filter_all": "All tags"
   },
   "sort_order": {
     "most_recent": "Most recent",
@@ -112,7 +128,9 @@
     "title_asc": "Title A-Z",
     "title_desc": "Title Z-A",
     "best_rated": "Top rated",
-    "worst_rated": "Lowest rated"
+    "worst_rated": "Lowest rated",
+    "manual_asc": "Manual order (first → last)",
+    "manual_desc": "Manual order (reversed)"
   },
   "settings": {
     "title": "Settings",
@@ -249,7 +267,14 @@
     "list_settings_theme_default": "Default (standard)",
     "list_settings_theme_cyberpunk": "Cyberpunk",
     "list_settings_theme_terminal": "Terminal",
-    "list_settings_theme_retro": "Retro cartoon"
+    "list_settings_theme_retro": "Retro cartoon",
+    "list_settings_tags_label": "List tags",
+    "list_settings_tags_help": "Comma-separated. They appear as suggestions in the tag filter.",
+    "list_settings_export_json": "Export items (JSON)",
+    "list_settings_import_json": "Import items (JSON)",
+    "list_settings_import_hint": "Format: { \"items\": [ { \"titulo\": \"…\", \"tipo\": \"pelicula\" | \"serie\", \"tags\": [] } ] }",
+    "list_settings_import_ok": "Import completed.",
+    "list_settings_import_error": "Import failed. Check the file format."
   },
   "buttons": {
     "delete": "Delete",
@@ -336,6 +361,8 @@
     "create_list_button": "Create list",
     "go_movies": "Go to movies",
     "go_series": "Go to shows",
+    "next_queue_title": "Next in queue",
+    "next_queue_clear": "Clear highlight",
     "global_activity_sys": "GLOBAL_ACTIVITY_LOG",
     "flow_movies_desc_with_list": "Continue with \"{{name}}\" to add options and decide from pending.",
     "flow_movies_desc_default": "Open movies and continue the main flow.",

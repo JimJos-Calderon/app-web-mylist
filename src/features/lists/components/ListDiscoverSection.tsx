@@ -28,6 +28,10 @@ interface ListDiscoverSectionProps {
   onToggleVisto: (itemId: string, currentValue: boolean) => Promise<void>
   onOpenDetails: (item: ListItem) => void
   onPageChange: (page: number) => void
+  sortModeManual?: boolean
+  canReorderManual?: boolean
+  onReorderPending?: (orderedIds: string[]) => void
+  isReordering?: boolean
 }
 
 const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
@@ -52,6 +56,10 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
   onToggleVisto,
   onOpenDetails,
   onPageChange,
+  sortModeManual = false,
+  canReorderManual = false,
+  onReorderPending,
+  isReordering = false,
 }) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
@@ -180,6 +188,10 @@ const ListDiscoverSection: React.FC<ListDiscoverSectionProps> = ({
               previousLabel={t('pagination.previous')}
               nextLabel={t('pagination.next')}
               pageLabel={pageLabel}
+              sortModeManual={sortModeManual}
+              canReorderManual={canReorderManual}
+              onReorderPending={onReorderPending}
+              isReordering={isReordering}
             />
           )}
 

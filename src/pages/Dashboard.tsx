@@ -111,7 +111,16 @@ const Dashboard: React.FC = () => {
   const isRetroCartoon = theme === 'retro-cartoon'
   const [isCreateListOpen, setIsCreateListOpen] = useState(false)
 
-  const { lists, currentList, setCurrentList, loading: loadingLists, createList, deleteList, leaveList } = useLists(user?.id)
+  const {
+    lists,
+    currentList,
+    setCurrentList,
+    loading: loadingLists,
+    createList,
+    deleteList,
+    leaveList,
+    updateList,
+  } = useLists(user?.id)
 
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
   const [isConfirmLeaveOpen, setIsConfirmLeaveOpen] = useState(false)
@@ -153,6 +162,17 @@ const Dashboard: React.FC = () => {
     },
     enabled: !!currentList?.id && !!user?.id,
   })
+
+  const nextQueueItem = React.useMemo(() => {
+    if (!currentList?.next_queue_item_id || !allItems.length) return null
+    return allItems.find((i) => String(i.id) === String(currentList.next_queue_item_id)) ?? null
+  }, [allItems, currentList?.next_queue_item_id])
+
+  const handleUpdateItemDashboard = async (id: string, updates: Partial<ListItem>) => {
+    const { error } = await supabase.from('items').update(updates).eq('id', id)
+    if (error) throw error
+    await queryClient.invalidateQueries({ queryKey: ['items'] })
+  }
 
   const displayName = profile?.username || t('navbar.myAccount')
   const hasLists = lists.length > 0
@@ -391,6 +411,35 @@ const Dashboard: React.FC = () => {
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {nextQueueItem && currentList && (
+              <div className="mb-5 rounded-2xl border border-[rgba(var(--color-accent-secondary-rgb),0.35)] bg-[rgba(var(--color-accent-secondary-rgb),0.06)] p-4">
+                <p className={`mb-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}>
+                  {t('dashboard.next_queue_title')}
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => void itemDetails.handleOpenDetails(nextQueueItem)}
+                    className={`text-left text-base font-semibold text-[var(--color-text-primary)] underline-offset-2 hover:underline ${isRetroCartoon ? 'theme-heading-font uppercase' : ''}`}
+                  >
+                    {nextQueueItem.titulo}
+                  </button>
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    {nextQueueItem.tipo === 'pelicula' ? t('movie_type') : t('series_type')}
+                  </span>
+                  {currentList.owner_id === user.id && (
+                    <button
+                      type="button"
+                      onClick={() => void updateList(currentList.id, { next_queue_item_id: null })}
+                      className="rounded-lg border border-[rgba(var(--color-text-muted),0.35)] px-3 py-1 text-xs font-semibold text-[var(--color-text-muted)] hover:border-red-400/50 hover:text-red-300"
+                    >
+                      {t('dashboard.next_queue_clear')}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -638,6 +687,18 @@ const Dashboard: React.FC = () => {
         onQuickCritiqueConfirm={itemDetails.handleConfirmQuickCritique}
         isQuickCritiqueSaving={itemDetails.isQuickCritiqueSaving}
         closeButtonRef={itemDetails.closeButtonRef}
+        listMeta={
+          currentList
+            ? {
+                listId: currentList.id,
+                ownerId: currentList.owner_id,
+                nextQueueItemId: currentList.next_queue_item_id ?? null,
+              }
+            : null
+        }
+        currentUserId={user.id}
+        onUpdateItem={handleUpdateItemDashboard}
+        onSetNextQueue={(itemId) => (currentList ? updateList(currentList.id, { next_queue_item_id: itemId }) : Promise.resolve())}
       />
 
       {critiqueToast && (

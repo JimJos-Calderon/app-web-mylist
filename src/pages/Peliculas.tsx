@@ -11,6 +11,7 @@ const Peliculas: React.FC = () => {
     setCurrentList,
     loading: loadingLists,
     createList,
+    updateList,
   } = useLists(user?.id)
 
   if (!user) return null
@@ -25,6 +26,7 @@ const Peliculas: React.FC = () => {
       setCurrentList={setCurrentList}
       loadingLists={loadingLists}
       createList={createList}
+      updateList={updateList}
     />
   )
 }

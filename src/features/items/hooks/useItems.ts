@@ -33,7 +33,8 @@ interface UseItemsReturn {
   isAddingItem: boolean
   isDeletingItem: boolean
   isUpdatingItem: boolean
-  isSavingQuickCritique: boolean
+  reorderItems: (orderedIds: string[]) => Promise<void>
+  isReorderingItems: boolean
 }
 
 function attachWatchGroupToItems(
@@ -82,6 +83,7 @@ export const useItems = (
         .select('*')
         .eq('tipo', tipo)
         .eq('list_id', listId)
+        .order('sort_index', { ascending: true })
         .order('created_at', { ascending: false })
 
       if (fetchError) throw fetchError
@@ -191,7 +193,22 @@ export const useItems = (
         ...item,
         titulo: normalizeItemTitleForStorage(item.titulo),
       }
-      const { error: insertError } = await supabase.from('items').insert([payload])
+
+      const { data: maxRow, error: maxErr } = await supabase
+        .from('items')
+        .select('sort_index')
+        .eq('list_id', payload.list_id)
+        .eq('tipo', payload.tipo)
+        .order('sort_index', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (maxErr) throw maxErr
+      const nextSort = typeof maxRow?.sort_index === 'number' ? maxRow.sort_index + 1 : 0
+
+      const { error: insertError } = await supabase
+        .from('items')
+        .insert([{ ...payload, sort_index: nextSort, tags: payload.tags ?? [] }])
 
       if (insertError) throw insertError
     },
@@ -350,6 +367,24 @@ export const useItems = (
     },
   })
 
+  const reorderItemsMutation = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      for (let idx = 0; idx < orderedIds.length; idx++) {
+        const id = orderedIds[idx]
+        const { error } = await supabase.from('items').update({ sort_index: idx }).eq('id', id)
+        if (error) throw error
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.byList(tipo, listId || ''),
+      })
+    },
+    onError: (e) => {
+      console.error('reorderItems:', e)
+    },
+  })
+
   const refetchItems = async () => {
     await refetch()
   }
@@ -365,12 +400,15 @@ export const useItems = (
     toggleVisto: (id, currentState) => toggleVistoMutation.mutateAsync({ id, currentState }),
     updateItem: (id, updates) => updateItemMutation.mutateAsync({ id, updates }),
     quickCritiqueAndWatch: (args) => quickCritiqueMutation.mutateAsync(args),
+    reorderItems: (orderedIds) => reorderItemsMutation.mutateAsync(orderedIds),
     isAddingItem: addItemMutation.isPending,
     isDeletingItem: deleteItemMutation.isPending,
     isUpdatingItem:
       updateItemMutation.isPending ||
       toggleVistoMutation.isPending ||
-      quickCritiqueMutation.isPending,
+      quickCritiqueMutation.isPending ||
+      reorderItemsMutation.isPending,
     isSavingQuickCritique: quickCritiqueMutation.isPending,
+    isReorderingItems: reorderItemsMutation.isPending,
   }
 }

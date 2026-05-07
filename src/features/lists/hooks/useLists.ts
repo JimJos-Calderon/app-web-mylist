@@ -18,10 +18,15 @@ interface UseListsReturn {
   getListMembers: (listId: string) => Promise<{ members: ListMember[]; error: string | null }>
   deleteList: (listId: string) => Promise<void>
   leaveList: (listId: string) => Promise<void>
+  updateList: (
+    listId: string,
+    patch: Partial<Pick<List, 'tags' | 'next_queue_item_id'>>,
+  ) => Promise<void>
   isCreatingList: boolean
   isJoiningList: boolean
   isDeletingList: boolean
   isLeavingList: boolean
+  isUpdatingList: boolean
 }
 
 type JoinListRpcResult = {
@@ -274,6 +279,23 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
     onError: (err) => console.error('Error leaving list:', err),
   })
 
+  const updateListMutation = useMutation({
+    mutationFn: async ({
+      listId,
+      patch,
+    }: {
+      listId: string
+      patch: Partial<Pick<List, 'tags' | 'next_queue_item_id'>>
+    }) => {
+      const { error } = await supabase.from('lists').update(patch).eq('id', listId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.lists.byUser(userId || '') })
+    },
+    onError: (err) => console.error('Error updating list:', err),
+  })
+
   const getListMembers = useCallback(async (listId: string) => {
     try {
       const { data, error: membersError } = await supabase
@@ -312,9 +334,11 @@ export const useLists = (userId: string | undefined): UseListsReturn => {
     getListMembers,
     deleteList: async (id) => deleteListMutation.mutateAsync(id),
     leaveList: async (id) => leaveListMutation.mutateAsync(id),
+    updateList: async (listId, patch) => updateListMutation.mutateAsync({ listId, patch }),
     isCreatingList: createListMutation.isPending,
     isJoiningList: joinListMutation.isPending,
     isDeletingList: deleteListMutation.isPending,
     isLeavingList: leaveListMutation.isPending,
+    isUpdatingList: updateListMutation.isPending,
   }
 }

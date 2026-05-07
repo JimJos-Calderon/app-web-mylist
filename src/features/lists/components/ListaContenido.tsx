@@ -24,6 +24,7 @@ interface ListaContenidoProps {
   setCurrentList?: (list: List) => void
   loadingLists?: boolean
   createList?: (name: string, description?: string) => Promise<List | null>
+  updateList?: (listId: string, patch: Partial<Pick<List, 'tags' | 'next_queue_item_id'>>) => Promise<void>
 }
 
 const ListaContenido: React.FC<ListaContenidoProps> = ({
@@ -34,6 +35,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   setCurrentList,
   loadingLists,
   createList,
+  updateList,
 }) => {
   const { user } = useAuth()
   const { t } = useTranslation()
@@ -50,7 +52,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   const discoverSectionRef = useRef<HTMLDivElement>(null)
 
   const { theme } = useTheme()
-  const { items, listMemberCount, loading, error: itemsError, addItem, deleteItem, toggleVisto, quickCritiqueAndWatch } =
+  const { items, listMemberCount, loading, error: itemsError, addItem, deleteItem, toggleVisto, quickCritiqueAndWatch, updateItem, reorderItems, isReorderingItems } =
     useItems(tipo, user?.id || '', listId)
 
   const [critiqueToast, setCritiqueToast] = useState<string | null>(null)
@@ -123,7 +125,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     filters.showWatched !== prevFilters.showWatched ||
     filters.showUnwatched !== prevFilters.showUnwatched ||
     filters.sortBy !== prevFilters.sortBy ||
-    filters.sortOrder !== prevFilters.sortOrder
+    filters.sortOrder !== prevFilters.sortOrder ||
+    filters.tagFilter !== prevFilters.tagFilter
   ) {
     setPrevFilters(filters)
     setCurrentPage(1)
@@ -143,6 +146,33 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
     filters,
     currentPage,
   })
+
+  const allTagOptions = useMemo(() => {
+    const set = new Set<string>()
+    for (const t of currentList?.tags ?? []) {
+      const s = String(t).trim()
+      if (s) set.add(s)
+    }
+    for (const it of items) {
+      for (const t of it.tags ?? []) {
+        const s = String(t).trim()
+        if (s) set.add(s)
+      }
+    }
+    return [...set].sort((a, b) => a.localeCompare(b))
+  }, [items, currentList?.tags])
+
+  const canReorderManual =
+    filters.sortBy === 'manual' &&
+    !filters.searchQuery.trim() &&
+    !filters.tagFilter.trim()
+
+  const handleReorderPending = React.useCallback(
+    async (orderedIds: string[]) => {
+      await reorderItems(orderedIds)
+    },
+    [reorderItems],
+  )
 
   const searchFlow = useListSearchFlow({
     tipo,
@@ -313,6 +343,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
               onToggleSecondaryControls={() => setShowSecondaryControls((prev) => !prev)}
               onResetFilters={resetFilters}
               onFilterChange={handleFilterChange}
+              tagOptions={allTagOptions}
             />
 
             <div ref={discoverSectionRef}>
@@ -341,6 +372,10 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                 onToggleVisto={toggleVisto}
                 onOpenDetails={itemDetails.handleOpenDetails}
                 onPageChange={handlePageChange}
+                sortModeManual={filters.sortBy === 'manual'}
+                canReorderManual={canReorderManual}
+                onReorderPending={handleReorderPending}
+                isReordering={isReorderingItems}
               />
             </div>
           </>
@@ -377,6 +412,18 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
         onNext={handleNextItem}
         onPrevious={handlePrevItem}
         closeButtonRef={itemDetails.closeButtonRef}
+        listMeta={
+          currentList && listId
+            ? {
+                listId: currentList.id,
+                ownerId: currentList.owner_id,
+                nextQueueItemId: currentList.next_queue_item_id ?? null,
+              }
+            : null
+        }
+        currentUserId={user.id}
+        onUpdateItem={updateItem}
+        onSetNextQueue={updateList && currentList ? (itemId) => updateList(currentList.id, { next_queue_item_id: itemId }) : undefined}
       />
 
       {critiqueToast && (

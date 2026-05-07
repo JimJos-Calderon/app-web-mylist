@@ -42,6 +42,11 @@ interface ItemDetailsModalProps {
   onNext?: () => void
   onPrevious?: () => void
   closeButtonRef: React.RefObject<HTMLButtonElement | null>
+  /** Metadatos de lista para “siguiente en cola” (solo dueño). */
+  listMeta?: { listId: string; ownerId: string; nextQueueItemId: string | null } | null
+  currentUserId?: string | null
+  onUpdateItem?: (id: string, updates: Partial<ListItem>) => Promise<void>
+  onSetNextQueue?: (itemId: string | null) => Promise<void>
 }
 
 const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
@@ -74,6 +79,10 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   onNext,
   onPrevious,
   closeButtonRef,
+  listMeta = null,
+  currentUserId = null,
+  onUpdateItem,
+  onSetNextQueue,
 }) => {
   const { t, i18n } = useTranslation()
   const { theme } = useTheme()
@@ -81,6 +90,9 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   const isCyberpunk = theme === 'cyberpunk'
   const isTerminal = theme === 'terminal'
   const [showQuickCritique, setShowQuickCritique] = React.useState(false)
+  const [tagsDraft, setTagsDraft] = React.useState('')
+  const [tagsSaving, setTagsSaving] = React.useState(false)
+  const [queueSaving, setQueueSaving] = React.useState(false)
   const quickCritiqueAutoOpenedRef = React.useRef(false)
   const { deleteComment, comment: existingCommentRow } = useItemComments(selectedItem?.id)
   const { rating: existingItemRating } = useItemRating(selectedItem?.id ?? '')
@@ -107,6 +119,39 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
       quickCritiqueAutoOpenedRef.current = true
     }
   }, [isOpen, selectedItemId, promptCommentOnOpen, selectedItem])
+
+  React.useEffect(() => {
+    if (!selectedItem) {
+      setTagsDraft('')
+      return
+    }
+    setTagsDraft((selectedItem.tags ?? []).join(', '))
+  }, [selectedItem?.id, selectedItem?.tags, selectedItem])
+
+  const handleSaveTags = async () => {
+    if (!selectedItem || !onUpdateItem) return
+    const tags = tagsDraft
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean)
+    const unique = [...new Set(tags)]
+    setTagsSaving(true)
+    try {
+      await onUpdateItem(selectedItem.id, { tags: unique })
+    } finally {
+      setTagsSaving(false)
+    }
+  }
+
+  const handleSetNextQueue = async (itemId: string | null) => {
+    if (!onSetNextQueue) return
+    setQueueSaving(true)
+    try {
+      await onSetNextQueue(itemId)
+    } finally {
+      setQueueSaving(false)
+    }
+  }
 
   const handleRequestClose = () => {
     if (isQuickCritiqueSaving) return
@@ -415,6 +460,71 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               uiLanguage={activeLanguage}
               isRetroCartoon={isRetroCartoon}
             />
+
+            {onUpdateItem && selectedItem && (
+              <div className="mb-4 rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] p-4">
+                <p
+                  className={
+                    isRetroCartoon
+                      ? 'item-details-modal__section-label mb-2'
+                      : 'theme-heading-font mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]'
+                  }
+                >
+                  {t('item.tags_label')}
+                </p>
+                <input
+                  type="text"
+                  value={tagsDraft}
+                  onChange={(e) => setTagsDraft(e.target.value)}
+                  className="mb-2 w-full rounded-lg border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[var(--color-bg-primary)] px-3 py-2 text-sm text-[var(--color-text-primary)]"
+                  placeholder={t('item.tags_placeholder')}
+                />
+                <button
+                  type="button"
+                  disabled={tagsSaving || modalActionLoading !== null}
+                  onClick={() => void handleSaveTags()}
+                  className={
+                    isRetroCartoon
+                      ? 'theme-heading-font rounded-md border-2 border-black bg-white px-3 py-1.5 text-xs font-black uppercase shadow-[3px_3px_0_#000] disabled:opacity-50'
+                      : 'rounded-lg border border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-primary)] disabled:opacity-50'
+                  }
+                >
+                  {tagsSaving ? t('item.tags_saving') : t('item.tags_save')}
+                </button>
+              </div>
+            )}
+
+            {onSetNextQueue && listMeta && currentUserId && listMeta.ownerId === currentUserId && selectedItem && (
+              <div className="mb-4">
+                {listMeta.nextQueueItemId === selectedItem.id ? (
+                  <button
+                    type="button"
+                    disabled={queueSaving || modalActionLoading !== null}
+                    onClick={() => void handleSetNextQueue(null)}
+                    className={
+                      isRetroCartoon
+                        ? 'theme-heading-font rounded-md border-2 border-black bg-[var(--color-retro-pink)] px-3 py-1.5 text-xs font-black uppercase text-white shadow-[3px_3px_0_#000] disabled:opacity-50'
+                        : 'rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-200 disabled:opacity-50'
+                    }
+                  >
+                    {queueSaving ? t('item.next_queue_saving') : t('item.next_queue_clear')}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={queueSaving || modalActionLoading !== null}
+                    onClick={() => void handleSetNextQueue(selectedItem.id)}
+                    className={
+                      isRetroCartoon
+                        ? 'theme-heading-font rounded-md border-2 border-black bg-[var(--color-retro-cyan)] px-3 py-1.5 text-xs font-black uppercase text-black shadow-[3px_3px_0_#000] disabled:opacity-50'
+                        : 'rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200 disabled:opacity-50'
+                    }
+                  >
+                    {queueSaving ? t('item.next_queue_saving') : t('item.next_queue_set')}
+                  </button>
+                )}
+              </div>
+            )}
 
             {selectedItem.visto && (
               <div className="mb-6">

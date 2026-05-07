@@ -36,10 +36,24 @@ const mockItems = [
 ]
 
 vi.mock('@/supabaseClient', () => {
-  const itemsChain = () => ({
+  const itemsListChain = () => ({
     eq: vi.fn(() => ({
       eq: vi.fn(() => ({
-        order: vi.fn(async () => ({ data: mockItems, error: null })),
+        order: vi.fn(() => ({
+          order: vi.fn(async () => ({ data: mockItems, error: null })),
+        })),
+      })),
+    })),
+  })
+
+  const maxSortChain = () => ({
+    eq: vi.fn(() => ({
+      eq: vi.fn(() => ({
+        order: vi.fn(() => ({
+          limit: vi.fn(() => ({
+            maybeSingle: vi.fn(async () => ({ data: { sort_index: 2 }, error: null })),
+          })),
+        })),
       })),
     })),
   })
@@ -88,7 +102,12 @@ vi.mock('@/supabaseClient', () => {
           }
         }
         return {
-          select: vi.fn(() => itemsChain()),
+          select: vi.fn((cols: string) => {
+            if (cols === 'sort_index') {
+              return maxSortChain()
+            }
+            return itemsListChain()
+          }),
           insert: vi.fn(async (rows: unknown) => {
             insertMockState.lastInsertPayload = rows as unknown[]
             return { data: null, error: insertMockState.insertError }
@@ -227,7 +246,9 @@ describe('useItems', () => {
     })
 
     expect(insertMockState.lastInsertPayload).not.toBeNull()
-    const row = insertMockState.lastInsertPayload![0] as { titulo: string }
+    const row = insertMockState.lastInsertPayload![0] as { titulo: string; sort_index: number; tags: string[] }
     expect(row.titulo).toBe('Trimmed')
+    expect(row.sort_index).toBe(3)
+    expect(row.tags).toEqual([])
   })
 })

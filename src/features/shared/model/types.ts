@@ -26,6 +26,10 @@ export interface ListItem {
   comentario?: string
   genero?: string
   list_id: string
+  /** Orden manual dentro de la lista y tipo (0 = primero). */
+  sort_index?: number
+  /** Etiquetas del ítem. */
+  tags?: string[] | null
   /** Miembros que han marcado visto este título (solo si la lista tiene más de un miembro). */
   watch_group?: {
     watched: number
@@ -71,9 +75,11 @@ export interface ApiError {
 export interface FilterState {
   showWatched: boolean
   showUnwatched: boolean
-  sortBy: 'date' | 'title' | 'rating'
+  sortBy: 'date' | 'title' | 'rating' | 'manual'
   sortOrder: 'asc' | 'desc'
   searchQuery: string
+  /** Filtrar por etiqueta (coincidencia exacta, sin distinguir mayúsculas). Vacío = todas. */
+  tagFilter: string
 }
 
 export interface List {
@@ -87,6 +93,10 @@ export interface List {
   invite_code: string
   /** Tema para embeds Discord (y UI futura); null = estilo por defecto. */
   theme?: string | null
+  /** Etiquetas de la lista (sugerencias / agrupación). */
+  tags?: string[] | null
+  /** Ítem marcado como “siguiente en cola” para la lista. */
+  next_queue_item_id?: string | null
 }
 
 export interface ListMember {

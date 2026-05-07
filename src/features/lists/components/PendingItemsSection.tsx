@@ -1,6 +1,10 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
+import { arrayMove, SortableContext, rectSortingStrategy } from '@dnd-kit/sortable'
 import { ItemCard } from '@/features/items'
 import { ListItem, useTheme } from '@/features/shared'
+import SortableItemCard from './SortableItemCard'
 
 interface PendingItemsSectionProps {
   searchQuery: string
@@ -17,6 +21,11 @@ interface PendingItemsSectionProps {
   previousLabel: string
   nextLabel: string
   pageLabel: string
+  /** Orden manual: grid con arrastre (requiere sin búsqueda ni filtro de etiqueta). */
+  sortModeManual?: boolean
+  canReorderManual?: boolean
+  onReorderPending?: (orderedIds: string[]) => void
+  isReordering?: boolean
 }
 
 const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
@@ -34,11 +43,63 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
   previousLabel,
   nextLabel,
   pageLabel,
+  sortModeManual = false,
+  canReorderManual = false,
+  onReorderPending,
+  isReordering = false,
 }) => {
+  const { t } = useTranslation()
   const { theme } = useTheme()
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
   const plainPaginationLabels = theme === 'retro-cartoon'
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+  )
+
+  const useDnD = Boolean(sortModeManual && canReorderManual && onReorderPending && paginatedPendingItems.length > 0)
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    if (!onReorderPending) return
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const ids = paginatedPendingItems.map((i) => i.id)
+    const oldIndex = ids.indexOf(String(active.id))
+    const newIndex = ids.indexOf(String(over.id))
+    if (oldIndex < 0 || newIndex < 0) return
+    const nextOrder = arrayMove(paginatedPendingItems, oldIndex, newIndex)
+    onReorderPending(nextOrder.map((i) => i.id))
+  }
+
+  const grid = (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
+      {paginatedPendingItems.map((item) =>
+        useDnD ? (
+          <SortableItemCard
+            key={item.id}
+            item={item}
+            isOwn={item.user_id === currentUserId}
+            onDelete={onDelete}
+            onToggleVisto={onToggleVisto}
+            onOpenDetails={onOpenDetails}
+            dragLabel={t('list.drag_reorder_handle')}
+          />
+        ) : (
+          <ItemCard
+            key={item.id}
+            item={item}
+            isOwn={item.user_id === currentUserId}
+            onDelete={onDelete}
+            onToggleVisto={onToggleVisto}
+            onOpenDetails={onOpenDetails}
+          />
+        ),
+      )}
+    </div>
+  )
 
   return (
     <>
@@ -68,8 +129,17 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
                 PAGINA {currentPage} DE {totalPages}
               </span>
             )}
+            {isReordering && (
+              <span className={isTerminal ? 'terminal-panel rounded-none px-3 py-1' : 'list-meta-tag-b'}>
+                {t('list.reordering')}
+              </span>
+            )}
           </div>
         </div>
+
+        {sortModeManual && !canReorderManual && visiblePendingItems.length > 0 && (
+          <p className="mb-4 text-xs text-[var(--color-text-muted)]">{t('list.manual_reorder_hint')}</p>
+        )}
 
         {visiblePendingItems.length === 0 ? (
           <div
@@ -84,19 +154,14 @@ const PendingItemsSection: React.FC<PendingItemsSectionProps> = ({
               Todo está marcado como visto o la búsqueda no devuelve pendientes.
             </p>
           </div>
+        ) : useDnD ? (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={paginatedPendingItems.map((i) => i.id)} strategy={rectSortingStrategy}>
+              {grid}
+            </SortableContext>
+          </DndContext>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
-            {paginatedPendingItems.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                isOwn={item.user_id === currentUserId}
-                onDelete={onDelete}
-                onToggleVisto={onToggleVisto}
-                onOpenDetails={onOpenDetails}
-              />
-            ))}
-          </div>
+          grid
         )}
       </section>
 

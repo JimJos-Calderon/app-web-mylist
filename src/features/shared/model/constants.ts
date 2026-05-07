@@ -22,4 +22,5 @@ export const SORT_OPTIONS = [
   { value: 'date', label: 'Más recientes' },
   { value: 'title', label: 'Título A-Z' },
   { value: 'rating', label: 'Mejor calificadas' },
+  { value: 'manual', label: 'Orden manual' },
 ] as const

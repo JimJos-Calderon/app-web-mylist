@@ -13,6 +13,7 @@ const initialFilters: FilterState = {
   sortBy: 'date',
   sortOrder: 'desc',
   searchQuery: '',
+  tagFilter: '',
 }
 
 export const useFilters = (): UseFiltersReturn => {

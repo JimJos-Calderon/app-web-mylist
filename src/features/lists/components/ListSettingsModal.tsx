@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { Settings, X } from 'lucide-react'
 
+import { useAuth } from '@/features/auth'
 import { HudContainer, TechLabel, type List } from '@/features/shared'
 import { useTheme } from '@/features/shared/hooks/useTheme'
 import { supabase } from '@/supabaseClient'
@@ -18,6 +19,7 @@ export interface ListSettingsModalProps {
 
 const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, list, userId }) => {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const { theme } = useTheme()
   const queryClient = useQueryClient()
   const isRetroCartoon = theme === 'retro-cartoon'
@@ -26,6 +28,8 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
 
   const [webhookUrl, setWebhookUrl] = useState('')
   const [listTheme, setListTheme] = useState<string>('')
+  const [listTagsText, setListTagsText] = useState('')
+  const [importMsg, setImportMsg] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -48,13 +52,14 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
     setLoadError(null)
     setSavedOk(false)
     setSaveError(null)
+    setImportMsg(null)
 
     const load = async () => {
       setLoading(true)
       try {
         const { data, error } = await supabase
           .from('lists')
-          .select('discord_webhook_url, theme')
+          .select('discord_webhook_url, theme, tags')
           .eq('id', list.id)
           .single()
 
@@ -63,11 +68,14 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
           setLoadError(error.message)
           setWebhookUrl('')
           setListTheme('')
+          setListTagsText('')
           return
         }
         setWebhookUrl(typeof data?.discord_webhook_url === 'string' ? data.discord_webhook_url : '')
         const th = data?.theme
         setListTheme(typeof th === 'string' && th.trim() ? th.trim() : '')
+        const tg = data?.tags
+        setListTagsText(Array.isArray(tg) ? tg.map(String).join(', ') : '')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -90,11 +98,17 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
     try {
       const trimmed = webhookUrl.trim()
       const themeValue = listTheme.trim()
+      const tagArr = listTagsText
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean)
+      const tags = [...new Set(tagArr)]
       const { error } = await supabase
         .from('lists')
         .update({
           discord_webhook_url: trimmed.length > 0 ? trimmed : null,
           theme: themeValue.length > 0 ? themeValue : null,
+          tags,
         })
         .eq('id', list.id)
 
@@ -105,6 +119,79 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
       setTimeout(() => setSavedOk(false), 2500)
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : t('dialog.list_settings_save_error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExportJson = async () => {
+    setImportMsg(null)
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.from('items').select('*').eq('list_id', list.id)
+      if (error) throw error
+      const payload = {
+        listId: list.id,
+        listName: list.name,
+        exportedAt: new Date().toISOString(),
+        items: data ?? [],
+      }
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      const safe = list.name.replace(/\W+/g, '_').slice(0, 40) || 'lista'
+      a.download = `${safe}.json`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    } catch {
+      setImportMsg(t('dialog.list_settings_import_error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleImportJson: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setImportMsg(null)
+    setLoading(true)
+    try {
+      const text = await file.text()
+      const parsed = JSON.parse(text) as {
+        items?: Array<{ titulo?: string; tipo?: string; tags?: string[]; sort_index?: number }>
+      }
+      const rows = parsed.items
+      if (!Array.isArray(rows)) throw new Error('bad')
+      const email = user?.email ?? ''
+      let ok = 0
+      for (const row of rows) {
+        const titulo = String(row.titulo ?? '').trim()
+        const tipo = row.tipo === 'serie' ? 'serie' : 'pelicula'
+        if (!titulo) continue
+        const tags = Array.isArray(row.tags)
+          ? [...new Set(row.tags.map((x) => String(x).trim().toLowerCase()).filter(Boolean))]
+          : []
+        const sortIdx = row.sort_index
+        const sort_index =
+          typeof sortIdx === 'number' && Number.isFinite(sortIdx) ? Math.trunc(sortIdx) : undefined
+        const { error } = await supabase.from('items').insert({
+          titulo,
+          tipo,
+          list_id: list.id,
+          user_id: userId,
+          user_email: email,
+          poster_url: null,
+          visto: false,
+          tags,
+          ...(sort_index !== undefined ? { sort_index } : {}),
+        })
+        if (!error) ok += 1
+      }
+      await queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
+      setImportMsg(ok > 0 ? t('dialog.list_settings_import_ok') : t('dialog.list_settings_import_error'))
+    } catch {
+      setImportMsg(t('dialog.list_settings_import_error'))
     } finally {
       setLoading(false)
     }
@@ -203,6 +290,41 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
                 <option value="retro-cartoon">{t('dialog.list_settings_theme_retro')}</option>
               </select>
             </div>
+
+            <div>
+              <label className="theme-heading-font mb-2 block text-[10px] font-black uppercase text-black">
+                {t('dialog.list_settings_tags_label')}
+              </label>
+              <p className="theme-heading-font text-xs text-black/85 mb-2 leading-relaxed">
+                {t('dialog.list_settings_tags_help')}
+              </p>
+              <textarea
+                value={listTagsText}
+                onChange={(e) => setListTagsText(e.target.value)}
+                rows={2}
+                className="theme-heading-font w-full px-4 py-3 bg-white text-black border-[3px] border-black rounded-md font-bold"
+                disabled={loading}
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => void handleExportJson()}
+                disabled={loading}
+                className="theme-heading-font border-[3px] border-black bg-white px-3 py-2 text-xs font-black uppercase shadow-[3px_3px_0_#000] disabled:opacity-50"
+              >
+                {t('dialog.list_settings_export_json')}
+              </button>
+              <label className="theme-heading-font cursor-pointer border-[3px] border-black bg-[var(--color-retro-cyan)] px-3 py-2 text-xs font-black uppercase text-black shadow-[3px_3px_0_#000] disabled:opacity-50">
+                <input type="file" accept="application/json,.json" className="hidden" onChange={handleImportJson} disabled={loading} />
+                {t('dialog.list_settings_import_json')}
+              </label>
+            </div>
+            <p className="theme-heading-font text-[10px] text-black/80">{t('dialog.list_settings_import_hint')}</p>
+            {importMsg && (
+              <div className="rounded-md border-[3px] border-black bg-white px-3 py-2 text-xs font-bold">{importMsg}</div>
+            )}
 
             {loadError && (
               <div className="rounded-md border-[3px] border-black bg-white px-3 py-2 text-sm font-bold">{loadError}</div>
@@ -303,6 +425,43 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
                   <option value="retro-cartoon">{t('dialog.list_settings_theme_retro')}</option>
                 </select>
               </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2 font-mono">
+                  {t('dialog.list_settings_tags_label')}
+                </label>
+                <p className="text-xs text-[var(--color-text-muted)] font-mono mb-3 leading-relaxed">
+                  {t('dialog.list_settings_tags_help')}
+                </p>
+                <textarea
+                  value={listTagsText}
+                  onChange={(e) => setListTagsText(e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-3 bg-[rgba(0,0,0,0.45)] border border-[rgba(var(--color-accent-primary-rgb),0.35)] rounded-lg text-[var(--color-text-primary)] font-mono text-sm focus-visible:border-accent-primary outline-none disabled:opacity-50"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleExportJson()}
+                  disabled={loading}
+                  className="px-4 py-2 border border-[rgba(var(--color-accent-primary-rgb),0.45)] text-xs font-mono uppercase tracking-widest text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.08)] disabled:opacity-50"
+                >
+                  {t('dialog.list_settings_export_json')}
+                </button>
+                <label className="cursor-pointer px-4 py-2 border border-[rgba(var(--color-accent-secondary-rgb),0.45)] text-xs font-mono uppercase tracking-widest text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.08)]">
+                  <input type="file" accept="application/json,.json" className="hidden" onChange={handleImportJson} disabled={loading} />
+                  {t('dialog.list_settings_import_json')}
+                </label>
+              </div>
+              <p className="text-[10px] text-[var(--color-text-muted)] font-mono leading-relaxed">{t('dialog.list_settings_import_hint')}</p>
+              {importMsg && (
+                <div className="text-xs text-[var(--color-text-primary)] font-mono border border-[rgba(var(--color-accent-primary-rgb),0.35)] px-3 py-2 rounded">
+                  {importMsg}
+                </div>
+              )}
 
               {loadError && (
                 <div className="text-sm text-accent-secondary font-mono border border-[rgba(var(--color-accent-secondary-rgb),0.4)] px-3 py-2 rounded">

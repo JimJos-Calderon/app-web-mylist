@@ -17,7 +17,10 @@
     "list_description": "Descripción",
     "description_placeholder": "Una lista de películas y series para ver juntos...",
     "description_optional": "(opcional)",
-    "members_roster": "{{count}} personas en esta lista"
+    "members_roster": "{{count}} personas en esta lista",
+    "drag_reorder_handle": "Arrastrar para reordenar",
+    "reordering": "Guardando orden…",
+    "manual_reorder_hint": "Quita el filtro de búsqueda y el filtro por etiqueta para poder arrastrar y reordenar."
   },
   "item": {
     "watched": "✓ Visto",
@@ -51,7 +54,14 @@
     "watch_providers_error": "No se pudieron cargar las plataformas.",
     "watch_providers_region": "Datos para la región {{region}}",
     "watch_providers_more_link": "Más opciones (JustWatch)",
-    "watch_providers_no_token": "Para ver en qué plataformas está disponible hace falta un token de lectura de The Movie Database. Añade VITE_TMDB_ACCESS_TOKEN en tu .env (solo lectura), reinicia el servidor de desarrollo y vuelve a abrir los detalles."
+    "watch_providers_no_token": "Para ver en qué plataformas está disponible hace falta un token de lectura de The Movie Database. Añade VITE_TMDB_ACCESS_TOKEN en tu .env (solo lectura), reinicia el servidor de desarrollo y vuelve a abrir los detalles.",
+    "tags_label": "Etiquetas",
+    "tags_placeholder": "documental, en pareja… (separadas por coma)",
+    "tags_save": "Guardar etiquetas",
+    "tags_saving": "Guardando…",
+    "next_queue_set": "Marcar como siguiente en cola",
+    "next_queue_clear": "Quitar de la cola",
+    "next_queue_saving": "Guardando…"
   },
   "stats": {
     "total": "Total",
@@ -104,7 +114,13 @@
     "sort_order_toggle": "Invertir orden",
     "search_placeholder": "Filtrar por título...",
     "search_label": "Filtrar por título",
-    "reset": "Limpiar"
+    "reset": "Limpiar",
+    "sort_date": "Fecha",
+    "sort_title": "Título",
+    "sort_rating": "Valoración",
+    "sort_manual": "Orden manual (arrastrar)",
+    "tag_filter": "Etiqueta",
+    "tag_filter_all": "Todas las etiquetas"
   },
   "sort_order": {
     "most_recent": "Más recientes",
@@ -112,7 +128,9 @@
     "title_asc": "Título A-Z",
     "title_desc": "Título Z-A",
     "best_rated": "Mejor calificadas",
-    "worst_rated": "Peor calificadas"
+    "worst_rated": "Peor calificadas",
+    "manual_asc": "Orden manual (primero → último)",
+    "manual_desc": "Orden manual (invertido)"
   },
   "settings": {
     "title": "Ajustes",
@@ -249,7 +267,14 @@
     "list_settings_theme_default": "Normal (por defecto)",
     "list_settings_theme_cyberpunk": "Cyberpunk",
     "list_settings_theme_terminal": "Terminal",
-    "list_settings_theme_retro": "Retro cartoon"
+    "list_settings_theme_retro": "Retro cartoon",
+    "list_settings_tags_label": "Etiquetas de la lista",
+    "list_settings_tags_help": "Separadas por coma. Sirven como sugerencias y aparecen en el filtro de etiquetas.",
+    "list_settings_export_json": "Exportar ítems (JSON)",
+    "list_settings_import_json": "Importar ítems (JSON)",
+    "list_settings_import_hint": "Formato: { \"items\": [ { \"titulo\": \"…\", \"tipo\": \"pelicula\" | \"serie\", \"tags\": [] } ] }",
+    "list_settings_import_ok": "Importación completada.",
+    "list_settings_import_error": "No se pudo importar. Revisa el formato."
   },
   "buttons": {
     "delete": "Borrar",
@@ -336,6 +361,8 @@
     "create_list_button": "Crear lista",
     "go_movies": "Ir a películas",
     "go_series": "Ir a series",
+    "next_queue_title": "Siguiente en cola",
+    "next_queue_clear": "Quitar destacado",
     "global_activity_sys": "GLOBAL_ACTIVITY_LOG",
     "flow_movies_desc_with_list": "Entrar con \"{{name}}\" para añadir opciones y decidir desde pendientes.",
     "flow_movies_desc_default": "Abrir películas y continuar el flujo principal.",

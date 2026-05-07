@@ -1,5 +1,6 @@
-import React from 'react'
-import { FilterState, SORT_OPTIONS } from '@/features/shared'
+import React, { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { FilterState } from '@/features/shared'
 import { FilterPanel } from '@/features/items'
 
 interface ListFiltersSectionProps {
@@ -7,7 +8,8 @@ interface ListFiltersSectionProps {
   showSecondaryControls: boolean
   onToggleSecondaryControls: () => void
   onResetFilters: () => void
-  onFilterChange: (filterKey: keyof FilterState, value: any) => void
+  onFilterChange: (filterKey: keyof FilterState, value: FilterState[keyof FilterState]) => void
+  tagOptions?: string[]
 }
 
 const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
@@ -16,7 +18,21 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
   onToggleSecondaryControls,
   onResetFilters,
   onFilterChange,
+  tagOptions = [],
 }) => {
+  const { t } = useTranslation()
+
+  const sortOptions = useMemo(
+    () =>
+      [
+        { value: 'date' as const, label: t('filter.sort_date') },
+        { value: 'title' as const, label: t('filter.sort_title') },
+        { value: 'rating' as const, label: t('filter.sort_rating') },
+        { value: 'manual' as const, label: t('filter.sort_manual') },
+      ],
+    [t],
+  )
+
   return (
     <section className="list-filters-section mb-8">
       <div
@@ -39,7 +55,8 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
               filters={filters}
               onFilterChange={onFilterChange}
               onReset={onResetFilters}
-              sortOptions={SORT_OPTIONS}
+              sortOptions={sortOptions}
+              tagOptions={tagOptions}
             />
           </div>
         )}
