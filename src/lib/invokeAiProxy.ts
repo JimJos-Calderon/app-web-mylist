@@ -26,7 +26,7 @@ export async function invokeAiProxy(
       }
       if (status === 401) {
         detail =
-          'Acceso denegado al proxy de IA (401). En Supabase: Edge Function «ai-proxy» → desactiva «Verify JWT», o ejecuta deploy con supabase/config.toml (verify_jwt = false). Comprueba también que VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY sean del mismo proyecto donde desplegaste la función.'
+          'Acceso denegado al proxy de IA (401). Debes tener sesión iniciada; en Supabase confirma que «ai-proxy» tenga Verify JWT activo y que supabase/config.toml use verify_jwt = true, luego npx supabase functions deploy ai-proxy. Comprueba que VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY correspondan al mismo proyecto.'
       }
     }
     throw new Error(detail)

@@ -18,8 +18,7 @@ const AppShell: React.FC = () => {
     const { theme } = useTheme()
     const location = useLocation()
 
-    const [showError, setShowError] = useState(authError)
-    const [prevAuthError, setPrevAuthError] = useState(authError)
+    const [showError, setShowError] = useState<string | null>(authError)
 
     const {
         pendingInvite,
@@ -31,17 +30,14 @@ const AppShell: React.FC = () => {
         userId: session?.user?.id,
     })
 
-    // Derived state during render, avoids cascading renders
-    if (authError !== prevAuthError) {
-        setPrevAuthError(authError)
+    useEffect(() => {
         setShowError(authError)
-    }
+    }, [authError])
 
     useEffect(() => {
-        if (showError) {
-            const timer = setTimeout(() => setShowError(null), 5000)
-            return () => clearTimeout(timer)
-        }
+        if (!showError) return
+        const timer = setTimeout(() => setShowError(null), 5000)
+        return () => clearTimeout(timer)
     }, [showError])
 
     if (loading) {

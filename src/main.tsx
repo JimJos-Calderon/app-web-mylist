@@ -14,10 +14,11 @@ import './index.css'
 import { initializeI18n } from './i18n'
 
 // ─── Sentry Initialization ─────────────────────────────────────────────────
+const sentryDsn = import.meta.env.VITE_SENTRY_DSN?.trim() || undefined
 Sentry.init({
-  dsn: 'https://b6011cfdb38824a61735673b971d45b4@o4510993959878656.ingest.de.sentry.io/4510993961517136',
-  environment: import.meta.env.MODE, // 'development' | 'production'
-  enabled: import.meta.env.PROD, // Solo envía errores en producción
+  dsn: sentryDsn,
+  environment: import.meta.env.MODE,
+  enabled: import.meta.env.PROD && Boolean(sentryDsn),
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),

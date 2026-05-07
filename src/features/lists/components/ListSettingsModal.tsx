@@ -9,6 +9,13 @@ import { HudContainer, TechLabel, type List } from '@/features/shared'
 import { useTheme } from '@/features/shared/hooks/useTheme'
 import { supabase } from '@/supabaseClient'
 import { queryKeys } from '@config/queryKeys'
+import {
+  buildItemsCsv,
+  itemImportRowsToPayloads,
+  parseItemImportCsv,
+  type ItemImportRow,
+  type ItemInsertPayload,
+} from '@/features/lists/utils/listItemsImportExport'
 
 export interface ListSettingsModalProps {
   open: boolean
@@ -124,6 +131,27 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
     }
   }
 
+  const batchInsertItems = async (payloads: ItemInsertPayload[]) => {
+    const CHUNK_SIZE = 50
+    let imported = 0
+    let skippedErrors = 0
+    for (let i = 0; i < payloads.length; i += CHUNK_SIZE) {
+      const slice = payloads.slice(i, i + CHUNK_SIZE)
+      const { error: batchErr } = await supabase.from('items').insert(slice)
+      if (!batchErr) {
+        imported += slice.length
+        continue
+      }
+      for (const row of slice) {
+        const { error: rowErr } = await supabase.from('items').insert(row)
+        if (rowErr) skippedErrors += 1
+        else imported += 1
+      }
+    }
+    await queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
+    return { imported, skippedErrors }
+  }
+
   const handleExportJson = async () => {
     setImportMsg(null)
     setLoading(true)
@@ -150,12 +178,34 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
     }
   }
 
+  const handleExportCsv = async () => {
+    setImportMsg(null)
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.from('items').select('*').eq('list_id', list.id)
+      if (error) throw error
+      const csv = buildItemsCsv((data ?? []) as Record<string, unknown>[])
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      const safe = list.name.replace(/\W+/g, '_').slice(0, 40) || 'lista'
+      a.download = `${safe}.csv`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    } catch {
+      setImportMsg(t('dialog.list_settings_import_error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleImportJson: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
     setImportMsg(null)
     setLoading(true)
+
     try {
       const text = await file.text()
       const parsed = JSON.parse(text) as {
@@ -164,32 +214,73 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
       const rows = parsed.items
       if (!Array.isArray(rows)) throw new Error('bad')
       const email = user?.email ?? ''
-      let ok = 0
-      for (const row of rows) {
+
+      const jsonRows: ItemImportRow[] = rows.map((row) => {
         const titulo = String(row.titulo ?? '').trim()
         const tipo = row.tipo === 'serie' ? 'serie' : 'pelicula'
-        if (!titulo) continue
         const tags = Array.isArray(row.tags)
           ? [...new Set(row.tags.map((x) => String(x).trim().toLowerCase()).filter(Boolean))]
           : []
         const sortIdx = row.sort_index
         const sort_index =
           typeof sortIdx === 'number' && Number.isFinite(sortIdx) ? Math.trunc(sortIdx) : undefined
-        const { error } = await supabase.from('items').insert({
-          titulo,
-          tipo,
-          list_id: list.id,
-          user_id: userId,
-          user_email: email,
-          poster_url: null,
-          visto: false,
-          tags,
-          ...(sort_index !== undefined ? { sort_index } : {}),
-        })
-        if (!error) ok += 1
+        return { titulo, tipo, tags, sort_index }
+      })
+
+      const { payloads, skippedEmpty } = itemImportRowsToPayloads(jsonRows, {
+        listId: list.id,
+        userId,
+        email,
+      })
+
+      if (payloads.length === 0) {
+        setImportMsg(t('dialog.list_settings_import_none_valid'))
+        return
       }
-      await queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
-      setImportMsg(ok > 0 ? t('dialog.list_settings_import_ok') : t('dialog.list_settings_import_error'))
+
+      const { imported, skippedErrors } = await batchInsertItems(payloads)
+      const skipped = skippedEmpty + skippedErrors
+      setImportMsg(t('dialog.list_settings_import_summary', { imported, skipped }))
+    } catch {
+      setImportMsg(t('dialog.list_settings_import_error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleImportCsv: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setImportMsg(null)
+    setLoading(true)
+
+    try {
+      const text = await file.text()
+      const parsed = parseItemImportCsv(text)
+      if (!parsed.ok) {
+        setImportMsg(
+          parsed.reason === 'missing_titulo_column'
+            ? t('dialog.list_settings_csv_bad_header')
+            : t('dialog.list_settings_import_error'),
+        )
+        return
+      }
+      const email = user?.email ?? ''
+      const { payloads, skippedEmpty } = itemImportRowsToPayloads(parsed.rows, {
+        listId: list.id,
+        userId,
+        email,
+      })
+
+      if (payloads.length === 0) {
+        setImportMsg(t('dialog.list_settings_import_none_valid'))
+        return
+      }
+
+      const { imported, skippedErrors } = await batchInsertItems(payloads)
+      const skipped = skippedEmpty + skippedErrors
+      setImportMsg(t('dialog.list_settings_import_summary', { imported, skipped }))
     } catch {
       setImportMsg(t('dialog.list_settings_import_error'))
     } finally {
@@ -319,6 +410,18 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
               <label className="theme-heading-font cursor-pointer border-[3px] border-black bg-[var(--color-retro-cyan)] px-3 py-2 text-xs font-black uppercase text-black shadow-[3px_3px_0_#000] disabled:opacity-50">
                 <input type="file" accept="application/json,.json" className="hidden" onChange={handleImportJson} disabled={loading} />
                 {t('dialog.list_settings_import_json')}
+              </label>
+              <button
+                type="button"
+                onClick={() => void handleExportCsv()}
+                disabled={loading}
+                className="theme-heading-font border-[3px] border-black bg-white px-3 py-2 text-xs font-black uppercase shadow-[3px_3px_0_#000] disabled:opacity-50"
+              >
+                {t('dialog.list_settings_export_csv')}
+              </button>
+              <label className="theme-heading-font cursor-pointer border-[3px] border-black bg-[var(--color-retro-cyan)] px-3 py-2 text-xs font-black uppercase text-black shadow-[3px_3px_0_#000] disabled:opacity-50">
+                <input type="file" accept="text/csv,.csv" className="hidden" onChange={handleImportCsv} disabled={loading} />
+                {t('dialog.list_settings_import_csv')}
               </label>
             </div>
             <p className="theme-heading-font text-[10px] text-black/80">{t('dialog.list_settings_import_hint')}</p>
@@ -454,6 +557,18 @@ const ListSettingsModal: React.FC<ListSettingsModalProps> = ({ open, onClose, li
                 <label className="cursor-pointer px-4 py-2 border border-[rgba(var(--color-accent-secondary-rgb),0.45)] text-xs font-mono uppercase tracking-widest text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.08)]">
                   <input type="file" accept="application/json,.json" className="hidden" onChange={handleImportJson} disabled={loading} />
                   {t('dialog.list_settings_import_json')}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => void handleExportCsv()}
+                  disabled={loading}
+                  className="px-4 py-2 border border-[rgba(var(--color-accent-primary-rgb),0.45)] text-xs font-mono uppercase tracking-widest text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.08)] disabled:opacity-50"
+                >
+                  {t('dialog.list_settings_export_csv')}
+                </button>
+                <label className="cursor-pointer px-4 py-2 border border-[rgba(var(--color-accent-secondary-rgb),0.45)] text-xs font-mono uppercase tracking-widest text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.08)]">
+                  <input type="file" accept="text/csv,.csv" className="hidden" onChange={handleImportCsv} disabled={loading} />
+                  {t('dialog.list_settings_import_csv')}
                 </label>
               </div>
               <p className="text-[10px] text-[var(--color-text-muted)] font-mono leading-relaxed">{t('dialog.list_settings_import_hint')}</p>

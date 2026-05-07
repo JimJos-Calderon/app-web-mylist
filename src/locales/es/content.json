@@ -272,9 +272,14 @@
     "list_settings_tags_help": "Separadas por coma. Sirven como sugerencias y aparecen en el filtro de etiquetas.",
     "list_settings_export_json": "Exportar ítems (JSON)",
     "list_settings_import_json": "Importar ítems (JSON)",
-    "list_settings_import_hint": "Formato: { \"items\": [ { \"titulo\": \"…\", \"tipo\": \"pelicula\" | \"serie\", \"tags\": [] } ] }",
+    "list_settings_export_csv": "Exportar ítems (CSV)",
+    "list_settings_import_csv": "Importar ítems (CSV)",
+    "list_settings_import_hint": "JSON: clave «items» con objetos titulo, tipo, tags [], sort_index opcional. CSV: cabecera titulo,tipo,tags,sort_index; en «tags» separa etiquetas con ;",
     "list_settings_import_ok": "Importación completada.",
-    "list_settings_import_error": "No se pudo importar. Revisa el formato."
+    "list_settings_import_summary": "{{imported}} importados, {{skipped}} omitidos (vacíos o duplicados/error).",
+    "list_settings_import_none_valid": "No hay filas con título para importar.",
+    "list_settings_import_error": "No se pudo importar. Revisa el formato.",
+    "list_settings_csv_bad_header": "CSV: falta la columna «titulo» (o «title») en la primera fila."
   },
   "buttons": {
     "delete": "Borrar",

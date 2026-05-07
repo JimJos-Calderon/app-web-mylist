@@ -1,12 +1,16 @@
-import { defineConfig, devices } from '@playwright/test';
+import { loadEnv } from 'vite'
+import { defineConfig, devices } from '@playwright/test'
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
+ * Carga E2E_* desde `.env` / `.env.local` (mismo directorio que Vite) para no añadir dependencia `dotenv`.
+ * Las variables ya presentes en `process.env` tienen prioridad.
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+const e2eFromFiles = loadEnv('development', process.cwd(), 'E2E_')
+for (const key of Object.keys(e2eFromFiles)) {
+  if (process.env[key] === undefined) {
+    process.env[key] = e2eFromFiles[key]
+  }
+}
 
 /**
  * See https://playwright.dev/docs/test-configuration.

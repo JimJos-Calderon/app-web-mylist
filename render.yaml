@@ -4,6 +4,10 @@ services:
     env: static
     buildCommand: npm run build
     staticPublishPath: ./dist
+    # Opcional: errores del cliente en producción (Vite inyecta en build). Configura el valor en el dashboard de Render.
+    envVars:
+      - key: VITE_SENTRY_DSN
+        sync: false
     routes:
       - type: rewrite
         source: /*
