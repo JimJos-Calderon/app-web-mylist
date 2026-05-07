@@ -8,7 +8,7 @@
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-4.1.18-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-2.93.3-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-Una aplicación web para gestionar **listas compartidas** de películas y series: autenticación Supabase, búsqueda con **Edge Function + OMDB**, metadatos enriquecidos con **TMDB** (título ES, póster, géneros), calificaciones, comentarios, **crítica rápida** al marcar como visto, **Oráculo** (sugerencias vía Groq) y **varios temas visuales** (retro cartoon, terminal, cyberpunk y default).
+Una aplicación web para gestionar **listas compartidas** de películas y series: autenticación Supabase, búsqueda con **Edge Function + OMDB**, metadatos enriquecidos con **TMDB** (título ES, póster, géneros), calificaciones, comentarios, **crítica rápida** al marcar como visto, **Oráculo** (sugerencias vía Groq), **etiquetas**, **orden manual**, **siguiente en cola**, **export/import JSON y CSV**, y **varios temas visuales** (retro cartoon, terminal, cyberpunk y default).
 
 [✨ WebSite](https://jandn.onrender.com/) • [📖 Documentación](#características) • [🐛 Reportar Bug](../../issues)
 
@@ -20,33 +20,40 @@ Una aplicación web para gestionar **listas compartidas** de películas y series
 
 - 🔐 **Autenticación segura** — Login/registro con Supabase
 - 🎯 **Búsqueda** — Sugerencias vía Edge Function `search-omdb` (OMDB); enriquecimiento opcional con TMDB en cliente (`VITE_TMDB_ACCESS_TOKEN`, Bearer v3)
-- 📋 **Listas compartidas** — Crea listas, invita a otras personas con un código y colabora en tiempo real
-- 📊 **Gestión completa** — Añade, elimina (en lista), marca visto/pendiente; **colaboración**: cualquier miembro puede actualizar `visto` en la lista
+- 📋 **Listas compartidas** — Crea listas, invita con código y colabora en tiempo real
+- 📊 **Gestión completa** — Añade, elimina (en lista), marca visto/pendiente por miembro (`item_user_watch`); la UI usa tu estado de visto sin pisar el de otros
+- 🏷️ **Etiquetas** — Por ítem y por lista; filtro por etiqueta en Películas/Series
+- 🔢 **Orden manual** — Arrastra pendientes cuando el orden es «manual» (`sort_index`), además de fecha/título/valoración
+- ▶️ **Siguiente en cola** — Marca un ítem destacado por lista (`next_queue_item_id`) y bloque en dashboard
+- 📤 **Export / import JSON y CSV** — Desde ajustes de lista (dueño); importación por lotes con resumen importados/omitidos. CSV: cabecera `titulo,tipo,tags,sort_index`, etiquetas en `tags` separadas por `;`
 - ⭐ **Calificaciones y reacciones** — Estrellas 1–5 y me gusta / no me gusta (`item_ratings`)
 - 📝 **Comentarios / reseñas** — `item_comments`; al marcar visto pueden exigirse reseña o **crítica rápida** (modal: estrellas, reacción, texto opcional) vía RPC `save_quick_critique`
 - 🤖 **IA (opcional)** — Mejora de borradores con **Groq** en la caja de comentarios y en el modal de crítica; **Oráculo** usa el mismo modelo para recomendaciones según tu historial (todo vía Edge Function **`ai-proxy`**, clave solo en servidor)
 - 🕒 **Historial de actividad** — Timeline colaborativo por lista con eventos recientes de cambios
 - 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` y default; preferencia sincronizada en perfil
-- 🔍 **Filtros avanzados** — Filtra por estado (vistas/pendientes), texto y ordenamiento
-- 💎 **Dos modos de vista** — Grid clásico con paginación y carrusel Ring en 3D
+- 🔍 **Filtros avanzados** — Estado (vistas/pendientes), texto, orden y etiqueta
+- 📐 **Lista en rejilla** — Tarjetas en cuadrícula adaptable (móvil → varias columnas), paginación por página (**9** ítems) salvo en orden **manual** (sin paginar para poder reordenar todo lo visible)
+- 🎲 **Selector aleatorio** — Modal «¿Qué ver hoy?» entre títulos pendientes (`RandomPickManager`)
 - ⚡ **Cache inteligente** — React Query con persistencia local y política offline-first
 - 📲 **PWA instalable** — Soporte de instalación nativa en Android (prompt) e iOS (Add to Home Screen)
 - 📴 **Modo offline lectura** — Usuarios pueden seguir viendo listas/items cacheados sin conexión
 - 📡 **Tiempo real** — Sincronización en vivo con Supabase Realtime Subscriptions
+- 📊 **Observabilidad (opcional)** — Sentry en producción si defines `VITE_SENTRY_DSN` en el build
 - 👤 **Perfil** — Estadísticas, valoraciones globales; **quitar valoración** restaura pendiente en la lista y borra tu rating/comentario (no elimina el título de la lista)
 - 🔒 **Ajustes de seguridad** — Cambio de email y contraseña con verificación
 - 📱 **Responsive** — Adaptable a móvil y escritorio; **Capacitor** para Android (`npm run android`, `sincronizar`)
 - 🛡️ **Seguridad a nivel empresarial** — RLS en BD, Edge Functions con rate limiting, validaciones en cliente y servidor
-- ✅ **Testing completo** — Unit tests + E2E tests con Playwright + CI/CD con GitHub Actions
+- ✅ **Testing** — Tests unitarios (Vitest) en hooks/utils críticos + E2E Playwright (smoke + login opcional con `E2E_*`) + CI en GitHub Actions
 
 ---
 
 ## 🆕 Últimos cambios
 
+- 🗄️ **Listas e ítems** — Etiquetas (`tags`), orden manual con arrastre (`@dnd-kit`), «siguiente en cola», export/import JSON y CSV en ajustes de lista; migraciones `31`–`33` (incl. trigger de coherencia `next_queue_item_id` ↔ lista).
+- 🔒 **Calidad** — `ai-proxy` con JWT verificado (`supabase/config.toml`); Sentry vía `VITE_SENTRY_DSN`; auth con `getSession` + tipos Supabase; import JSON/CSV por lotes.
 - 🎭 **Modal de crítica rápida** — Colores y tipografía alineados con cada tema (retro / terminal / cyberpunk / default); botón principal retro coherente con el modal de detalle; contador de caracteres con fuente retro; **Mejorar con IA** (Groq) de nuevo disponible en el modal con contexto de título y sinopsis.
 - 👤 **Perfil** — Acción para **quitar valoración**: deja el título en la lista como pendiente y elimina tu fila en `item_ratings` y `item_comments`; invalidación de caché por lista.
 - 🎨 **Retro** — Ajustes de fuente en botón Ajustes (perfil), botón «Limpiar» del widget de estrellas y textos del modal de crítica.
-- 🗄️ **Esquema** — Migraciones recientes: comentarios en crítica rápida (`save_quick_critique`), `items` / ratings con IDs enteros, temas por lista, webhook Discord opcional, `title_es`, etc. (ver `supabase/migrations/`).
 - 📣 **Discord** — Guía para **rotar el webhook** de un canal (revocar el antiguo y pegar uno nuevo): [docs/DISCORD_WEBHOOK.md](docs/DISCORD_WEBHOOK.md).
 
 ## 🛠️ Stack Tecnológico
@@ -61,8 +68,12 @@ Una aplicación web para gestionar **listas compartidas** de películas y series
 - **@tanstack/react-query-persist-client** — Persistencia de caché para modo offline
 - **@tanstack/query-sync-storage-persister** — Persistencia en localStorage
 - **vite-plugin-pwa** — Manifest + Service Worker custom con Workbox (injectManifest)
-- **Swiper 12** — Biblioteca de carruseles (usada en la vista Ring)
+- **@dnd-kit/core & sortable** — Orden manual arrastrando ítems en vista pendientes
+- **@sentry/react** — Errores en cliente (producción, si hay `VITE_SENTRY_DSN`)
+- **Framer Motion** — Animaciones en parte de la UI
 - **Lucide React** — Iconos SVG modernos
+
+> **Nota:** En `package.json` y `src/index.css` siguen apareciendo **`swiper`** y sus CSS (`effect-coverflow`, etc.) por herencia de una vieja vista carrusel; **ningún componente TypeScript importa Swiper** y la UI actual no ofrece modo Ring/3D.
 
 ### Backend & Servicios
 - **Supabase** — Auth + PostgreSQL + Realtime + Storage + Edge Functions
@@ -113,9 +124,9 @@ Previene datos inválidos incluso sin validación frontend:
 - `role` ∈ {'owner', 'admin', 'member'}
 
 ### Testing de Seguridad
-- ✅ 18 unit tests de hooks con aislamiento de contexto
-- ✅ 4 E2E tests de flujos críticos
-- ✅ CI/CD en GitHub Actions (Node.js 18 & 20)
+- ✅ **28** tests unitarios (Vitest) en hooks y utils con mocks de Supabase
+- ✅ **E2E** Playwright: smoke en [`tests/home.spec.ts`](tests/home.spec.ts); login opcional en [`tests/auth-login.spec.ts`](tests/auth-login.spec.ts) si defines `E2E_EMAIL` / `E2E_PASSWORD`
+- ✅ CI/CD en GitHub Actions (Node.js 18 & 20): lint, Vitest, build; job E2E con artefacto de reporte
 
 ---
 
@@ -128,9 +139,9 @@ Las funciones de **IA** (mejora de comentarios, sinopsis asistida, traducción d
 | **Cliente** | `src/lib/invokeAiProxy.ts` llama a `supabase.functions.invoke('ai-proxy', { body })` con la sesión del usuario. |
 | **Servidor** | La Edge Function `ai-proxy` lee el secreto **`GROQ_API_KEY`** (Supabase → Edge Functions → Secrets) y reenvía la petición a la API de Groq. |
 
-**Configuración:** en el panel de Supabase, crea el secreto `GROQ_API_KEY` con tu clave de [Groq](https://console.groq.com/). Despliega la función `ai-proxy` (`npx supabase functions deploy ai-proxy`). No añadas `VITE_*` para Groq: **no debe existir `VITE_GROQ_API_KEY` en el frontend.**
+**Configuración:** en el panel de Supabase, crea el secreto `GROQ_API_KEY` con tu clave de [Groq](https://console.groq.com/). En [`supabase/config.toml`](supabase/config.toml) debe figurar `verify_jwt = true` para `[functions.ai-proxy]`; luego despliega: `npx supabase functions deploy ai-proxy`. No añadas `VITE_*` para Groq: **no debe existir `VITE_GROQ_API_KEY` en el frontend.**
 
-Si recibes **401** al invocar el proxy, revisa que la función `ai-proxy` tenga `verify_jwt` acorde a tu `supabase/config.toml` y que el usuario esté autenticado.
+Si recibes **401** al invocar el proxy, confirma que el usuario tenga sesión activa y que en `supabase/config.toml` la función `ai-proxy` tenga **`verify_jwt = true`** (recomendado); tras cambiarlo, vuelve a desplegar: `npx supabase functions deploy ai-proxy`.
 
 ---
 
@@ -157,11 +168,14 @@ npm install
 
 3. **Configura las variables de entorno**
 
-Crea un archivo `.env` en la raíz del proyecto:
+Crea un archivo `.env` en la raíz (puedes partir de [`.env.example`](.env.example)):
 
 ```env
 VITE_SUPABASE_URL=tu_supabase_url
 VITE_SUPABASE_ANON_KEY=tu_supabase_anon_key
+
+# Opcional — Sentry (solo envía en producción si está definido)
+# VITE_SENTRY_DSN=tu_dsn_sentry
 
 # Opcional — TMDB (Bearer API v3): póster/título ES/sinopsis enriquecida
 # VITE_TMDB_ACCESS_TOKEN=tu_token_bearer_tmdb
@@ -192,7 +206,10 @@ supabase db push
 | `15_require_comment_before_watch.sql` | Reseña o crítica antes de marcar visto |
 | `16` … `19` | Join RPC, `title_es`, Discord webhook, tema por lista |
 | `20` … `22` | RPC `save_quick_critique` (bigint + comentario opcional) |
+| `23` … `27` | Push FCM Android, suscripciones únicas, rename orchestrator, Discord→orchestrator, vista activity social |
 | `28` … `29` | Visto por miembro (`item_user_watch`) y roster de lista compartida |
+| `30` | Unicidad `(list_id, tipo, título)` en ítems |
+| `31` … `33` | Etiquetas, orden manual (`sort_index`), cola (`next_queue_item_id`), reparación bigint, trigger de coherencia cola/lista |
 
 La migración activa de dispatch de push a Edge Functions es `08_dispatch_push_record_id_text_match.sql` (tras `07_0_push_subscriptions.sql` y relacionadas).
 
@@ -273,7 +290,8 @@ npm.cmd run dev
 ```
 app-web-mylist/
 ├── src/
-│   ├── App.tsx                   # Rutas y lazy loading por página
+│   ├── App.tsx                   # Punto de entrada UI (Capacitor splash, etc.)
+│   ├── app/AppRoutes.tsx         # Rutas SPA (Dashboard, Películas, Series, …)
 │   ├── app/AppShell.tsx          # Layout: navbar, invitaciones, onboarding
 │   ├── main.tsx                  # Bootstrap app + Query persistence + providers
 │   ├── sw.ts                     # Service Worker custom (Workbox + Push handlers)
@@ -303,6 +321,7 @@ app-web-mylist/
 ├── supabase/
 │   ├── functions/
 │   │   ├── search-omdb/          # Proxy seguro OMDB con rate limit
+│   │   ├── ai-proxy/             # Groq / IA solo servidor (JWT verificado)
 │   │   ├── send-push/            # Envío web push
 │   │   └── push-orchestrator/    # Discord + Web Push + FCM (antes notify-discord)
 │   └── migrations/               # Esquema, RLS, auditoría, push y fixes
@@ -326,6 +345,7 @@ app-web-mylist/
 2. **Invitar**: Comparte el código de invitación con quien quieras
 3. **Unirse**: Usa el enlace de invitación `/join/:code` (si no hay sesión, se retoma al autenticar)
 4. **Cambiar lista activa**: Usa el selector de lista en la parte superior de Películas/Series
+5. **Ajustes (dueño)**: Webhook Discord, tema de avisos, etiquetas de lista, exportar/importar ítems en **JSON** o **CSV**
 
 ### Gestión de Películas/Series
 1. **Buscar**: Escribe para ver sugerencias (Edge Function + OMDB; TMDB opcional para mejor carátula/título)
@@ -334,20 +354,22 @@ app-web-mylist/
 4. **Calificar después**: Widget de estrellas y me gusta / no me gusta en la tarjeta o en detalle
 5. **Detalles**: Clic en la tarjeta para sinopsis, comentario largo y marcar no visto
 6. **Eliminar de la lista**: En el modal de detalles, quien tenga permiso (dueño del ítem / políticas RLS) puede borrar el ítem de la lista
+7. **Aleatorio**: Botón para abrir el modal **«¿Qué ver hoy?»**, elige un pendiente al azar y permite abrir la ficha
 
 ### Perfil
 - **Quitar valoración** (papelera o acción en detalle): elimina tu rating y comentario, pone el ítem en **pendiente** en la lista; **no** quita la película/serie de la lista compartida
 
-### Modos de Vista
-- 📋 **Grid**: Vista en cuadrícula con paginación (9 items por página)
-- 💎 **Ring**: Carrusel 3D, ideal para navegar visualmente
-- 🕒 **Activity Feed**: Panel colapsable por lista con timeline de eventos recientes
+### Presentación de Películas/Series
+
+- **Rejilla**: Tarjetas en columnas responsivas (`PendingItemsSection` / `WatchedItemsSection`).
+- **Paginación**: Por defecto **9** ítems por página en la sección activa (pendientes o vistas). Con orden **manual**, la paginación se **desactiva** en esa vista para mostrar todos los ítems filtrados y poder **arrastrarlos**.
+- **Activity Feed**: Panel colapsable por lista con timeline de eventos recientes.
 
 ### Filtros Disponibles
-- 📋 **Pendientes**: Muestra solo las no vistas
-- ✅ **Vistas**: Muestra solo las marcadas como vistas
-- 🔤 **Ordenar**: Por fecha, título A-Z o calificación
-- 🔍 **Buscar**: Filtro de texto en tiempo real sobre la lista actual
+- 📋 **Pendientes** / **Vistas** según tu estado de visto en la lista
+- 🔤 **Ordenar** — Fecha, título, valoración o **orden manual** (con arrastre en pendientes cuando aplica)
+- 🏷️ **Etiqueta** — Filtra por etiquetas de ítems (y etiquetas de lista en el selector de filtros)
+- 🔍 **Buscar** — Filtro de texto en tiempo real sobre la lista actual
 
 ### Perfil y Ajustes
 - **Perfil** (`/perfil`): Muestra tus estadísticas de calificaciones y las películas/series que has valorado
@@ -442,8 +464,11 @@ En Chrome: `Application > Manifest` y `Application > Service Workers`.
 |----------|-------------|----------|
 | `VITE_SUPABASE_URL` | URL de tu proyecto Supabase | ✅ Sí |
 | `VITE_SUPABASE_ANON_KEY` | Clave anónima de Supabase | ✅ Sí |
+| `VITE_SENTRY_DSN` | DSN del proyecto Sentry (solo errores en producción); si falta, el front no envía telemetría | Opcional |
 | `VITE_VAPID_PUBLIC_KEY` | Clave pública VAPID para suscripción Push en navegador | ✅ Sí (si usas Push) |
 | `VITE_TMDB_ACCESS_TOKEN` | Token Bearer TMDB v3 (metadatos y sinopsis enriquecida) | Opcional |
+
+**Persistencia de caché (React Query):** la app guarda en almacenamiento local (Capacitor Preferences o `localStorage`) las consultas de listas, ítems, perfil y traducciones para lectura offline (`src/config/queryPersistence.ts`). Al **cerrar sesión** se vacía esa caché y la memoria de React Query. En un **dispositivo compartido**, quien use la sesión anterior podría ver datos cacheados hasta que se cierre sesión o se borre el almacenamiento del sitio.
 
 ### Supabase Edge Functions Secrets
 
@@ -511,6 +536,7 @@ Interpretación rápida:
 ### Edge Functions
 - **Error en búsqueda**: Verifica que `OMDB_API_KEY` está configurado en Supabase Secrets
 - **Búsqueda muy lenta**: Puede ser el límite de rate limiting (30/hora), espera o usa otra cuenta
+- **Rate limit en memoria**: `search-omdb` acumula límites en memoria del proceso de la Edge Function; no es compartido entre instancias ni sobrevive a cold starts (adecuado como mitigación ligera, no como cuota global).
 - **Error de validación en búsqueda**: Asegúrate de escribir 2-100 caracteres, sin caracteres especiales
 - **Push devuelve 401**: Verifica que `PUSH_WEBHOOK_SECRET` coincida entre secrets y `public.push_dispatch_config`
 - **Push no llega pero hay 200**: Revisa permisos del navegador y que exista una fila activa en `push_subscriptions`
@@ -532,6 +558,7 @@ Interpretación rápida:
 ### Testing
 - **Tests fallan en CI/CD**: GitHub Actions usa Ubuntu. Si los tests pasan localmente pero fallan en CI, puede ser un tema de timeouts. Aumenta el timeout en `.github/workflows/ci.yml`
 - **E2E tests lentos**: Los tests E2E pueden tardar según tu conexión a internet. Defaults: 2 minutos por suite
+- **Login E2E opcional**: el spec [`tests/auth-login.spec.ts`](tests/auth-login.spec.ts) se **omite** si no hay `E2E_EMAIL` y `E2E_PASSWORD`. Puedes definirlas en el entorno de CI o en `.env` (el prefijo `E2E_` se carga en [`playwright.config.ts`](playwright.config.ts) vía Vite `loadEnv`). Requiere un usuario de prueba válido en tu proyecto Supabase.
 
 ---
 
@@ -542,7 +569,8 @@ Interpretación rápida:
 1. **Configura las variables de entorno** en tu plataforma:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-  - `VITE_VAPID_PUBLIC_KEY` (si habilitas Push en frontend)
+   - `VITE_VAPID_PUBLIC_KEY` (si habilitas Push en frontend)
+   - `VITE_SENTRY_DSN` (opcional): DSN del proyecto en [Sentry](https://sentry.io/) (**Settings → Client Keys (DSN)**). Se incrusta en el bundle en **tiempo de build**; si no la defines, la app en producción no enviará eventos a Sentry.
 
    **Nota**: `OMDB_API_KEY` NO va en el frontend. Se configura como Secret en Supabase.
 

@@ -4,12 +4,6 @@ export interface User {
   user_metadata?: Record<string, any>
 }
 
-export interface Session {
-  user: User
-  access_token: string
-  refresh_token: string
-}
-
 export interface ListItem {
   id: string
   titulo: string

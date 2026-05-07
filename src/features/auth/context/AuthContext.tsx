@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState, useCallback, ReactNode } from 'react'
-import { Session, User } from '@/features/shared'
+import type { Session } from '@supabase/supabase-js'
+import { User } from '@/features/shared'
 import { supabase } from '@/supabaseClient'
 import { queryClient } from '@config/queryClient'
 import { queryKeys } from '@config/queryKeys'
@@ -43,28 +44,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session as any)
-      if (session?.user) {
+    let cancelled = false
+
+    const applySession = (next: Session | null) => {
+      if (cancelled) return
+      setSession(next)
+      if (next?.user) {
         const mappedUser: User = {
-          id: session.user.id,
-          email: session.user.email || '',
-          user_metadata: session.user.user_metadata,
+          id: next.user.id,
+          email: next.user.email || '',
+          user_metadata: next.user.user_metadata,
         }
         setUser(mappedUser)
-        checkNeedsUsername(session.user.id)
+        void checkNeedsUsername(next.user.id)
       } else {
         setUser(null)
         setNeedsUsername(false)
       }
       setError(null)
       setLoading(false)
+    }
+
+    void supabase.auth.getSession().then(({ data: { session: initial } }) => {
+      applySession(initial ?? null)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      applySession(nextSession ?? null)
     })
 
     return () => {
-      subscription?.unsubscribe()
+      cancelled = true
+      subscription.unsubscribe()
     }
   }, [checkNeedsUsername])
 
