@@ -110,14 +110,14 @@ const AppNavbar: React.FC = () => {
       </Link>
 
       <div
-        className={`app-navbar__nav-cluster absolute left-1/2 z-20 hidden -translate-x-1/2 md:flex md:flex-row items-center justify-center gap-6 md:gap-8 ${
+        className={`app-navbar__nav-cluster absolute left-1/2 z-20 hidden -translate-x-1/2 md:flex md:flex-row items-center justify-center ${
           isRetroCartoon
             ? 'top-1/2 -translate-y-1/2 border-0 bg-transparent shadow-none py-2 md:py-3'
-            : 'top-1/2 -translate-y-1/2 py-4 md:py-6 ' +
+            : `top-1/2 -translate-y-1/2 ${isCyberpunk || isTerminal ? '' : 'gap-6 md:gap-8 py-4 md:py-6 '}` +
               (isCyberpunk
-                ? 'rounded-full border border-[rgba(0,255,255,0.4)] bg-[rgba(2,2,10,0.72)] px-2 shadow-[0_0_14px_rgba(255,0,255,0.16)] backdrop-blur-[12px]'
+                ? 'rounded-full border border-[rgba(0,255,255,0.4)] bg-[rgba(2,2,10,0.72)] shadow-[0_0_14px_rgba(255,0,255,0.16)] backdrop-blur-[12px]'
                 : isTerminal
-                  ? 'rounded-md border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.88)] px-2 shadow-[0_0_12px_rgba(var(--color-accent-primary-rgb),0.12)]'
+                  ? 'rounded-md border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.88)] shadow-[0_0_12px_rgba(var(--color-accent-primary-rgb),0.12)]'
                   : 'rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.12)] bg-[rgba(var(--color-accent-primary-rgb),0.06)] px-2')
         }`}
       >
