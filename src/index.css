@@ -832,6 +832,36 @@
   }
 }
 
+/* Cyberpunk + terminal: cluster central — mismo gap/padding/enlaces (solo md+ en layout; estilos de caja siguen en Tailwind por tema) */
+[data-theme='cyberpunk'] .app-navbar .app-navbar__nav-cluster,
+[data-theme='terminal'] .app-navbar .app-navbar__nav-cluster {
+  gap: 0.65rem;
+  padding: 0.3rem 0.55rem;
+}
+
+@media (min-width: 768px) {
+  [data-theme='cyberpunk'] .app-navbar .app-navbar__nav-cluster,
+  [data-theme='terminal'] .app-navbar .app-navbar__nav-cluster {
+    gap: 0.85rem;
+    padding: 0.4rem 0.7rem;
+  }
+}
+
+[data-theme='cyberpunk'] .app-navbar .app-navbar__nav-cluster .cyberpunk-nav-link,
+[data-theme='terminal'] .app-navbar .app-navbar__nav-cluster > a {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  [data-theme='cyberpunk'] .app-navbar .app-navbar__nav-cluster .cyberpunk-nav-link,
+  [data-theme='terminal'] .app-navbar .app-navbar__nav-cluster > a {
+    padding: 0.45rem 1.15rem;
+    font-size: 0.875rem;
+  }
+}
+
 /* Navbar desktop: Películas / Series / Perfil (bloques neubrutalistas) */
 [data-theme='retro-cartoon'] .app-navbar .ui-nav-button {
   display: inline-flex;
