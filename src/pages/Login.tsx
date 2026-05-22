@@ -1,7 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { validateEmail, validatePassword, validateUsername, ERROR_MESSAGES, useTheme } from '@/features/shared'
+import {
+  validateEmail,
+  validatePassword,
+  validateUsername,
+  ERROR_MESSAGES,
+  RetroMeepModalFrame,
+  type RetroMeepModalFrameHandle,
+  useReducedMotion,
+  useTheme,
+} from '@/features/shared'
 import { LanguageSwitcher } from '@/features/shared/components/LanguageSwitcher'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { supabase } from '@/supabaseClient'
@@ -30,6 +39,10 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) =
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
+  const reducedMotion = useReducedMotion()
+  const meep = isRetroCartoon && !reducedMotion
+  const frameRef = useRef<RetroMeepModalFrameHandle>(null)
+  const requestClose = () => frameRef.current?.tryBeginClose()
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -125,14 +138,6 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) =
       : isCyberpunk
         ? 'flex-1 cyberpunk-button theme-heading-font rounded-xl px-4 py-3 text-xl disabled:opacity-40 disabled:shadow-none'
         : 'flex-1 px-4 py-3 bg-accent-primary text-white rounded-xl font-black text-xl hover:shadow-[0_0_25px_rgba(var(--color-accent-primary-rgb),0.5)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2'
-
-  // Close on Escape
-  useEffect(() => {
-    if (!open) return
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [open, onClose])
 
   // Reset state when closing
   useEffect(() => {
@@ -255,18 +260,21 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) =
   if (!open) return null
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[300] flex items-center justify-center px-4">
-      {/* Overlay */}
-      <div
-        className={overlayClassName}
-        onClick={onClose}
-      />
-
-      {/* Card */}
-      <div
-        className={panelClassName}
-        onClick={e => e.stopPropagation()}
-      >
+    <RetroMeepModalFrame
+      ref={frameRef}
+      meep={meep}
+      variant="split"
+      closeOnEscape
+      onRequestClose={onClose}
+      rootClassName={
+        meep
+          ? 'fixed inset-0 z-[300] overflow-hidden'
+          : 'fixed inset-0 z-[300] flex items-center justify-center px-4'
+      }
+      splitOverlayClassName={overlayClassName}
+      panelClassName={panelClassName}
+      panelProps={{ onClick: (e) => e.stopPropagation() }}
+    >
         {!isRetroCartoon && <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-accent-primary to-transparent" />}
 
         {/* Header */}
@@ -280,7 +288,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) =
             </h2>
           </div>
           <button
-            onClick={onClose}
+            onClick={requestClose}
             aria-label={t('buttons.close_signup_window')}
             className={closeButtonClassName}
           >
@@ -306,7 +314,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) =
                 </p>
               </div>
               <button
-                onClick={onClose}
+                onClick={requestClose}
                 className={doneButtonClassName}
               >
                 {t('signup.button_done')}
@@ -447,7 +455,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) =
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={requestClose}
                   disabled={loading}
                   className={cancelButtonClassName}
                 >
@@ -476,8 +484,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) =
         </div>
 
         {!isRetroCartoon && <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-accent-primary to-transparent opacity-30" />}
-      </div>
-    </div>,
+    </RetroMeepModalFrame>,
     document.body
   )
 }

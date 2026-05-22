@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { resolveItemSynopsis } from '@/features/items/services/itemSynopsisService'
 import { ListItem } from '@/features/shared'
+import { useReducedMotion } from '@/features/shared/hooks/useReducedMotion'
+import { useTheme } from '@/features/shared/hooks/useTheme'
 
 interface UseListItemDetailsParams {
   currentUserId: string
@@ -50,6 +52,8 @@ export const useListItemDetails = ({
   onQuickCritiqueSave,
   onQuickCritiqueSuccess,
 }: UseListItemDetailsParams): UseListItemDetailsReturn => {
+  const { theme } = useTheme()
+  const reducedMotion = useReducedMotion()
   const [selectedItem, setSelectedItem] = useState<ListItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalAnimating, setIsModalAnimating] = useState(false)
@@ -146,6 +150,8 @@ export const useListItemDetails = ({
 
   const handleCloseDetails = () => {
     setIsModalAnimating(false)
+    const useRetroMeep = theme === 'retro-cartoon' && !reducedMotion
+    const cleanupDelayMs = useRetroMeep ? 0 : 180
     closeTimeoutRef.current = window.setTimeout(() => {
       setIsModalOpen(false)
       setSelectedItem(null)
@@ -155,7 +161,7 @@ export const useListItemDetails = ({
       setShouldPromptComment(false)
       closeTimeoutRef.current = null
       previousFocusRef.current?.focus()
-    }, 180)
+    }, cleanupDelayMs)
   }
 
   const handleToggleFromModal = async () => {

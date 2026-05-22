@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { Heart, Loader2, RotateCcw, Sparkles, Star, ThumbsDown } from 'lucide-react'
-import { useTheme } from '@/features/shared'
+import { RetroMeepModalFrame, type RetroMeepModalFrameHandle, useReducedMotion, useTheme } from '@/features/shared'
 import { useEnhanceComment, type EnhanceCommentContext } from '../hooks/useEnhanceComment'
 
 export type QuickCritiqueReaction = 'like' | 'dislike'
@@ -38,7 +38,10 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
 }) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
+  const reducedMotion = useReducedMotion()
   const isRetro = theme === 'retro-cartoon'
+  const meep = isRetro && !reducedMotion
+  const frameRef = useRef<RetroMeepModalFrameHandle>(null)
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
 
@@ -276,8 +279,6 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
         ? 'cyberpunk-button theme-heading-font w-full py-3 disabled:opacity-50'
         : 'theme-heading-font w-full rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(var(--color-accent-primary-rgb),0.14)] py-3 font-bold uppercase tracking-wide text-[var(--color-accent-primary)] transition hover:bg-[rgba(var(--color-accent-primary-rgb),0.22)] disabled:opacity-50'
 
-  const backdropClass = 'fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm'
-
   const panelClass = isRetro
     ? 'retro-fx max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-xl border-[4px] border-black bg-[var(--color-bg-secondary)] p-6 text-[var(--color-text-primary)] shadow-[10px_10px_0px_0px_#000000]'
     : isTerminal
@@ -290,17 +291,24 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
     'text-center text-xs uppercase tracking-wider theme-heading-font text-[var(--color-text-muted)]'
 
   return createPortal(
-    <div
-      className={backdropClass}
+    <RetroMeepModalFrame
+      ref={frameRef}
+      meep={meep}
+      variant="stacked"
+      closeOnEscape
+      onBeforeClose={() => !saving}
+      onRequestClose={onCancel}
+      rootClassName={
+        meep
+          ? 'fixed inset-0 z-[120] overflow-hidden'
+          : 'fixed inset-0 z-[120] flex items-center justify-center p-4'
+      }
+      stackedFillClassName={meep ? undefined : 'bg-black/60 backdrop-blur-sm'}
+      panelClassName={panelClass}
       role="dialog"
       aria-modal="true"
       aria-labelledby="quick-critique-title"
-      onClick={() => !saving && onCancel()}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape' && !saving) onCancel()
-      }}
     >
-      <div className={panelClass} onClick={(e) => e.stopPropagation()}>
         <h2
           id="quick-critique-title"
           className="theme-heading-font text-center text-lg font-black uppercase text-[var(--color-text-primary)] md:text-xl"
@@ -409,7 +417,7 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
           <button
             type="button"
             disabled={saving}
-            onClick={onCancel}
+            onClick={() => frameRef.current?.tryBeginClose()}
             className={`theme-heading-font text-sm font-bold uppercase underline decoration-2 disabled:opacity-50 ${
               isRetro
                 ? 'text-[var(--color-text-primary)]'
@@ -425,8 +433,7 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
             Guardamos visto, estrellas, reaccion y reseña junto
           </p>
         )}
-      </div>
-    </div>,
+    </RetroMeepModalFrame>,
     document.body,
   )
 }

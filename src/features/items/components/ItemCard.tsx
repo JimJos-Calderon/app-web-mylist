@@ -85,7 +85,12 @@ const ItemCard: React.FC<ItemCardProps> = ({
     statusText = t('item.not_watched', 'PENDING')
   }
 
-  const statusLabel = `STATUS: ${statusText}`.toUpperCase()
+  const statusLabel = isRetroCartoon
+    ? formatRetroHeading(
+        `> ${isRated ? t('item.retro_card_badge_rated') : item.visto ? t('item.retro_card_badge_watched') : t('item.retro_card_badge_pending')}`,
+        theme,
+      )
+    : `STATUS: ${statusText}`.toUpperCase()
   const ownerLabel = isOwn ? t('own_item') : username || item.user_email?.split('@')[0] || 'Usuario'
   const progressActionLabel = item.visto ? t('item.mark_unwatched') : t('item.mark_watched')
   const showCompactToggle = compactWatchedToggle && item.visto

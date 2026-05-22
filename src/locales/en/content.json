@@ -25,6 +25,9 @@
   "item": {
     "watched": "✓ Watched",
     "not_watched": "○ Unwatched",
+    "retro_card_badge_pending": "To watch",
+    "retro_card_badge_watched": "Seen",
+    "retro_card_badge_rated": "Rated",
     "mark_watched": "Mark as watched",
     "mark_unwatched": "Mark as unwatched",
     "delete_confirm": "Are you sure you want to delete this item?",

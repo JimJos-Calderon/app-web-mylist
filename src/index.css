@@ -824,11 +824,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  gap: 0.65rem;
 }
 
 @media (min-width: 768px) {
   [data-theme='retro-cartoon'] .app-navbar .app-navbar__nav-cluster {
     display: flex;
+    gap: 0.85rem;
   }
 }
 
@@ -1073,6 +1075,96 @@
     );
   opacity: 0.35;
   mix-blend-mode: multiply;
+}
+
+/* Modal “Meep Meep” (Road Runner): solo con data-theme retro-cartoon */
+[data-theme='retro-cartoon'] .retro-modal-meep {
+  transform: scale(1);
+  transform-origin: center;
+}
+
+[data-theme='retro-cartoon'] .retro-modal-meep__backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0);
+  animation: retro-meep-backdrop-in 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+[data-theme='retro-cartoon'] .retro-modal-meep__panel {
+  transform: translate3d(-1500px, 0, 0) skewX(30deg) scaleX(1.3);
+  will-change: transform;
+  animation: retro-meep-panel-in 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+[data-theme='retro-cartoon'] .retro-modal-meep--out {
+  animation: retro-meep-root-out 0s 0.5s linear forwards;
+}
+
+[data-theme='retro-cartoon'] .retro-modal-meep--out .retro-modal-meep__backdrop {
+  animation: retro-meep-backdrop-out 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+[data-theme='retro-cartoon'] .retro-modal-meep--out .retro-modal-meep__panel {
+  animation: retro-meep-panel-out 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes retro-meep-backdrop-in {
+  0% {
+    background: rgba(0, 0, 0, 0);
+  }
+  100% {
+    background: rgba(0, 0, 0, 0.65);
+  }
+}
+
+@keyframes retro-meep-backdrop-out {
+  0% {
+    background: rgba(0, 0, 0, 0.65);
+  }
+  100% {
+    background: rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes retro-meep-panel-in {
+  0% {
+    transform: translate3d(-1500px, 0, 0) skewX(30deg) scaleX(1.3);
+  }
+  70% {
+    transform: translate3d(30px, 0, 0) skewX(0deg) scaleX(0.9);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) skewX(0deg) scaleX(1);
+  }
+}
+
+@keyframes retro-meep-panel-out {
+  0% {
+    transform: translate3d(0, 0, 0) skewX(0deg) scaleX(1);
+  }
+  30% {
+    transform: translate3d(-30px, 0, 0) skewX(-5deg) scaleX(0.9);
+  }
+  100% {
+    transform: translate3d(1500px, 0, 0) skewX(30deg) scaleX(1.3);
+  }
+}
+
+@keyframes retro-meep-root-out {
+  0% {
+    transform: scale(1);
+  }
+  99.9% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
 }
 
 html, body, #root {
