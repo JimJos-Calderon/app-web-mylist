@@ -1,4 +1,10 @@
 export { default as ConfirmDialog } from './components/ConfirmDialog'
+export {
+  RetroMeepModalFrame,
+  RETRO_MEEP_EXIT_DURATION_MS,
+  type RetroMeepModalFrameHandle,
+  type RetroMeepModalFrameVariant,
+} from './components/RetroMeepModalFrame'
 export { default as ErrorAlert } from './components/ErrorAlert'
 export { GlobalErrorFallback } from './components/GlobalErrorFallback'
 export { InstallPwaPrompt } from './components/InstallPwaPrompt'

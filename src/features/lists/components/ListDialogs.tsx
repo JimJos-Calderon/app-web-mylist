@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import * as ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Plus, Users, X } from 'lucide-react'
 
-import { HudContainer, TechLabel, type List } from '@/features/shared'
+import { HudContainer, TechLabel, type List, RetroMeepModalFrame, type RetroMeepModalFrameHandle, useReducedMotion } from '@/features/shared'
 import { useTheme } from '@/features/shared/hooks/useTheme'
 
 interface CreateListDialogProps {
@@ -29,21 +29,14 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
   const { theme } = useTheme()
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
+  const reducedMotion = useReducedMotion()
+  const meep = isRetroCartoon && !reducedMotion
+  const frameRef = useRef<RetroMeepModalFrameHandle>(null)
+  const requestClose = () => frameRef.current?.tryBeginClose()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (!open) return
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [open, onClose])
 
   if (!open) return null
 
@@ -97,7 +90,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
       const createdList = await onCreate(name.trim(), description.trim() || undefined)
       if (createdList) {
         onCreated(createdList)
-        onClose()
+        requestClose()
       } else {
         setError(t('dialog.create_list_failed', { defaultValue: 'No se pudo crear la lista' }))
       }
@@ -110,10 +103,23 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
   }
 
   const content = (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" role="dialog" aria-modal="true" aria-labelledby="create-list-dialog-title">
-      <div className={overlayClassName} onClick={onClose} />
-
-      <div className={panelClassName} onClick={(e) => e.stopPropagation()}>
+    <RetroMeepModalFrame
+      ref={frameRef}
+      meep={meep}
+      variant="split"
+      closeOnEscape
+      onRequestClose={onClose}
+      rootClassName={
+        meep
+          ? 'fixed inset-0 z-[200] overflow-hidden'
+          : 'fixed inset-0 z-[200] flex items-center justify-center px-4'
+      }
+      splitOverlayClassName={overlayClassName}
+      panelClassName={panelClassName}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-list-dialog-title"
+    >
         {isRetroCartoon ? (
           <>
             <div className="flex items-center justify-between border-b-4 border-black px-6 py-5 sm:px-8 sm:py-6">
@@ -136,7 +142,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
 
               <button
                 type="button"
-                onClick={onClose}
+                onClick={requestClose}
                 aria-label={t('dialog.close_button', { defaultValue: 'Cerrar' })}
                 className={`${retroButtonBaseClassName} flex h-10 w-10 items-center justify-center p-0 hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-0 active:shadow-none`}
               >
@@ -190,7 +196,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
               <div className="flex gap-4 pt-2">
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={requestClose}
                   className={`${secondaryButtonClassName} flex-1 px-4 py-3`}
                 >
                   {t('dialog.cancel_button', { defaultValue: 'Cancelar' })}
@@ -225,7 +231,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
               </div>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={requestClose}
                 aria-label={t('dialog.close_button', { defaultValue: 'Cerrar' })}
                 className={isTerminal ? 'terminal-button theme-heading-font w-8 h-8 flex items-center justify-center rounded-none' : 'w-8 h-8 flex items-center justify-center text-[var(--color-text-muted)] hover:text-accent-primary hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] transition-all'}
                 style={isTerminal ? undefined : { clipPath: 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 25%)' }}
@@ -281,7 +287,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
               )}
 
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={onClose} className={`${secondaryButtonClassName} flex-1 px-4 py-3`}>
+                <button type="button" onClick={requestClose} className={`${secondaryButtonClassName} flex-1 px-4 py-3`}>
                   {t('dialog.cancel_button', { defaultValue: 'Cancelar' })}
                 </button>
                 <button type="submit" disabled={loading} className={`${primaryButtonClassName} flex-1 px-4 py-3`}>
@@ -291,8 +297,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
             </form>
           </HudContainer>
         )}
-      </div>
-    </div>
+    </RetroMeepModalFrame>
   )
 
   return ReactDOM.createPortal(content, document.body)
@@ -305,16 +310,10 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
   const isTerminal = theme === 'terminal'
   const [copiedCode, setCopiedCode] = useState(false)
 
-  useEffect(() => {
-    if (!open) return
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [open, onClose])
+  const reducedMotion = useReducedMotion()
+  const meep = isRetroCartoon && !reducedMotion
+  const inviteFrameRef = useRef<RetroMeepModalFrameHandle>(null)
+  const requestInviteClose = () => inviteFrameRef.current?.tryBeginClose()
 
   const inviteUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/join/${list.invite_code}`
@@ -347,10 +346,23 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
     'rounded-md border-[3px] border-black bg-[#f6eddc] text-black shadow-[4px_4px_0px_0px_#000000] transition-all'
 
   const content = (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" role="dialog" aria-modal="true" aria-labelledby="invite-dialog-title">
-      <div className={overlayClassName} onClick={onClose} />
-
-      <div className={panelClassName} onClick={(e) => e.stopPropagation()}>
+    <RetroMeepModalFrame
+      ref={inviteFrameRef}
+      meep={meep}
+      variant="split"
+      closeOnEscape
+      onRequestClose={onClose}
+      rootClassName={
+        meep
+          ? 'fixed inset-0 z-[200] overflow-hidden'
+          : 'fixed inset-0 z-[200] flex items-center justify-center px-4'
+      }
+      splitOverlayClassName={overlayClassName}
+      panelClassName={panelClassName}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="invite-dialog-title"
+    >
         {isRetroCartoon ? (
           <>
             <div className="flex items-center justify-between border-b-4 border-black px-6 py-5 sm:px-8 sm:py-6">
@@ -371,7 +383,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                 </div>
               </div>
               <button
-                onClick={onClose}
+                onClick={requestInviteClose}
                 aria-label={t('dialog.close_button')}
                 className={`${retroButtonBaseClassName} flex h-10 w-10 items-center justify-center p-0 hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-0 active:shadow-none`}
               >
@@ -430,7 +442,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
             <div className="px-6 pb-6 sm:px-8">
               <button
-                onClick={onClose}
+                onClick={requestInviteClose}
                 className={`${retroButtonBaseClassName} flex w-full items-center justify-center gap-2 px-4 py-3 font-black uppercase tracking-widest hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-0 active:shadow-none`}
               >
                 <X className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" />
@@ -456,7 +468,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                 </div>
               </div>
               <button
-                onClick={onClose}
+                onClick={requestInviteClose}
                 aria-label={t('dialog.close_button')}
                 className={isTerminal ? 'terminal-button theme-heading-font w-8 h-8 flex items-center justify-center rounded-none' : 'w-8 h-8 flex items-center justify-center text-[var(--color-text-muted)] hover:text-accent-secondary hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] transition-all'}
                 style={isTerminal ? undefined : { clipPath: 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 25%)' }}
@@ -527,7 +539,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
 
             <div className="px-6 pb-6 mt-2">
               <button
-                onClick={onClose}
+                onClick={requestInviteClose}
                 className={isTerminal ? 'terminal-button theme-heading-font w-full px-4 py-3 rounded-none text-xs font-bold uppercase tracking-widest' : 'w-full px-4 py-3 bg-transparent hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] text-[var(--color-text-primary)] font-mono text-xs font-bold uppercase tracking-widest transition-all border border-[rgba(var(--color-accent-secondary-rgb),0.4)] hover:border-[rgba(var(--color-accent-secondary-rgb),0.8)] hover:text-accent-secondary'}
                 style={isTerminal ? undefined : { clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
               >
@@ -536,8 +548,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
             </div>
           </HudContainer>
         )}
-      </div>
-    </div>
+    </RetroMeepModalFrame>
   )
 
   return ReactDOM.createPortal(content, document.body)

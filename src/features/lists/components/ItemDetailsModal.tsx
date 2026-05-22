@@ -9,7 +9,14 @@ import {
   useItemRating,
   useTranslateSynopsis,
 } from '@/features/items'
-import { ItemGroupWatchBadge, ListItem, useTheme } from '@/features/shared'
+import {
+  ItemGroupWatchBadge,
+  ListItem,
+  RetroMeepModalFrame,
+  type RetroMeepModalFrameHandle,
+  useReducedMotion,
+  useTheme,
+} from '@/features/shared'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 
 interface ItemDetailsModalProps {
@@ -89,6 +96,9 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   const isRetroCartoon = theme === 'retro-cartoon'
   const isCyberpunk = theme === 'cyberpunk'
   const isTerminal = theme === 'terminal'
+  const reducedMotion = useReducedMotion()
+  const meep = isRetroCartoon && !reducedMotion
+  const frameRef = React.useRef<RetroMeepModalFrameHandle>(null)
   const [showQuickCritique, setShowQuickCritique] = React.useState(false)
   const [tagsDraft, setTagsDraft] = React.useState('')
   const [tagsSaving, setTagsSaving] = React.useState(false)
@@ -153,14 +163,18 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
     }
   }
 
-  const handleRequestClose = () => {
-    if (isQuickCritiqueSaving) return
+  const handleBeforeCloseModal = React.useCallback(() => {
+    if (isQuickCritiqueSaving) return false
     if (showQuickCritique) {
       setShowQuickCritique(false)
-      return
+      return false
     }
-    onClose()
-  }
+    return true
+  }, [isQuickCritiqueSaving, showQuickCritique])
+
+  const handleRequestClose = React.useCallback(() => {
+    frameRef.current?.tryBeginClose()
+  }, [])
 
   const handleToggleClick = async () => {
     if (!selectedItem || modalActionLoading !== null) return
@@ -190,43 +204,53 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
       : translatedSynopsis || synopsis
   const displayTitle = formatRetroHeading(selectedItem.titulo, theme)
 
+  const panelMotionClass = meep
+    ? ''
+    : `transition-all duration-200 ${isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`
+
+  const panelShellClass = `item-details-modal ${isRetroCartoon ? 'retro-fx ' : ''}w-full max-w-4xl max-h-[90vh] overflow-y-auto text-[var(--color-text-primary)] ${panelMotionClass} ${
+    isRetroCartoon
+      ? ''
+      : 'border bg-[var(--color-bg-secondary)] ' +
+        (isTerminal
+          ? 'terminal-surface rounded-md'
+          : isCyberpunk
+            ? 'cyberpunk-surface'
+            : 'rounded-2xl border-[rgba(var(--color-accent-primary-rgb),0.25)] shadow-2xl')
+  }`
+
   return (
     <>
       {createPortal(
-        <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${titlePrefix} ${selectedItem.titulo}`}
-      onClick={handleRequestClose}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') {
-          e.stopPropagation()
-          handleRequestClose()
-        } else if (e.key === 'ArrowRight' && onNext) {
-          e.stopPropagation()
-          onNext()
-        } else if (e.key === 'ArrowLeft' && onPrevious) {
-          e.stopPropagation()
-          onPrevious()
-        }
-      }}
-    >
-      <div
-        className={`item-details-modal ${isRetroCartoon ? 'retro-fx ' : ''}w-full max-w-4xl max-h-[90vh] overflow-y-auto text-[var(--color-text-primary)] transition-all duration-200 ${
-          isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-        } ${
-          isRetroCartoon
-            ? ''
-            : 'border bg-[var(--color-bg-secondary)] ' +
-              (isTerminal
-                ? 'terminal-surface rounded-md'
-                : isCyberpunk
-                  ? 'cyberpunk-surface'
-                  : 'rounded-2xl border-[rgba(var(--color-accent-primary-rgb),0.25)] shadow-2xl')
-        }`}
-        onClick={(event) => event.stopPropagation()}
-      >
+        <RetroMeepModalFrame
+          ref={frameRef}
+          meep={meep}
+          variant="stacked"
+          onRequestClose={onClose}
+          onBeforeClose={handleBeforeCloseModal}
+          rootClassName={
+            meep
+              ? 'fixed inset-0 z-[100] overflow-hidden'
+              : 'fixed inset-0 z-[100] flex items-center justify-center p-4'
+          }
+          stackedFillClassName={meep ? undefined : 'bg-black/60 backdrop-blur-sm'}
+          panelClassName={panelShellClass}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${titlePrefix} ${selectedItem.titulo}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.stopPropagation()
+              handleRequestClose()
+            } else if (e.key === 'ArrowRight' && onNext) {
+              e.stopPropagation()
+              onNext()
+            } else if (e.key === 'ArrowLeft' && onPrevious) {
+              e.stopPropagation()
+              onPrevious()
+            }
+          }}
+        >
         <div
           className={`flex items-start justify-between gap-4 ${
             isRetroCartoon
@@ -618,8 +642,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
             </div>
           </div>
         </div>
-      </div>
-    </div>,
+    </RetroMeepModalFrame>,
         document.body,
       )}
       <QuickCritiqueModal

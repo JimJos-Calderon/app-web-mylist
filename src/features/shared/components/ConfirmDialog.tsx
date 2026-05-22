@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import TechLabel from './TechLabel'
+import { RetroMeepModalFrame, type RetroMeepModalFrameHandle } from './RetroMeepModalFrame'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import { useTheme } from '../hooks/useTheme'
 import { formatRetroHeading } from '../utils/textUtils'
 
@@ -27,9 +29,12 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 }) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
+  const reducedMotion = useReducedMotion()
+  const frameRef = useRef<RetroMeepModalFrameHandle>(null)
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
+  const meep = isRetroCartoon && !reducedMotion
   const resolveDialogText = (value: string): string => {
     if (!value) return ''
 
@@ -113,12 +118,23 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     : 'h-8 w-8 text-[var(--color-accent-primary)]'
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      onClick={onCancel}
+    <RetroMeepModalFrame
+      ref={frameRef}
+      meep={meep}
+      variant="stacked"
+      closeOnEscape
+      onRequestClose={onCancel}
+      rootClassName={
+        meep
+          ? 'fixed inset-0 z-[100] overflow-hidden'
+          : 'fixed inset-0 z-[100] flex items-center justify-center p-4'
+      }
+      stackedFillClassName={meep ? undefined : 'bg-black/60 backdrop-blur-sm'}
+      panelClassName={panelClass}
+      role="dialog"
+      aria-modal="true"
     >
-      <div className={panelClass} onClick={(e) => e.stopPropagation()}>
-        <div className="p-8">
+      <div className="p-8">
           {/* Header */}
           <div className="relative mb-6 flex flex-col items-center justify-center">
             <TechLabel text={isRetroCartoon ? 'ALERTA' : 'SYS.ALERT'} tone="secondary" blink className="absolute -top-4" />
@@ -146,12 +162,14 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           {/* Buttons */}
           <div className={`grid ${isRetroCartoon ? 'grid-cols-1 sm:grid-cols-2 gap-3' : 'grid-cols-1 sm:grid-cols-2 gap-4'}`}>
             <button
-              onClick={onCancel}
+              type="button"
+              onClick={() => frameRef.current?.tryBeginClose()}
               className={cancelButtonClass}
             >
               {isRetroCartoon ? retroCancelText : resolvedCancelText}
             </button>
             <button
+              type="button"
               onClick={onConfirm}
               className={confirmButtonClass}
             >
@@ -159,8 +177,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             </button>
           </div>
         </div>
-      </div>
-    </div>,
+    </RetroMeepModalFrame>,
     document.body
   )
 }
