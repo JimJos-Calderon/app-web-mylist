@@ -1,4 +1,4 @@
-# 🎬 Nuestra Lista - Gestor de Películas y Series
+# 🎬 WhichNext — Listas compartidas de películas y series
 
 <div align="center">
 
@@ -8,7 +8,7 @@
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-4.1.18-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-2.93.3-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-Una aplicación web para gestionar **listas compartidas** de películas y series: autenticación Supabase, búsqueda con **Edge Function + OMDB**, metadatos enriquecidos con **TMDB** (título ES, póster, géneros), calificaciones, comentarios, **crítica rápida** al marcar como visto, **Oráculo** (sugerencias vía Groq), **etiquetas**, **orden manual**, **siguiente en cola**, **export/import JSON y CSV**, y **varios temas visuales** (retro cartoon, terminal, cyberpunk y default).
+**WhichNext** es una aplicación web para gestionar **listas compartidas** de películas y series: autenticación Supabase, búsqueda con **Edge Function + OMDB**, metadatos enriquecidos con **TMDB** (título ES, póster, géneros, **dónde verlo** por región), calificaciones, comentarios, **crítica rápida** al marcar como visto, **Oráculo** (sugerencias vía Groq), **etiquetas**, **orden manual**, **siguiente en cola**, **export/import JSON y CSV**, y **varios temas visuales** (retro cartoon, terminal, cyberpunk y default).
 
 [✨ WebSite](https://jandn.onrender.com/) • [📖 Documentación](#características) • [🐛 Reportar Bug](../../issues)
 
@@ -30,7 +30,8 @@ Una aplicación web para gestionar **listas compartidas** de películas y series
 - 📝 **Comentarios / reseñas** — `item_comments`; al marcar visto pueden exigirse reseña o **crítica rápida** (modal: estrellas, reacción, texto opcional) vía RPC `save_quick_critique`
 - 🤖 **IA (opcional)** — Mejora de borradores con **Groq** en la caja de comentarios y en el modal de crítica; **Oráculo** usa el mismo modelo para recomendaciones según tu historial (todo vía Edge Function **`ai-proxy`**, clave solo en servidor)
 - 🕒 **Historial de actividad** — Timeline colaborativo por lista con eventos recientes de cambios
-- 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` y default; preferencia sincronizada en perfil
+- 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` y default; preferencia sincronizada en perfil; en **retro**, modales con animación tipo «Meep Meep» (entrada/salida del panel) y badges HUD en tarjetas (`> POR VER`, `> VISTO`, `> CON NOTA`)
+- 📺 **Dónde verlo** — En el modal de detalle, plataformas de streaming/alquiler/compra vía TMDB (`resolveItemWatchProviders`), según idioma/región del usuario
 - 🔍 **Filtros avanzados** — Estado (vistas/pendientes), texto, orden y etiqueta
 - 📐 **Lista en rejilla** — Tarjetas en cuadrícula adaptable (móvil → varias columnas), paginación por página (**9** ítems) salvo en orden **manual** (sin paginar para poder reordenar todo lo visible)
 - 🎲 **Selector aleatorio** — Modal «¿Qué ver hoy?» entre títulos pendientes (`RandomPickManager`)
@@ -49,12 +50,14 @@ Una aplicación web para gestionar **listas compartidas** de películas y series
 
 ## 🆕 Últimos cambios
 
-- 🗄️ **Listas e ítems** — Etiquetas (`tags`), orden manual con arrastre (`@dnd-kit`), «siguiente en cola», export/import JSON y CSV en ajustes de lista; migraciones `31`–`33` (incl. trigger de coherencia `next_queue_item_id` ↔ lista).
-- 🔒 **Calidad** — `ai-proxy` con JWT verificado (`supabase/config.toml`); Sentry vía `VITE_SENTRY_DSN`; auth con `getSession` + tipos Supabase; import JSON/CSV por lotes.
-- 🎭 **Modal de crítica rápida** — Colores y tipografía alineados con cada tema (retro / terminal / cyberpunk / default); botón principal retro coherente con el modal de detalle; contador de caracteres con fuente retro; **Mejorar con IA** (Groq) de nuevo disponible en el modal con contexto de título y sinopsis.
-- 👤 **Perfil** — Acción para **quitar valoración**: deja el título en la lista como pendiente y elimina tu fila en `item_ratings` y `item_comments`; invalidación de caché por lista.
-- 🎨 **Retro** — Ajustes de fuente en botón Ajustes (perfil), botón «Limpiar» del widget de estrellas y textos del modal de crítica.
-- 📣 **Discord** — Guía para **rotar el webhook** de un canal (revocar el antiguo y pegar uno nuevo): [docs/DISCORD_WEBHOOK.md](docs/DISCORD_WEBHOOK.md).
+- 🎬 **UI retro** — Animación de modales «Meep Meep» solo en `retro-cartoon` (`RetroMeepModalFrame` + CSS `retro-modal-meep`); badges en tarjetas sin prefijo `STATUS:` (`> POR VER` / `> VISTO` / `> CON NOTA`); separación entre botones del navbar central.
+- 🕒 **Activity Feed** — Migraciones `34`–`35`: nombre de actor con fallback a prefijo de email; `effective_actor_user_id` cuando `audit_logs.user_id` es NULL pero la fila de negocio sí tiene autor.
+- 🔐 **Auditoría** — Migración `36`: `audit_changes_trigger` rellena `user_id` desde la fila (`items`, `item_ratings`, etc.) si `auth.uid()` viene vacío en el trigger.
+- 🗄️ **Listas e ítems** — Etiquetas (`tags`), orden manual (`@dnd-kit`), «siguiente en cola», export/import JSON y CSV; migraciones `31`–`33`.
+- 🎭 **Crítica rápida** — Modal alineado por tema; **Mejorar con IA** (Groq) con contexto de título/sinopsis.
+- 👤 **Perfil** — **Quitar valoración** restaura pendiente sin sacar el título de la lista compartida.
+- 🔒 **Calidad** — `ai-proxy` con JWT verificado; Sentry opcional; **28** tests Vitest + E2E Playwright en CI.
+- 📣 **Discord** — Rotación de webhook: [docs/DISCORD_WEBHOOK.md](docs/DISCORD_WEBHOOK.md).
 
 ## 🛠️ Stack Tecnológico
 
@@ -210,8 +213,13 @@ supabase db push
 | `28` … `29` | Visto por miembro (`item_user_watch`) y roster de lista compartida |
 | `30` | Unicidad `(list_id, tipo, título)` en ítems |
 | `31` … `33` | Etiquetas, orden manual (`sort_index`), cola (`next_queue_item_id`), reparación bigint, trigger de coherencia cola/lista |
+| `34` | Activity feed: `actor_name` con fallback a email (función `activity_actor_email_local_part`) |
+| `35` | Activity feed: `effective_actor_user_id` cuando el log no trae `user_id` pero la fila sí |
+| `36` | Trigger de auditoría: fallback de `user_id` desde la fila insertada/actualizada |
 
 La migración activa de dispatch de push a Edge Functions es `08_dispatch_push_record_id_text_match.sql` (tras `07_0_push_subscriptions.sql` y relacionadas).
+
+> Si ya tenías la BD desplegada, aplica también `34`–`36` con `supabase db push` o ejecutando esos archivos en orden en el SQL Editor.
 
 5. **Configura Supabase Edge Functions & Secrets**
 
@@ -307,7 +315,8 @@ app-web-mylist/
 │   │   ├── lists/                # Listas, dialogs, selector, Activity Feed
 │   │   ├── profile/              # Hooks de perfil/username
 │   │   ├── oracle/               # Oráculo (recomendaciones Groq)
-│   │   └── shared/               # Componentes base, tema, tipos y constantes
+│   │   ├── navigation/           # AppNavbar, rutas de cabecera
+│   │   └── shared/               # ConfirmDialog, RetroMeepModalFrame, tema, tipos, constantes
 │   ├── hooks/                    # p. ej. useOracleRecommendations
 │   ├── pages/
 │   │   ├── Login.tsx
@@ -352,7 +361,7 @@ app-web-mylist/
 2. **Agregar**: Elige una sugerencia o confirma título manual
 3. **Marcar como vista**: Abre el **modal de crítica rápida** (estrellas, reacción, comentario opcional); opcionalmente **Mejorar con IA** si configuraste Groq
 4. **Calificar después**: Widget de estrellas y me gusta / no me gusta en la tarjeta o en detalle
-5. **Detalles**: Clic en la tarjeta para sinopsis, comentario largo y marcar no visto
+5. **Detalles**: Clic en la tarjeta para sinopsis, **dónde verlo** (TMDB), comentario largo y marcar no visto
 6. **Eliminar de la lista**: En el modal de detalles, quien tenga permiso (dueño del ítem / políticas RLS) puede borrar el ítem de la lista
 7. **Aleatorio**: Botón para abrir el modal **«¿Qué ver hoy?»**, elige un pendiente al azar y permite abrir la ficha
 
@@ -401,7 +410,13 @@ El aspecto depende de `data-theme` (preferencia en **Ajustes** y sincronizada en
 | **Terminal** | Verde fósforo, bordes rectos, paneles estilo consola |
 | **Retro cartoon** | Papel y tinta, bordes gruesos negros, sombras desplazadas, fuente `theme-heading-font` (Space Meatball), clase `retro-fx` en modales clave |
 
-Los modales (detalle, crítica rápida, confirmaciones) reutilizan los mismos tokens y patrones por tema.
+Los modales (detalle, crítica rápida, confirmaciones, crear/invitar lista, registro) reutilizan los mismos tokens por tema. En **retro-cartoon**:
+
+- **`RetroMeepModalFrame`** — Animación de apertura/cierre inspirada en «Meep Meep» (panel con `roadRunnerIn` / `roadRunnerOut` y fade del backdrop); respeta `prefers-reduced-motion`.
+- **Tarjetas** — Etiqueta de estado con prefijo `>` y textos i18n (`item.retro_card_badge_*`), no el formato `STATUS: …` de otros temas.
+- **Navbar** — Botones Películas / Series / Perfil con `gap` entre bloques neubrutalistas.
+
+**Marca:** el nombre **WhichNext** está unificado en i18n (`appTitle`), PWA (`vite.config.ts`), `index.html`, service worker, Capacitor/Android y mensajes de Discord/push.
 
 ---
 
@@ -658,7 +673,7 @@ const { data, error } = await supabase.functions.invoke('search-omdb', {
 curl -X POST "https://<project-ref>.supabase.co/functions/v1/send-push" \
   -H "Content-Type: application/json" \
   -H "x-push-secret: <PUSH_WEBHOOK_SECRET>" \
-  -d '{"user_id":"<uuid>","message":"Test push","title":"MyList"}'
+  -d '{"user_id":"<uuid>","message":"Test push","title":"WhichNext"}'
 ```
 
 **Automatización**:
@@ -675,15 +690,15 @@ curl -X POST "https://<project-ref>.supabase.co/functions/v1/send-push" \
 ```
 src/
 ├── features/
-│   ├── items/hooks/__tests__/
-│   │   ├── useItems.test.tsx
-│   │   └── useItemRating.test.tsx
-│   └── lists/hooks/__tests__/
-│       └── useLists.test.tsx
-└── test-utils.tsx              # Wrapper de React Query
+│   ├── items/hooks/__tests__/       # useItems, useItemRating
+│   ├── items/utils/__tests__/       # itemDedupUtils
+│   ├── lists/hooks/__tests__/       # useLists
+│   └── lists/utils/__tests__/       # listItemsImportExport
+└── test-utils.tsx                   # Wrapper de React Query
 
 tests/
-└── home.spec.ts                 # 4 E2E tests
+├── home.spec.ts                     # Smoke E2E
+└── auth-login.spec.ts               # Login E2E (opcional con E2E_EMAIL / E2E_PASSWORD)
 ```
 
 ### Ejecutar Tests

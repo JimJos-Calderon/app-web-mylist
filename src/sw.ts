@@ -32,7 +32,7 @@ type PushPayload = {
   }
 }
 
-const DEFAULT_TITLE = 'MyList'
+const DEFAULT_TITLE = 'WhichNext'
 const DEFAULT_BODY = 'Tienes una nueva notificacion'
 /** Ruta al abrir la notificación si el payload no trae `url` / `data.url` */
 const DEFAULT_URL = '/'

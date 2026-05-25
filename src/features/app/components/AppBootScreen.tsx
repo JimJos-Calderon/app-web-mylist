@@ -2,7 +2,7 @@ import React from 'react'
 
 const AppBootScreen: React.FC = () => {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="app-boot-screen min-h-screen flex items-center justify-center">
       <div className="text-center space-y-6">
         <div className="inline-flex items-center justify-center relative">
           <div className="w-20 h-20 border-2 border-[rgba(var(--color-accent-primary-rgb),0.2)] border-t-accent-primary border-r-[var(--color-accent-secondary)] rounded-full animate-spin" />

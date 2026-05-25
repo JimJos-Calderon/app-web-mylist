@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react'
 import { SplashScreen } from '@capacitor/splash-screen'
 import AppShell from '@/app/AppShell'
+import { CyberpunkLinesBackground, TerminalMatrixBackground } from '@/features/shared'
+import { useTheme } from '@/features/shared/hooks/useTheme'
 import { useAndroidBackButton } from '@/hooks/useAndroidBackButton'
 import { useAndroidPushNotificationDeepLink } from '@/hooks/useAndroidPushNotificationDeepLink'
 
 const App: React.FC = () => {
+  const { theme } = useTheme()
+
   useAndroidBackButton()
   useAndroidPushNotificationDeepLink()
 
@@ -16,7 +20,15 @@ const App: React.FC = () => {
     return () => clearTimeout(timer)
   }, [])
 
-  return <AppShell />
+  return (
+    <>
+      {theme === 'cyberpunk' && <CyberpunkLinesBackground />}
+      {theme === 'terminal' && <TerminalMatrixBackground />}
+      <div className="app-view-layer min-h-screen">
+        <AppShell />
+      </div>
+    </>
+  )
 }
 
 export default App

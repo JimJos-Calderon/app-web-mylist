@@ -1176,6 +1176,57 @@ html, body, #root {
   background: radial-gradient(circle at top right, var(--color-bg-gradient-start), var(--color-bg-gradient-end)) fixed;
 }
 
+html[data-theme="cyberpunk"],
+html[data-theme="cyberpunk"] body,
+html[data-theme="cyberpunk"] #root,
+html[data-theme="terminal"],
+html[data-theme="terminal"] body,
+html[data-theme="terminal"] #root {
+  background: #000;
+}
+
+.cyberpunk-lines-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.cyberpunk-lines-bg--static {
+  background: #000;
+}
+
+.terminal-matrix-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.terminal-matrix-bg--static {
+  background: #000;
+}
+
+.app-view-layer {
+  position: relative;
+  z-index: 1;
+}
+
+.app-boot-screen {
+  background: #000;
+}
+
+html[data-theme="cyberpunk"] .app-boot-screen,
+html[data-theme="terminal"] .app-boot-screen {
+  background: transparent;
+}
+
 body {
   font-family: var(--app-font-body);
   background-color: var(--color-bg-base);

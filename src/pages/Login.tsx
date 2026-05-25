@@ -536,7 +536,9 @@ const Login: React.FC = () => {
 
   const rootClassName = isRetroCartoon
     ? 'bg-[var(--color-bg-primary)] retro-fx min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden'
-    : 'min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden bg-[var(--color-bg-base)] text-[var(--color-text-primary)]'
+    : isCyberpunk || isTerminal
+      ? 'min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden bg-transparent text-[var(--color-text-primary)]'
+      : 'min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden bg-[var(--color-bg-base)] text-[var(--color-text-primary)]'
 
 const rootStyle = isRetroCartoon
   ? {
@@ -545,12 +547,14 @@ const rootStyle = isRetroCartoon
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
     }
-  : {
-      backgroundImage: 'url(/login-bg.webp)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-    }
+  : isCyberpunk || isTerminal
+    ? undefined
+    : {
+        backgroundImage: 'url(/login-bg.webp)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }
 
   const cardClassName = isRetroCartoon
     ? 'bg-white border-[4px] border-black shadow-[10px_10px_0px_0px_#000000] rounded-xl overflow-hidden relative z-10 p-6 sm:p-8'
@@ -674,12 +678,12 @@ const rootStyle = isRetroCartoon
         className={rootClassName}
         style={rootStyle}
       >
-        {!isRetroCartoon && (
+        {!isRetroCartoon && !isCyberpunk && !isTerminal && (
           <>
-            <div className={isCyberpunk ? 'absolute inset-0 bg-[rgba(2,2,10,0.74)] backdrop-blur-[10px]' : 'absolute inset-0 bg-black/60'} />
+            <div className="absolute inset-0 bg-black/60" />
             <div className="absolute inset-0 pointer-events-none">
-              <div className={`absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-3xl ${isCyberpunk ? 'bg-[rgba(255,0,255,0.1)]' : 'bg-[rgba(var(--color-accent-primary-rgb),0.06)]'}`} />
-              <div className={`absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-3xl ${isCyberpunk ? 'bg-[rgba(0,255,255,0.08)]' : 'bg-[rgba(var(--color-accent-secondary-rgb),0.06)]'}`} />
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-3xl bg-[rgba(var(--color-accent-primary-rgb),0.06)]" />
+              <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full blur-3xl bg-[rgba(var(--color-accent-secondary-rgb),0.06)]" />
             </div>
           </>
         )}

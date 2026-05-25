@@ -521,7 +521,7 @@ function buildThemedEmbed(theme: ListTheme, ctx: BuildEmbedContext): Record<stri
         color: hexColor('#00f3ff'),
         fields: [],
         ...(item.poster_url ? { thumbnail: { url: item.poster_url } } : {}),
-        footer: { text: 'MyList // holo_feed' },
+        footer: { text: 'WhichNext // holo_feed' },
         timestamp: item.created_at,
       }
     }
@@ -532,7 +532,7 @@ function buildThemedEmbed(theme: ListTheme, ctx: BuildEmbedContext): Record<stri
         color: hexColor('#ffcc00'),
         fields: baseFields,
         ...(item.poster_url ? { thumbnail: { url: item.poster_url } } : {}),
-        footer: { text: 'MyList • Cine casero ♥' },
+        footer: { text: 'WhichNext • Cine casero ♥' },
         timestamp: item.created_at,
       }
     }
@@ -566,11 +566,11 @@ function buildThemedEmbed(theme: ListTheme, ctx: BuildEmbedContext): Record<stri
       const sub = item.title_es?.trim() ? `\n_${item.title_es.trim()}_` : ''
       return {
         title: `${emoji} ${tituloLine}`,
-        description: `**${authorDisplay}** ha añadido una nueva ${typeLabel.toLowerCase()} a **${listName}**${sub}${listUrl ? `\n\n[Abrir en MyList](${listUrl})` : ''}`,
+        description: `**${authorDisplay}** ha añadido una nueva ${typeLabel.toLowerCase()} a **${listName}**${sub}${listUrl ? `\n\n[Abrir en WhichNext](${listUrl})` : ''}`,
         color,
         fields: baseFields.filter((f) => f.name !== 'Obra'),
         ...(item.poster_url ? { thumbnail: { url: item.poster_url } } : {}),
-        footer: { text: 'MyList • Nuestra Lista ♥' },
+        footer: { text: 'WhichNext ♥' },
         timestamp: item.created_at,
       }
     }

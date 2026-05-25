@@ -155,11 +155,13 @@ const JoinList: React.FC = () => {
     }
 
     return (
-        <div className={`min-h-screen flex items-center justify-center px-4 ${isRetroCartoon || isTerminal || isCyberpunk ? 'bg-[var(--color-bg-base)] text-[var(--color-text-primary)]' : 'bg-black'}`}>
+        <div className={`min-h-screen flex items-center justify-center px-4 ${isCyberpunk || isTerminal ? 'bg-transparent text-[var(--color-text-primary)]' : isRetroCartoon ? 'bg-[var(--color-bg-base)] text-[var(--color-text-primary)]' : 'bg-black'}`}>
+            {!isCyberpunk && !isTerminal && (
             <div className="fixed inset-0 pointer-events-none">
-                <div className={`absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-3xl ${isRetroCartoon ? 'bg-black/5' : isTerminal ? 'bg-[rgba(var(--color-accent-primary-rgb),0.05)]' : isCyberpunk ? 'bg-[rgba(255,0,255,0.08)]' : 'bg-cyan-500/5'}`} />
-                <div className={`absolute bottom-1/4 left-1/3 w-[400px] h-[400px] rounded-full blur-3xl ${isRetroCartoon ? 'bg-black/5' : isTerminal ? 'bg-[rgba(var(--color-accent-secondary-rgb),0.04)]' : isCyberpunk ? 'bg-[rgba(0,255,255,0.07)]' : 'bg-pink-500/5'}`} />
+                <div className={`absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-3xl ${isRetroCartoon ? 'bg-black/5' : isTerminal ? 'bg-[rgba(var(--color-accent-primary-rgb),0.05)]' : 'bg-cyan-500/5'}`} />
+                <div className={`absolute bottom-1/4 left-1/3 w-[400px] h-[400px] rounded-full blur-3xl ${isRetroCartoon ? 'bg-black/5' : isTerminal ? 'bg-[rgba(var(--color-accent-secondary-rgb),0.04)]' : 'bg-pink-500/5'}`} />
             </div>
+            )}
 
             <div className="relative w-full max-w-2xl">
                 <div className={`relative overflow-hidden backdrop-blur-xl ${

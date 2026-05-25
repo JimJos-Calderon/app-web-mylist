@@ -1,4 +1,4 @@
-# Informe de auditoría técnica — Nuestra Lista (app-web-mylist)
+# Informe de auditoría técnica — WhichNext (app-web-mylist)
 
 **Rol:** arquitectura de software y revisión de sistema  
 **Alcance:** código en `src/`, migraciones `supabase/migrations/`, Edge Functions `supabase/functions/`, dependencias y configuración documentada.  
