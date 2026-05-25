@@ -7,7 +7,7 @@ La URL del webhook **no** va en variables `VITE_*` ni en el código: se guarda p
 1. Abre el canal donde estaba el webhook.
 2. **Configuración del canal** → **Integraciones** → **Webhooks**.
 3. Elimina el webhook antiguo (así invalidas la URL filtrada).
-4. **Crear webhook** → nombre descriptivo (p. ej. `MyList – Películas`) → **Copiar URL del webhook**.
+4. **Crear webhook** → nombre descriptivo (p. ej. `WhichNext – Películas`) → **Copiar URL del webhook**.
 
 ## 2. En la app (recomendado)
 

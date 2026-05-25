@@ -29,9 +29,9 @@ export default defineConfig({
         'pwa-64x64.png',
       ],
       manifest: {
-        name: 'MyList - Peliculas y Series',
-        short_name: 'MyList',
-        description: 'Gestiona tus listas de peliculas y series',
+        name: 'WhichNext — Películas y series',
+        short_name: 'WhichNext',
+        description: 'Listas compartidas de películas y series: qué ver después, juntos.',
         theme_color: '#0b0b12',
         background_color: '#0b0b12',
         display: 'standalone',

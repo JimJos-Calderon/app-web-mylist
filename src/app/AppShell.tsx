@@ -61,7 +61,7 @@ const AppShell: React.FC = () => {
     }
 
     return (
-        <div className={`min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-sans selection:bg-orange-500/30 ${theme === 'retro-cartoon' ? 'retro-fx' : ''}`}>
+        <div className={`min-h-screen text-[var(--color-text-primary)] font-sans selection:bg-orange-500/30 ${theme === 'cyberpunk' || theme === 'terminal' ? 'bg-transparent' : 'bg-[var(--color-bg-primary)]'} ${theme === 'retro-cartoon' ? 'retro-fx' : ''}`}>
             {needsUsername && <UsernameSetupModal />}
 
             <PendingInviteModal

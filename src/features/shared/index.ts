@@ -14,6 +14,8 @@ export { SectionErrorFallback } from './components/SectionErrorFallback'
 
 export { default as ThemeSwitcher } from './components/ThemeSwitcher'
 export { default as TechBackground } from './components/TechBackground'
+export { default as CyberpunkLinesBackground } from './components/CyberpunkLinesBackground'
+export { default as TerminalMatrixBackground } from './components/TerminalMatrixBackground'
 export { default as HudContainer } from './components/HudContainer'
 export { default as TechLabel } from './components/TechLabel'
 export { default as ItemGroupWatchBadge } from './components/ItemGroupWatchBadge'

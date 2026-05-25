@@ -212,7 +212,7 @@ serve(async (req: Request) => {
     const omdbResponse = await fetch(omdbUrl.toString(), {
       method: "GET",
       headers: {
-        "User-Agent": "MyListApp/1.0",
+        "User-Agent": "WhichNext/1.0",
       },
     });
 
@@ -244,7 +244,7 @@ serve(async (req: Request) => {
           const detailsResponse = await fetch(detailsUrl.toString(), {
             method: "GET",
             headers: {
-              "User-Agent": "MyListApp/1.0",
+              "User-Agent": "WhichNext/1.0",
             },
           });
 

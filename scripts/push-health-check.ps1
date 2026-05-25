@@ -62,7 +62,7 @@ $timestamp = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd HH:mm:ss UTC')
 $pushBody = @{
   user_id = $targetUser
   message = "Health-check deploy ($timestamp)"
-  title = 'MyList Push Health Check'
+  title = 'WhichNext Push Health Check'
   url = '/peliculas'
   tag = 'mylist-health-check'
 } | ConvertTo-Json -Compress
