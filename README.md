@@ -10,7 +10,7 @@
 
 **WhichNext** es una aplicación web para gestionar **listas compartidas** de películas y series: autenticación Supabase, búsqueda con **Edge Function + OMDB**, metadatos enriquecidos con **TMDB** (título ES, póster, géneros, **dónde verlo** por región), calificaciones, comentarios, **crítica rápida** al marcar como visto, **Oráculo** (sugerencias vía Groq), **etiquetas**, **orden manual**, **siguiente en cola**, **export/import JSON y CSV**, y **varios temas visuales** (retro cartoon, terminal, cyberpunk y default).
 
-[✨ WebSite](https://jandn.onrender.com/) • [📖 Documentación](#características) • [🐛 Reportar Bug](../../issues)
+[✨ WebSite](https://jandn.onrender.com/) • [📖 Documentación](docs/README.md) • [🐛 Reportar Bug](../../issues)
 
 </div>
 
@@ -30,7 +30,7 @@
 - 📝 **Comentarios / reseñas** — `item_comments`; al marcar visto pueden exigirse reseña o **crítica rápida** (modal: estrellas, reacción, texto opcional) vía RPC `save_quick_critique`
 - 🤖 **IA (opcional)** — Mejora de borradores con **Groq** en la caja de comentarios y en el modal de crítica; **Oráculo** usa el mismo modelo para recomendaciones según tu historial (todo vía Edge Function **`ai-proxy`**, clave solo en servidor)
 - 🕒 **Historial de actividad** — Timeline colaborativo por lista con eventos recientes de cambios
-- 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` y default; preferencia sincronizada en perfil; en **retro**, modales con animación tipo «Meep Meep» (entrada/salida del panel) y badges HUD en tarjetas (`> POR VER`, `> VISTO`, `> CON NOTA`)
+- 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` (por defecto); fondos animados en **cyberpunk** (líneas neón) y **terminal** (Matrix); en **retro**, modales «Meep Meep» y badges `> POR VER` / `> VISTO` / `> CON NOTA` — véase [docs/THEMES.md](docs/THEMES.md)
 - 📺 **Dónde verlo** — En el modal de detalle, plataformas de streaming/alquiler/compra vía TMDB (`resolveItemWatchProviders`), según idioma/región del usuario
 - 🔍 **Filtros avanzados** — Estado (vistas/pendientes), texto, orden y etiqueta
 - 📐 **Lista en rejilla** — Tarjetas en cuadrícula adaptable (móvil → varias columnas), paginación por página (**9** ítems) salvo en orden **manual** (sin paginar para poder reordenar todo lo visible)
@@ -334,9 +334,9 @@ app-web-mylist/
 │   │   ├── send-push/            # Envío web push
 │   │   └── push-orchestrator/    # Discord + Web Push + FCM (antes notify-discord)
 │   └── migrations/               # Esquema, RLS, auditoría, push y fixes
+├── docs/                         # Documentación (índice: docs/README.md; TFG: docs/tfg/)
 ├── scripts/
 │   └── push-health-check.ps1     # Verificación operativa de push
-├── RUNBOOK_PUSH_NOTIFICATIONS.md # Runbook operativo de push
 ├── migration-to-shared-lists.sql # Migración desde esquema anterior
 └── README.md
 ```
@@ -405,10 +405,11 @@ El aspecto depende de `data-theme` (preferencia en **Ajustes** y sincronizada en
 
 | Tema | Notas |
 |------|--------|
-| **Default** | Neón / retrowave, acentos cyan y variables CSS |
-| **Cyberpunk** | Superficies `cyberpunk-surface`, botones con brillo magenta/cyan |
-| **Terminal** | Verde fósforo, bordes rectos, paneles estilo consola |
-| **Retro cartoon** | Papel y tinta, bordes gruesos negros, sombras desplazadas, fuente `theme-heading-font` (Space Meatball), clase `retro-fx` en modales clave |
+| **Cyberpunk** (default) | Superficies `cyberpunk-surface`, fondo canvas de líneas neón (`CyberpunkLinesBackground`) |
+| **Terminal** | Verde fósforo, paneles consola, fondo lluvia Matrix (`TerminalMatrixBackground`) |
+| **Retro cartoon** | Neubrutalismo, `retro-fx`, modales `RetroMeepModalFrame`, login `/retro-login-bg.webp` |
+
+Documentación detallada: [docs/THEMES.md](docs/THEMES.md).
 
 Los modales (detalle, crítica rápida, confirmaciones, crear/invitar lista, registro) reutilizan los mismos tokens por tema. En **retro-cartoon**:
 
