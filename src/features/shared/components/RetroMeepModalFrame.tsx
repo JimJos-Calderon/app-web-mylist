@@ -11,8 +11,11 @@ import { useReducedMotion } from '../hooks/useReducedMotion'
 /** Duración total de salida (fade + road runner + quickScale), alineada con el CSS “Meep Meep”. */
 export const RETRO_MEEP_EXIT_DURATION_MS = 520
 
+/** Salida «Unfolding»: zoomOut 0,5s + unfoldOut 1s con delay 0,3s. */
+export const CYBERPUNK_UNFOLD_EXIT_DURATION_MS = 1300
+
 export type RetroMeepModalFrameHandle = {
-  /** Ejecuta comprobaciones opcionales y cierra (con animación solo en tema retro si aplica). */
+  /** Ejecuta comprobaciones opcionales y cierra (con animación si aplica al tema). */
   tryBeginClose: () => void
 }
 
@@ -21,6 +24,8 @@ export type RetroMeepModalFrameVariant = 'stacked' | 'split'
 type RetroMeepModalFrameProps = {
   /** Tema retro cartoon: activa animación tipo “Meep Meep” (respeta prefers-reduced-motion). */
   meep: boolean
+  /** Tema cyberpunk: animación «Unfolding» (desplegar + zoom del panel). */
+  cyberpunkUnfold?: boolean
   variant: RetroMeepModalFrameVariant
   onRequestClose: () => void
   /** Si devuelve false, se cancela el cierre (p. ej. submodal abierta). */
@@ -45,6 +50,7 @@ export const RetroMeepModalFrame = forwardRef<RetroMeepModalFrameHandle, RetroMe
   function RetroMeepModalFrame(
     {
       meep,
+      cyberpunkUnfold = false,
       variant,
       onRequestClose,
       onBeforeClose,
@@ -67,6 +73,7 @@ export const RetroMeepModalFrame = forwardRef<RetroMeepModalFrameHandle, RetroMe
   ) {
     const reducedMotion = useReducedMotion()
     const meepActive = Boolean(meep && !reducedMotion)
+    const unfoldActive = Boolean(cyberpunkUnfold && !reducedMotion && !meepActive)
     const [leaving, setLeaving] = useState(false)
     const leavingRef = useRef(false)
     const closeTimerRef = useRef<number | null>(null)
@@ -80,25 +87,37 @@ export const RetroMeepModalFrame = forwardRef<RetroMeepModalFrameHandle, RetroMe
 
     useEffect(() => () => clearCloseTimer(), [clearCloseTimer])
 
+    const runAnimatedClose = useCallback(
+      (durationMs: number) => {
+        if (leavingRef.current) return
+        leavingRef.current = true
+        setLeaving(true)
+        clearCloseTimer()
+        closeTimerRef.current = window.setTimeout(() => {
+          onRequestClose()
+          leavingRef.current = false
+          setLeaving(false)
+          closeTimerRef.current = null
+        }, durationMs)
+      },
+      [clearCloseTimer, onRequestClose],
+    )
+
     const tryBeginClose = useCallback(() => {
       if (onBeforeClose && !onBeforeClose()) return
 
-      if (!meepActive) {
-        onRequestClose()
+      if (unfoldActive) {
+        runAnimatedClose(CYBERPUNK_UNFOLD_EXIT_DURATION_MS)
         return
       }
 
-      if (leavingRef.current) return
-      leavingRef.current = true
-      setLeaving(true)
-      clearCloseTimer()
-      closeTimerRef.current = window.setTimeout(() => {
-        onRequestClose()
-        leavingRef.current = false
-        setLeaving(false)
-        closeTimerRef.current = null
-      }, RETRO_MEEP_EXIT_DURATION_MS)
-    }, [clearCloseTimer, meepActive, onBeforeClose, onRequestClose])
+      if (meepActive) {
+        runAnimatedClose(RETRO_MEEP_EXIT_DURATION_MS)
+        return
+      }
+
+      onRequestClose()
+    }, [meepActive, onBeforeClose, onRequestClose, runAnimatedClose, unfoldActive])
 
     useImperativeHandle(ref, () => ({ tryBeginClose }), [tryBeginClose])
 
@@ -136,7 +155,29 @@ export const RetroMeepModalFrame = forwardRef<RetroMeepModalFrameHandle, RetroMe
       tabIndex,
     }
 
-    const panelClasses = joinClass(meepActive ? 'retro-modal-meep__panel' : undefined, panelClassName)
+    const panelClasses = joinClass(
+      unfoldActive ? 'cyberpunk-modal-unfold__panel' : undefined,
+      meepActive ? 'retro-modal-meep__panel' : undefined,
+      panelClassName,
+    )
+
+    if (unfoldActive) {
+      const unfoldRoot = joinClass(
+        'cyberpunk-modal-unfold',
+        leaving && 'cyberpunk-modal-unfold--out',
+        rootClassName,
+      )
+
+      return (
+        <div className={unfoldRoot} {...rootA11y}>
+          <div className="cyberpunk-modal-unfold__background" onClick={tryBeginClose}>
+            <div className={panelClasses} {...restPanelProps} onClick={handlePanelClick}>
+              {children}
+            </div>
+          </div>
+        </div>
+      )
+    }
 
     if (!meepActive) {
       if (variant === 'split') {

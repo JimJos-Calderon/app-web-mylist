@@ -43,7 +43,7 @@ interface ItemDetailsModalProps {
   deleteLabel: string
   onClose: () => void
   onToggle: () => void
-  onDelete: () => void
+  onDelete: () => Promise<boolean>
   onQuickCritiqueConfirm: (rating: number, liked: boolean, comment: string) => Promise<void>
   isQuickCritiqueSaving: boolean
   onNext?: () => void
@@ -98,6 +98,8 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
   const isTerminal = theme === 'terminal'
   const reducedMotion = useReducedMotion()
   const meep = isRetroCartoon && !reducedMotion
+  const cyberpunkUnfold = isCyberpunk && !reducedMotion
+  const modalAnimated = meep || cyberpunkUnfold
   const frameRef = React.useRef<RetroMeepModalFrameHandle>(null)
   const [showQuickCritique, setShowQuickCritique] = React.useState(false)
   const [tagsDraft, setTagsDraft] = React.useState('')
@@ -176,6 +178,13 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
     frameRef.current?.tryBeginClose()
   }, [])
 
+  const handleDeleteClick = async () => {
+    const deleted = await onDelete()
+    if (deleted) {
+      handleRequestClose()
+    }
+  }
+
   const handleToggleClick = async () => {
     if (!selectedItem || modalActionLoading !== null) return
 
@@ -204,7 +213,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
       : translatedSynopsis || synopsis
   const displayTitle = formatRetroHeading(selectedItem.titulo, theme)
 
-  const panelMotionClass = meep
+  const panelMotionClass = modalAnimated
     ? ''
     : `transition-all duration-200 ${isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`
 
@@ -225,15 +234,17 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
         <RetroMeepModalFrame
           ref={frameRef}
           meep={meep}
+          cyberpunkUnfold={cyberpunkUnfold}
           variant="stacked"
           onRequestClose={onClose}
           onBeforeClose={handleBeforeCloseModal}
+          closeOnEscape={modalAnimated}
           rootClassName={
-            meep
+            modalAnimated
               ? 'fixed inset-0 z-[100] overflow-hidden'
               : 'fixed inset-0 z-[100] flex items-center justify-center p-4'
           }
-          stackedFillClassName={meep ? undefined : 'bg-black/60 backdrop-blur-sm'}
+          stackedFillClassName={modalAnimated ? undefined : 'bg-black/60 backdrop-blur-sm'}
           panelClassName={panelShellClass}
           role="dialog"
           aria-modal="true"
@@ -622,7 +633,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               {canDelete && (
                 <button
                   type="button"
-                  onClick={onDelete}
+                  onClick={handleDeleteClick}
                   disabled={modalActionLoading !== null}
                   className={
                     isRetroCartoon

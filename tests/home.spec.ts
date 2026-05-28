@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('App - Home Page', () => {
   test('debería cargar la página principal', async ({ page }) => {
-    // Navega a la URL base (http://localhost:5173)
+    // Navega a la URL base (http://localhost:5174)
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     // Verifica que la página no está vacía

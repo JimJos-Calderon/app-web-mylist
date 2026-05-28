@@ -111,7 +111,7 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
 
       {!hasPendingSection && visibleWatchedItems.length > 0 && totalPages > 1 && (
         <>
-          <div className="mt-8 flex items-center justify-center gap-1 overflow-visible py-2 md:mt-10 md:gap-2">
+          <div className="list-pagination mt-8 flex items-center justify-center gap-1 overflow-visible py-2 md:mt-10 md:gap-2">
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
@@ -154,10 +154,8 @@ const WatchedItemsSection: React.FC<WatchedItemsSectionProps> = ({
                     onClick={() => onPageChange(page)}
                     className={
                       isTerminal
-                        ? `theme-heading-font rounded-none md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${
-                            currentPage === page
-                              ? 'terminal-button bg-[var(--color-accent-primary)] text-[var(--color-bg-base)]'
-                              : 'terminal-button opacity-80'
+                        ? `theme-heading-font rounded-none md:min-w-[40px] md:px-4 md:py-2 md:text-sm terminal-button ${
+                            currentPage === page ? 'terminal-button--active' : ''
                           }`
                         : `list-pagination-page font-mono md:min-w-[40px] md:px-4 md:py-2 md:text-sm ${
                             currentPage === page ? 'list-pagination-page--active' : 'list-pagination-page--idle'

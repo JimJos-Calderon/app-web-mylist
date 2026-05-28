@@ -244,7 +244,7 @@ Inicia el servidor:
 npm run dev
 ```
 
-La aplicación debería estar en `http://localhost:5173`
+La aplicación debería estar en `http://localhost:5174`
 
 **Checklist**:
 - ✅ Puedes registrarte/iniciar sesión

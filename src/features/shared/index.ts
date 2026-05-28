@@ -1,6 +1,7 @@
 export { default as ConfirmDialog } from './components/ConfirmDialog'
 export {
   RetroMeepModalFrame,
+  CYBERPUNK_UNFOLD_EXIT_DURATION_MS,
   RETRO_MEEP_EXIT_DURATION_MS,
   type RetroMeepModalFrameHandle,
   type RetroMeepModalFrameVariant,

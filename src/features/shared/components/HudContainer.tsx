@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 
 interface HudContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
@@ -6,15 +6,18 @@ interface HudContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   showDecorations?: boolean
 }
 
-const HudContainer: React.FC<HudContainerProps> = ({
-  children,
-  className = '',
-  contentClassName = '',
-  showDecorations = true,
-  ...rest
-}) => {
+const HudContainer = forwardRef<HTMLDivElement, HudContainerProps>(function HudContainer(
+  {
+    children,
+    className = '',
+    contentClassName = '',
+    showDecorations = true,
+    ...rest
+  },
+  ref,
+) {
   return (
-    <div className={`hud-container backdrop-blur-md ${className}`} {...rest}>
+    <div ref={ref} className={`hud-container backdrop-blur-md ${className}`} {...rest}>
       {showDecorations && (
         <>
           <span aria-hidden="true" className="hud-corner hud-corner--tl" />
@@ -32,6 +35,6 @@ const HudContainer: React.FC<HudContainerProps> = ({
       </div>
     </div>
   )
-}
+})
 
 export default HudContainer

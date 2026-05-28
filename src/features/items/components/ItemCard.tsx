@@ -104,13 +104,11 @@ const ItemCard: React.FC<ItemCardProps> = ({
           item.visto && !disableVistoEffect
             ? 'opacity-[0.65] saturate-50 hover:opacity-100 hover:saturate-100'
             : 'ring-1 ring-inset ring-white/5 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/50 hover:ring-white/10'
-        } ${
-          isOwn ? 'hud-item-card--owner' : 'hud-item-card--shared'
-        } ${
-          isRetroCartoon ? 'item-card-retro-ink border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl' : ''
-        } ${
-          isCyberpunk ? 'cyberpunk-card-hover' : ''
-        }`}
+        } ${isOwn ? 'hud-item-card--owner' : 'hud-item-card--shared'} ${
+          isRetroCartoon
+            ? 'item-card-retro-ink border-[3px] border-black shadow-[5px_5px_0px_0px_#000000] rounded-xl'
+            : ''
+        } ${isCyberpunk ? 'cyberpunk-card-hover' : ''}`}
         contentClassName="relative flex h-full flex-col"
       >
         <button
