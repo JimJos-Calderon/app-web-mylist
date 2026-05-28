@@ -82,19 +82,6 @@ export const useListItemDetails = ({
   }, [isModalOpen])
 
   useEffect(() => {
-    if (!selectedItem) return
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        handleCloseDetails()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedItem])
-
-  useEffect(() => {
     return () => {
       if (closeTimeoutRef.current !== null) {
         window.clearTimeout(closeTimeoutRef.current)
@@ -150,8 +137,9 @@ export const useListItemDetails = ({
 
   const handleCloseDetails = () => {
     setIsModalAnimating(false)
-    const useRetroMeep = theme === 'retro-cartoon' && !reducedMotion
-    const cleanupDelayMs = useRetroMeep ? 0 : 180
+    const useFrameExitAnimation =
+      (theme === 'retro-cartoon' || theme === 'cyberpunk') && !reducedMotion
+    const cleanupDelayMs = useFrameExitAnimation ? 0 : 180
     closeTimeoutRef.current = window.setTimeout(() => {
       setIsModalOpen(false)
       setSelectedItem(null)
@@ -204,18 +192,19 @@ export const useListItemDetails = ({
     }
   }
 
-  const handleDeleteFromModal = async () => {
-    if (!selectedItem || modalActionLoading) return
-    if (!confirm(getDeleteConfirmationMessage(selectedItem))) return
+  const handleDeleteFromModal = async (): Promise<boolean> => {
+    if (!selectedItem || modalActionLoading) return false
+    if (!confirm(getDeleteConfirmationMessage(selectedItem))) return false
 
     setModalActionLoading('delete')
 
     try {
       await onDeleteItem(selectedItem.id)
-      handleCloseDetails()
+      return true
     } catch (error) {
       console.error('Delete error:', error)
       setModalActionLoading(null)
+      return false
     }
   }
 

@@ -44,6 +44,7 @@ Montados en [`src/App.tsx`](../src/App.tsx) solo cuando el tema activo coincide:
 - Lluvia de caracteres estilo Matrix (`#0aff0a`, ~30 FPS).
 - Misma estrategia: sin imagen de login, sin orbes decorativos, shell transparente.
 - `resize` reinicializa columnas del efecto.
+- Paneles de lista (`list-active-header`, buscador, `hud-container`, stats) usan fondos ~50–55 % opacos + `backdrop-filter` para dejar ver la lluvia detrás.
 
 ### Retro cartoon
 
@@ -80,7 +81,14 @@ Solo en `retro-cartoon`:
 
 - Componente [`RetroMeepModalFrame`](../src/features/shared/components/RetroMeepModalFrame.tsx).
 - Keyframes `retro-meep-*` en `index.css`.
-- Usado en confirmaciones, detalle, crítica rápida, crear/invitar lista, registro.
+- Usado en confirmaciones, crítica rápida, crear/invitar lista, registro.
+
+## Cyberpunk: modal de ítem «Unfolding»
+
+Solo en `cyberpunk`, únicamente en el **detalle de ítem** (`ItemDetailsModal` con `cyberpunkUnfold`):
+
+- Keyframes `cyberpunk-unfold-*` en `index.css` (pack modal #one: desplegar contenedor + zoom del panel).
+- Apertura: `unfoldIn` 1s + `zoomIn` 0,5s (delay 0,8s). Cierre: `zoomOut` 0,5s + `unfoldOut` 1s (delay 0,3s).
 
 ---
 

@@ -250,7 +250,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   if (!user) return null
 
   return (
-    <div className="list-content-shell relative min-h-screen w-full overflow-x-hidden bg-[var(--color-bg-primary)] font-sans">
+    <div className="list-content-shell relative min-h-screen w-full overflow-x-hidden font-sans">
       <CreateListDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}

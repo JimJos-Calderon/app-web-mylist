@@ -112,7 +112,7 @@ Crea un bucket público **`avatars`** en Supabase Storage para fotos de perfil.
 npm run dev
 ```
 
-Abre [http://localhost:5173](http://localhost:5173).
+Abre [http://localhost:5174](http://localhost:5174).
 
 ### Checklist
 

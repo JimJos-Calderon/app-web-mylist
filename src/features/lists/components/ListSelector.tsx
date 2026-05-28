@@ -81,7 +81,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
           }`}
           style={{
             borderColor: isRetroCartoon ? '#000000' : 'rgba(var(--color-accent-primary-rgb), 0.3)',
-            background: isRetroCartoon ? '#ffffff' : isTerminal ? 'rgba(0, 0, 0, 0.88)' : 'var(--color-bg-secondary)',
+            background: isRetroCartoon ? '#ffffff' : isTerminal ? 'rgba(5, 8, 5, 0.45)' : 'var(--color-bg-secondary)',
             color: isRetroCartoon ? '#000000' : isTerminal ? 'var(--color-accent-primary)' : 'var(--color-text-primary)',
             boxShadow: isRetroCartoon
               ? '4px 4px 0px 0px #000000'

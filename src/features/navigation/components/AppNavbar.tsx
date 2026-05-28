@@ -16,6 +16,7 @@ import HudContainer from '@/features/shared/components/HudContainer'
 import { useTheme } from '@/features/shared'
 import type { ThemePreference } from '@/features/shared'
 import { formatRetroHeading } from '@/features/shared/utils/textUtils'
+import CyberpunkStaggerNavLink from './CyberpunkStaggerNavLink'
 
 /** Fallback ligero (~64×64) en `public/`; no importar PNG grandes (evita inflar el bundle JS). */
 const NAV_LOGO_WEBP = '/logo-navbar.webp'
@@ -113,44 +114,60 @@ const AppNavbar: React.FC = () => {
         className={`app-navbar__nav-cluster absolute left-1/2 z-20 hidden -translate-x-1/2 md:flex md:flex-row items-center justify-center ${
           isRetroCartoon
             ? 'top-1/2 -translate-y-1/2 border-0 bg-transparent shadow-none py-2 md:py-3'
-            : `top-1/2 -translate-y-1/2 ${isCyberpunk || isTerminal ? '' : 'gap-6 md:gap-8 py-4 md:py-6 '}` +
+            : `top-1/2 -translate-y-1/2 ${isCyberpunk ? 'cyberpunk-stagger-nav-cluster gap-2 p-0 border-0 bg-transparent shadow-none' : isTerminal ? '' : 'gap-6 md:gap-8 py-4 md:py-6 '}` +
               (isCyberpunk
-                ? 'rounded-full border border-[rgba(0,255,255,0.4)] bg-[rgba(2,2,10,0.72)] shadow-[0_0_14px_rgba(255,0,255,0.16)] backdrop-blur-[12px]'
+                ? ''
                 : isTerminal
                   ? 'rounded-md border border-[rgba(var(--color-accent-primary-rgb),0.5)] bg-[rgba(0,0,0,0.88)] shadow-[0_0_12px_rgba(var(--color-accent-primary-rgb),0.12)]'
                   : 'rounded-xl border border-[rgba(var(--color-accent-primary-rgb),0.12)] bg-[rgba(var(--color-accent-primary-rgb),0.06)] px-2')
         }`}
       >
-        <NavLink
-          to="/peliculas"
-          className={({ isActive }) =>
-            isRetroCartoon
-              ? `ui-nav-button ui-nav-button--peliculas${isActive ? ' ui-nav-button--active' : ''}`
-              : `px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)] ${isTerminal || isCyberpunk ? 'theme-heading-font uppercase' : ''} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`
-          }
-        >
-          {formatRetroHeading(t('navbar.movies'), theme)}
-        </NavLink>
-        <NavLink
-          to="/series"
-          className={({ isActive }) =>
-            isRetroCartoon
-              ? `ui-nav-button ui-nav-button--series${isActive ? ' ui-nav-button--active' : ''}`
-              : `px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)] ${isTerminal || isCyberpunk ? 'theme-heading-font uppercase' : ''} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`
-          }
-        >
-          {formatRetroHeading(t('navbar.series'), theme)}
-        </NavLink>
-        <NavLink
-          to="/perfil"
-          className={({ isActive }) =>
-            isRetroCartoon
-              ? `ui-nav-button ui-nav-button--perfil${isActive ? ' ui-nav-button--active' : ''}`
-              : `px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)] ${isTerminal || isCyberpunk ? 'theme-heading-font uppercase' : ''} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`
-          }
-        >
-          {formatRetroHeading(t('navbar.profile'), theme)}
-        </NavLink>
+        {isCyberpunk ? (
+          <>
+            <CyberpunkStaggerNavLink to="/peliculas">
+              {formatRetroHeading(t('navbar.movies'), theme)}
+            </CyberpunkStaggerNavLink>
+            <CyberpunkStaggerNavLink to="/series">
+              {formatRetroHeading(t('navbar.series'), theme)}
+            </CyberpunkStaggerNavLink>
+            <CyberpunkStaggerNavLink to="/perfil">
+              {formatRetroHeading(t('navbar.profile'), theme)}
+            </CyberpunkStaggerNavLink>
+          </>
+        ) : (
+          <>
+            <NavLink
+              to="/peliculas"
+              className={({ isActive }) =>
+                isRetroCartoon
+                  ? `ui-nav-button ui-nav-button--peliculas${isActive ? ' ui-nav-button--active' : ''}`
+                  : `px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)] ${isTerminal ? 'theme-heading-font uppercase' : ''}`
+              }
+            >
+              {formatRetroHeading(t('navbar.movies'), theme)}
+            </NavLink>
+            <NavLink
+              to="/series"
+              className={({ isActive }) =>
+                isRetroCartoon
+                  ? `ui-nav-button ui-nav-button--series${isActive ? ' ui-nav-button--active' : ''}`
+                  : `px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)] ${isTerminal ? 'theme-heading-font uppercase' : ''}`
+              }
+            >
+              {formatRetroHeading(t('navbar.series'), theme)}
+            </NavLink>
+            <NavLink
+              to="/perfil"
+              className={({ isActive }) =>
+                isRetroCartoon
+                  ? `ui-nav-button ui-nav-button--perfil${isActive ? ' ui-nav-button--active' : ''}`
+                  : `px-6 py-2 rounded-lg hover:text-accent-primary transition-all font-bold text-sm text-[var(--color-text-primary)] ${isTerminal ? 'theme-heading-font uppercase' : ''}`
+              }
+            >
+              {formatRetroHeading(t('navbar.profile'), theme)}
+            </NavLink>
+          </>
+        )}
       </div>
 
       <button
@@ -221,12 +238,16 @@ const AppNavbar: React.FC = () => {
         </button>
 
         {showUserMenu && (
-          <HudContainer className={`!absolute right-0 mt-2 w-56 z-50 p-0 overflow-hidden animate-in slide-in-from-top-2 duration-200 block ${
+          <HudContainer className={`app-navbar-user-menu !absolute right-0 mt-2 w-56 z-50 p-0 overflow-hidden animate-in slide-in-from-top-2 duration-200 block ${
             isCyberpunk
               ? 'cyberpunk-surface shadow-[0_0_24px_rgba(255,0,255,0.18)] backdrop-blur-[12px]'
               : 'shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.2)]'
           }`}>
-            <div className="px-5 py-4 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[rgba(var(--color-accent-primary-rgb),0.05)]">
+            <div
+              className={`app-navbar-user-menu__header px-5 py-4 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)] ${
+                isTerminal ? '' : 'bg-[rgba(var(--color-accent-primary-rgb),0.05)]'
+              }`}
+            >
               <p className={`text-sm font-bold text-[var(--color-text-primary)] truncate ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font uppercase' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-text-glow' : ''}`}>{formatRetroHeading(displayName, theme)}</p>
               <p className={`text-xs text-[var(--color-text-muted)] truncate opacity-80 ${isCyberpunk ? 'theme-body-font' : 'font-mono'}`}>{userEmail}</p>
             </div>
@@ -253,37 +274,42 @@ const AppNavbar: React.FC = () => {
                 <Link
                   to="/perfil"
                   onClick={() => setShowUserMenu(false)}
-                  className={`block w-full text-left px-5 py-3 text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold ${isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`}
+                  className={`app-navbar-user-menu__link block w-full text-left px-5 py-3 text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold ${isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`}
                 >
                   {formatRetroHeading(t('navbar.profile'), theme)}
                 </Link>
                 <Link
                   to="/ajustes"
                   onClick={() => setShowUserMenu(false)}
-                  className={`block w-full text-left px-5 py-3 text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold ${isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`}
+                  className={`app-navbar-user-menu__link block w-full text-left px-5 py-3 text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-primary-rgb),0.1)] hover:text-accent-primary hover:shadow-[inset_4px_0_0_var(--color-accent-primary)] transition-all font-bold ${isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`}
                 >
                   {formatRetroHeading(t('navbar.settings'), theme)}
                 </Link>
               </>
             )}
 
-            <div className="px-5 py-3 border-t border-[rgba(var(--color-accent-primary-rgb),0.15)]">
+            <div className="app-navbar-user-menu__themes px-5 py-3 border-t border-[rgba(var(--color-accent-primary-rgb),0.15)]">
               <p className={`text-[9px] uppercase tracking-widest text-[var(--color-text-muted)] mb-2 opacity-70 ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>{formatRetroHeading('Tema', theme)}</p>
               <div className="flex gap-1.5">
                 {THEMES.map(({ value, label, color }) => (
                   <button
                     key={value}
                     type="button"
+                    data-active={theme === value ? 'true' : 'false'}
                     onClick={() => { changeTheme(value); setShowUserMenu(false) }}
                     title={label}
-                    className={`flex-1 py-1.5 text-[9px] font-bold uppercase tracking-widest border transition-all ${
+                    className={`app-navbar-user-menu__theme-btn flex-1 py-1.5 text-[9px] font-bold uppercase tracking-widest border transition-all ${
                       isCyberpunk ? 'cyberpunk-pill theme-heading-font px-2' : isRetroCartoon || isTerminal ? 'theme-heading-font rounded' : 'font-mono rounded'
                     }`}
-                    style={{
-                      borderColor: theme === value ? color : 'rgba(255,255,255,0.1)',
-                      color: theme === value ? color : 'var(--color-text-muted)',
-                      background: theme === value ? `color-mix(in srgb, ${color} 15%, transparent)` : 'transparent',
-                    }}
+                    style={
+                      isTerminal
+                        ? undefined
+                        : {
+                            borderColor: theme === value ? color : 'rgba(255,255,255,0.1)',
+                            color: theme === value ? color : 'var(--color-text-muted)',
+                            background: theme === value ? `color-mix(in srgb, ${color} 15%, transparent)` : 'transparent',
+                          }
+                    }
                   >
                     {label}
                   </button>
@@ -296,7 +322,7 @@ const AppNavbar: React.FC = () => {
                 signOut()
                 setShowUserMenu(false)
               }}
-              className={`w-full text-left px-5 py-4 text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold border-t border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] flex items-center gap-2 ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`}
+              className={`app-navbar-user-menu__logout w-full text-left px-5 py-4 text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold border-t border-[rgba(var(--color-accent-primary-rgb),0.2)] flex items-center gap-2 ${isTerminal ? '' : 'bg-[var(--color-bg-secondary)]'} ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`}
             >
               <LogOut className="w-4 h-4 opacity-70" /> {formatRetroHeading(t('navbar.logout'), theme)}
             </button>
