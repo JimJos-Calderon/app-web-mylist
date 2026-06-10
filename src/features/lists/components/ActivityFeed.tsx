@@ -183,6 +183,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
   const { events, loading, error } = useActivityFeed({ listId, limit })
   const retroMode = isRetroTheme(theme)
   const feedI18nMode: FeedThemeMode = retroMode ? 'retro' : 'default'
+  const retroText = useCallback((value: string) => formatRetroHeading(value, theme), [theme])
   const headerLabel = t(`activityFeed.${feedI18nMode}.header.label`)
   const errorHeaderLabel = t(`activityFeed.${feedI18nMode}.header.errorLabel`)
   const headerTitle = t(`activityFeed.${feedI18nMode}.header.title`)
@@ -235,7 +236,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
         <div
           className={`flex items-start gap-2 text-xs ${retroMode ? 'theme-heading-font !text-black' : 'font-mono text-accent-secondary'}`}
         >
-          <span>{errorMessage}</span>
+          <span>{retroMode ? retroText(errorMessage) : errorMessage}</span>
         </div>
       </HudContainer>
     )
@@ -254,7 +255,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
         <p
           className={`text-xs ${retroMode ? 'theme-heading-font !text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)] font-mono'}`}
         >
-          {emptyMessage}
+          {retroMode ? retroText(emptyMessage) : emptyMessage}
         </p>
       </HudContainer>
     )
@@ -283,15 +284,15 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <TechLabel text={headerLabel} />
+              <TechLabel text={retroMode ? retroText(headerLabel) : headerLabel} />
             </div>
             <h3
               className={`mt-1 text-base font-semibold ${retroMode ? 'theme-heading-font uppercase !text-[var(--color-bg-primary)]' : 'text-[var(--color-text-primary)]'}`}
             >
-              {formattedHeaderTitle}
+              {retroMode ? retroText(formattedHeaderTitle) : formattedHeaderTitle}
             </h3>
             <p className={`mt-1 text-xs ${retroMode ? 'theme-heading-font !text-[var(--color-bg-primary)] opacity-90' : 'text-[var(--color-text-muted)]'}`}>
-              {headerSubtitle}
+              {retroMode ? retroText(headerSubtitle) : headerSubtitle}
             </p>
           </div>
         </div>
@@ -305,7 +306,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
           }`}
           style={retroMode ? { backgroundColor: 'var(--color-bg-primary)' } : undefined}
         >
-          {t('activityFeed.common.countBadge', { count: events.length })}
+          {retroMode ? retroText(t('activityFeed.common.countBadge', { count: events.length })) : t('activityFeed.common.countBadge', { count: events.length })}
         </span>
       </header>
 
@@ -397,7 +398,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
                           : 'border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[rgba(var(--color-accent-primary-rgb),0.08)] text-accent-primary'
                       }`}
                     >
-                      {actorName}
+                      {retroMode ? retroText(actorName) : actorName}
                     </span>
                     {event.item_title && (
                       <span
@@ -407,7 +408,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
                             : 'border border-[rgba(var(--color-accent-secondary-rgb),0.25)] bg-[rgba(var(--color-accent-secondary-rgb),0.08)] text-accent-secondary'
                         }`}
                       >
-                        {itemTitle}
+                        {retroMode ? retroText(itemTitle) : itemTitle}
                       </span>
                     )}
                     {event.list_name && (
@@ -418,7 +419,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
                             : 'border border-white/10 bg-white/5 text-[var(--color-text-muted)]'
                         }`}
                       >
-                        {listName}
+                        {retroMode ? retroText(listName) : listName}
                       </span>
                     )}
                   </div>
@@ -454,7 +455,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
                     }`}
                   >
                     {theme === 'terminal' ? <span className="mr-1 text-green-500/80">&gt;</span> : null}
-                    {message}
+                    {retroMode ? retroText(message) : message}
                   </p>
 
                   {showCommentPreview && (
@@ -467,7 +468,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
                           : 'border-violet-500/50 text-[var(--color-text-muted)]'
                       } ${theme === 'terminal' ? 'font-mono' : ''}`}
                     >
-                      “{event.comment_text!.trim().slice(0, 160)}
+                      “{retroMode ? retroText(event.comment_text!.trim().slice(0, 160)) : event.comment_text!.trim().slice(0, 160)}
                       {event.comment_text!.trim().length > 160 ? '…' : ''}”
                     </p>
                   )}
@@ -478,7 +479,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ listId, limit = 20, classNa
                     }`}
                   >
                     <Clock3 className={`h-3 w-3 shrink-0 ${retroMode ? retroInk : ''}`} />
-                    <span>{relativeTime}</span>
+                    <span>{retroMode ? retroText(relativeTime) : relativeTime}</span>
                   </div>
                 </div>
 

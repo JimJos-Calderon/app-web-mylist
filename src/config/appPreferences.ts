@@ -2,7 +2,7 @@ import { capacitorStorage } from './capacitorStorage'
 
 export const THEME_STORAGE_KEY = 'theme'
 export const LANGUAGE_STORAGE_KEY = 'language'
-export const DEFAULT_THEME = 'cyberpunk'
+export const DEFAULT_THEME = 'retro-cartoon'
 export const DEFAULT_LANGUAGE = 'es'
 
 const normalizeLanguage = (value?: string | null) => {

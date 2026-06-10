@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Suspense, lazy } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Navigate } from 'react-router-dom'
 import { XCircle } from 'lucide-react'
 import { useAuth } from '@/features/auth'
 import UsernameSetupModal from '@/features/onboarding/components/UsernameSetupModal'
@@ -12,11 +12,17 @@ import { useTheme } from '@/features/shared/hooks/useTheme'
 
 const Login = lazy(() => import('@pages/Login'))
 const JoinList = lazy(() => import('@pages/JoinList'))
+const Landing = lazy(() => import('@pages/Landing'))
 
 const AppShell: React.FC = () => {
     const { session, loading, error: authError, needsUsername } = useAuth()
     const { theme } = useTheme()
     const location = useLocation()
+    const stateFrom = typeof location.state === 'object' && location.state && 'from' in location.state
+        ? String((location.state as { from?: unknown }).from || '/')
+        : ''
+    const searchFrom = new URLSearchParams(location.search).get('from') ?? ''
+    const loginReturnTo = stateFrom || searchFrom || '/'
 
     const [showError, setShowError] = useState<string | null>(authError)
 
@@ -52,12 +58,32 @@ const AppShell: React.FC = () => {
         )
     }
 
-    if (!session) {
+    if (!session && (location.pathname === '/' || location.pathname === '/landing')) {
         return (
             <Suspense fallback={<AppBootScreen />}>
-                <Login />
+                <Landing />
             </Suspense>
         )
+    }
+
+    if (!session) {
+        if (location.pathname !== '/login') {
+            return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />
+        }
+
+        return (
+            <Suspense fallback={<AppBootScreen />}>
+                <Login redirectTo={loginReturnTo} />
+            </Suspense>
+        )
+    }
+
+    if (location.pathname === '/login') {
+        return <Navigate to={loginReturnTo} replace />
+    }
+
+    if (location.pathname === '/landing') {
+        return <Navigate to="/" replace />
     }
 
     return (

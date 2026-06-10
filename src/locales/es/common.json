@@ -76,5 +76,142 @@
     "loading": "Cargando listas...",
     "no_lists": "No tienes listas disponibles",
     "label": "Lista:"
+  },
+  "landing": {
+    "nav": {
+      "features": "Funciones",
+      "workflow": "Flujo",
+      "oracle": "Oráculo",
+      "themes": "Temas",
+      "roadmap": "Roadmap",
+      "login": "Entrar",
+      "menu": "☰ Menu",
+      "close": "✕ Cerrar"
+    },
+    "hero": {
+      "kicker1": "SELECCIÓN COOPERATIVA DE CINE",
+      "kicker2": "MOTOR DE ORÁCULO IA",
+      "titleWord1": "Decide",
+      "titleWord2": "Qué ver",
+      "titleWord3": "En grupo",
+      "desc": "Crea listas compartidas de películas y series con amigos, vota y decide sin discusiones.",
+      "stat1": "Lista compartida",
+      "stat2": "Temas visuales",
+      "stat3": "Decisión rápida"
+    },
+    "terminal": {
+      "line1": "$ whichnext list --active",
+      "line2": "[WhichNext] Sincronizando lista \"Cine del Finde\"...",
+      "line3": "● El Padrino (1972)",
+      "line4": "  Votos: 4 Likes / 0 Dislikes",
+      "line5": "  Comentarios: \"Un clásico imprescindible.\"",
+      "line6": "● Interestelar (2014)",
+      "line7": "  Votos: 3 Likes / 1 Dislike",
+      "line8": "  Comentarios: \"Demasiado larga para el viernes.\"",
+      "line9": "➜ Ejecutando conexión neuronal del Oráculo...",
+      "line10": "[ORACULO AI]: \"Recomiendo 'Inception' (2010)\"",
+      "line11": "Razón: Alta afinidad a la Ciencia Ficción, excluye drama lento."
+    },
+    "sideNote": {
+      "title": "Cine en grupo. Sin drama.",
+      "desc": "Agrega títulos al instante, vota con tu grupo y comparte tus críticas. El Oráculo analiza vuestro historial para proponer las películas ideales.",
+      "btn": "Entrar ahora →"
+    },
+    "marquee": {
+      "share": "COMPARTIR",
+      "vote": "VOTAR",
+      "recommend": "RECOMENDAR",
+      "oracle": "ORACULO IA",
+      "search": "BÚSQUEDA TMDB",
+      "cyberpunk": "CYBERPUNK",
+      "retro": "RETRO CARTOON",
+      "terminal": "TERMINAL",
+      "sync": "SINCRONIZACIÓN EN TIEMPO REAL",
+      "pending": "PENDIENTES",
+      "watched": "VISTOS"
+    },
+    "features": {
+      "index": "01 / Features",
+      "title": "Creado para cooperar.",
+      "desc": "Una interfaz limpia y enfocada en tomar decisiones rápidas sin perder el tiempo en chats infinitos.",
+      "cards": {
+        "c1_title": "Listas compartidas",
+        "c1_desc": "Crea listas colaborativas con amigos mediante un simple código de invitación rápida.",
+        "c2_title": "Votos en tiempo real",
+        "c2_desc": "Indica si te gusta o no un título para que el grupo conozca tu afinidad al instante.",
+        "c3_title": "Valoración con estrellas",
+        "c3_desc": "Califica tus películas y series vistas de 1 a 5 para nutrir tu perfil y el de tu grupo.",
+        "c4_title": "Buscador de TMDB",
+        "c4_desc": "Busca cualquier película o serie de la base de datos mundial y añádela con un solo clic.",
+        "c5_title": "El Oráculo IA",
+        "c5_desc": "Recomendaciones inteligentes cruzando el historial de gustos y rechazos de todo tu grupo.",
+        "c6_title": "Comentarios y críticas",
+        "c6_desc": "Deja reseñas cortas para explicar por qué recomiendas un título o por qué prefieres evitarlo."
+      }
+    },
+    "workflow": {
+      "index": "02 / Workflow",
+      "title": "El flujo de decisión.",
+      "desc": "De la invitación a la pantalla en 5 sencillos pasos.",
+      "steps": {
+        "s1_title": "Crear lista",
+        "s1_lbl": "en segundos",
+        "s2_title": "Invitar amigos",
+        "s2_lbl": "comparte el código",
+        "s3_title": "Añadir títulos",
+        "s3_lbl": "buscador TMDB",
+        "s4_title": "Votar y valorar",
+        "s4_lbl": "likes / estrellas",
+        "s5_title": "Consultar Oráculo",
+        "s5_lbl": "el veredicto de la IA"
+      }
+    },
+    "intelligence": {
+      "panel1_title": "Cerebro del Oráculo",
+      "panel1_r1": "01 / Perfil Positivo",
+      "panel1_r1_lbl": "Favoritos · Likes · 4-5 estrellas",
+      "panel1_r2": "02 / Perfil Negativo",
+      "panel1_r2_lbl": "Rechazos · Dislikes · 1-2 estrellas",
+      "panel1_r3": "03 / Historial de Exclusión",
+      "panel1_r3_lbl": "Filtro activo de títulos vistos",
+      "panel2_title": "Lógica de decisión",
+      "panel2_r1": "Coincidencia ≥ 90%",
+      "panel2_r1_lbl": "ORACULO RECOMIENDA",
+      "panel2_r2": "65% ≤ Coincidencia < 90%",
+      "panel2_r2_lbl": "LISTA DE ESPERA",
+      "panel2_r3": "Coincidencia < 65%",
+      "panel2_r3_lbl": "FILTRADO / EVITADO"
+    },
+    "themes": {
+      "index": "03 / Temas",
+      "title": "Tres experiencias.",
+      "desc": "Elige el tema que mejor se adapte a tu estilo de pantalla, cambiándolo al instante desde los ajustes.",
+      "card1_title": "Temas modernos",
+      "card1_c1": "CYBERPUNK: Glows de neón, gradientes oscuros y animaciones fluidas.",
+      "card1_c2": "TERMINAL: Pantalla verde clásica de fósforo, tipografía monospace.",
+      "card2_title": "Retro Cartoon",
+      "card2_c1": "VINTAGE: Estilo de caricatura de 1930, tipografía Space Meatball.",
+      "card2_c2": "FILTRO RETRO: Quita automáticamente los acentos para preservar el diseño retro original."
+    },
+    "roadmap": {
+      "index": "04 / Roadmap",
+      "title": "Evolución continua.",
+      "desc": "Nuestros planes para mejorar el sistema de decisión cinematográfica.",
+      "status_completed": "Completado",
+      "status_soon": "Próximamente",
+      "p1": "Sincronización Supabase",
+      "p2": "Oráculo Neural IA",
+      "p3": "Integración de Temas",
+      "p4": "Sugerencias grupales cruzadas"
+    },
+    "cta": {
+      "kicker": "Llamada final",
+      "title": "Tu próxima noche de cine empieza aquí.",
+      "btn": "Empezar a colaborar →"
+    },
+    "footer": {
+      "copyright": "WhichNext — Decide qué ver en grupo sin discusiones.",
+      "credits": "Swiss spaced / brutalist interface system."
+    }
   }
 }

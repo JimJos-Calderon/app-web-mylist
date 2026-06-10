@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Menu,
@@ -27,6 +27,7 @@ const AppNavbar: React.FC = () => {
   const { profile } = useUserProfile()
   const { t } = useTranslation()
   const { theme, changeTheme } = useTheme()
+  const navigate = useNavigate()
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
@@ -319,7 +320,8 @@ const AppNavbar: React.FC = () => {
 
             <button
               onClick={() => {
-                signOut()
+                navigate('/')
+                void signOut()
                 setShowUserMenu(false)
               }}
               className={`app-navbar-user-menu__logout w-full text-left px-5 py-4 text-xs uppercase tracking-widest text-[var(--color-text-primary)] hover:bg-[rgba(var(--color-accent-secondary-rgb),0.1)] hover:shadow-[inset_4px_0_0_var(--color-accent-secondary)] transition-all font-bold border-t border-[rgba(var(--color-accent-primary-rgb),0.2)] flex items-center gap-2 ${isTerminal ? '' : 'bg-[var(--color-bg-secondary)]'} ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`}
@@ -447,7 +449,8 @@ const AppNavbar: React.FC = () => {
           <button
             type="button"
             onClick={() => {
-              signOut()
+              navigate('/')
+              void signOut()
               setShowMobileMenu(false)
             }}
             className={`app-navbar__mobile-dropdown__logout flex w-full min-h-[3.25rem] items-center gap-3 border-t border-[rgba(var(--color-accent-primary-rgb),0.15)] bg-[var(--color-bg-secondary)] px-5 py-3 text-left text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] transition-colors hover:bg-[rgba(var(--color-accent-secondary-rgb),0.08)] ${isRetroCartoon || isCyberpunk || isTerminal ? 'theme-heading-font' : 'font-mono'} ${isCyberpunk ? 'cyberpunk-nav-link' : ''}`}

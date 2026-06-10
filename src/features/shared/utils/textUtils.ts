@@ -1,4 +1,4 @@
-export const formatRetroHeading = (text: string | null | undefined, theme: string): string => {
+export const removeRetroAccents = (text: string | null | undefined, theme: string): string => {
   if (!text) return ''
 
   if (!theme.includes('retro')) {
@@ -8,5 +8,9 @@ export const formatRetroHeading = (text: string | null | undefined, theme: strin
   return text
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
 }
+
+export const formatRetroHeading = (text: string | null | undefined, theme: string): string => {
+  return removeRetroAccents(text, theme).toUpperCase()
+}
+

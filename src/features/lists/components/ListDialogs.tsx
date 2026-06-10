@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, Copy, Plus, Users, X } from 'lucide-react'
 
 import { HudContainer, TechLabel, type List, RetroMeepModalFrame, type RetroMeepModalFrameHandle, useReducedMotion } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { useTheme } from '@/features/shared/hooks/useTheme'
 
 interface CreateListDialogProps {
@@ -27,6 +28,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
 }) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
+  const retroText = (v: string) => formatRetroHeading(v, theme)
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
   const reducedMotion = useReducedMotion()
@@ -135,15 +137,15 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
                     id="create-list-dialog-title"
                     className="theme-heading-font text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
                   >
-                    {t('dialog.create_list_title', { defaultValue: 'Crear Nueva Lista' })}
+                    {retroText(t('dialog.create_list_title', { defaultValue: 'Crear Nueva Lista' }))}
                   </h2>
                 </div>
               </div>
 
-              <button
+                <button
                 type="button"
                 onClick={requestClose}
-                aria-label={t('dialog.close_button', { defaultValue: 'Cerrar' })}
+                aria-label={retroText(t('dialog.close_button', { defaultValue: 'Cerrar' }))}
                 className={`${retroButtonBaseClassName} flex h-10 w-10 items-center justify-center p-0 hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-0 active:shadow-none`}
               >
                 <X className="h-5 w-5" strokeWidth={2.5} aria-hidden="true" />
@@ -153,21 +155,21 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
             <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 sm:px-8">
               <div className={`${retroPaperCardClassName} px-5 py-4`}>
                 <p className="theme-heading-font mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
-                  {'>'} {t('dialog.create_list_hint', { defaultValue: 'Define tu nueva lista' })}
+                  {'>'} {retroText(t('dialog.create_list_hint', { defaultValue: 'Define tu nueva lista' }))}
                 </p>
                 <p className="theme-heading-font text-sm font-medium leading-relaxed text-black opacity-90">
-                  {t('dialog.create_list_description', { defaultValue: 'Ponle un nombre y una descripción opcional.' })}
+                  {retroText(t('dialog.create_list_description', { defaultValue: 'Ponle un nombre y una descripción opcional.' }))}
                 </p>
               </div>
 
               <div>
                 <label className="theme-heading-font mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
-                  {'>'} {t('dialog.list_name_label', { defaultValue: 'Nombre de la lista' })}
+                  {'>'} {retroText(t('dialog.list_name_label', { defaultValue: 'Nombre de la lista' }))}
                 </label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder={t('dialog.list_name_placeholder', { defaultValue: 'Mi lista de favoritos' })}
+                  placeholder={retroText(t('dialog.list_name_placeholder', { defaultValue: 'Mi lista de favoritos' }))}
                   className={inputClassName}
                   maxLength={40}
                   autoFocus
@@ -176,12 +178,12 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
 
               <div>
                 <label className="theme-heading-font mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
-                  {'>'} {t('dialog.list_description_label', { defaultValue: 'Descripción' })}
+                  {'>'} {retroText(t('dialog.list_description_label', { defaultValue: 'Descripción' }))}
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder={t('dialog.list_description_placeholder', { defaultValue: 'Una breve descripción opcional' })}
+                  placeholder={retroText(t('dialog.list_description_placeholder', { defaultValue: 'Una breve descripción opcional' }))}
                   className={`${inputClassName} min-h-[120px] resize-none`}
                   maxLength={150}
                 />
@@ -199,7 +201,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
                   onClick={requestClose}
                   className={`${secondaryButtonClassName} flex-1 px-4 py-3`}
                 >
-                  {t('dialog.cancel_button', { defaultValue: 'Cancelar' })}
+                  {retroText(t('dialog.cancel_button', { defaultValue: 'Cancelar' }))}
                 </button>
 
                 <button
@@ -207,7 +209,7 @@ export const CreateListDialog: React.FC<CreateListDialogProps> = ({
                   disabled={loading}
                   className={`${primaryButtonClassName} flex-1 px-4 py-3`}
                 >
-                  {loading ? t('dialog.creating_button', { defaultValue: 'Creando...' }) : t('dialog.next_button', { defaultValue: 'Siguiente' })}
+                  {loading ? retroText(t('dialog.creating_button', { defaultValue: 'Creando...' })) : retroText(t('dialog.next_button', { defaultValue: 'Siguiente' }))}
                 </button>
               </div>
             </form>
@@ -378,13 +380,13 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                     id="invite-dialog-title"
                     className="theme-heading-font text-lg font-black uppercase tracking-[0.1em] text-black leading-none"
                   >
-                    {t('dialog.invite_title')}
+                    {retroText(t('dialog.invite_title'))}
                   </h2>
                 </div>
               </div>
               <button
                 onClick={requestInviteClose}
-                aria-label={t('dialog.close_button')}
+                aria-label={retroText(t('dialog.close_button'))}
                 className={`${retroButtonBaseClassName} flex h-10 w-10 items-center justify-center p-0 hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-0 active:shadow-none`}
               >
                 <X className="h-5 w-5" strokeWidth={2.5} aria-hidden="true" />
@@ -394,26 +396,26 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
             <div className="space-y-6 px-6 py-6 sm:px-8">
               <div className={`${retroPaperCardClassName} px-5 py-4`}>
                 <p className="mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-black">
-                  {'>'} TARGET: {t('dialog.list_label')}
+                  {'>'} TARGET: {retroText(t('dialog.list_label'))}
                 </p>
                 <p
                   className="theme-heading-font text-sm font-black leading-tight text-black"
                 >
-                  {list.name}
+                  {retroText(list.name)}
                 </p>
                 {list.description && (
                   <p className="mt-2 text-xs font-medium leading-relaxed text-black opacity-90">
-                    {list.description}
+                    {retroText(list.description)}
                   </p>
                 )}
               </div>
 
               <div>
                 <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-black">
-                  {'>'} {t('dialog.invite_link_label')}
+                  {'>'} {retroText(t('dialog.invite_link_label'))}
                 </label>
                 <p className="mb-3 text-xs font-medium leading-relaxed text-black opacity-90">
-                  {t('dialog.invite_help_text')}
+                  {retroText(t('dialog.invite_help_text'))}
                 </p>
                 <div className="flex flex-col gap-3">
                   <div className={`${retroPaperCardClassName} flex items-center overflow-x-auto px-4 py-3`}>
@@ -428,11 +430,11 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                   >
                     {copiedCode ? (
                       <>
-                        <Check className="h-4 w-4" strokeWidth={2.5} /> {t('dialog.copied_button')}
+                        <Check className="h-4 w-4" strokeWidth={2.5} /> {retroText(t('dialog.copied_button'))}
                       </>
                     ) : (
                       <>
-                        <Copy className="h-4 w-4" strokeWidth={2.5} /> {t('dialog.copy_button')}
+                        <Copy className="h-4 w-4" strokeWidth={2.5} /> {retroText(t('dialog.copy_button'))}
                       </>
                     )}
                   </button>
@@ -446,7 +448,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({ open, onClose, list 
                 className={`${retroButtonBaseClassName} flex w-full items-center justify-center gap-2 px-4 py-3 font-black uppercase tracking-widest hover:-translate-y-[1px] hover:shadow-[5px_5px_0px_0px_#000000] active:translate-y-0 active:shadow-none`}
               >
                 <X className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" />
-                {t('dialog.close_button')}
+                {retroText(t('dialog.close_button'))}
               </button>
             </div>
           </>

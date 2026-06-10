@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FilterState } from '@/features/shared'
+import { FilterState, useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { FilterPanel } from '@/features/items'
 
 interface ListFiltersSectionProps {
@@ -21,16 +22,18 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
   tagOptions = [],
 }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const retroText = (value: string) => formatRetroHeading(value, theme)
 
   const sortOptions = useMemo(
     () =>
       [
-        { value: 'date' as const, label: t('filter.sort_date') },
-        { value: 'title' as const, label: t('filter.sort_title') },
-        { value: 'rating' as const, label: t('filter.sort_rating') },
-        { value: 'manual' as const, label: t('filter.sort_manual') },
+        { value: 'date' as const, label: retroText(t('filter.sort_date')) },
+        { value: 'title' as const, label: retroText(t('filter.sort_title')) },
+        { value: 'rating' as const, label: retroText(t('filter.sort_rating')) },
+        { value: 'manual' as const, label: retroText(t('filter.sort_manual')) },
       ],
-    [t],
+    [retroText, t],
   )
 
   return (
@@ -41,11 +44,11 @@ const ListFiltersSection: React.FC<ListFiltersSectionProps> = ({
         <div className="list-filters-toolbar flex justify-end gap-6">
           {showSecondaryControls && (
             <button type="button" onClick={onResetFilters} className="ui-action-link">
-              Quitar filtros
+              {retroText('Quitar filtros')}
             </button>
           )}
           <button type="button" onClick={onToggleSecondaryControls} className="ui-action-link">
-            {showSecondaryControls ? 'Ocultar filtros' : 'Filtros'}
+            {showSecondaryControls ? retroText('Ocultar filtros') : retroText('Filtros')}
           </button>
         </div>
 

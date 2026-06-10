@@ -41,7 +41,7 @@ export const useTheme = (): UseThemeReturn => {
   const queryClient = useQueryClient()
 
   const queryKey = queryKeys.userProfile.themePreferenceByUser(user?.id || 'anonymous')
-  const initialTheme = readPersistedTheme()
+  const initialTheme = user?.id ? readPersistedTheme() : (DEFAULT_THEME as ThemePreference)
 
   const {
     data: theme = initialTheme,
@@ -51,7 +51,7 @@ export const useTheme = (): UseThemeReturn => {
     queryKey,
     queryFn: async () => {
       if (!user?.id) {
-        return readPersistedTheme()
+        return DEFAULT_THEME as ThemePreference
       }
 
       const { data, error: fetchError } = await supabase

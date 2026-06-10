@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { Heart, Loader2, RotateCcw, Sparkles, Star, ThumbsDown } from 'lucide-react'
 import { RetroMeepModalFrame, type RetroMeepModalFrameHandle, useReducedMotion, useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { useEnhanceComment, type EnhanceCommentContext } from '../hooks/useEnhanceComment'
 
 export type QuickCritiqueReaction = 'like' | 'dislike'
@@ -38,6 +39,7 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
 }) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
+  const retroText = (value: string) => formatRetroHeading(value, theme)
   const reducedMotion = useReducedMotion()
   const isRetro = theme === 'retro-cartoon'
   const meep = isRetro && !reducedMotion
@@ -313,22 +315,22 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
           id="quick-critique-title"
           className="theme-heading-font text-center text-lg font-black uppercase text-[var(--color-text-primary)] md:text-xl"
         >
-          {isRetro ? 'CRITICA Y COMENTARIO' : 'Crítica y comentario'}
+          {retroText('Crítica y comentario')}
         </h2>
         <p className="theme-heading-font mt-2 text-center text-sm text-[var(--color-text-muted)]">{itemTitle}</p>
 
         <p className={`theme-heading-font mt-4 ${sectionLabelClass}`}>
-          {isRetro ? 'TU PUNTUACION' : 'Tu puntuación'}
+          {retroText('Tu puntuación')}
         </p>
         <div className="mt-3">{starRow}</div>
 
         <p className={`theme-heading-font mt-6 ${sectionLabelClass}`}>
-          {isRetro ? 'REACCION' : 'Reacción'}
+          {retroText('Reacción')}
         </p>
         {reactionRow}
 
         <label className={`theme-heading-font mt-6 block ${sectionLabelClass}`} htmlFor="quick-critique-comment">
-          {isRetro ? 'TU COMENTARIO (OPCIONAL)' : 'Tu comentario (opcional)'}
+          {retroText('Tu comentario (opcional)')}
         </label>
         <textarea
           id="quick-critique-comment"
@@ -343,7 +345,7 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
             if (enhanceFeedback) setEnhanceFeedback(null)
             if (enhanceError) resetEnhanceError()
           }}
-          placeholder={isRetro ? 'Escribe aqui si quieres ampliar...' : 'Escribe aquí si quieres ampliar tu crítica…'}
+          placeholder={retroText('Escribe aquí si quieres ampliar tu crítica…')}
           className={textareaClass}
         />
         <div
@@ -377,7 +379,7 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
             ) : (
               <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
             )}
-            {isEnhancing ? t('item.enhancing_ai') : t('item.enhance_with_ai')}
+            {isEnhancing ? retroText(t('item.enhancing_ai')) : retroText(t('item.enhance_with_ai'))}
           </button>
           {originalDraft !== null && (
             <button
@@ -390,7 +392,7 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
               className={undoButtonClass}
             >
               <RotateCcw className="h-4 w-4 shrink-0" aria-hidden="true" />
-              {t('item.undo_enhancement')}
+              {retroText(t('item.undo_enhancement'))}
             </button>
           )}
         </div>
@@ -412,7 +414,7 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
 
         <div className="mt-6 flex flex-col gap-3">
           <button type="button" disabled={!canSubmit} className={primaryBtn} onClick={handleSubmit}>
-            {saving ? (isRetro ? 'GUARDANDO...' : 'Guardando...') : isRetro ? 'CONFIRMAR Y GUARDAR' : 'Confirmar y guardar'}
+            {saving ? retroText('Guardando...') : retroText('Confirmar y guardar')}
           </button>
           <button
             type="button"
@@ -424,13 +426,13 @@ export const QuickCritiqueModal: React.FC<QuickCritiqueModalProps> = ({
                 : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
           >
-            {isRetro ? 'CANCELAR' : 'Cancelar'}
+            {retroText('Cancelar')}
           </button>
         </div>
 
         {isRetro && (
           <p className="theme-heading-font mt-4 text-center text-[10px] uppercase text-[var(--color-text-muted)]">
-            Guardamos visto, estrellas, reaccion y reseña junto
+            {retroText('Guardamos visto, estrellas, reacción y reseña juntos.')}
           </p>
         )}
     </RetroMeepModalFrame>,

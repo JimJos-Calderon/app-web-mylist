@@ -14,6 +14,7 @@ import ItemDetailsModal from './ItemDetailsModal'
 import { useListSearchFlow } from '../hooks/useListSearchFlow'
 import { useListItemDetails } from '../hooks/useListItemDetails'
 import { useListContentView } from '../hooks/useListContentView'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 
 interface ListaContenidoProps {
   tipo: 'pelicula' | 'serie'
@@ -52,6 +53,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
   const discoverSectionRef = useRef<HTMLDivElement>(null)
 
   const { theme } = useTheme()
+  const retroText = (value: string) => formatRetroHeading(value, theme)
   const { items, listMemberCount, loading, error: itemsError, addItem, deleteItem, toggleVisto, quickCritiqueAndWatch, updateItem, reorderItems, isReorderingItems } =
     useItems(tipo, user?.id || '', listId)
 
@@ -296,8 +298,8 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           onInvite={() => setShowInviteDialog(true)}
           onListChange={handleListChange}
           onFocusDecisionBlock={focusDecisionBlock}
-          createListLabel={t('action.create_list')}
-          inviteLabel={t('action.invite')}
+          createListLabel={retroText(t('action.create_list'))}
+          inviteLabel={retroText(t('action.invite'))}
           onRandomPick={() => setIsRandomPickerOpen(true)}
         />
 
@@ -308,15 +310,15 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
             setCurrentList={setCurrentList}
             onListChange={handleListChange}
             onCreateList={() => setShowCreateDialog(true)}
-            createListLabel={t('action.create_list')}
+            createListLabel={retroText(t('action.create_list'))}
           />
         )}
 
         {currentList && (
           <>
-            {itemsError && <ErrorAlert message={itemsError} onClose={() => {}} />}
+            {itemsError && <ErrorAlert message={retroText(itemsError)} onClose={() => {}} />}
             {searchFlow.suggestionsError && (
-              <ErrorAlert message={searchFlow.suggestionsError} onClose={() => {}} />
+              <ErrorAlert message={retroText(searchFlow.suggestionsError)} onClose={() => {}} />
             )}
 
             <div ref={searchSectionRef}>
@@ -329,11 +331,11 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
                 suggestions={searchFlow.suggestions}
                 onSuggestionSelect={searchFlow.handleAddFromSuggestion}
                 sugerenciasRef={searchFlow.sugerenciasRef}
-                searchPlaceholder={t(
+                searchPlaceholder={retroText(t(
                   tipo === 'pelicula'
                     ? 'action.search_movie_placeholder'
                     : 'action.search_series_placeholder'
-                )}
+                ))}
               />
             </div>
 
@@ -431,7 +433,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           className="fixed bottom-6 left-1/2 z-[200] max-w-[min(90vw,24rem)] -translate-x-1/2 px-4 py-3 text-center text-sm font-bold shadow-xl border border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] theme-heading-font"
           role="status"
         >
-          {critiqueToast}
+          {retroText(critiqueToast)}
         </div>
       )}
 
@@ -440,7 +442,7 @@ const ListaContenido: React.FC<ListaContenidoProps> = ({
           className="fixed bottom-20 left-1/2 z-[200] max-w-[min(90vw,24rem)] -translate-x-1/2 px-4 py-3 text-center text-sm font-semibold shadow-xl border border-amber-500/40 bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)]"
           role="alert"
         >
-          {duplicateToast}
+          {retroText(duplicateToast)}
         </div>
       )}
     </div>

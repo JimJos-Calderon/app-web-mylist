@@ -76,5 +76,142 @@
     "loading": "Loading lists...",
     "no_lists": "You have no available lists",
     "label": "List:"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "workflow": "Workflow",
+      "oracle": "Oracle",
+      "themes": "Themes",
+      "roadmap": "Roadmap",
+      "login": "Login",
+      "menu": "☰ Menu",
+      "close": "✕ Close"
+    },
+    "hero": {
+      "kicker1": "COOPERATIVE MOVIE SELECTION",
+      "kicker2": "AI ORACLE ENGINE",
+      "titleWord1": "Decide",
+      "titleWord2": "What to watch",
+      "titleWord3": "As a group",
+      "desc": "Create shared lists of movies and series with friends, vote and decide without arguments.",
+      "stat1": "Shared list",
+      "stat2": "Visual themes",
+      "stat3": "Fast decision"
+    },
+    "terminal": {
+      "line1": "$ whichnext list --active",
+      "line2": "[WhichNext] Syncing list \"Cine del Finde\"...",
+      "line3": "● El Padrino (1972)",
+      "line4": "  Votes: 4 Likes / 0 Dislikes",
+      "line5": "  Comments: \"A must-watch classic.\"",
+      "line6": "● Interestelar (2014)",
+      "line7": "  Votes: 3 Likes / 1 Dislike",
+      "line8": "  Comments: \"Too long for a Friday.\"",
+      "line9": "➜ Running Oracle Recommendation Neural Link...",
+      "line10": "[ORACLE AI]: \"I recommend 'Inception' (2010)\"",
+      "line11": "Reason: Fits high Sci-Fi affinity, excludes long-pacing drama."
+    },
+    "sideNote": {
+      "title": "Group cinema. No drama.",
+      "desc": "Add titles instantly, vote with your group and share your reviews. The Oracle analyzes your history to propose the ideal movies.",
+      "btn": "Enter now →"
+    },
+    "marquee": {
+      "share": "SHARE",
+      "vote": "VOTE",
+      "recommend": "RECOMMEND",
+      "oracle": "AI ORACLE",
+      "search": "TMDB SEARCH",
+      "cyberpunk": "CYBERPUNK",
+      "retro": "RETRO CARTOON",
+      "terminal": "TERMINAL",
+      "sync": "REALTIME SYNC",
+      "pending": "PENDING",
+      "watched": "WATCHED"
+    },
+    "features": {
+      "index": "01 / Features",
+      "title": "Built to cooperate.",
+      "desc": "A clean interface focused on making fast decisions without wasting time in endless chats.",
+      "cards": {
+        "c1_title": "Shared lists",
+        "c1_desc": "Create collaborative lists with friends using a simple, fast invitation code.",
+        "c2_title": "Real-time votes",
+        "c2_desc": "Indicate if you like or dislike a title so the group knows your affinity instantly.",
+        "c3_title": "Star rating",
+        "c3_desc": "Rate your watched movies and series from 1 to 5 to nurture your profile and your group's.",
+        "c4_title": "TMDB Search",
+        "c4_desc": "Search any movie or series from the global database and add it with a single click.",
+        "c5_title": "The AI Oracle",
+        "c5_desc": "Smart recommendations by crossing the likes and dislikes history of your entire group.",
+        "c6_title": "Comments & reviews",
+        "c6_desc": "Leave short reviews to explain why you recommend a title or why you prefer to avoid it."
+      }
+    },
+    "workflow": {
+      "index": "02 / Workflow",
+      "title": "The decision flow.",
+      "desc": "From invitation to screen in 5 simple steps.",
+      "steps": {
+        "s1_title": "Create list",
+        "s1_lbl": "in seconds",
+        "s2_title": "Invite friends",
+        "s2_lbl": "share the code",
+        "s3_title": "Add titles",
+        "s3_lbl": "TMDB search",
+        "s4_title": "Vote & rate",
+        "s4_lbl": "likes / stars",
+        "s5_title": "Consult Oracle",
+        "s5_lbl": "the AI's verdict"
+      }
+    },
+    "intelligence": {
+      "panel1_title": "Oracle's Brain",
+      "panel1_r1": "01 / Positive Profile",
+      "panel1_r1_lbl": "Favorites · Likes · 4-5 stars",
+      "panel1_r2": "02 / Negative Profile",
+      "panel1_r2_lbl": "Rejections · Dislikes · 1-2 stars",
+      "panel1_r3": "03 / Exclusion History",
+      "panel1_r3_lbl": "Active filter of watched titles",
+      "panel2_title": "Decision logic",
+      "panel2_r1": "Match ≥ 90%",
+      "panel2_r1_lbl": "ORACLE RECOMMENDS",
+      "panel2_r2": "65% ≤ Match < 90%",
+      "panel2_r2_lbl": "WAITLIST",
+      "panel2_r3": "Match < 65%",
+      "panel2_r3_lbl": "FILTERED / AVOIDED"
+    },
+    "themes": {
+      "index": "03 / Themes",
+      "title": "Three experiences.",
+      "desc": "Choose the theme that best fits your screen style, changing it instantly from settings.",
+      "card1_title": "Modern themes",
+      "card1_c1": "CYBERPUNK: Neon glows, dark gradients, and fluid animations.",
+      "card1_c2": "TERMINAL: Classic green phosphor screen, monospace typography.",
+      "card2_title": "Retro Cartoon",
+      "card2_c1": "VINTAGE: 1930s cartoon style, Space Meatball typography.",
+      "card2_c2": "RETRO FILTER: Automatically removes accents to preserve the original retro design."
+    },
+    "roadmap": {
+      "index": "04 / Roadmap",
+      "title": "Continuous evolution.",
+      "desc": "Our plans to improve the film decision system.",
+      "status_completed": "Completed",
+      "status_soon": "Coming soon",
+      "p1": "Supabase Synchronization",
+      "p2": "Neural AI Oracle",
+      "p3": "Themes Integration",
+      "p4": "Cross-group suggestions"
+    },
+    "cta": {
+      "kicker": "Final Call",
+      "title": "Your next movie night starts here.",
+      "btn": "Start collaborating →"
+    },
+    "footer": {
+      "copyright": "WhichNext — Decide what to watch as a group without arguments.",
+      "credits": "Swiss spaced / brutalist interface system."
+    }
   }
 }

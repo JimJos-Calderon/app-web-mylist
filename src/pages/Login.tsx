@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import {
   validateEmail,
   validatePassword,
@@ -491,8 +492,18 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ open, onClose, theme }) =
 
 // ─── Login Page ──────────────────────────────────────────────────────────────
 
-const Login: React.FC = () => {
+interface LoginProps {
+  redirectTo?: string
+}
+
+const normalizeRedirectTo = (value?: string) => {
+  if (!value) return '/'
+  return value.startsWith('/') ? value : '/'
+}
+
+const Login: React.FC<LoginProps> = ({ redirectTo }) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { theme: authTheme } = useTheme()
   // Inicializaci�n segura
   const [activeTheme, setActiveTheme] = useState(() => {
@@ -533,6 +544,7 @@ const Login: React.FC = () => {
   const isRetroCartoon = activeTheme === 'retro-cartoon'
   const isTerminal = activeTheme === 'terminal'
   const isCyberpunk = activeTheme === 'cyberpunk'
+  const targetPath = normalizeRedirectTo(redirectTo)
 
   const rootClassName = isRetroCartoon
     ? 'bg-[var(--color-bg-primary)] retro-fx min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden'
@@ -622,7 +634,7 @@ const rootStyle = isRetroCartoon
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: new URL(targetPath, window.location.origin).toString(),
         },
       })
       if (error) setError(error.message)
@@ -663,6 +675,7 @@ const rootStyle = isRetroCartoon
         return
       }
       setEmail(''); setPassword('')
+      navigate(targetPath, { replace: true })
     } catch (err) {
       console.error('Login error:', err)
     } finally {

@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { FilterState, TechLabel } from '@/features/shared'
+import { FilterState, TechLabel, useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 
 interface FilterPanelProps {
   filters: FilterState
@@ -19,6 +20,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   tagOptions = [],
 }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const retroText = (value: string) => formatRetroHeading(value, theme)
 
   const getSortOrderLabel = () => {
     if (filters.sortBy === 'manual') {
@@ -27,11 +30,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     if (filters.sortBy === 'date') {
       return filters.sortOrder === 'desc' ? t('sort_order.most_recent') : t('sort_order.oldest')
     }
-
     if (filters.sortBy === 'title') {
       return filters.sortOrder === 'desc' ? t('sort_order.title_desc') : t('sort_order.title_asc')
     }
-
     return filters.sortOrder === 'desc' ? t('sort_order.best_rated') : t('sort_order.worst_rated')
   }
 
@@ -43,7 +44,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           onClick={onReset}
           className="hud-filter-reset px-4 py-2 text-xs font-semibold whitespace-nowrap md:px-5 md:text-sm"
         >
-          {t('filter.reset')}
+          {retroText(t('filter.reset'))}
         </button>
       </div>
 
@@ -53,10 +54,10 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           onClick={() => onFilterChange('showUnwatched', !filters.showUnwatched)}
           className={`hud-filter-switch ${filters.showUnwatched ? 'hud-filter-switch--active-primary' : 'hud-filter-switch--inactive'}`}
           aria-pressed={filters.showUnwatched}
-          aria-label={t('filter.pending')}
+          aria-label={retroText(t('filter.pending'))}
         >
           <span className={`hud-filter-switch-dot ${filters.showUnwatched ? 'hud-filter-switch-dot--active-primary' : ''}`} />
-          <span className="hud-filter-switch-label">{t('filter.pending')}</span>
+          <span className="hud-filter-switch-label">{retroText(t('filter.pending'))}</span>
         </button>
 
         <button
@@ -64,10 +65,10 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           onClick={() => onFilterChange('showWatched', !filters.showWatched)}
           className={`hud-filter-switch ${filters.showWatched ? 'hud-filter-switch--active-secondary' : 'hud-filter-switch--inactive'}`}
           aria-pressed={filters.showWatched}
-          aria-label={t('filter.watched')}
+          aria-label={retroText(t('filter.watched'))}
         >
           <span className={`hud-filter-switch-dot ${filters.showWatched ? 'hud-filter-switch-dot--active-secondary' : ''}`} />
-          <span className="hud-filter-switch-label">{t('filter.watched')}</span>
+          <span className="hud-filter-switch-label">{retroText(t('filter.watched'))}</span>
         </button>
       </div>
 
@@ -76,7 +77,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <select
             value={filters.sortBy}
             onChange={(e) => onFilterChange('sortBy', e.target.value)}
-            aria-label={t('filter.sort_by')}
+            aria-label={retroText(t('filter.sort_by'))}
             className="hud-filter-field hud-filter-select px-3 py-2 text-xs md:px-4 md:text-sm"
           >
             {sortOptions.map((option) => (
@@ -88,16 +89,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
           <button
             type="button"
-            onClick={() =>
-              onFilterChange(
-                'sortOrder',
-                filters.sortOrder === 'desc' ? 'asc' : 'desc'
-              )
-            }
+            onClick={() => onFilterChange('sortOrder', filters.sortOrder === 'desc' ? 'asc' : 'desc')}
             className="hud-filter-order px-3 py-2 text-xs font-semibold whitespace-nowrap md:px-4 md:text-sm"
-            aria-label={t('filter.sort_order_toggle')}
+            aria-label={retroText(t('filter.sort_order_toggle'))}
           >
-            {getSortOrderLabel()}
+            {retroText(getSortOrderLabel())}
           </button>
         </div>
 
@@ -105,13 +101,13 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <select
             value={filters.tagFilter}
             onChange={(e) => onFilterChange('tagFilter', e.target.value)}
-            aria-label={t('filter.tag_filter')}
+            aria-label={retroText(t('filter.tag_filter'))}
             className="hud-filter-field hud-filter-select px-3 py-2 text-xs md:px-4 md:text-sm sm:max-w-[200px]"
           >
-            <option value="">{t('filter.tag_filter_all')}</option>
+            <option value="">{retroText(t('filter.tag_filter_all'))}</option>
             {tagOptions.map((tag) => (
               <option key={tag} value={tag}>
-                {tag}
+                {retroText(tag)}
               </option>
             ))}
           </select>
@@ -119,8 +115,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
         <input
           type="text"
-          placeholder={t('filter.search_placeholder')}
-          aria-label={t('filter.search_label')}
+          placeholder={retroText(t('filter.search_placeholder'))}
+          aria-label={retroText(t('filter.search_label'))}
           value={filters.searchQuery}
           onChange={(e) => onFilterChange('searchQuery', e.target.value)}
           className="hud-filter-field hud-filter-search flex-1 px-3 py-2 text-xs md:px-4 md:text-sm"

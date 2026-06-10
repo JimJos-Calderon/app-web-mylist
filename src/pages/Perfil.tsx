@@ -8,6 +8,7 @@ import { ItemCard } from '@/features/items'
 import ItemDetailsModal from '@/features/lists/components/ItemDetailsModal'
 import { useListItemDetails } from '@/features/lists/hooks/useListItemDetails'
 import { ListItem, useTheme } from '@/features/shared'
+import { removeRetroAccents } from '@/features/shared/utils/textUtils'
 import { saveQuickCritique } from '@/features/items/services/quickCritiqueService'
 import { setUserItemWatched } from '@/features/items/services/itemUserWatchService'
 import { mergeUserWatchIntoItems } from '@/features/items/utils/mergeUserWatchIntoItems'
@@ -304,10 +305,10 @@ const Perfil: React.FC = () => {
                     filter: 'drop-shadow(0 0 10px rgba(var(--color-accent-primary-rgb), 0.3))'
                   }}
                 >
-                  {profile?.username || 'Usuario'}
+                  {removeRetroAccents(profile?.username || 'Usuario', theme)}
                 </h1>
                 {profile?.bio && (
-                  <p className="text-[var(--color-text-muted)] mt-2 max-w-sm">{profile.bio}</p>
+                  <p className="text-[var(--color-text-muted)] mt-2 max-w-sm">{removeRetroAccents(profile.bio, theme)}</p>
                 )}
               </div>
             </div>

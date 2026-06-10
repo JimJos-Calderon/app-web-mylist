@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { List } from '@/features/shared'
+import { List, useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import ListSelector from './ListSelector'
 
 interface ListActiveHeaderProps {
@@ -38,19 +39,21 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
   onRandomPick,
 }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const retroText = (value: string) => formatRetroHeading(value, theme)
   return (
     <section className="list-active-header font-heading mb-6 p-4 md:p-5">
       <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
             <h2 className="text-xl font-black uppercase tracking-tighter text-[var(--color-text-primary)] md:text-2xl">
-              {currentList?.name || 'Sin lista seleccionada'}
+              {retroText(currentList?.name || 'Sin lista seleccionada')}
             </h2>
             <p className="list-active-header__eyebrow text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)] opacity-60">
-              {currentList ? 'ID_ACTIVE_CONTEXT' : 'SYSTEM_IDLE'}
+              {retroText(currentList ? 'ID_ACTIVE_CONTEXT' : 'SYSTEM_IDLE')}
             </p>
             {currentList != null && listMemberCount != null && listMemberCount > 1 && (
-              <p className="list-active-header__roster">{t('list.members_roster', { count: listMemberCount })}</p>
+              <p className="list-active-header__roster">{retroText(t('list.members_roster', { count: listMemberCount }))}</p>
             )}
           </div>
 
@@ -71,13 +74,13 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
             <div className="flex gap-2">
               <button type="button" className="ui-action-primary" onClick={onCreateList}>
                 <span className="ui-action-plus leading-none">+</span>
-                {createListLabel}
+                {retroText(createListLabel)}
               </button>
 
               {currentList && (
                 <div className="flex gap-2">
                   <button type="button" className="ui-action-secondary" onClick={onInvite}>
-                    {inviteLabel}
+                    {retroText(inviteLabel)}
                   </button>
 
                   <button
@@ -113,18 +116,18 @@ const ListActiveHeader: React.FC<ListActiveHeaderProps> = ({
 
         <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
           <div className="ui-stat-pending">
-            <p className="ui-stat-label">Pendientes</p>
+            <p className="ui-stat-label">{retroText('Pendientes')}</p>
             <h3 className="ui-stat-number">{pendingCount}</h3>
           </div>
 
           <div className="ui-stat-watched">
-            <p className="ui-stat-label">Vistos</p>
+            <p className="ui-stat-label">{retroText('Vistos')}</p>
             <h3 className="ui-stat-number">{watchedCount}</h3>
           </div>
 
           <button type="button" onClick={onFocusDecisionBlock} className="ui-stat-cta">
-            <p className="ui-stat-label">Ir a</p>
-            <h3 className="ui-stat-cta-title">Pendientes</h3>
+            <p className="ui-stat-label">{retroText('Ir a')}</p>
+            <h3 className="ui-stat-cta-title">{retroText('Pendientes')}</h3>
           </button>
         </div>
       </div>

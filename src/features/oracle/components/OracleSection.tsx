@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/supabaseClient'
 import { useAuth } from '@/features/auth'
 import { useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { queryKeys } from '@config/queryKeys'
 import { FavoriteItem, useOracleRecommendations } from '@/hooks/useOracleRecommendations'
 
@@ -179,6 +180,7 @@ export const OracleSection: React.FC<OracleSectionProps> = () => {
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
   const { isLoading, error, recomendaciones, fetchRecommendations } = useOracleRecommendations()
+  const retroText = (value: string) => formatRetroHeading(value, theme)
 
   // Consultamos TODOS los items calificados del usuario en todas las listas
   // haciendo un join directo en Supabase para obtener el título
@@ -470,8 +472,8 @@ export const OracleSection: React.FC<OracleSectionProps> = () => {
             )}
             {recomendaciones.map((rec, idx) => (
               <div key={idx} className={recommendationItemClass}>
-                <h3 className={recommendationTitleClass}>{rec.titulo}</h3>
-                <p className={recommendationDescriptionClass}>{rec.justificacion}</p>
+                <h3 className={recommendationTitleClass}>{isRetroCartoon ? retroText(rec.titulo) : rec.titulo}</h3>
+                <p className={recommendationDescriptionClass}>{isRetroCartoon ? retroText(rec.justificacion) : rec.justificacion}</p>
               </div>
             ))}
           </div>

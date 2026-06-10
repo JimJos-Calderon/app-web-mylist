@@ -15,6 +15,20 @@ const resources = {
   },
 }
 
+const removeAccentsPostProcessor = {
+  type: 'postProcessor' as const,
+  name: 'removeAccents',
+  process: (value: string) => {
+    if (typeof value === 'string' && typeof document !== 'undefined') {
+      const currentTheme = document.documentElement.getAttribute('data-theme')
+      if (currentTheme && currentTheme.includes('retro')) {
+        return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      }
+    }
+    return value
+  },
+}
+
 let initializationPromise: Promise<typeof i18n> | null = null
 let languagePersistenceBound = false
 
@@ -28,6 +42,7 @@ export const initializeI18n = async () => {
       const initialLanguage = await getPreferredLanguage()
 
       await i18n
+        .use(removeAccentsPostProcessor)
         .use(initReactI18next)
         .init({
           resources,
@@ -36,7 +51,9 @@ export const initializeI18n = async () => {
           interpolation: {
             escapeValue: false,
           },
+          postProcess: ['removeAccents'],
         })
+
 
       if (!languagePersistenceBound) {
         i18n.on('languageChanged', (language) => {

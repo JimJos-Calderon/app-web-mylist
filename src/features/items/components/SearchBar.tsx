@@ -1,6 +1,8 @@
 import React, { Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HudContainer, OmdbSuggestion, OptimizedImage, TechLabel } from '@/features/shared'
+import { useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import { Loader2 } from 'lucide-react'
 
 interface SearchBarProps {
@@ -32,6 +34,8 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     ref
   ) => {
     const { t } = useTranslation()
+    const { theme } = useTheme()
+    const retroText = (value: string) => formatRetroHeading(value, theme)
     const ariaLabel = React.useMemo(() => t('placeholders.search_aria_label'), [t])
 
     return (
@@ -66,7 +70,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
             disabled={loading}
             className="hud-search-submit px-4 py-3 text-[10px] font-black uppercase transition-all disabled:cursor-not-allowed md:px-7 md:py-4 md:text-xs"
           >
-            {loading ? '...' : t('action.search_ok_button')}
+            {loading ? '...' : retroText(t('action.search_ok_button'))}
           </button>
         </form>
 
@@ -91,7 +95,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
                 </div>
                 <div>
                   <div className="hud-search-suggestion-title text-sm font-black uppercase italic">
-                    {suggestion.Title}
+                    {retroText(suggestion.Title)}
                   </div>
                   <div className="hud-search-suggestion-meta mt-1 text-[10px] font-bold">{suggestion.Year}</div>
                 </div>

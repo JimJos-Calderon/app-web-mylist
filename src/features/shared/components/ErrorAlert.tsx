@@ -2,6 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { XCircle, X } from 'lucide-react'
 import { useTheme } from '../hooks/useTheme'
+import { formatRetroHeading } from '../utils/textUtils'
 
 interface ErrorAlertProps {
   message: string
@@ -12,6 +13,7 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({ message, onClose }) => {
   const { t } = useTranslation()
   const { theme } = useTheme()
   const isTerminal = theme === 'terminal'
+  const retroText = (value: string) => formatRetroHeading(value, theme)
   
   React.useEffect(() => {
     const timer = setTimeout(onClose, 5000)
@@ -27,7 +29,7 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({ message, onClose }) => {
       <XCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isTerminal ? 'text-[#ff0000]' : 'text-red-400'}`} />
       <div className="flex-1">
         <p className={`text-sm font-medium ${isTerminal ? 'theme-body-font text-[#ff4d4d]' : 'text-red-200'}`}>
-          {isTerminal ? '[FATAL_ERROR] ' : ''}{message}
+          {isTerminal ? '[FATAL_ERROR] ' : ''}{retroText(message)}
         </p>
       </div>
       <button

@@ -1,5 +1,6 @@
 import React from 'react'
-import { List } from '@/features/shared'
+import { List, useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 import ListSelector from './ListSelector'
 
 interface ListSetupEmptyStateProps {
@@ -19,15 +20,18 @@ const ListSetupEmptyState: React.FC<ListSetupEmptyStateProps> = ({
   onCreateList,
   createListLabel,
 }) => {
+  const { theme } = useTheme()
+  const retroText = (value: string) => formatRetroHeading(value, theme)
+
   return (
     <section className="mb-8 rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-elevated)] p-6 md:p-8">
       <div className="mx-auto max-w-3xl">
         <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--color-text-muted)]">
-          Primer paso
+          {retroText('Primer paso')}
         </p>
-        <h3 className="mb-2 text-xl font-semibold text-[var(--color-text-primary)]">Elige una lista para empezar</h3>
+        <h3 className="mb-2 text-xl font-semibold text-[var(--color-text-primary)]">{retroText('Elige una lista para empezar')}</h3>
         <p className="mb-6 max-w-2xl text-sm text-[var(--color-text-muted)]">
-          Necesitas una lista activa para añadir títulos, decidir qué ver y seguir el progreso.
+          {retroText('Necesitas una lista activa para añadir títulos, decidir qué ver y seguir el progreso.')}
         </p>
 
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -38,11 +42,11 @@ const ListSetupEmptyState: React.FC<ListSetupEmptyStateProps> = ({
                 currentList={undefined}
                 onChange={onListChange}
                 loading={loadingLists}
-                label="Elegir lista"
+                label={retroText('Elegir lista')}
               />
             ) : (
               <div className="rounded-2xl border border-[rgba(var(--color-accent-primary-rgb),0.2)] bg-[var(--color-bg-secondary)] px-4 py-3 text-sm text-[var(--color-text-muted)]">
-                {loadingLists ? 'Cargando listas...' : 'Todavía no tienes listas disponibles.'}
+                {loadingLists ? retroText('Cargando listas...') : retroText('Todavía no tienes listas disponibles.')}
               </div>
             )}
           </div>
@@ -56,7 +60,7 @@ const ListSetupEmptyState: React.FC<ListSetupEmptyStateProps> = ({
                 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
             }}
           >
-            <span className="opacity-70">+</span> [ {createListLabel} ]
+            <span className="opacity-70">+</span> [ {retroText(createListLabel)} ]
           </button>
         </div>
       </div>

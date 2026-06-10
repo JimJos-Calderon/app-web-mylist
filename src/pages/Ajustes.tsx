@@ -12,7 +12,7 @@ import { syncTitleEsForUserLists } from '@/features/items/services/syncTitleEsFr
 import { Eye, EyeOff, User, LockKeyhole, UserCircle, Mail, Key, Bell } from 'lucide-react'
 import HudContainer from '@/features/shared/components/HudContainer'
 import TechLabel from '@/features/shared/components/TechLabel'
-import { formatRetroHeading } from '@/features/shared/utils/textUtils'
+import { formatRetroHeading, removeRetroAccents } from '@/features/shared/utils/textUtils'
 
 type Section = 'perfil' | 'seguridad' | 'notificaciones'
 
@@ -76,6 +76,7 @@ const Ajustes: React.FC = () => {
   const isRetroCartoon = theme === 'retro-cartoon'
   const isTerminal = theme === 'terminal'
   const isCyberpunk = theme === 'cyberpunk'
+  const retroText = (value: string) => formatRetroHeading(value, theme)
 
   const navButtonClasses = (section: Section) => {
     const isActive = activeSection === section
@@ -208,8 +209,8 @@ const Ajustes: React.FC = () => {
 
   const handleConfirmLogout = async () => {
     setShowLogoutConfirm(false)
-    await signOut()
     navigate('/')
+    await signOut()
   }
 
   const handleChangeEmail = async (e: React.FormEvent) => {
@@ -383,7 +384,7 @@ const Ajustes: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--color-bg-base)] flex items-center justify-center">
-        <div className="text-[var(--color-text-primary)] font-mono tracking-widest">{t('settings.loading')}</div>
+        <div className="text-[var(--color-text-primary)] font-mono tracking-widest">{retroText(t('settings.loading'))}</div>
       </div>
     )
   }
@@ -393,7 +394,7 @@ const Ajustes: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center gap-4">
-          <TechLabel text="SYS.CONFIG" blink={false} />
+          <TechLabel text={isRetroCartoon ? retroText('SYS.CONFIG') : 'SYS.CONFIG'} blink={false} className={isRetroCartoon ? 'theme-heading-font' : ''} />
           <div>
             <h1 
               className={`text-3xl sm:text-4xl font-black tracking-tighter ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}
@@ -404,9 +405,9 @@ const Ajustes: React.FC = () => {
                 filter: 'drop-shadow(0 0 10px rgba(var(--color-accent-primary-rgb), 0.3))'
               }}
             >
-              {formatRetroHeading(t('settings.title'), theme)}
+              {retroText(t('settings.title'))}
             </h1>
-            <p className={`mt-1 text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{t('settings.description')}</p>
+            <p className={`mt-1 text-[var(--color-text-muted)] ${isRetroCartoon ? 'theme-heading-font' : ''}`}>{retroText(t('settings.description'))}</p>
           </div>
         </div>
 
@@ -419,19 +420,19 @@ const Ajustes: React.FC = () => {
                   onClick={() => setActiveSection('perfil')}
                   className={navButtonClasses('perfil')}
                 >
-                  <User className="w-4 h-4" /> {t('settings.profile_section')}
+                  <User className="w-4 h-4" /> {retroText(t('settings.profile_section'))}
                 </button>
                 <button
                   onClick={() => setActiveSection('seguridad')}
                   className={navButtonClasses('seguridad')}
                 >
-                  <LockKeyhole className="w-4 h-4" /> {t('settings.security_section')}
+                  <LockKeyhole className="w-4 h-4" /> {retroText(t('settings.security_section'))}
                 </button>
                 <button
                   onClick={() => setActiveSection('notificaciones')}
                   className={navButtonClasses('notificaciones')}
                 >
-                  <Bell className="w-4 h-4" /> {t('settings.notifications_section')}
+                  <Bell className="w-4 h-4" /> {retroText(t('settings.notifications_section'))}
                 </button>
               </nav>
               
@@ -457,7 +458,7 @@ const Ajustes: React.FC = () => {
                         : 'bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-accent-secondary text-accent-secondary font-mono rounded hover:bg-[rgba(var(--color-accent-secondary-rgb),0.2)] hover:shadow-[0_0_15px_rgba(var(--color-accent-secondary-rgb),0.4)]'
                 }`}
               >
-                {t('settings.logout_button')}
+                {retroText(t('settings.logout_button'))}
               </button>
             </HudContainer>
           </div>
@@ -504,7 +505,7 @@ const Ajustes: React.FC = () => {
                           <p
                             className={`text-xs text-[var(--color-text-primary)] ${isRetroCartoon ? 'theme-heading-font' : 'font-mono'}`}
                           >
-                            {t('settings.avatar_uploading')}
+                            {retroText(t('settings.avatar_uploading'))}
                           </p>
                         </div>
                       ) : (
@@ -542,51 +543,51 @@ const Ajustes: React.FC = () => {
                   {/* Username Form */}
                   <div className="mb-6 pb-6 border-b border-[rgba(var(--color-accent-primary-rgb),0.2)]">
                     <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                      {t('settings.username_label')}
+                      {retroText(t('settings.username_label'))}
                     </label>
                     <input
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder={t('settings.username_placeholder')}
+                      placeholder={retroText(t('settings.username_placeholder'))}
                       disabled={isSaving}
                       maxLength={20}
                       className="w-full px-4 py-3 bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-accent-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2 font-mono"
                     />
                     <div className="text-xs text-[var(--color-text-muted)] font-mono">
-                      {username.length}/20 {t('placeholders.character_count')}
+                      {username.length}/20 {retroText(t('placeholders.character_count'))}
                     </div>
                   </div>
 
                   {/* Bio Form */}
                   <div className="mb-6">
                     <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                      {t('settings.bio_label')}
+                      {retroText(t('settings.bio_label'))}
                     </label>
                     <textarea
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      placeholder={t('settings.bio_placeholder')}
+                      placeholder={retroText(t('settings.bio_placeholder'))}
                       disabled={isSaving}
                       maxLength={150}
                       rows={3}
                       className="w-full px-4 py-3 bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-accent-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-2 resize-none font-mono"
                     />
                     <div className="text-xs text-[var(--color-text-muted)] font-mono">
-                      {bio.length}/150 {t('placeholders.character_count')}
+                      {bio.length}/150 {retroText(t('placeholders.character_count'))}
                     </div>
                   </div>
 
                   {/* Error and Success Messages */}
                   {error && (
                     <div className="bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary px-4 py-2 rounded text-sm mb-4 font-mono">
-                      {error}
+                      {retroText(error)}
                     </div>
                   )}
 
                   {saveSuccess && (
                     <div className="bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-accent-primary px-4 py-2 rounded text-sm mb-4 font-mono">
-                      {t('settings.save_success')}
+                      {retroText(t('settings.save_success'))}
                     </div>
                   )}
 
@@ -601,7 +602,7 @@ const Ajustes: React.FC = () => {
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                     style={isRetroCartoon ? undefined : { clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
                   >
-                    {isSaving ? t('settings.saving_button') : t('settings.save_button')}
+                    {isSaving ? retroText(t('settings.saving_button')) : retroText(t('settings.save_button'))}
                   </button>
                 </HudContainer>
 
@@ -609,10 +610,10 @@ const Ajustes: React.FC = () => {
                   <h2
                     className={`text-lg font-black tracking-widest uppercase mb-3 text-accent-primary ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}
                   >
-                    {formatRetroHeading(t('settings.sync_title_es_title'), theme)}
+                    {retroText(t('settings.sync_title_es_title'))}
                   </h2>
                   <p className="text-xs font-mono text-[var(--color-text-muted)] mb-4">
-                    {t('settings.sync_title_es_description')}
+                    {retroText(t('settings.sync_title_es_description'))}
                   </p>
                   {syncTitleEsMessage && (
                     <div
@@ -622,7 +623,7 @@ const Ajustes: React.FC = () => {
                           : 'border-[rgba(var(--color-accent-secondary-rgb),0.35)] text-accent-secondary bg-[rgba(var(--color-accent-secondary-rgb),0.08)]'
                       }`}
                     >
-                      {syncTitleEsMessage.text}
+                      {retroText(syncTitleEsMessage.text)}
                     </div>
                   )}
                   <button
@@ -633,26 +634,26 @@ const Ajustes: React.FC = () => {
                       isRetroCartoon ? 'theme-heading-font' : ''
                     }`}
                   >
-                    {syncTitleEsLoading ? t('settings.sync_title_es_loading') : t('settings.sync_title_es_button')}
+                    {syncTitleEsLoading ? retroText(t('settings.sync_title_es_loading')) : retroText(t('settings.sync_title_es_button'))}
                   </button>
                 </HudContainer>
 
                 {/* Account Info */}
                 <HudContainer className="p-6">
-                  <h2 className={`text-lg font-black tracking-widest uppercase mb-4 text-accent-primary ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>{formatRetroHeading(t('account.info_title'), theme)}</h2>
+                  <h2 className={`text-lg font-black tracking-widest uppercase mb-4 text-accent-primary ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>{retroText(t('account.info_title'))}</h2>
                   <div className="space-y-3 font-mono text-xs">
                     <div>
-                      <span className="text-[var(--color-text-muted)]">{t('account.email')}:</span>
+                      <span className="text-[var(--color-text-muted)]">{retroText(t('account.email'))}:</span>
                       <p className="text-[var(--color-text-primary)] break-all mt-1">{user?.email}</p>
                     </div>
                     {bio && (
                       <div className="pt-3 border-t border-[rgba(var(--color-accent-primary-rgb),0.2)]">
-                        <span className="text-[var(--color-text-muted)]">{t('account.bio')}:</span>
-                        <p className="text-[var(--color-text-primary)] mt-1 whitespace-pre-wrap">{bio}</p>
+                        <span className="text-[var(--color-text-muted)]">{retroText(t('account.bio'))}:</span>
+                        <p className="text-[var(--color-text-primary)] mt-1 whitespace-pre-wrap">{removeRetroAccents(bio, theme)}</p>
                       </div>
                     )}
                     <div className={bio ? 'pt-3 border-t border-[rgba(var(--color-accent-primary-rgb),0.2)]' : ''}>
-                      <span className="text-[var(--color-text-muted)]">{t('account.user_id')}:</span>
+                      <span className="text-[var(--color-text-muted)]">{retroText(t('account.user_id'))}:</span>
                       <p className="text-[var(--color-text-primary)] break-all mt-1 opacity-60">{user?.id}</p>
                     </div>
                   </div>
@@ -666,13 +667,13 @@ const Ajustes: React.FC = () => {
                 <HudContainer className="p-4 sm:p-8">
                   <h2 className={`text-xl font-black tracking-widest uppercase mb-6 flex items-center gap-3 text-[var(--color-text-primary)] ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>
                     <Mail className="w-5 h-5 text-accent-primary" />
-                    {formatRetroHeading(t('settings.email_change_title'), theme)}
+                    {retroText(t('settings.email_change_title'))}
                   </h2>
                   
                   <form onSubmit={handleChangeEmail} className="space-y-4">
                     <div>
                       <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                        {t('settings.email_current_label')}
+                        {retroText(t('settings.email_current_label'))}
                       </label>
                       <input
                         type="email"
@@ -684,13 +685,13 @@ const Ajustes: React.FC = () => {
                     
                     <div>
                       <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                        {t('settings.email_new_label')}
+                        {retroText(t('settings.email_new_label'))}
                       </label>
                       <input
                         type="email"
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
-                        placeholder={t('placeholders.email_new')}
+                        placeholder={retroText(t('placeholders.email_new'))}
                         disabled={isSaving}
                         className="w-full px-4 py-3 bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-accent-primary transition-all disabled:opacity-50 font-mono"
                       />
@@ -702,7 +703,7 @@ const Ajustes: React.FC = () => {
                       className="w-full px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-mono tracking-widest text-xs uppercase hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded mt-2"
                       style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
                     >
-                      {isSaving ? t('settings.email_updating') : t('settings.email_button')}
+                      {isSaving ? retroText(t('settings.email_updating')) : retroText(t('settings.email_button'))}
                     </button>
                   </form>
                 </HudContainer>
@@ -711,20 +712,20 @@ const Ajustes: React.FC = () => {
                 <HudContainer className="p-4 sm:p-8">
                   <h2 className={`text-xl font-black tracking-widest uppercase mb-6 flex items-center gap-3 text-[var(--color-text-primary)] ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>
                     <Key className="w-5 h-5 text-accent-primary" />
-                    {formatRetroHeading(t('settings.password_change_title'), theme)}
+                    {retroText(t('settings.password_change_title'))}
                   </h2>
                   
                   <form onSubmit={handleChangePassword} className="space-y-4">
                     <div>
                       <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                        {t('settings.password_current_label')}
+                        {retroText(t('settings.password_current_label'))}
                       </label>
                       <div className="relative">
                         <input
                           type={showCurrentPassword ? 'text' : 'password'}
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
-                          placeholder={t('settings.password_current_placeholder')}
+                          placeholder={retroText(t('settings.password_current_placeholder'))}
                           disabled={isSaving}
                           className="w-full px-4 py-3 pr-12 bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-accent-primary transition-all disabled:opacity-50 font-mono tracking-widest"
                         />
@@ -733,7 +734,7 @@ const Ajustes: React.FC = () => {
                           onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-accent-primary transition-colors"
                           disabled={isSaving}
-                          aria-label={showCurrentPassword ? t('settings.password_hide_label') : t('settings.password_show_label')}
+                          aria-label={showCurrentPassword ? retroText(t('settings.password_hide_label')) : retroText(t('settings.password_show_label'))}
                         >
                           {showCurrentPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
@@ -742,14 +743,14 @@ const Ajustes: React.FC = () => {
                     
                     <div>
                       <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                        {t('settings.password_new_label')}
+                        {retroText(t('settings.password_new_label'))}
                       </label>
                       <div className="relative">
                         <input
                           type={showNewPassword ? 'text' : 'password'}
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder={t('placeholders.password_hint')}
+                          placeholder={retroText(t('placeholders.password_hint'))}
                           disabled={isSaving}
                           className="w-full px-4 py-3 pr-12 bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-accent-primary transition-all disabled:opacity-50 font-mono tracking-widest"
                         />
@@ -758,7 +759,7 @@ const Ajustes: React.FC = () => {
                           onClick={() => setShowNewPassword(!showNewPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-accent-primary transition-colors"
                           disabled={isSaving}
-                          aria-label={showNewPassword ? t('settings.password_hide_label') : t('settings.password_show_label')}
+                          aria-label={showNewPassword ? retroText(t('settings.password_hide_label')) : retroText(t('settings.password_show_label'))}
                         >
                           {showNewPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
@@ -767,14 +768,14 @@ const Ajustes: React.FC = () => {
                     
                     <div>
                       <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                        {t('settings.password_confirm_label')}
+                        {retroText(t('settings.password_confirm_label'))}
                       </label>
                       <div className="relative">
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder={t('settings.password_confirm_placeholder')}
+                          placeholder={retroText(t('settings.password_confirm_placeholder'))}
                           disabled={isSaving}
                           className="w-full px-4 py-3 pr-12 bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-accent-primary transition-all disabled:opacity-50 font-mono tracking-widest"
                         />
@@ -783,7 +784,7 @@ const Ajustes: React.FC = () => {
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-accent-primary transition-colors"
                           disabled={isSaving}
-                          aria-label={showConfirmPassword ? t('settings.password_hide_label') : t('settings.password_show_label')}
+                          aria-label={showConfirmPassword ? retroText(t('settings.password_hide_label')) : retroText(t('settings.password_show_label'))}
                         >
                           {showConfirmPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                         </button>
@@ -796,7 +797,7 @@ const Ajustes: React.FC = () => {
                       className="w-full px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-mono tracking-widest text-xs uppercase hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded mt-2"
                       style={{ clipPath: 'polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)' }}
                     >
-                      {isSaving ? t('settings.email_updating') : t('settings.password_button')}
+                      {isSaving ? retroText(t('settings.email_updating')) : retroText(t('settings.password_button'))}
                     </button>
                   </form>
                 </HudContainer>
@@ -808,7 +809,7 @@ const Ajustes: React.FC = () => {
                       ? 'bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-accent-primary'
                       : 'bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary'
                   }`}>
-                    {securityMessage.text}
+                    {retroText(securityMessage.text)}
                   </div>
                 )}
               </div>
@@ -819,9 +820,9 @@ const Ajustes: React.FC = () => {
                 <HudContainer className="p-4 sm:p-8">
                   <h2 className={`text-xl font-black tracking-widest uppercase mb-3 flex items-center gap-3 text-[var(--color-text-primary)] ${isRetroCartoon || isTerminal || isCyberpunk ? 'theme-heading-font' : 'font-mono'}`}>
                     <Bell className="w-5 h-5 text-accent-primary" />
-                    {formatRetroHeading(t('settings.push_title'), theme)}
+                    {retroText(t('settings.push_title'))}
                   </h2>
-                  <p className="text-[var(--color-text-muted)] mb-6 font-mono text-sm">{t('settings.push_description')}</p>
+                  <p className="text-[var(--color-text-muted)] mb-6 font-mono text-sm">{retroText(t('settings.push_description'))}</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm font-mono">
                     <div
@@ -831,9 +832,9 @@ const Ajustes: React.FC = () => {
                           : 'bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)]'
                       }`}
                     >
-                      <span className="text-[var(--color-text-muted)] text-xs uppercase tracking-widest">{t('settings.push_support_label')}:</span>
+                      <span className="text-[var(--color-text-muted)] text-xs uppercase tracking-widest">{retroText(t('settings.push_support_label'))}:</span>
                       <p className="mt-1 font-semibold text-[var(--color-text-primary)]">
-                        {isPushSupported ? t('settings.push_support_yes') : t('settings.push_support_no')}
+                        {isPushSupported ? retroText(t('settings.push_support_yes')) : retroText(t('settings.push_support_no'))}
                       </p>
                     </div>
                     <div
@@ -843,8 +844,8 @@ const Ajustes: React.FC = () => {
                           : 'bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)]'
                       }`}
                     >
-                      <span className="text-[var(--color-text-muted)] text-xs uppercase tracking-widest">{t('settings.push_permission_label')}:</span>
-                      <p className="mt-1 font-semibold text-[var(--color-text-primary)] opacity-80">{pushPermission}</p>
+                      <span className="text-[var(--color-text-muted)] text-xs uppercase tracking-widest">{retroText(t('settings.push_permission_label'))}:</span>
+                      <p className="mt-1 font-semibold text-[var(--color-text-primary)] opacity-80">{retroText(pushPermission)}</p>
                     </div>
                   </div>
 
@@ -856,13 +857,13 @@ const Ajustes: React.FC = () => {
                           : 'bg-[rgba(var(--color-accent-secondary-rgb),0.12)] border border-[rgba(var(--color-accent-secondary-rgb),0.35)] text-[var(--color-text-primary)]'
                       }`}
                     >
-                      <p className="font-bold uppercase tracking-widest text-xs mb-2 text-accent-secondary">{t('settings.push_denied_title')}</p>
-                      <p className="text-[var(--color-text-muted)]">{t('settings.push_denied_instructions')}</p>
+                      <p className="font-bold uppercase tracking-widest text-xs mb-2 text-accent-secondary">{retroText(t('settings.push_denied_title'))}</p>
+                      <p className="text-[var(--color-text-muted)]">{retroText(t('settings.push_denied_instructions'))}</p>
                     </div>
                   )}
 
                   {isPushSubscribed && (
-                    <p className="mb-3 text-xs font-mono uppercase tracking-widest text-accent-primary">{t('settings.push_subscribed_hint')}</p>
+                    <p className="mb-3 text-xs font-mono uppercase tracking-widest text-accent-primary">{retroText(t('settings.push_subscribed_hint'))}</p>
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -883,8 +884,8 @@ const Ajustes: React.FC = () => {
                       }
                     >
                       {isPushLoading && !isPushSubscribed
-                        ? t('settings.push_button_loading')
-                        : t('settings.push_activate_device')}
+                        ? retroText(t('settings.push_button_loading'))
+                        : retroText(t('settings.push_activate_device'))}
                     </button>
 
                     <button
@@ -894,8 +895,8 @@ const Ajustes: React.FC = () => {
                       className={pushActionSecondaryClass}
                     >
                       {isPushLoading && isPushSubscribed
-                        ? t('settings.push_unsubscribe_loading')
-                        : t('settings.push_unsubscribe')}
+                        ? retroText(t('settings.push_unsubscribe_loading'))
+                        : retroText(t('settings.push_unsubscribe'))}
                     </button>
                   </div>
 
@@ -905,13 +906,13 @@ const Ajustes: React.FC = () => {
                         ? 'bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-[rgba(var(--color-accent-primary-rgb),0.3)] text-accent-primary'
                         : 'bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary'
                     }`}>
-                      {pushMessage.text}
+                      {retroText(pushMessage.text)}
                     </div>
                   )}
 
                   {!pushMessage && pushError && (
                     <div className="mt-4 bg-[rgba(var(--color-accent-secondary-rgb),0.1)] border border-[rgba(var(--color-accent-secondary-rgb),0.3)] text-accent-secondary px-4 py-3 rounded text-sm font-mono tracking-wide">
-                      {pushError}
+                      {retroText(pushError)}
                     </div>
                   )}
                 </HudContainer>
@@ -924,22 +925,22 @@ const Ajustes: React.FC = () => {
         {showVerifyEmailModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <HudContainer className="p-8 max-w-md w-full bg-[var(--color-bg-elevated)] border-accent-primary shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.2)]">
-              <h3 className="text-xl font-black font-mono tracking-widest uppercase mb-2 text-[var(--color-text-primary)]">{t('settings.verify_email_title')}</h3>
+              <h3 className="text-xl font-black font-mono tracking-widest uppercase mb-2 text-[var(--color-text-primary)]">{retroText(t('settings.verify_email_title'))}</h3>
               <p className="text-[var(--color-text-muted)] text-sm mb-6 font-mono">
-                {t('settings.verify_email_description')}
+                {retroText(t('settings.verify_email_description'))}
               </p>
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)] mb-3">
-                    {t('settings.verify_email_label')}
+                    {retroText(t('settings.verify_email_label'))}
                   </label>
                   <div className="relative">
                     <input
                       type={showVerifyEmailPassword ? 'text' : 'password'}
                       value={verifyEmailPassword}
                       onChange={(e) => setVerifyEmailPassword(e.target.value)}
-                      placeholder={t('settings.verify_email_placeholder')}
+                      placeholder={retroText(t('settings.verify_email_placeholder'))}
                       disabled={isSaving}
                       className="w-full px-4 py-3 pr-12 bg-black/40 border border-[rgba(var(--color-accent-primary-rgb),0.2)] rounded text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus-visible:border-accent-primary focus-visible:ring-1 focus-visible:ring-accent-primary transition-all disabled:opacity-50 font-mono tracking-widest"
                     />
@@ -948,7 +949,7 @@ const Ajustes: React.FC = () => {
                       onClick={() => setShowVerifyEmailPassword(!showVerifyEmailPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-accent-primary transition-colors"
                       disabled={isSaving}
-                      aria-label={showVerifyEmailPassword ? t('settings.password_hide_label') : t('settings.password_show_label')}
+                      aria-label={showVerifyEmailPassword ? retroText(t('settings.password_hide_label')) : retroText(t('settings.password_show_label'))}
                     >
                       {showVerifyEmailPassword ? <Eye className="w-5 h-5" aria-hidden="true" /> : <EyeOff className="w-5 h-5" aria-hidden="true" />}
                     </button>
@@ -971,14 +972,14 @@ const Ajustes: React.FC = () => {
                     disabled={isSaving}
                     className="flex-1 px-4 py-3 text-[var(--color-text-muted)] border border-[rgba(var(--color-text-muted-rgb,161,161,170),0.3)] rounded hover:bg-white/5 hover:text-[var(--color-text-primary)] transition-all disabled:opacity-50 font-mono text-xs uppercase tracking-widest"
                   >
-                    {t('account.cancel')}
+                    {retroText(t('account.cancel'))}
                   </button>
                   <button
                     onClick={handleVerifyAndChangeEmail}
                     disabled={isSaving || !verifyEmailPassword.trim()}
                     className="flex-1 px-4 py-3 bg-[rgba(var(--color-accent-primary-rgb),0.1)] border border-accent-primary text-accent-primary font-mono tracking-widest text-xs uppercase hover:bg-[rgba(var(--color-accent-primary-rgb),0.2)] hover:shadow-[0_0_30px_rgba(var(--color-accent-primary-rgb),0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded"
                   >
-                    {isSaving ? t('account.verifying') : t('account.confirm')}
+                    {isSaving ? retroText(t('account.verifying')) : retroText(t('account.confirm'))}
                   </button>
                 </div>
               </div>
@@ -988,10 +989,10 @@ const Ajustes: React.FC = () => {
 
         <ConfirmDialog
           isOpen={showLogoutConfirm}
-          title={t('settings.logout_button')}
-          message={t('settings.logout_confirm')}
-          confirmText={t('settings.logout_button')}
-          cancelText={t('account.cancel')}
+          title={retroText(t('settings.logout_button'))}
+          message={retroText(t('settings.logout_confirm'))}
+          confirmText={retroText(t('settings.logout_button'))}
+          cancelText={retroText(t('account.cancel'))}
           onConfirm={handleConfirmLogout}
           onCancel={() => setShowLogoutConfirm(false)}
         />

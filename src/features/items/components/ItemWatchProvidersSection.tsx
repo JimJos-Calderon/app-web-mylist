@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import type { ListItem } from '@/features/shared'
 import { useItemWatchProviders } from '../hooks/useItemWatchProviders'
 import { TMDB_LOGO_W45, type WatchProviderEntry } from '../services/tmdbService'
+import { useTheme } from '@/features/shared'
+import { formatRetroHeading } from '@/features/shared/utils/textUtils'
 
 interface ItemWatchProvidersSectionProps {
   item: ListItem | null
@@ -93,6 +95,8 @@ const ItemWatchProvidersSection: React.FC<ItemWatchProvidersSectionProps> = ({
   isRetroCartoon,
 }) => {
   const { t } = useTranslation()
+  const { theme } = useTheme()
+  const retroText = (v: string) => formatRetroHeading(v, theme)
   const hasToken = Boolean(import.meta.env.VITE_TMDB_ACCESS_TOKEN?.trim())
   const { data, isLoading, isError } = useItemWatchProviders(item, Boolean(isOpen && item && hasToken), uiLanguage)
 
@@ -107,9 +111,9 @@ const ItemWatchProvidersSection: React.FC<ItemWatchProvidersSectionProps> = ({
       return (
         <div className="mb-4">
           <RetroWatchPanel>
-            <p className={labelCls}>{t('item.watch_providers_title')}</p>
+            <p className={labelCls}>{retroText(t('item.watch_providers_title'))}</p>
             <p className="item-details-modal__watch-muted item-details-modal__synopsis">
-              {t('item.watch_providers_no_token')}
+              {retroText(t('item.watch_providers_no_token'))}
             </p>
           </RetroWatchPanel>
         </div>
@@ -117,8 +121,8 @@ const ItemWatchProvidersSection: React.FC<ItemWatchProvidersSectionProps> = ({
     }
     return (
       <div className="mb-4">
-        <p className={labelCls}>{t('item.watch_providers_title')}</p>
-        <p className="text-xs leading-snug text-[var(--color-text-muted)]">{t('item.watch_providers_no_token')}</p>
+        <p className={labelCls}>{retroText(t('item.watch_providers_title'))}</p>
+        <p className="text-xs leading-snug text-[var(--color-text-muted)]">{retroText(t('item.watch_providers_no_token'))}</p>
       </div>
     )
   }
@@ -127,44 +131,44 @@ const ItemWatchProvidersSection: React.FC<ItemWatchProvidersSectionProps> = ({
     return (
       <div className="mb-4">
         <RetroWatchPanel>
-          <p className={labelCls}>{t('item.watch_providers_title')}</p>
+          <p className={labelCls}>{retroText(t('item.watch_providers_title'))}</p>
           {isLoading && (
             <div className="item-details-modal__watch-loading flex items-center gap-1.5">
               <span className="item-details-modal__watch-spinner animate-spin rounded-full" aria-hidden="true" />
-              <span>{t('item.watch_providers_loading')}</span>
+              <span>{retroText(t('item.watch_providers_loading'))}</span>
             </div>
           )}
-          {isError && <p className="item-details-modal__watch-error">{t('item.watch_providers_error')}</p>}
+          {isError && <p className="item-details-modal__watch-error">{retroText(t('item.watch_providers_error'))}</p>}
           {!isLoading && !isError && data && (
             <>
-              <p className="item-details-modal__watch-region">{t('item.watch_providers_region', { region: data.regionCode })}</p>
+              <p className="item-details-modal__watch-region">{retroText(t('item.watch_providers_region', { region: data.regionCode }))}</p>
               <ProviderGroup
                 sectionKey="flatrate"
-                title={t('item.watch_providers_streaming')}
+                title={retroText(t('item.watch_providers_streaming'))}
                 providers={data.flatrate}
                 isRetroCartoon
               />
               <ProviderGroup
                 sectionKey="rent"
-                title={t('item.watch_providers_rent')}
+                title={retroText(t('item.watch_providers_rent'))}
                 providers={data.rent}
                 isRetroCartoon
               />
               <ProviderGroup
                 sectionKey="buy"
-                title={t('item.watch_providers_buy')}
+                title={retroText(t('item.watch_providers_buy'))}
                 providers={data.buy}
                 isRetroCartoon
               />
               {data.watchLink ? (
                 <a href={data.watchLink} target="_blank" rel="noopener noreferrer" className="item-details-modal__watch-link">
-                  {t('item.watch_providers_more_link')}
+                  {retroText(t('item.watch_providers_more_link'))}
                 </a>
               ) : null}
             </>
           )}
           {!isLoading && !isError && !data && (
-            <p className="item-details-modal__watch-muted item-details-modal__synopsis">{t('item.watch_providers_none')}</p>
+            <p className="item-details-modal__watch-muted item-details-modal__synopsis">{retroText(t('item.watch_providers_none'))}</p>
           )}
         </RetroWatchPanel>
       </div>
@@ -173,34 +177,34 @@ const ItemWatchProvidersSection: React.FC<ItemWatchProvidersSectionProps> = ({
 
   return (
     <div className="mb-4">
-      <p className={labelCls}>{t('item.watch_providers_title')}</p>
+      <p className={labelCls}>{retroText(t('item.watch_providers_title'))}</p>
       {isLoading && (
         <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
           <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
-          <span>{t('item.watch_providers_loading')}</span>
+          <span>{retroText(t('item.watch_providers_loading'))}</span>
         </div>
       )}
-      {isError && <p className="text-xs text-[var(--color-accent-secondary)]">{t('item.watch_providers_error')}</p>}
+      {isError && <p className="text-xs text-[var(--color-accent-secondary)]">{retroText(t('item.watch_providers_error'))}</p>}
       {!isLoading && !isError && data && (
         <>
-          <p className="mb-1.5 text-[10px] uppercase tracking-wide text-[var(--color-text-muted)]">
-            {t('item.watch_providers_region', { region: data.regionCode })}
+            <p className="mb-1.5 text-[10px] uppercase tracking-wide text-[var(--color-text-muted)]">
+            {retroText(t('item.watch_providers_region', { region: data.regionCode }))}
           </p>
           <ProviderGroup
             sectionKey="flatrate"
-            title={t('item.watch_providers_streaming')}
+            title={retroText(t('item.watch_providers_streaming'))}
             providers={data.flatrate}
             isRetroCartoon={false}
           />
           <ProviderGroup
             sectionKey="rent"
-            title={t('item.watch_providers_rent')}
+            title={retroText(t('item.watch_providers_rent'))}
             providers={data.rent}
             isRetroCartoon={false}
           />
           <ProviderGroup
             sectionKey="buy"
-            title={t('item.watch_providers_buy')}
+            title={retroText(t('item.watch_providers_buy'))}
             providers={data.buy}
             isRetroCartoon={false}
           />
@@ -211,13 +215,13 @@ const ItemWatchProvidersSection: React.FC<ItemWatchProvidersSectionProps> = ({
               rel="noopener noreferrer"
               className="mt-1.5 inline-block text-xs font-medium text-[var(--color-accent-primary)] hover:underline"
             >
-              {t('item.watch_providers_more_link')}
+              {retroText(t('item.watch_providers_more_link'))}
             </a>
           ) : null}
         </>
       )}
       {!isLoading && !isError && !data && (
-        <p className="text-xs leading-snug text-[var(--color-text-muted)]">{t('item.watch_providers_none')}</p>
+        <p className="text-xs leading-snug text-[var(--color-text-muted)]">{retroText(t('item.watch_providers_none'))}</p>
       )}
     </div>
   )

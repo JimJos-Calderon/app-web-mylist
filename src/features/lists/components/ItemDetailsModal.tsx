@@ -93,6 +93,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
 }) => {
   const { t, i18n } = useTranslation()
   const { theme } = useTheme()
+  const retroText = (value: string) => formatRetroHeading(value, theme)
   const isRetroCartoon = theme === 'retro-cartoon'
   const isCyberpunk = theme === 'cyberpunk'
   const isTerminal = theme === 'terminal'
@@ -285,7 +286,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                     : 'theme-heading-font rounded-full border border-[rgba(var(--color-accent-primary-rgb),0.4)] bg-transparent px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-primary)]'
                 }
               >
-                {selectedItem.tipo === 'pelicula' ? movieTypeLabel : seriesTypeLabel}
+                {retroText(selectedItem.tipo === 'pelicula' ? movieTypeLabel : seriesTypeLabel)}
               </span>
               <span
                 className={
@@ -298,7 +299,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                       }`
                 }
               >
-                {selectedItem.visto ? watchedLabel : notWatchedLabel}
+                {retroText(selectedItem.visto ? watchedLabel : notWatchedLabel)}
               </span>
             </div>
             {selectedItem.watch_group && selectedItem.watch_group.total > 1 && (
@@ -310,19 +311,19 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                       : 'font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]'
                   }
                 >
-                  {t('item.watch_group_caption')}
+                  {retroText(t('item.watch_group_caption'))}
                 </p>
                 <ItemGroupWatchBadge
                   watched={selectedItem.watch_group.watched}
                   total={selectedItem.watch_group.total}
-                  ratioLabel={t('item.watch_group_ratio', {
+                  ratioLabel={retroText(t('item.watch_group_ratio', {
                     watched: selectedItem.watch_group.watched,
                     total: selectedItem.watch_group.total,
-                  })}
-                  title={t('item.watch_group_title', {
+                  }))}
+                  title={retroText(t('item.watch_group_title', {
                     watched: selectedItem.watch_group.watched,
                     total: selectedItem.watch_group.total,
-                  })}
+                  }))}
                   density="comfortable"
                 />
               </div>
@@ -345,7 +346,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                             : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
                       }`
                 }
-                aria-label="Anterior"
+                aria-label={retroText('Anterior')}
               >
                 {'<'}
               </button>
@@ -365,7 +366,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                             : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
                       }`
                 }
-                aria-label="Siguiente"
+                aria-label={retroText('Siguiente')}
               >
                 {'>'}
               </button>
@@ -392,7 +393,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                           : 'border border-[rgba(var(--color-accent-primary-rgb),0.3)] bg-[var(--color-bg-elevated)] text-[var(--color-text-primary)] hover:border-[rgba(var(--color-accent-primary-rgb),0.5)]'
                     }`
               }
-              aria-label={closeLabel}
+              aria-label={retroText(closeLabel)}
               disabled={isQuickCritiqueSaving}
             >
               X
@@ -438,7 +439,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                       : 'theme-heading-font mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]'
                   }
                 >
-                  Genero
+                  {retroText('Genero')}
                 </p>
                 <p className="theme-heading-font text-[11px] font-bold uppercase text-[var(--color-text-primary)]">
                   {selectedItem.genero}
@@ -449,14 +450,14 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
 
           <div className="flex flex-col p-5">
             <div className="mb-4 flex-1">
-              <p
+                <p
                 className={
                   isRetroCartoon
                     ? 'item-details-modal__section-label mb-3'
                     : 'theme-heading-font mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]'
                 }
               >
-                Sinopsis
+                {retroText('Sinopsis')}
               </p>
               <div
                 className={`text-sm md:text-base leading-relaxed text-[var(--color-text-primary)] ${
@@ -480,11 +481,11 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                     }`}
                   >
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
-                    <span>Traduciendo sinopsis...</span>
+                    <span>{retroText('Traduciendo sinopsis...')}</span>
                   </div>
                 )}
                 {!synopsisLoading && !synopsisError && !isTranslatingSynopsis && (
-                  <p className={isRetroCartoon ? 'theme-body-font' : ''}>{displaySynopsis || emptySynopsisLabel}</p>
+                  <p className={isRetroCartoon ? 'theme-body-font' : ''}>{retroText(String(displaySynopsis || emptySynopsisLabel))}</p>
                 )}
               </div>
             </div>
@@ -505,14 +506,14 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                       : 'theme-heading-font mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]'
                   }
                 >
-                  {t('item.tags_label')}
+                  {retroText(t('item.tags_label'))}
                 </p>
                 <input
                   type="text"
                   value={tagsDraft}
                   onChange={(e) => setTagsDraft(e.target.value)}
                   className="mb-2 w-full rounded-lg border border-[rgba(var(--color-accent-primary-rgb),0.25)] bg-[var(--color-bg-primary)] px-3 py-2 text-sm text-[var(--color-text-primary)]"
-                  placeholder={t('item.tags_placeholder')}
+                  placeholder={retroText(t('item.tags_placeholder'))}
                 />
                 <button
                   type="button"
@@ -524,7 +525,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                       : 'rounded-lg border border-[rgba(var(--color-accent-primary-rgb),0.35)] bg-[var(--color-bg-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-primary)] disabled:opacity-50'
                   }
                 >
-                  {tagsSaving ? t('item.tags_saving') : t('item.tags_save')}
+                  {retroText(tagsSaving ? t('item.tags_saving') : t('item.tags_save'))}
                 </button>
               </div>
             )}
@@ -542,7 +543,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                         : 'rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-200 disabled:opacity-50'
                     }
                   >
-                    {queueSaving ? t('item.next_queue_saving') : t('item.next_queue_clear')}
+                    {retroText(queueSaving ? t('item.next_queue_saving') : t('item.next_queue_clear'))}
                   </button>
                 ) : (
                   <button
@@ -555,7 +556,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                         : 'rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200 disabled:opacity-50'
                     }
                   >
-                    {queueSaving ? t('item.next_queue_saving') : t('item.next_queue_set')}
+                    {retroText(queueSaving ? t('item.next_queue_saving') : t('item.next_queue_set'))}
                   </button>
                 )}
               </div>
@@ -598,11 +599,9 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
               >
                 <span>
                   {modalActionLoading === 'toggle'
-                    ? 'Actualizando...'
+                    ? formatRetroHeading('Actualizando...', theme)
                     : showQuickCritique
-                      ? isRetroCartoon
-                        ? 'CIERRA LA CRITICA O COMPLETA'
-                        : 'Completa la crítica rápida o ciérrala'
+                      ? formatRetroHeading('Completa la crítica rápida o ciérrala', theme)
                       : selectedItem.visto
                         ? markUnwatchedLabel
                         : markWatchedLabel}
@@ -627,7 +626,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                 }
                 disabled={isQuickCritiqueSaving}
               >
-                Cerrar
+                {formatRetroHeading('Cerrar', theme)}
               </button>
 
               {canDelete && (
@@ -647,7 +646,7 @@ const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
                         }`
                   }
                 >
-                  {modalActionLoading === 'delete' ? 'Borrando...' : `DELETE ${deleteLabel}`}
+                  {modalActionLoading === 'delete' ? formatRetroHeading('Borrando...', theme) : formatRetroHeading(`DELETE ${deleteLabel}`, theme)}
                 </button>
               )}
             </div>
