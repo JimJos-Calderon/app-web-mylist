@@ -10,7 +10,7 @@
 
 **WhichNext** es una aplicación web para gestionar **listas compartidas** de películas y series: autenticación Supabase, búsqueda con **Edge Function + OMDB**, metadatos enriquecidos con **TMDB** (título ES, póster, géneros, **dónde verlo** por región), calificaciones, comentarios, **crítica rápida** al marcar como visto, **Oráculo** (sugerencias vía Groq), **etiquetas**, **orden manual**, **siguiente en cola**, **export/import JSON y CSV**, y **varios temas visuales** (retro cartoon, terminal, cyberpunk y default).
 
-[✨ WebSite](https://jandn.onrender.com/) • [📖 Documentación](docs/README.md) • [🐛 Reportar Bug](../../issues)
+[✨ WebSite](https://jandn.onrender.com/) • [📖 Guía de Usuario](docs/USER_GUIDE.md) • [🐛 Reportar Bug](../../issues)
 
 </div>
 
@@ -30,7 +30,7 @@
 - 📝 **Comentarios / reseñas** — `item_comments`; al marcar visto pueden exigirse reseña o **crítica rápida** (modal: estrellas, reacción, texto opcional) vía RPC `save_quick_critique`
 - 🤖 **IA (opcional)** — Mejora de borradores con **Groq** en la caja de comentarios y en el modal de crítica; **Oráculo** usa el mismo modelo para recomendaciones según tu historial (todo vía Edge Function **`ai-proxy`**, clave solo en servidor)
 - 🕒 **Historial de actividad** — Timeline colaborativo por lista con eventos recientes de cambios
-- 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` (por defecto); fondos animados en **cyberpunk** (líneas neón) y **terminal** (Matrix); en **retro**, modales «Meep Meep» y badges `> POR VER` / `> VISTO` / `> CON NOTA` — véase [docs/THEMES.md](docs/THEMES.md)
+- 🎨 **Temas** — `retro-cartoon`, `terminal`, `cyberpunk` (por defecto); fondos animados en **cyberpunk** (líneas neón) y **terminal** (Matrix); en **retro**, modales «Meep Meep» y badges `> POR VER` / `> VISTO` / `> CON NOTA`
 - 📺 **Dónde verlo** — En el modal de detalle, plataformas de streaming/alquiler/compra vía TMDB (`resolveItemWatchProviders`), según idioma/región del usuario
 - 🔍 **Filtros avanzados** — Estado (vistas/pendientes), texto, orden y etiqueta
 - 📐 **Lista en rejilla** — Tarjetas en cuadrícula adaptable (móvil → varias columnas), paginación por página (**9** ítems) salvo en orden **manual** (sin paginar para poder reordenar todo lo visible)
@@ -57,7 +57,7 @@
 - 🎭 **Crítica rápida** — Modal alineado por tema; **Mejorar con IA** (Groq) con contexto de título/sinopsis.
 - 👤 **Perfil** — **Quitar valoración** restaura pendiente sin sacar el título de la lista compartida.
 - 🔒 **Calidad** — `ai-proxy` con JWT verificado; Sentry opcional; **28** tests Vitest + E2E Playwright en CI.
-- 📣 **Discord** — Rotación de webhook: [docs/DISCORD_WEBHOOK.md](docs/DISCORD_WEBHOOK.md).
+- 📣 **Discord** — Soporte para rotación y configuración de webhooks de notificación.
 
 ## 🛠️ Stack Tecnológico
 
@@ -334,7 +334,7 @@ app-web-mylist/
 │   │   ├── send-push/            # Envío web push
 │   │   └── push-orchestrator/    # Discord + Web Push + FCM (antes notify-discord)
 │   └── migrations/               # Esquema, RLS, auditoría, push y fixes
-├── docs/                         # Documentación (índice: docs/README.md; TFG: docs/tfg/)
+├── docs/                         # Guía de usuario (docs/USER_GUIDE.md)
 ├── scripts/
 │   └── push-health-check.ps1     # Verificación operativa de push
 ├── migration-to-shared-lists.sql # Migración desde esquema anterior
@@ -409,7 +409,7 @@ El aspecto depende de `data-theme` (preferencia en **Ajustes** y sincronizada en
 | **Terminal** | Verde fósforo, paneles consola, fondo lluvia Matrix (`TerminalMatrixBackground`) |
 | **Retro cartoon** | Neubrutalismo, `retro-fx`, modales `RetroMeepModalFrame`, login `/retro-login-bg.webp` |
 
-Documentación detallada: [docs/THEMES.md](docs/THEMES.md).
+El tema visual y el fondo dinámico pueden configurarse desde la sección de Ajustes del usuario.
 
 Los modales (detalle, crítica rápida, confirmaciones, crear/invitar lista, registro) reutilizan los mismos tokens por tema. En **retro-cartoon**:
 
